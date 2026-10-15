@@ -1,0 +1,14 @@
+node_modules/
+dist/
+build/
+coverage/
+.expo/
+.turbo/
+pnpm-lock.yaml
+
+# Prose (docs, ADR, agents, README) : Prettier n'y touche pas. Il aligne les tableaux et
+# réécrit les listes, ce qui gonfle les différences sur des textes relus à la main.
+# Les copies de référence (cahier des charges, charte) suivent la source vivante sur claude.ai.
+*.md
+docs/cahier-des-charges/
+docs/charte/

@@ -2,13 +2,43 @@
   "name": "lignee",
   "private": true,
   "description": "Lignée — arbre généalogique familial, monorepo",
-  "packageManager": "pnpm@9.15.0",
+  "type": "module",
+  "packageManager": "pnpm@9.15.9",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.12.0"
   },
   "scripts": {
-    "lint": "pnpm -r lint",
-    "typecheck": "pnpm -r typecheck",
-    "test": "pnpm -r test"
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "format": "turbo run //#format:write",
+    "format:check": "turbo run //#format:verify",
+    "format:write": "prettier --write .",
+    "format:verify": "prettier --check .",
+    "commitlint": "commitlint"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "21.2.3",
+    "@commitlint/config-conventional": "21.2.3",
+    "@eslint/compat": "2.1.1",
+    "@eslint/js": "catalog:",
+    "eslint": "catalog:",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-react-native-a11y": "3.5.1",
+    "globals": "17.12.0",
+    "pnpm": "9.15.9",
+    "prettier": "3.9.9",
+    "turbo": "2.11.6",
+    "typescript": "catalog:",
+    "typescript-eslint": "8.71.0"
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "eslint-plugin-jsx-a11y>eslint": "10",
+        "eslint-plugin-react-native-a11y>eslint": "10"
+      }
+    }
   }
 }

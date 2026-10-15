@@ -41,6 +41,25 @@ docs/
   adr/  runbooks/  conformite/  cahier-des-charges/  charte/
 ```
 
+## Outillage
+
+Monorepo pnpm et Turborepo, TypeScript strict, ESLint (règles d'accessibilité comprises), Prettier, Vitest et commitlint. Il faut Node 22.12 ou plus récent (Node 24 conseillé). pnpm n'a pas besoin d'être installé globalement : Corepack, livré avec Node, prend la version fixée dans `package.json`.
+
+```sh
+corepack pnpm install        # installe les dépendances (pnpm-lock.yaml)
+corepack pnpm lint           # ESLint dans chaque paquet, via Turborepo
+corepack pnpm typecheck      # tsc --noEmit dans chaque paquet
+corepack pnpm test           # Vitest dans chaque paquet
+corepack pnpm format:check   # vérifie la mise en forme (Prettier)
+corepack pnpm format         # corrige la mise en forme
+```
+
+Pour un seul paquet : `corepack pnpm --filter @lignee/kinship test`.
+
+Les messages de commit suivent les conventions (`feat(kinship): …`) ; les portées admises sont dans `commitlint.config.mjs`. Pour vérifier un message : `echo "feat(kinship): …" | corepack pnpm commitlint`. Le hook `commit-msg` est facultatif : `git config core.hooksPath .githooks` l'active.
+
+Prettier ne reformate pas les fichiers Markdown. `apps/mobile`, `apps/web` et `apps/admin` n'ont pas encore de `package.json` : ils entrent dans les tâches quand leur app est créée. Turborepo collecte une télémétrie anonyme ; `corepack pnpm exec turbo telemetry disable` la coupe sur votre poste.
+
 ## Agents Claude Code
 
 Les agents spécialisés sont dans [.claude/agents/](.claude/agents/). Dans une session Claude Code, demandez par exemple « utilise l'agent moteur-parente pour… ».

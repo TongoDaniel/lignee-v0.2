@@ -1,0 +1,5 @@
+#!/bin/sh
+# Hook facultatif : vérifie le message de commit avec commitlint.
+# Activation, une fois par clone : git config core.hooksPath .githooks
+# Désactivation : git config --unset core.hooksPath
+exec corepack pnpm exec commitlint --edit "$1"
