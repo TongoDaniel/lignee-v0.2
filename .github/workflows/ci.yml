@@ -1,0 +1,215 @@
+# Intégration continue de Lignée (TRD, « Environnements, CI/CD et livraison » et « Tests et qualité »).
+# Un job qui échoue bloque la fusion, une fois les vérifications rendues obligatoires sur `main`
+# (docs/runbooks/proteger-main.md). Les noms des jobs sont ceux à cocher : ne les renommez pas
+# sans mettre le runbook et la protection de branche à jour.
+#
+# Actions épinglées par SHA de commit complet (version en commentaire) ; Dependabot les met à jour.
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  TURBO_TELEMETRY_DISABLED: "1"
+
+jobs:
+  # Lint, types, tests unitaires et de propriétés (Vitest, fast-check), mise en forme,
+  # contrôle CON-12 et messages de commit : tout ce qui n'a besoin que de Node.
+  verifications:
+    name: verifications
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Historique complet sur une pull request, pour vérifier tous ses commits.
+          fetch-depth: ${{ github.event_name == 'pull_request' && '0' || '1' }}
+          persist-credentials: false
+
+      - name: Installer pnpm (version de packageManager)
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Installer Node (version de .nvmrc) et le cache pnpm
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Installer les dépendances
+        id: install
+        run: pnpm install --frozen-lockfile
+
+      # Les étapes suivantes tournent même si l'une d'elles échoue, pour tout voir en une fois.
+      - name: CON-12 — aucune bibliothèque de reconnaissance faciale
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm check:forbidden-dependencies
+
+      - name: Mise en forme (Prettier)
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm format:check
+
+      - name: Lint (ESLint)
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm lint
+
+      - name: Types (tsc)
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm typecheck
+
+      - name: Tests unitaires et de propriétés (Vitest)
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm run test
+
+      # Les messages de Dependabot ne suivent pas les conventions (lignes de plus de 100
+      # caractères) : ils ne sont pas vérifiés.
+      - name: Messages de commit (commitlint)
+        if: >-
+          ${{ !cancelled() && steps.install.outcome == 'success'
+          && github.event_name == 'pull_request'
+          && github.event.pull_request.user.login != 'dependabot[bot]' }}
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: pnpm exec commitlint --from "$BASE_SHA" --to "$HEAD_SHA" --verbose
+
+  # Analyse des dépendances (TRD, « Tests et qualité », Sécurité) : échoue sur une faille haute
+  # ou critique connue. Dependabot ouvre les correctifs (.github/dependabot.yml).
+  audit-dependances:
+    name: audit-dependances
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Installer pnpm (version de packageManager)
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Installer Node (version de .nvmrc)
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      # pnpm audit lit pnpm-lock.yaml : pas besoin d'installer les dépendances.
+      - name: Failles hautes et critiques (pnpm audit)
+        run: pnpm audit --audit-level high
+
+  # ---------------------------------------------------------------------------------------------
+  # Étapes prévues par le TRD qui n'ont pas encore de matière. Chacune vérifie qu'il n'y a
+  # vraiment rien à tester, le dit dans le résumé, et échoue dès que la matière apparaît sans
+  # que le job soit branché : jamais de vert alors que quelque chose n'est pas vérifié.
+  # ---------------------------------------------------------------------------------------------
+
+  # Cas limites : un fichier test/scenarios/<ID>.yaml par cas, joué par un test.
+  # À remplir par T-006 (lecteur de scénarios) : échouer si un scénario n'est lu par aucun test.
+  cas-limites:
+    name: cas-limites
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Scénarios présents
+        run: |
+          scenarios=$(git ls-files 'test/scenarios/*.yaml')
+          count=$(printf '%s' "$scenarios" | grep -c . || true)
+          if [ "$count" -eq 0 ]; then
+            message="Aucun scénario de cas limite pour l'instant."
+          else
+            message="$count scénario(s) présent(s) mais pas encore joué(s) automatiquement : le lecteur de scénarios arrive avec T-006. Fichiers : $(echo $scenarios)"
+            echo "::warning title=Cas limites non joués (T-006)::$message"
+          fi
+          echo "$message"
+          {
+            echo "### Cas limites"
+            echo
+            echo "$message"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # Intégration avec PostgreSQL réel (Vitest et Testcontainers) : droits, synchro, propositions.
+  # Convention : fichiers `*.integration.test.ts`. À remplir avec le schéma Prisma (T-042) et
+  # les premières routes (T-043, T-048, T-049).
+  integration-postgresql:
+    name: integration-postgresql
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Tests d'intégration à jouer
+        run: |
+          files=$(git ls-files '*.integration.test.ts')
+          if [ -n "$files" ]; then
+            echo "::error title=Intégration PostgreSQL non branchée::Des tests d'intégration existent ($(echo $files)) mais ce job ne les lance pas encore. Branchez Testcontainers ici."
+            exit 1
+          fi
+          message="Aucun test d'intégration PostgreSQL pour l'instant (schéma Prisma en T-042, API en T-043)."
+          echo "$message"
+          { echo "### Intégration PostgreSQL"; echo; echo "$message"; } >> "$GITHUB_STEP_SUMMARY"
+
+  # Taille des réponses de synchronisation sur des arbres types de 100, 1 000 et 5 000 personnes
+  # (TRD, « Médias et économie de données », Contrôle). Convention : un script `test:sync-size`
+  # dans un package.json. À remplir par T-064.
+  taille-synchro:
+    name: taille-synchro
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Mesure à faire
+        run: |
+          files=$(git grep -l '"test:sync-size"' -- '*package.json' || true)
+          if [ -n "$files" ]; then
+            echo "::error title=Taille de synchro non branchée::Un script test:sync-size existe ($(echo $files)) mais ce job ne le lance pas encore."
+            exit 1
+          fi
+          message="Aucune réponse de synchronisation à mesurer pour l'instant (protocole de synchro, puis mesure en T-064)."
+          echo "$message"
+          { echo "### Taille des réponses de synchronisation"; echo; echo "$message"; } >> "$GITHUB_STEP_SUMMARY"
+
+  # Construction des images Docker (API, worker). Dockerfiles en T-003, publication sur GitHub
+  # Container Registry avec le déploiement de la préproduction (T-068).
+  images-docker:
+    name: images-docker
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Images à construire
+        run: |
+          files=$(git ls-files '*Dockerfile' '*.Dockerfile' '*.dockerfile')
+          if [ -n "$files" ]; then
+            echo "::error title=Images Docker non branchées::Dockerfile(s) présent(s) ($(echo $files)) mais ce job ne les construit pas encore."
+            exit 1
+          fi
+          message="Aucune image à construire pour l'instant (Dockerfiles en T-003, publication en T-068)."
+          echo "$message"
+          { echo "### Images Docker"; echo; echo "$message"; } >> "$GITHUB_STEP_SUMMARY"

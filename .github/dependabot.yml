@@ -1,0 +1,43 @@
+# Mises à jour des dépendances (TRD, « Tests et qualité », Sécurité ; « mises à jour de sécurité
+# chaque semaine »). Les alertes et les correctifs de sécurité de Dependabot sont gratuits sur un
+# dépôt privé ; ils s'activent dans Settings > Code security (docs/runbooks/proteger-main.md).
+#
+# `cooldown` : une version n'est proposée que 14 jours après sa publication (règle du projet).
+# Les correctifs de sécurité ne l'attendent pas.
+
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Africa/Douala
+    cooldown:
+      default-days: 14
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore(exploitation)
+    labels: [exploitation]
+    groups:
+      # Une seule pull request par semaine pour les versions mineures et correctives.
+      mineures-et-correctifs:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Africa/Douala
+    cooldown:
+      default-days: 14
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore(exploitation)
+    labels: [exploitation]
+    groups:
+      actions-github:
+        patterns: ["*"]

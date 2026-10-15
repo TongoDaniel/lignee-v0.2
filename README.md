@@ -34,6 +34,8 @@ packages/
   ui/        composants de la charte et tokens.ts
   i18n/      textes FR et EN
   db/        schéma Prisma et migrations
+tools/
+  ci/        contrôles de l'intégration continue (CON-12…), ADR 0006
 test/
   scenarios/     un fichier par cas limite
   voice-golden/  jeu de 300 phrases (avec l'accord des locuteurs)
@@ -43,7 +45,7 @@ docs/
 
 ## Outillage
 
-Monorepo pnpm et Turborepo, TypeScript strict, ESLint (règles d'accessibilité comprises), Prettier, Vitest et commitlint. Il faut Node 22.12 ou plus récent (Node 24 conseillé). pnpm n'a pas besoin d'être installé globalement : Corepack, livré avec Node, prend la version fixée dans `package.json`.
+Monorepo pnpm et Turborepo, TypeScript strict, ESLint (règles d'accessibilité comprises), Prettier, Vitest et commitlint. Il faut Node 22.18 ou plus récent ; la version de référence est dans `.nvmrc` (24), celle de la CI. pnpm n'a pas besoin d'être installé globalement : Corepack, livré avec Node, prend la version fixée dans `package.json`.
 
 ```sh
 corepack pnpm install        # installe les dépendances (pnpm-lock.yaml)
@@ -52,13 +54,30 @@ corepack pnpm typecheck      # tsc --noEmit dans chaque paquet
 corepack pnpm test           # Vitest dans chaque paquet
 corepack pnpm format:check   # vérifie la mise en forme (Prettier)
 corepack pnpm format         # corrige la mise en forme
+corepack pnpm check:forbidden-dependencies  # CON-12 : aucune bibliothèque de reconnaissance faciale
 ```
 
 Pour un seul paquet : `corepack pnpm --filter @lignee/kinship test`.
 
 Les messages de commit suivent les conventions (`feat(kinship): …`) ; les portées admises sont dans `commitlint.config.mjs`. Pour vérifier un message : `echo "feat(kinship): …" | corepack pnpm commitlint`. Le hook `commit-msg` est facultatif : `git config core.hooksPath .githooks` l'active.
 
-Prettier ne reformate pas les fichiers Markdown. `apps/mobile`, `apps/web` et `apps/admin` n'ont pas encore de `package.json` : ils entrent dans les tâches quand leur app est créée. Turborepo collecte une télémétrie anonyme ; `corepack pnpm exec turbo telemetry disable` la coupe sur votre poste. La CI devra définir `TURBO_TELEMETRY_DISABLED=1` (T-002).
+Prettier ne reformate pas les fichiers Markdown. `apps/mobile`, `apps/web` et `apps/admin` n'ont pas encore de `package.json` : ils entrent dans les tâches quand leur app est créée. Turborepo collecte une télémétrie anonyme ; `corepack pnpm exec turbo telemetry disable` la coupe sur votre poste. La CI la coupe avec `TURBO_TELEMETRY_DISABLED=1`.
+
+## Intégration continue
+
+GitHub Actions, à chaque pull request et à chaque push sur `main` :
+
+| Workflow | Job | Contenu |
+| --- | --- | --- |
+| `.github/workflows/ci.yml` | `verifications` | CON-12, Prettier, ESLint, tsc, Vitest (unitaires et propriétés), commitlint sur les commits de la pull request |
+| | `audit-dependances` | `pnpm audit --audit-level high` : échoue sur une faille haute ou critique |
+| | `cas-limites` | Scénarios `test/scenarios/*.yaml` ; joués à partir de T-006 (avertissement d'ici là) |
+| | `integration-postgresql` | Tests `*.integration.test.ts` sur PostgreSQL réel ; à brancher avec T-042 et T-043 |
+| | `taille-synchro` | Taille des réponses de synchronisation ; à brancher avec T-064 |
+| | `images-docker` | Construction des images ; à brancher avec T-003 et T-068 |
+| `.github/workflows/codeql.yml` | `codeql` | Analyse CodeQL ; inactif tant que le dépôt est privé sans Code Security |
+
+Un job qui n'a encore rien à tester le dit dans son résumé, et échoue dès que la matière apparaît sans que le job soit branché. Dependabot (`.github/dependabot.yml`) propose chaque semaine les mises à jour, 14 jours après leur publication. La protection de `main` se règle à la main : [docs/runbooks/proteger-main.md](docs/runbooks/proteger-main.md).
 
 ## Agents Claude Code
 
