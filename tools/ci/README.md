@@ -7,6 +7,7 @@ Les scripts sont en TypeScript et tournent directement sous Node 24 (suppression
 | Script | Exigence | Commande à la racine |
 | --- | --- | --- |
 | `src/check-forbidden-dependencies.ts` | CON-12 : aucune bibliothèque de reconnaissance faciale | `corepack pnpm check:forbidden-dependencies` |
+| `src/check-local-env.ts` | Environnement local (T-003) : extensions, droits des utilisateurs de la base, compartiment privé | `corepack pnpm check:local-env`, après `docker compose up -d` |
 
 ## CON-12 : dépendances interdites
 
@@ -26,3 +27,9 @@ Le contrôle ne voit que les paquets npm de `pnpm-lock.yaml`. Une bibliothèque 
 Pour ajouter un paquet : une ligne dans `FORBIDDEN_PACKAGES` (ou `FORBIDDEN_SCOPES` pour une portée) avec la raison, et un cas dans `forbidden-dependencies.test.ts`.
 
 Le test qui contrôle le `pnpm-lock.yaml` du dépôt dépend d'un fichier hors du paquet : `turbo.json` le déclare dans les entrées de `@lignee/ci#test`, pour que Turborepo ne réutilise pas un résultat en cache quand le lockfile change.
+
+## Environnement local
+
+`src/check-local-env.ts` lit `.env`, puis interroge les conteneurs de `compose.yaml` par `docker compose exec` (PostgreSQL et `mc` dans le conteneur de MinIO) et par une requête HTTP anonyme sur MinIO. Les contrôles eux-mêmes sont dans `src/local-env.ts` ; `src/local-env.test.ts` les joue contre un faux environnement, sans Docker, pour prouver qu'ils échouent quand une exigence n'est pas tenue et qu'ils ne rendent pas de faux vert quand la base ne répond pas. Le même fichier vérifie aussi `compose.yaml`, `.env.example`, les Dockerfiles et le script d'initialisation de la base (ports sur `127.0.0.1` seulement, images épinglées par empreinte, valeurs factices) ; `turbo.json` les déclare en entrées de `@lignee/ci#test`.
+
+Les droits refusés se vérifient par un bloc `DO` qui ne réussit que si PostgreSQL répond « droits insuffisants » (SQLSTATE 42501) : une instruction acceptée, ou une erreur d'une autre nature, fait échouer le contrôle.

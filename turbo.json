@@ -20,7 +20,14 @@
     },
     "@lignee/ci#test": {
       "dependsOn": ["transit"],
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/pnpm-lock.yaml"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/pnpm-lock.yaml",
+        "$TURBO_ROOT$/compose.yaml",
+        "$TURBO_ROOT$/.env.example",
+        "$TURBO_ROOT$/packages/db/initdb/**",
+        "$TURBO_ROOT$/apps/*/Dockerfile"
+      ],
       "outputs": []
     },
     "//#format:write": {

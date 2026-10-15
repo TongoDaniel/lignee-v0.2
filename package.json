@@ -16,7 +16,8 @@
     "format:write": "prettier --write .",
     "format:verify": "prettier --check .",
     "commitlint": "commitlint",
-    "check:forbidden-dependencies": "node tools/ci/src/check-forbidden-dependencies.ts"
+    "check:forbidden-dependencies": "node tools/ci/src/check-forbidden-dependencies.ts",
+    "check:local-env": "node tools/ci/src/check-local-env.ts"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.3",
