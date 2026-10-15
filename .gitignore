@@ -1,0 +1,35 @@
+# Dépendances et builds
+node_modules/
+dist/
+build/
+.expo/
+.turbo/
+coverage/
+*.tsbuildinfo
+android/
+ios/
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.p8
+*.p12
+*.keystore
+*.jks
+google-services.json
+GoogleService-Info.plist
+
+# Systèmes et éditeurs
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Copie brute récupérée depuis claude.ai (films HTML lourds) ; le contenu utile est dans docs/
+recup_claude_ai/
+
+# Réglages Claude Code personnels
+.claude/settings.local.json

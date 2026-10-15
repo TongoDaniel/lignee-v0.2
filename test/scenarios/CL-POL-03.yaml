@@ -1,0 +1,21 @@
+# Exemple repris du TRD (Tests et qualité). Un fichier par identifiant de l'onglet Cas limites.
+id: CL-POL-03
+titre: Enfant du grand-père, mère inconnue parmi ses épouses
+arbre:
+  personnes: [pierre/M, rose/F, odile/F, joseph/M, comfort/F]
+  unions:
+    - { conjoints: [pierre, rose], rang_pierre: 1 }
+    - { conjoints: [pierre, odile], rang_pierre: 2 }
+  filiations:
+    - { parents: [pierre, odile], enfant: joseph }
+    - { parents: [joseph], enfant: comfort }
+action:
+  locuteur: comfort
+  dictee: "Samuel est un fils de mon grand-père Pierre, je ne sais pas de quelle femme"
+attendu:
+  questions: 0
+  plan:
+    - creer: samuel
+    - filiation: { parent: pierre, enfant: samuel, type: naissance }
+    - candidats_mere: { enfant: samuel, candidates: [rose, odile] }
+  lien: { de: joseph, vers: samuel, fr: "frère ou demi-frère", en: "brother or half-brother" }

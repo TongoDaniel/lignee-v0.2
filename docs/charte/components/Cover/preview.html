@@ -1,0 +1,61 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Lignée</title>
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:var(--fond); color:var(--texte); font-family:var(--font-texte); overflow:hidden; }
+  .cover { position:relative; height:288px; overflow:hidden; }
+  .art { position:absolute; top:0; left:480px; width:480px; height:288px; overflow:hidden; }
+  .art svg { display:block; width:480px; height:288px; overflow:visible; }
+  .deep { fill:var(--foret-700); }
+  .brand { fill:var(--vert-700); }
+  .gold { fill:var(--or-500); }
+  .sage { fill:var(--sauge-300); }
+  .tile { rx:var(--rayon-carte); }
+  .pill { rx:12px; }
+  .arc { fill:none; stroke:var(--or-500); stroke-width:var(--trait-chemin); stroke-linecap:round; }
+  .node { fill:var(--or-500); }
+  .words { position:absolute; left:var(--espace-6); bottom:var(--espace-6); max-width:440px; }
+  .name { margin:0; font-family:var(--font-titre); font-weight:540; font-size:120px; line-height:.92; letter-spacing:-.01em; color:var(--texte); }
+  .tag { margin:var(--espace-6) 0 0 4px; font-size:14px; line-height:20px; color:var(--texte-secondaire); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 288" width="480" height="288">
+<!--
+  blocks      foret-700 216×232 slab bled off the top (the deep ground of the brand) · vert-700 256×208 bleeding off the right (the brand green) · or-500 disc Ø48 (the gold of « Vous ») · sauge-300 pill 112×24 — about 35 % of 960×288
+  arrangement one tall slab with a wide block and two satellites on the bottom line, espace-4 gutters
+  pattern     the open medallion and its nodes, from « la lignée part de vous, l’anneau reste ouvert » : three rings open by 24° at the bottom, trait-chemin, with seven or-500 node discs, clipped to the green block
+  scales      sides in multiples of espace-2 (216, 232, 256, 208, 112, 24) ; gutters espace-4 ; corners rayon-carte ; pill rx = half of 24 ; arcs trait-chemin
+-->
+<defs><clipPath id="blk"><rect x="248" y="56" width="256" height="208" rx="22"/></clipPath></defs>
+<rect class="deep tile" x="16" y="-24" width="216" height="232" rx="22"/>
+<rect class="brand tile" x="248" y="56" width="256" height="208" rx="22"/>
+<circle class="gold" cx="64" cy="244" r="24"/>
+<rect class="sage pill" x="104" y="232" width="112" height="24" rx="12"/>
+<g clip-path="url(#blk)">
+<path class="arc" d="M354.8 315.5A52 52 0 1 1 397.2 315.5"/>
+<path class="arc" d="M335.3 359.4A100 100 0 1 1 416.7 359.4"/>
+<path class="arc" d="M315.8 403.2A148 148 0 1 1 436.2 403.2"/>
+<circle class="node" cx="376.0" cy="216.0" r="9"/>
+<circle class="node" cx="422.9" cy="179.7" r="8"/>
+<circle class="node" cx="329.1" cy="179.7" r="8"/>
+<circle class="node" cx="492.6" cy="176.9" r="7"/>
+<circle class="node" cx="406.8" cy="123.2" r="7"/>
+<circle class="node" cx="345.2" cy="123.2" r="7"/>
+<circle class="node" cx="259.4" cy="176.9" r="7"/>
+</g>
+</svg>
+</div>
+<div class="words">
+<h1 class="name">Lignée</h1>
+<p class="tag">Votre famille, enfin visible.</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,508 @@
+{
+  "v": 3,
+  "layout": "files",
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-14T19:31:13Z"
+  },
+  "title": "Lignée",
+  "namespace": "Lignee",
+  "libraries": [],
+  "sections": {},
+  "groups": [
+    "Logos",
+    "Icones",
+    "Applications"
+  ],
+  "assetGroups": {
+    "Logos": {
+      "name": "Logos",
+      "tile": "l",
+      "order": [
+        "lignee-logo-horizontal-nuit.svg",
+        "lignee-logo-horizontal-jour.svg",
+        "lignee-logo-horizontal-noir.svg",
+        "lignee-logo-horizontal-blanc.svg",
+        "lignee-logo-vertical-nuit.svg",
+        "lignee-logo-vertical-jour.svg",
+        "lignee-symbole-or.svg",
+        "lignee-symbole-vert.svg",
+        "lignee-symbole-creme.svg",
+        "lignee-symbole-encre.svg",
+        "lignee-symbole-noir.svg",
+        "lignee-symbole-blanc.svg",
+        "lignee-symbole-compact-or.svg",
+        "lignee-symbole-compact-vert.svg",
+        "lignee-symbole-compact-creme.svg",
+        "lignee-symbole-compact-encre.svg",
+        "lignee-logotype-creme.svg",
+        "lignee-logotype-encre.svg"
+      ],
+      "files": {
+        "lignee-logo-horizontal-nuit.svg": {
+          "name": "lignee-logo-horizontal-nuit.svg",
+          "blob": "e862a8ee0426b70e7d5d73615925b0f5",
+          "size": 7435,
+          "type": "image/svg+xml"
+        },
+        "lignee-logo-horizontal-jour.svg": {
+          "name": "lignee-logo-horizontal-jour.svg",
+          "blob": "b4b0c851337af6737793cf74f4ac33b6",
+          "size": 7435,
+          "type": "image/svg+xml"
+        },
+        "lignee-logo-horizontal-noir.svg": {
+          "name": "lignee-logo-horizontal-noir.svg",
+          "blob": "400d39803011f6be7b01661916193827",
+          "size": 7435,
+          "type": "image/svg+xml"
+        },
+        "lignee-logo-horizontal-blanc.svg": {
+          "name": "lignee-logo-horizontal-blanc.svg",
+          "blob": "721aa9cfe259e32d5062a47c36f21b2a",
+          "size": 7435,
+          "type": "image/svg+xml"
+        },
+        "lignee-logo-vertical-nuit.svg": {
+          "name": "lignee-logo-vertical-nuit.svg",
+          "blob": "288a5a4e17dd33fc759bffe63f99e423",
+          "size": 7768,
+          "type": "image/svg+xml"
+        },
+        "lignee-logo-vertical-jour.svg": {
+          "name": "lignee-logo-vertical-jour.svg",
+          "blob": "1f8aad3689e4bf13749b873d2c021cb2",
+          "size": 7768,
+          "type": "image/svg+xml"
+        },
+        "lignee-symbole-or.svg": {
+          "name": "lignee-symbole-or.svg",
+          "blob": "c3b82a25126f69f0b66e0c3adafb4009",
+          "size": 932,
+          "type": "image/svg+xml"
+        },
+        "lignee-symbole-vert.svg": {
+          "name": "lignee-symbole-vert.svg",
+          "blob": "850de60184fdedb0aa3c5446bacc7e72",
+          "size": 932,
+          "type": "image/svg+xml"
+        },
+        "lignee-symbole-creme.svg": {
+          "name": "lignee-symbole-creme.svg",
+          "blob": "7eae34820b8d9b345bfabc346c580bd9",
+          "size": 932,
+          "type": "image/svg+xml"
+        },
+        "lignee-symbole-encre.svg": {
+          "name": "lignee-symbole-encre.svg",
+          "blob": "8eec16318d38d2e210dd1f4bda7fe0f9",
+          "size": 932,
+          "type": "image/svg+xml"
+        },
+        "lignee-symbole-noir.svg": {
+          "name": "lignee-symbole-noir.svg",
+          "blob": "1968aa6634b23ac46921777197aaece6",
+          "size": 932,
+          "type": "image/svg+xml"
+        },
+        "lignee-symbole-blanc.svg": {
+          "name": "lignee-symbole-blanc.svg",
+          "blob": "060102087227618e31b4afc417ae8fdc",
+          "size": 932,
+          "type": "image/svg+xml"
+        },
+        "lignee-symbole-compact-or.svg": {
+          "name": "lignee-symbole-compact-or.svg",
+          "blob": "8556c5530774befdb8b2d245e90cf05e",
+          "size": 936,
+          "type": "image/svg+xml"
+        },
+        "lignee-symbole-compact-vert.svg": {
+          "name": "lignee-symbole-compact-vert.svg",
+          "blob": "77aff4831d532b3d6cc2a94a28cead9d",
+          "size": 936,
+          "type": "image/svg+xml"
+        },
+        "lignee-symbole-compact-creme.svg": {
+          "name": "lignee-symbole-compact-creme.svg",
+          "blob": "5c27756529d19d0e66143b3e86542144",
+          "size": 936,
+          "type": "image/svg+xml"
+        },
+        "lignee-symbole-compact-encre.svg": {
+          "name": "lignee-symbole-compact-encre.svg",
+          "blob": "9ea9ba596030ecd02206b558c559f165",
+          "size": 936,
+          "type": "image/svg+xml"
+        },
+        "lignee-logotype-creme.svg": {
+          "name": "lignee-logotype-creme.svg",
+          "blob": "211268aa8c80f3533a059e9df437db69",
+          "size": 6135,
+          "type": "image/svg+xml"
+        },
+        "lignee-logotype-encre.svg": {
+          "name": "lignee-logotype-encre.svg",
+          "blob": "413a691197d354ed1f4f136f0de08ddc",
+          "size": 6135,
+          "type": "image/svg+xml"
+        }
+      }
+    },
+    "Icones": {
+      "name": "Icônes",
+      "tile": "xs",
+      "order": [
+        "ajouter.svg",
+        "valider.svg",
+        "retour.svg",
+        "suivant.svg",
+        "fermer.svg",
+        "famille.svg",
+        "personne.svg",
+        "inviter.svg",
+        "sante.svg",
+        "sante-plein.svg",
+        "memoire.svg",
+        "prive.svg",
+        "securite.svg",
+        "micro.svg",
+        "scanner.svg",
+        "document.svg",
+        "photo.svg",
+        "appareil-photo.svg",
+        "notifications.svg",
+        "message.svg",
+        "anniversaire.svg",
+        "calendrier.svg",
+        "lieu.svg",
+        "carte.svg",
+        "langues.svg",
+        "rechercher.svg",
+        "envoyer.svg",
+        "partager.svg",
+        "exporter.svg",
+        "modifier.svg",
+        "reglages.svg",
+        "plus.svg",
+        "lecture.svg",
+        "pause.svg",
+        "apres-moi.svg",
+        "alerte.svg",
+        "info.svg"
+      ],
+      "files": {
+        "ajouter.svg": {
+          "name": "ajouter.svg",
+          "blob": "6ae18220b1111fa43d5443f0f2e3c65e",
+          "size": 230,
+          "type": "image/svg+xml"
+        },
+        "valider.svg": {
+          "name": "valider.svg",
+          "blob": "6b6c0a5bc2c54f98cae4a6289bc8ba6a",
+          "size": 232,
+          "type": "image/svg+xml"
+        },
+        "retour.svg": {
+          "name": "retour.svg",
+          "blob": "7be11dd846d9cc5ad2895f266735bb06",
+          "size": 226,
+          "type": "image/svg+xml"
+        },
+        "suivant.svg": {
+          "name": "suivant.svg",
+          "blob": "dac22c3ae9ec9911ba5aafb00da3a80d",
+          "size": 225,
+          "type": "image/svg+xml"
+        },
+        "fermer.svg": {
+          "name": "fermer.svg",
+          "blob": "3e1f728dc039e9f6a823fbd076d79653",
+          "size": 244,
+          "type": "image/svg+xml"
+        },
+        "famille.svg": {
+          "name": "famille.svg",
+          "blob": "3667b7bf3aec5c72ab1786cbe25b4858",
+          "size": 741,
+          "type": "image/svg+xml"
+        },
+        "personne.svg": {
+          "name": "personne.svg",
+          "blob": "24f49290f0ca21e1ba49a9f914e25a98",
+          "size": 414,
+          "type": "image/svg+xml"
+        },
+        "inviter.svg": {
+          "name": "inviter.svg",
+          "blob": "ec9d9ff544e8997008f396f2d6e61ad1",
+          "size": 572,
+          "type": "image/svg+xml"
+        },
+        "sante.svg": {
+          "name": "sante.svg",
+          "blob": "445f68c234a530324216bc558a1526f3",
+          "size": 265,
+          "type": "image/svg+xml"
+        },
+        "sante-plein.svg": {
+          "name": "sante-plein.svg",
+          "blob": "18e267d086ebf5465a0959374773ea29",
+          "size": 187,
+          "type": "image/svg+xml"
+        },
+        "memoire.svg": {
+          "name": "memoire.svg",
+          "blob": "443a4bcdec7eaf50eb2ff48a82fe6eee",
+          "size": 286,
+          "type": "image/svg+xml"
+        },
+        "prive.svg": {
+          "name": "prive.svg",
+          "blob": "717b3384730c2c5b34768631a066da08",
+          "size": 423,
+          "type": "image/svg+xml"
+        },
+        "securite.svg": {
+          "name": "securite.svg",
+          "blob": "6fdf1852ac8cf8081d91130b50a1fc1d",
+          "size": 253,
+          "type": "image/svg+xml"
+        },
+        "micro.svg": {
+          "name": "micro.svg",
+          "blob": "71a98ca758bbdf70049b05fcc2f2f441",
+          "size": 529,
+          "type": "image/svg+xml"
+        },
+        "scanner.svg": {
+          "name": "scanner.svg",
+          "blob": "b5e339d140f725a454b8e9288038b9ad",
+          "size": 333,
+          "type": "image/svg+xml"
+        },
+        "document.svg": {
+          "name": "document.svg",
+          "blob": "895d3418ff228f18539a9c828fe3f980",
+          "size": 409,
+          "type": "image/svg+xml"
+        },
+        "photo.svg": {
+          "name": "photo.svg",
+          "blob": "8eec82ea7ea2daa8172de9d66c6cb895",
+          "size": 633,
+          "type": "image/svg+xml"
+        },
+        "appareil-photo.svg": {
+          "name": "appareil-photo.svg",
+          "blob": "1d6edbfad526a1f138e16ba9cf787487",
+          "size": 692,
+          "type": "image/svg+xml"
+        },
+        "notifications.svg": {
+          "name": "notifications.svg",
+          "blob": "4814908d388d96abb75b3d92af881ecb",
+          "size": 422,
+          "type": "image/svg+xml"
+        },
+        "message.svg": {
+          "name": "message.svg",
+          "blob": "56a10dc2dbac1a3827a68a5adac06a73",
+          "size": 494,
+          "type": "image/svg+xml"
+        },
+        "anniversaire.svg": {
+          "name": "anniversaire.svg",
+          "blob": "b55bfe5e3d73aae750108ffc8055e09d",
+          "size": 760,
+          "type": "image/svg+xml"
+        },
+        "calendrier.svg": {
+          "name": "calendrier.svg",
+          "blob": "b18b0fdfd1d219f7d7f9013e4f52cddc",
+          "size": 528,
+          "type": "image/svg+xml"
+        },
+        "lieu.svg": {
+          "name": "lieu.svg",
+          "blob": "7e039f28737b3610a0af43a1320589d7",
+          "size": 259,
+          "type": "image/svg+xml"
+        },
+        "carte.svg": {
+          "name": "carte.svg",
+          "blob": "9d4e6463639949958e1be97f3c9b44e7",
+          "size": 432,
+          "type": "image/svg+xml"
+        },
+        "langues.svg": {
+          "name": "langues.svg",
+          "blob": "6b6f363601b34fb97ff21e86c4cc327d",
+          "size": 555,
+          "type": "image/svg+xml"
+        },
+        "rechercher.svg": {
+          "name": "rechercher.svg",
+          "blob": "df8cfbe05cb1816431edc35374b8aa0f",
+          "size": 396,
+          "type": "image/svg+xml"
+        },
+        "envoyer.svg": {
+          "name": "envoyer.svg",
+          "blob": "579ebe1df0cb90608e596127e27c9f21",
+          "size": 225,
+          "type": "image/svg+xml"
+        },
+        "partager.svg": {
+          "name": "partager.svg",
+          "blob": "3e67412ac20669818ecb5952415c08ff",
+          "size": 426,
+          "type": "image/svg+xml"
+        },
+        "exporter.svg": {
+          "name": "exporter.svg",
+          "blob": "28a1cc2074e0a58aec52cf983389a73a",
+          "size": 400,
+          "type": "image/svg+xml"
+        },
+        "modifier.svg": {
+          "name": "modifier.svg",
+          "blob": "ff0ce308093d38eb129d9710b4c8a2c2",
+          "size": 364,
+          "type": "image/svg+xml"
+        },
+        "reglages.svg": {
+          "name": "reglages.svg",
+          "blob": "ca5b983f37a84961feceafc5856872e9",
+          "size": 539,
+          "type": "image/svg+xml"
+        },
+        "plus.svg": {
+          "name": "plus.svg",
+          "blob": "cc5d4c5a157157c358dee61014b17613",
+          "size": 362,
+          "type": "image/svg+xml"
+        },
+        "lecture.svg": {
+          "name": "lecture.svg",
+          "blob": "2aa7f51df1d051e007cf91a0e807bcce",
+          "size": 149,
+          "type": "image/svg+xml"
+        },
+        "pause.svg": {
+          "name": "pause.svg",
+          "blob": "12b4f224276d4d046cc2e385ea20ef70",
+          "size": 480,
+          "type": "image/svg+xml"
+        },
+        "apres-moi.svg": {
+          "name": "apres-moi.svg",
+          "blob": "33ebe609fe2b1aa253bec888bd26317a",
+          "size": 284,
+          "type": "image/svg+xml"
+        },
+        "alerte.svg": {
+          "name": "alerte.svg",
+          "blob": "9f861e8ce705fad18eccf99ca745a460",
+          "size": 459,
+          "type": "image/svg+xml"
+        },
+        "info.svg": {
+          "name": "info.svg",
+          "blob": "b92d90c6d73d005385f9e8bd358c7f87",
+          "size": 484,
+          "type": "image/svg+xml"
+        }
+      }
+    },
+    "Applications": {
+      "name": "Applications",
+      "tile": "m",
+      "order": [
+        "icone-app-ios-1024.png",
+        "icone-app-apercu-512.png",
+        "android-adaptive-avant-plan-1024.png",
+        "android-adaptive-arriere-plan-1024.png",
+        "android-icone-monochrome-1024.png",
+        "splash-symbole-1024.png",
+        "apple-touch-icon-180.png",
+        "favicon-48.png",
+        "reseaux-avatar-1080.png",
+        "partage-reseaux-1200x630.png"
+      ],
+      "files": {
+        "icone-app-ios-1024.png": {
+          "name": "icone-app-ios-1024.png",
+          "blob": "5bd84d936cc368f991c5e55d5610edd3",
+          "size": 42845,
+          "type": "image/png"
+        },
+        "icone-app-apercu-512.png": {
+          "name": "icone-app-apercu-512.png",
+          "blob": "6f1fbd710c909ca8cef7713b6d743350",
+          "size": 25786,
+          "type": "image/png"
+        },
+        "android-adaptive-avant-plan-1024.png": {
+          "name": "android-adaptive-avant-plan-1024.png",
+          "blob": "79c8893ee17f3b0baa7e5e9a04968e7e",
+          "size": 44518,
+          "type": "image/png"
+        },
+        "android-adaptive-arriere-plan-1024.png": {
+          "name": "android-adaptive-arriere-plan-1024.png",
+          "blob": "9af0d841cc56f4ccafef37ee32dd2f3e",
+          "size": 5236,
+          "type": "image/png"
+        },
+        "android-icone-monochrome-1024.png": {
+          "name": "android-icone-monochrome-1024.png",
+          "blob": "ca3f859f9f79d28e86f9c6f8c444666a",
+          "size": 34588,
+          "type": "image/png"
+        },
+        "splash-symbole-1024.png": {
+          "name": "splash-symbole-1024.png",
+          "blob": "8ca6a381da7c0487678be741f2fbedd6",
+          "size": 35188,
+          "type": "image/png"
+        },
+        "apple-touch-icon-180.png": {
+          "name": "apple-touch-icon-180.png",
+          "blob": "033ebe633f8a297316c7d25de082213f",
+          "size": 6554,
+          "type": "image/png"
+        },
+        "favicon-48.png": {
+          "name": "favicon-48.png",
+          "blob": "9eb1b571049a1bac6efa0332cb137563",
+          "size": 2066,
+          "type": "image/png"
+        },
+        "reseaux-avatar-1080.png": {
+          "name": "reseaux-avatar-1080.png",
+          "blob": "b059244d6f24bff9a029209d324eca88",
+          "size": 46678,
+          "type": "image/png"
+        },
+        "partage-reseaux-1200x630.png": {
+          "name": "partage-reseaux-1200x630.png",
+          "blob": "f35160153ece2c03c1ae57737791f5c5",
+          "size": 232517,
+          "type": "image/png"
+        }
+      }
+    }
+  },
+  "blobs": {},
+  "docs": {
+    "sections": []
+  },
+  "lastChange": {
+    "by": "Daniel Tongo",
+    "at": "2026-10-14T19:41:00Z",
+    "via": "Claude",
+    "note": "Mise en œuvre React Native précisée (rangement des fichiers, bouton sur les tokens), marges du bouton sur les espacements, proportions des couleurs chiffrées"
+  }
+}

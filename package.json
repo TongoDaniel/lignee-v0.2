@@ -1,0 +1,14 @@
+{
+  "name": "lignee",
+  "private": true,
+  "description": "Lignée — arbre généalogique familial, monorepo",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test"
+  }
+}
