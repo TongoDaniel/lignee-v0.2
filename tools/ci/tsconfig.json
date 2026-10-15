@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Les scripts tournent directement sous Node 24 (suppression des types, sans compilation) :
+    // les imports relatifs gardent l'extension `.ts`.
+    "types": ["node"],
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "declaration": false
+  },
+  "include": ["src"]
+}

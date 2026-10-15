@@ -82,7 +82,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
 
   apps/worker:
     devDependencies:
@@ -97,7 +97,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
 
   packages/db:
     devDependencies:
@@ -109,7 +109,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
 
   packages/domain:
     devDependencies:
@@ -121,7 +121,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
 
   packages/i18n:
     devDependencies:
@@ -133,7 +133,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
 
   packages/kinship:
     devDependencies:
@@ -145,7 +145,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
 
   packages/layout:
     devDependencies:
@@ -157,7 +157,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
 
   packages/sync:
     devDependencies:
@@ -169,7 +169,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
 
   packages/ui:
     devDependencies:
@@ -181,7 +181,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
 
   packages/voice:
     devDependencies:
@@ -193,7 +193,26 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
+
+  tools/ci:
+    dependencies:
+      yaml:
+        specifier: 2.9.1
+        version: 2.9.1
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.0
+      eslint:
+        specifier: 'catalog:'
+        version: 10.11.0(jiti@2.6.1)
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
 
 packages:
 
@@ -1756,6 +1775,11 @@ packages:
     resolution: {integrity: sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==}
     engines: {node: '>=10'}
 
+  yaml@2.9.1:
+    resolution: {integrity: sha512-3NxN8+78OdzbT7C/WjGsyfPAtJaN3FNDsWxv7Y7mcDsT/oOmgW8BpyQQFFBnvZE3j9Y2Sdz1ULFLezL7Eb2yFw==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
+
   yargs-parser@22.0.0:
     resolution: {integrity: sha512-rwu/ClNdSMpkSrUb+d6BRsSkLUq1fmfsY6TOpYzTwvwkg1/NRG85KBy3kq++A8LKQwX6lsu+aWad+2khvuXrqw==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=23}
@@ -2165,14 +2189,14 @@ snapshots:
       '@typescript-eslint/types': 8.71.0
       eslint-visitor-keys: 5.0.1
 
-  '@vitest/mocker@5.0.3(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))':
+  '@vitest/mocker@5.0.3(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       '@vitest/spy': 5.0.3
       estree-walker: 3.0.3
       magic-string: 1.4.3
     optionalDependencies:
-      vite: 8.3.4(@types/node@24.19.0)(jiti@2.6.1)
+      vite: 8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1)
 
   '@vitest/spy@5.0.3': {}
 
@@ -3334,7 +3358,7 @@ snapshots:
 
   verkit@0.5.0: {}
 
-  vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1):
+  vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
@@ -3345,11 +3369,12 @@ snapshots:
       '@types/node': 24.19.0
       fsevents: 2.3.3
       jiti: 2.6.1
+      yaml: 2.9.1
 
-  vitest@5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)):
+  vitest@5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1)):
     dependencies:
       '@types/chai': 5.2.3
-      '@vitest/mocker': 5.0.3(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+      '@vitest/mocker': 5.0.3(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
       chai: 6.3.0
       es-module-lexer: 2.3.2
       expect-type: 1.4.0
@@ -3360,7 +3385,7 @@ snapshots:
       tinybench: 6.2.2
       tinyexec: 1.3.1
       tinyglobby: 0.2.17
-      vite: 8.3.4(@types/node@24.19.0)(jiti@2.6.1)
+      vite: 8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1)
       why-is-node-running: 3.2.1
     optionalDependencies:
       '@types/node': 24.19.0
@@ -3423,6 +3448,8 @@ snapshots:
       strip-ansi: 7.2.0
 
   y18n@5.0.8: {}
+
+  yaml@2.9.1: {}
 
   yargs-parser@22.0.0: {}
 
