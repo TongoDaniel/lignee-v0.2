@@ -1,0 +1,31 @@
+# Contexte de construction des images (racine du dépôt). Tout ce qui n'est pas nécessaire à
+# `pnpm deploy` reste dehors, à commencer par les secrets : un `.env` copié dans une couche
+# d'image y resterait lisible.
+.env
+.env.*
+!.env.example
+**/*.pem
+**/*.p8
+**/*.p12
+**/*.keystore
+**/*.jks
+
+.git
+.github
+.claude
+.githooks
+**/node_modules
+**/.turbo
+**/dist
+**/build
+**/coverage
+**/.expo
+**/android
+**/ios
+recup_claude_ai
+docs
+test
+compose.yaml
+**/Dockerfile
+**/*.Dockerfile
+.dockerignore
