@@ -123,6 +123,149 @@ jobs:
       - name: Failles hautes et critiques (pnpm audit)
         run: pnpm audit --audit-level high
 
+  # Construction des images Docker (API, worker), sans publication : la publication sur GitHub
+  # Container Registry arrive avec le déploiement de la préproduction (T-068). Chaque Dockerfile
+  # ou Containerfile du dépôt (toute casse, `Dockerfile.api` compris) doit être construit par un
+  # service de compose.yaml : un fichier ajouté sans service fait échouer le job.
+  images-docker:
+    name: images-docker
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      HADOLINT_IMAGE: hadolint/hadolint:v2.14.0@sha256:27086352fd5e1907ea2b934eb1023f217c5ae087992eb59fde121dce9c9ff21e
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Valeurs factices et publiques, lues par compose.yaml.
+      - name: Fichier d'environnement local
+        run: cp .env.example .env
+
+      - name: Chaque Dockerfile est construit par compose.yaml
+        id: dockerfiles
+        run: |
+          files=$(git ls-files ':(icase)*dockerfile' ':(icase)*dockerfile.*' ':(icase)*containerfile' ':(icase)*containerfile.*')
+          if [ -z "$files" ]; then
+            echo "::error title=Aucun Dockerfile::Les Dockerfiles de l'API et du worker ont disparu."
+            exit 1
+          fi
+          # Chemins relatifs au contexte de construction, la racine du dépôt.
+          built=$(docker compose --profile '*' config --format json \
+            | jq -r '.services[] | select(.build != null) | .build.dockerfile' | sort -u)
+          missing=""
+          for file in $files; do
+            if ! printf '%s\n' "$built" | grep -qxF -- "$file"; then
+              missing="$missing $file"
+            fi
+          done
+          if [ -n "$missing" ]; then
+            echo "::error title=Image non construite::Dockerfile(s) sans service dans compose.yaml :$missing"
+            exit 1
+          fi
+          {
+            echo "### Images Docker"
+            echo
+            echo "Construites, sans publication (prévue en T-068) :"
+            for file in $files; do echo "- \`$file\`"; done
+          } >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "files<<EOF"
+            echo "$files"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Lint des Dockerfiles (hadolint)
+        env:
+          FILES: ${{ steps.dockerfiles.outputs.files }}
+        run: |
+          status=0
+          for file in $FILES; do
+            echo "hadolint $file"
+            docker run --rm -i "$HADOLINT_IMAGE" < "$file" || status=1
+          done
+          exit "$status"
+
+      - name: Construire les images
+        run: docker compose --profile '*' build
+
+      # Les paquets n'ont pas encore de programme (T-043, T-075) : l'image doit démarrer Node,
+      # exécuter src/index.ts et s'arrêter sans erreur, sous un utilisateur autre que root.
+      - name: Démarrer chaque image
+        run: |
+          for image in lignee/api:local lignee/worker:local; do
+            uid=$(docker run --rm --entrypoint id "$image" -u)
+            if [ "$uid" = "0" ]; then
+              echo "::error title=Image lancée en root::$image tourne sous root."
+              exit 1
+            fi
+            docker run --rm --network none "$image"
+            echo "$image : démarrée et arrêtée sans erreur (utilisateur $uid)."
+          done
+
+  # Environnement local (compose.yaml, docs/runbooks/environnement-local.md) : démarre PostgreSQL
+  # et MinIO comme sur un poste, puis vérifie ce que le TRD exige de la base (extensions,
+  # utilisateur applicatif sans droit sur le schéma, utilisateur de migration séparé) et du
+  # stockage (compartiment privé, clé de l'application limitée à ce compartiment).
+  environnement-local:
+    name: environnement-local
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Fichier d'environnement local
+        run: cp .env.example .env
+
+      - name: Démarrer (docker compose up -d)
+        run: |
+          docker compose up -d
+          docker compose up -d --wait --wait-timeout 180 postgres minio
+          code=$(docker wait "$(docker compose ps --all --quiet minio-init)")
+          if [ "$code" != "0" ]; then
+            echo "::error title=Compartiment non créé::minio-init s'est arrêté avec le code $code."
+            exit 1
+          fi
+
+      # Le contrôle n'utilise que Node (pas de dépendance à installer) : tools/ci/src/local-env.ts.
+      - name: Installer Node (version de .nvmrc)
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Extensions, droits des utilisateurs, compartiment privé
+        run: node tools/ci/src/check-local-env.ts
+
+      # Le compartiment et la clé existent déjà : le second passage ne doit rien casser.
+      - name: Redémarrer sans remise à zéro
+        run: |
+          docker compose up -d --force-recreate --no-deps minio-init
+          code=$(docker wait "$(docker compose ps --all --quiet minio-init)")
+          if [ "$code" != "0" ]; then
+            echo "::error title=Redémarrage::minio-init s'est arrêté avec le code $code au second passage."
+            exit 1
+          fi
+          echo "ok - second passage de minio-init sans erreur"
+          {
+            echo "### Environnement local"
+            echo
+            echo "PostgreSQL : extensions pg_trgm, unaccent et fuzzystrmatch ; lignee_app ne crée ni table, ni table temporaire, ni schéma ; lignee_migration crée les tables."
+            echo
+            echo "MinIO : compartiment privé, clé de l'application limitée à ce compartiment, second démarrage sans erreur."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Journaux des conteneurs
+        if: failure()
+        run: docker compose logs --no-color --timestamps
+
+      - name: Arrêter et effacer
+        if: always()
+        run: docker compose down --volumes --remove-orphans
+
   # ---------------------------------------------------------------------------------------------
   # Étapes prévues par le TRD qui n'ont pas encore de matière. Chacune vérifie qu'il n'y a
   # rien à tester, le dit dans le résumé, et échoue dès que la matière apparaît sans que le job
@@ -226,27 +369,3 @@ jobs:
           message="Aucune réponse de synchronisation à mesurer pour l'instant (protocole de synchro, puis mesure en T-064)."
           echo "$message"
           { echo "### Taille des réponses de synchronisation"; echo; echo "$message"; } >> "$GITHUB_STEP_SUMMARY"
-
-  # Construction des images Docker (API, worker). Cherche Dockerfile et Containerfile, quelle que
-  # soit la casse (`Dockerfile.api` compris). Dockerfiles en T-003, publication sur GitHub
-  # Container Registry avec le déploiement de la préproduction (T-068).
-  images-docker:
-    name: images-docker
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    steps:
-      - name: Récupérer le code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Images à construire
-        run: |
-          files=$(git ls-files ':(icase)*dockerfile' ':(icase)*dockerfile.*' ':(icase)*containerfile' ':(icase)*containerfile.*')
-          if [ -n "$files" ]; then
-            echo "::error title=Images Docker non branchées::Dockerfile(s) présent(s) ($(echo $files)) mais ce job ne les construit pas encore."
-            exit 1
-          fi
-          message="Aucune image à construire pour l'instant (Dockerfiles en T-003, publication en T-068)."
-          echo "$message"
-          { echo "### Images Docker"; echo; echo "$message"; } >> "$GITHUB_STEP_SUMMARY"
