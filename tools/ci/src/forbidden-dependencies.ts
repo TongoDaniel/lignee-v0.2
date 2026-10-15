@@ -11,6 +11,12 @@ export interface ForbiddenPackage {
   readonly reason: string;
 }
 
+export interface ForbiddenScope {
+  /** Portée npm, avec son `@` : tous ses paquets sont interdits. */
+  readonly scope: string;
+  readonly reason: string;
+}
+
 export interface ForbiddenPattern {
   readonly pattern: RegExp;
   readonly reason: string;
@@ -30,18 +36,36 @@ export const FORBIDDEN_PACKAGES: readonly ForbiddenPackage[] = [
   { name: 'react-native-camera', reason: 'détection de visages intégrée (ML Kit)' },
   { name: 'clmtrackr', reason: 'suivi des points du visage' },
   { name: 'jeelizfacefilter', reason: 'détection et suivi de visages' },
+  { name: 'facetec', reason: 'vérification d’identité par le visage (FaceTec)' },
+  { name: 'faceio', reason: 'authentification par reconnaissance faciale (FACEIO)' },
+  { name: 'faceplusplus', reason: 'service de reconnaissance de visages Face++' },
+  { name: 'facepp', reason: 'service de reconnaissance de visages Face++' },
+  {
+    name: '@react-native-firebase/ml-vision',
+    reason: 'détection de visages Firebase ML Kit',
+  },
+];
+
+/** Portées dont tout le contenu traite des visages. */
+export const FORBIDDEN_SCOPES: readonly ForbiddenScope[] = [
+  { scope: '@facetec', reason: 'vérification d’identité par le visage (FaceTec)' },
+  { scope: '@faceio', reason: 'authentification par reconnaissance faciale (FACEIO)' },
+  { scope: '@luxand', reason: 'service de reconnaissance de visages Luxand' },
 ];
 
 // Un motif commence au début du nom ou après un séparateur (`/`, `@`, `-`, `_`, `.`), pour ne pas
-// confondre `face` avec `interface`, `typeface` ou `surface`.
+// confondre `face` avec `interface`, `typeface` ou `surface`, et se termine avant une lettre,
+// pour ne pas confondre `face-id` avec `face-identity` ni `face-net` avec `face-network`.
+// `faces?` couvre aussi `faces-api`, sans toucher `facet` ni `facets`.
 const START = String.raw`(?:^|[/@._-])`;
 const END = String.raw`(?![a-z])`;
 const FACE_KEYWORDS = [
   'api',
-  'recognition',
-  'recognizer',
-  'detection',
-  'detector',
+  'js',
+  'recog[a-z]*',
+  'detect[a-z]*',
+  // Face ID d'un fournisseur tiers ; le Face ID du système passe par expo-local-authentication.
+  'id',
   'landmarks?',
   'mesh',
   'matcher',
@@ -57,7 +81,7 @@ const FACE_KEYWORDS = [
 /** Motifs interdits : noms qui annoncent un traitement de visages. */
 export const FORBIDDEN_PATTERNS: readonly ForbiddenPattern[] = [
   {
-    pattern: new RegExp(`${START}face[-_.]?(?:${FACE_KEYWORDS})${END}`, 'i'),
+    pattern: new RegExp(`${START}faces?[-_.]?(?:${FACE_KEYWORDS})${END}`, 'i'),
     reason: 'traitement de visages (détection, repères, reconnaissance)',
   },
   {
@@ -154,8 +178,9 @@ export function findForbiddenDependencies(names: Iterable<string>): Violation[] 
   for (const name of names) {
     const normalized = name.toLowerCase();
     const listed = FORBIDDEN_PACKAGES.find((entry) => entry.name === normalized);
+    const scoped = FORBIDDEN_SCOPES.find((entry) => normalized.startsWith(`${entry.scope}/`));
     const matched = FORBIDDEN_PATTERNS.find((entry) => entry.pattern.test(normalized));
-    const reason = listed?.reason ?? matched?.reason;
+    const reason = listed?.reason ?? scoped?.reason ?? matched?.reason;
     if (reason !== undefined) {
       violations.set(name, { name, reason });
     }

@@ -2,14 +2,15 @@
 // Ces tests échouent si le contrôle laisse passer un paquet interdit, s'il bloque un paquet
 // légitime, ou s'il ne sait plus lire le lockfile.
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it } from 'vitest';
 
 import {
   FORBIDDEN_PACKAGES,
+  FORBIDDEN_SCOPES,
   findForbiddenDependencies,
   findForbiddenInLockfile,
   listLockfilePackageNames,
@@ -85,18 +86,50 @@ describe('findForbiddenDependencies', () => {
     'Facial-Expression-Kit',
     'insightface-js',
     'compreface-js-sdk',
+    // Faux négatifs relevés en relecture de T-002.
+    'face.detect',
+    'face-js',
+    'node-face-recog',
+    'faces-api',
+    'face-recognizer-lite',
+    'react-native-face-id',
   ])('refuse par motif %s', (name) => {
     expect(findForbiddenDependencies([name])).toHaveLength(1);
   });
 
   it.each([
+    'facetec',
+    '@facetec/sdk',
+    'faceio',
+    '@faceio/fiojs',
+    'faceplusplus',
+    'facepp',
+    '@luxand/cloud',
+    '@react-native-firebase/ml-vision',
+  ])('refuse le paquet ou la portée %s', (name) => {
+    expect(findForbiddenDependencies([name]).map((v) => v.name)).toEqual([name]);
+  });
+
+  it.each(FORBIDDEN_SCOPES.map((entry) => entry.scope))('refuse toute la portée %s', (scope) => {
+    expect(findForbiddenDependencies([scope + '/nouveau-paquet'])).toHaveLength(1);
+  });
+
+  it.each([
     'interface-datastore',
+    'interface-ipld-format',
+    'surface-api',
+    'typeface-roboto',
+    'facet-api',
+    '@clerk/facets',
+    'react-facebook-login',
+    '@react-native-firebase/app',
+    'faceted-search',
+    'faceless-ui',
     'typeface-inter',
     'surface-nets',
     'preface',
     '@types/facebook-js-sdk',
     'expo-local-authentication',
-    'react-native-faceid',
     'expo-camera',
     'expo-image-manipulator',
     'sharp',
@@ -172,10 +205,15 @@ describe('pnpm-lock.yaml du dépôt', () => {
 
 describe('script check-forbidden-dependencies', () => {
   const dir = mkdtempSync(join(tmpdir(), 'lignee-con12-'));
+  afterAll(() => {
+    rmSync(dir, { recursive: true, force: true });
+  });
 
-  function run(lockfileText: string): { status: number; output: string } {
+  function run(lockfileText: string | undefined): { status: number; output: string } {
     const path = join(dir, `pnpm-lock-${String(Math.random()).slice(2)}.yaml`);
-    writeFileSync(path, lockfileText);
+    if (lockfileText !== undefined) {
+      writeFileSync(path, lockfileText);
+    }
     try {
       const output = execFileSync(process.execPath, [cliPath, path], {
         encoding: 'utf8',
@@ -201,7 +239,13 @@ describe('script check-forbidden-dependencies', () => {
     expect(result.output).toMatch(/face-api\.js/);
   });
 
-  it('sort en 2 si le lockfile est introuvable ou illisible', () => {
+  it('sort en 2 si le lockfile est introuvable', () => {
+    const result = run(undefined);
+    expect(result.status).toBe(2);
+    expect(result.output).toMatch(/impossible de lire/);
+  });
+
+  it('sort en 2 si le lockfile est illisible', () => {
     const result = run("lockfileVersion: '5.4'\n");
     expect(result.status).toBe(2);
   });
