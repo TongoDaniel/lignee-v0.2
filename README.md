@@ -59,6 +59,17 @@ corepack pnpm check:forbidden-dependencies  # CON-12 : aucune bibliothèque de r
 
 Pour un seul paquet : `corepack pnpm --filter @lignee/kinship test`.
 
+### Environnement local
+
+PostgreSQL 18 (avec pg_trgm, unaccent et fuzzystrmatch) et MinIO à la place de Cloudflare R2 tournent dans Docker Compose (`compose.yaml`) ; l'API et le worker s'y ajoutent avec le profil `app`. Mode d'emploi, ports et remise à zéro : [docs/runbooks/environnement-local.md](docs/runbooks/environnement-local.md).
+
+```sh
+cp .env.example .env            # valeurs factices, réservées au poste ; .env n'est jamais commité
+docker compose up -d            # PostgreSQL et MinIO
+corepack pnpm check:local-env   # vérifie extensions, droits des utilisateurs et compartiment privé
+docker compose down             # arrête (ajouter --volumes pour tout effacer)
+```
+
 Les messages de commit suivent les conventions (`feat(kinship): …`) ; les portées admises sont dans `commitlint.config.mjs`. Pour vérifier un message : `echo "feat(kinship): …" | corepack pnpm commitlint`. Le hook `commit-msg` est facultatif : `git config core.hooksPath .githooks` l'active.
 
 Prettier ne reformate pas les fichiers Markdown. `apps/mobile`, `apps/web` et `apps/admin` n'ont pas encore de `package.json` : ils entrent dans les tâches quand leur app est créée. Turborepo collecte une télémétrie anonyme ; `corepack pnpm exec turbo telemetry disable` la coupe sur votre poste. La CI la coupe avec `TURBO_TELEMETRY_DISABLED=1`.
@@ -74,7 +85,8 @@ GitHub Actions, à chaque pull request et à chaque push sur `main` :
 | | `cas-limites` | Scénarios `test/scenarios/*.yaml` : aucun n'est joué avant T-006 ; le job tolère avec un avertissement la liste fermée `PENDING_T006` (`CL-POL-03`) et échoue sur tout autre scénario |
 | | `integration-postgresql` | Tests `*.integration.test.ts` sur PostgreSQL réel ; à brancher avec T-042 et T-043 |
 | | `taille-synchro` | Taille des réponses de synchronisation ; à brancher avec T-064 |
-| | `images-docker` | Construction des images ; à brancher avec T-003 et T-068 |
+| | `images-docker` | hadolint et construction des images de l'API et du worker (`apps/*/Dockerfile`), démarrage sous un utilisateur autre que root ; échoue si un Dockerfile n'est construit par aucun service de `compose.yaml`. Publication sur GitHub Container Registry : T-068 |
+| | `environnement-local` | `docker compose up -d`, puis `check:local-env` : extensions de PostgreSQL, utilisateur applicatif sans droit sur le schéma, utilisateur de migration séparé, compartiment MinIO privé ; second démarrage, arrêt |
 | `.github/workflows/codeql.yml` | `codeql` | Analyse CodeQL ; inactif (ignoré, donc compté comme réussi) tant que le dépôt est privé sans Code Security : ne pas le rendre obligatoire avant |
 
 Un job qui n'a encore rien à tester le dit dans son résumé, et échoue dès que la matière apparaît sans que le job soit branché. Le titre de la pull request est vérifié parce que la fusion se fait par squash : il devient le message du commit sur `main`. Dependabot (`.github/dependabot.yml`) propose chaque semaine les mises à jour, 14 jours après leur publication. La protection de `main` se règle à la main : [docs/runbooks/proteger-main.md](docs/runbooks/proteger-main.md).
