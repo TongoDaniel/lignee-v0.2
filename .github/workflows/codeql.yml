@@ -3,8 +3,10 @@
 # Sur un dépôt privé, CodeQL demande GitHub Code Security (payant, par contributeur actif) :
 # sans lui, l'envoi des résultats échoue. Le job ne tourne donc que si le dépôt est public, ou si
 # la variable de dépôt CODEQL_ENABLED vaut `true` (Settings > Secrets and variables > Actions >
-# Variables), une fois Code Security activé. Sinon il apparaît « skipped » : ni vert ni rouge.
-# Ne le rendez obligatoire sur `main` qu'une fois activé (docs/runbooks/proteger-main.md).
+# Variables), une fois Code Security activé. Sinon il est ignoré (« skipped »).
+# Attention : pour une vérification obligatoire, GitHub compte un job ignoré par `if:` comme
+# réussi. Cocher `codeql` alors qu'il est inactif donnerait un faux vert : ne le rendez
+# obligatoire sur `main` qu'une fois activé et passé au vert (docs/runbooks/proteger-main.md).
 
 name: CodeQL
 

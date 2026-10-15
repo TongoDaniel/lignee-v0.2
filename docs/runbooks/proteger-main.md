@@ -60,14 +60,14 @@ Règles à cocher :
 
 | Vérification | Ce qu'elle bloque | Rempli par |
 | --- | --- | --- |
-| `verifications` | CON-12 (reconnaissance faciale), Prettier, ESLint, tsc, Vitest (unitaires et propriétés), commitlint | T-002 |
+| `verifications` | CON-12 (reconnaissance faciale), Prettier, ESLint, tsc, Vitest (unitaires et propriétés), commitlint sur chaque commit et sur le titre de la pull request (le titre devient le message du commit *squash*) | T-002 |
 | `audit-dependances` | Faille haute ou critique connue (`pnpm audit --audit-level high`) | T-002 |
-| `cas-limites` | Scénario `test/scenarios/*.yaml` qui n'est joué par aucun test | T-006 (pour l'instant : avertissement, toujours vert) |
+| `cas-limites` | Scénario `test/scenarios/*.yaml` ou `*.yml` qui n'est joué par aucun test | T-006. D'ici là, aucun scénario n'est joué : le job tolère, avec un avertissement, la seule liste fermée `PENDING_T006` du workflow (aujourd'hui `CL-POL-03`) et échoue sur tout autre scénario |
 | `integration-postgresql` | Tests `*.integration.test.ts` sur PostgreSQL réel (Testcontainers) | T-042, T-043 (pour l'instant : vert s'il n'y a aucun test d'intégration, rouge s'il y en a un et que le job n'est pas branché) |
 | `taille-synchro` | Dépassement du budget de données sur les arbres de 100, 1 000 et 5 000 personnes | T-064 (même règle) |
-| `images-docker` | Image de l'API ou du worker qui ne se construit pas | T-003, T-068 (même règle) |
+| `images-docker` | Image de l'API ou du worker qui ne se construit pas (`Dockerfile`, `Containerfile`, toute casse) | T-003, T-068 (même règle) |
 
-  - **Ne cochez pas `codeql`** tant que l'étape 5 n'est pas faite : sur un dépôt privé sans Code Security, le job est ignoré (*skipped*).
+  - **Ne cochez pas `codeql`** tant que l'étape 5 n'est pas faite : sur un dépôt privé sans Code Security, le job est ignoré (*skipped*), et GitHub compte un job ignoré comme **réussi** pour une vérification obligatoire. La cocher donnerait un faux vert.
 
 Enregistrer avec *Create*.
 
@@ -129,6 +129,7 @@ gh api repos/TongoDaniel/lignee-v0.2/rules/branches/main --jq '.[].type'
 Puis, sur une pull request de test (branche jetable, fermée sans fusion ensuite) dont un commit a un message hors convention (`git commit --allow-empty -m "test sans convention"`) :
 
 - le job `verifications` échoue à l'étape *Messages de commit (commitlint)* ;
+- avec un titre hors convention (par exemple « Test »), il échoue aussi à l'étape *Titre de la pull request (commitlint)*, et repasse au vert quand on corrige le titre ;
 - le bouton *Merge* est grisé avec « Required statuses must pass before merging ».
 
 ## Retour arrière

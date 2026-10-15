@@ -69,15 +69,15 @@ GitHub Actions, à chaque pull request et à chaque push sur `main` :
 
 | Workflow | Job | Contenu |
 | --- | --- | --- |
-| `.github/workflows/ci.yml` | `verifications` | CON-12, Prettier, ESLint, tsc, Vitest (unitaires et propriétés), commitlint sur les commits de la pull request |
+| `.github/workflows/ci.yml` | `verifications` | CON-12, Prettier, ESLint, tsc, Vitest (unitaires et propriétés), commitlint sur les commits et sur le titre de la pull request |
 | | `audit-dependances` | `pnpm audit --audit-level high` : échoue sur une faille haute ou critique |
-| | `cas-limites` | Scénarios `test/scenarios/*.yaml` ; joués à partir de T-006 (avertissement d'ici là) |
+| | `cas-limites` | Scénarios `test/scenarios/*.yaml` : aucun n'est joué avant T-006 ; le job tolère avec un avertissement la liste fermée `PENDING_T006` (`CL-POL-03`) et échoue sur tout autre scénario |
 | | `integration-postgresql` | Tests `*.integration.test.ts` sur PostgreSQL réel ; à brancher avec T-042 et T-043 |
 | | `taille-synchro` | Taille des réponses de synchronisation ; à brancher avec T-064 |
 | | `images-docker` | Construction des images ; à brancher avec T-003 et T-068 |
-| `.github/workflows/codeql.yml` | `codeql` | Analyse CodeQL ; inactif tant que le dépôt est privé sans Code Security |
+| `.github/workflows/codeql.yml` | `codeql` | Analyse CodeQL ; inactif (ignoré, donc compté comme réussi) tant que le dépôt est privé sans Code Security : ne pas le rendre obligatoire avant |
 
-Un job qui n'a encore rien à tester le dit dans son résumé, et échoue dès que la matière apparaît sans que le job soit branché. Dependabot (`.github/dependabot.yml`) propose chaque semaine les mises à jour, 14 jours après leur publication. La protection de `main` se règle à la main : [docs/runbooks/proteger-main.md](docs/runbooks/proteger-main.md).
+Un job qui n'a encore rien à tester le dit dans son résumé, et échoue dès que la matière apparaît sans que le job soit branché. Le titre de la pull request est vérifié parce que la fusion se fait par squash : il devient le message du commit sur `main`. Dependabot (`.github/dependabot.yml`) propose chaque semaine les mises à jour, 14 jours après leur publication. La protection de `main` se règle à la main : [docs/runbooks/proteger-main.md](docs/runbooks/proteger-main.md).
 
 ## Agents Claude Code
 
