@@ -3,13 +3,19 @@
   "agentGuidance": false,
   "globalDependencies": ["tsconfig.base.json", "eslint.config.mjs"],
   "tasks": {
+    "transit": {
+      "dependsOn": ["^transit"]
+    },
     "lint": {
+      "dependsOn": ["transit"],
       "outputs": []
     },
     "typecheck": {
+      "dependsOn": ["transit"],
       "outputs": []
     },
     "test": {
+      "dependsOn": ["transit"],
       "outputs": []
     },
     "//#format:write": {

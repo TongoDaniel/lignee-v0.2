@@ -58,7 +58,7 @@ Pour un seul paquet : `corepack pnpm --filter @lignee/kinship test`.
 
 Les messages de commit suivent les conventions (`feat(kinship): …`) ; les portées admises sont dans `commitlint.config.mjs`. Pour vérifier un message : `echo "feat(kinship): …" | corepack pnpm commitlint`. Le hook `commit-msg` est facultatif : `git config core.hooksPath .githooks` l'active.
 
-Prettier ne reformate pas les fichiers Markdown. `apps/mobile`, `apps/web` et `apps/admin` n'ont pas encore de `package.json` : ils entrent dans les tâches quand leur app est créée. Turborepo collecte une télémétrie anonyme ; `corepack pnpm exec turbo telemetry disable` la coupe sur votre poste.
+Prettier ne reformate pas les fichiers Markdown. `apps/mobile`, `apps/web` et `apps/admin` n'ont pas encore de `package.json` : ils entrent dans les tâches quand leur app est créée. Turborepo collecte une télémétrie anonyme ; `corepack pnpm exec turbo telemetry disable` la coupe sur votre poste. La CI devra définir `TURBO_TELEMETRY_DISABLED=1` (T-002).
 
 ## Agents Claude Code
 

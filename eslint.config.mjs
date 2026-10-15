@@ -33,7 +33,11 @@ export default tseslint.config(
   {
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        projectService: {
+          // Fichiers de configuration à la racine d'un paquet (vitest.config.ts…), hors de
+          // `include`. Les motifs partent de la racine du dépôt ; `**` n'y est pas admis.
+          allowDefaultProject: ['*.config.ts', 'apps/*/*.config.ts', 'packages/*/*.config.ts'],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
       globals: { ...globals.node },
