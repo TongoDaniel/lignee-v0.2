@@ -2,6 +2,9 @@
 # calculée, marquée approximative. La compréhension de la phrase dictée revient à la voix (T-066).
 id: CL-VOI-16
 titre: « Il est mort à 80 ans en 2010 »
+couverture:
+  teste: [modele]
+  reste: [T-066]
 action:
   dictee: "Il est mort à 80 ans en 2010"
   calcul: { age: 80, deces: { qualificatif: exacte, date: "2010" } }

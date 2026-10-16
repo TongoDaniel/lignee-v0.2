@@ -2,8 +2,12 @@
 # de dates de précisions différentes. La chronologie qui la signale est V2.
 # Notation des dates : « date » vaut AAAA, AAAA-MM ou AAAA-MM-JJ, la précision en est déduite
 # sauf « decennie », écrite à part.
+# Reste : la saisie (T-031) ; la chronologie (V2, MEM-11) est hors du plan V1.
 id: CL-DON-05
 titre: « Né vers 1940 »
+couverture:
+  teste: [modele]
+  reste: [T-031]
 action:
   saisie: "né vers 1940"
   date: { qualificatif: vers, date: "1940", texte: "vers 1940" }

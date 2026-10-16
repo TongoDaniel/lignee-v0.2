@@ -1,7 +1,11 @@
 # Partie date (T-005) : « entre 1935 et 1940 » est un intervalle à deux bornes ordonnées, de
 # même précision ; il couvre du premier jour de 1935 au dernier jour de 1940.
+# Reste : la saisie (T-031).
 id: CL-DON-06
 titre: « Entre 1935 et 1940 »
+couverture:
+  teste: [modele]
+  reste: [T-031]
 action:
   saisie: "entre 1935 et 1940"
   date: { qualificatif: entre, de: "1935", a: "1940", texte: "entre 1935 et 1940" }
