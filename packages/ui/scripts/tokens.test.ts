@@ -1,14 +1,23 @@
-// src/tokens.ts doit être exactement ce que le générateur produit depuis docs/charte/tokens.json :
-// ce test échoue si quelqu'un modifie la charte sans régénérer, ou tokens.ts à la main.
-import { readFileSync } from 'node:fs';
+// src/tokens.ts et src/fontFiles.ts doivent être exactement ce que le générateur produit depuis
+// docs/charte/tokens.json : ce test échoue si quelqu'un modifie la charte sans régénérer, ou un
+// fichier généré à la main.
+import { existsSync, readFileSync } from 'node:fs';
+import { join, relative } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
 import { charteComplements } from './charte-complements.ts';
 import { CharteFormatError, parseCharteTokens } from './charte-tokens.ts';
-import { charteTokensPath, tokensOutputPath } from './paths.ts';
-import { generateTokensFile } from './tokens.ts';
-import { buildTokensSource, camelCase, GENERATED_HEADER, parseShadow } from './tokens-source.ts';
+import { fontFaces } from '../src/tokens.ts';
+import { charteTokensPath, fontFilesOutputPath, packageRoot, tokensOutputPath } from './paths.ts';
+import { generateTokensFiles } from './tokens.ts';
+import {
+  buildTokensSource,
+  camelCase,
+  FONT_FILES_HEADER,
+  GENERATED_HEADER,
+  parseShadow,
+} from './tokens-source.ts';
 
 const REGENERATE = 'corepack pnpm --filter @lignee/ui tokens';
 
@@ -16,16 +25,44 @@ function charteJson(): Record<string, unknown> {
   return JSON.parse(readFileSync(charteTokensPath, 'utf8')) as Record<string, unknown>;
 }
 
-describe('src/tokens.ts', () => {
-  it('est à jour avec docs/charte/tokens.json', async () => {
-    const committed = readFileSync(tokensOutputPath, 'utf8').replace(/\r\n/g, '\n');
-    const expected = await generateTokensFile();
+function readGenerated(path: string): string {
+  return readFileSync(path, 'utf8').replace(/\r\n/g, '\n');
+}
+
+describe('fichiers générés', () => {
+  it.each([tokensOutputPath, fontFilesOutputPath])('%s est à jour avec la charte', async (path) => {
+    const expected = (await generateTokensFiles()).get(path);
     expect(
-      committed === expected,
-      `src/tokens.ts ne correspond pas à la charte : lancez « ${REGENERATE} » et ne modifiez pas ce fichier à la main.`,
+      readGenerated(path) === expected,
+      `${relative(packageRoot, path)} ne correspond pas à la charte : lancez « ${REGENERATE} » et ne modifiez pas ce fichier à la main.`,
     ).toBe(true);
   });
+});
 
+describe('src/fontFiles.ts', () => {
+  // Le fichier n'est pas importé (ses require() ne se chargent que sous Metro) : on le lit.
+  const source = readGenerated(fontFilesOutputPath);
+  const entries = [
+    ...source.matchAll(/'([A-Za-z0-9-]+)': require\('(\.\.\/assets\/fonts\/[^']+)'\)/g),
+  ];
+
+  it('porte l’en-tête « généré, ne pas modifier »', () => {
+    expect(source.startsWith(FONT_FILES_HEADER)).toBe(true);
+  });
+
+  it('charge chaque police de la charte sous son nom (useFonts)', () => {
+    expect(entries.map((m) => m[1]).sort()).toEqual(Object.keys(fontFaces).sort());
+  });
+
+  it('pointe vers les TTF de assets/fonts', () => {
+    for (const [, name, path] of entries) {
+      expect(existsSync(join(packageRoot, 'src', path ?? '')), path).toBe(true);
+      expect(path).toBe(`../assets/fonts/${fontFaces[name as keyof typeof fontFaces].file}`);
+    }
+  });
+});
+
+describe('src/tokens.ts', () => {
   it('porte l’en-tête « généré, ne pas modifier »', () => {
     const committed = readFileSync(tokensOutputPath, 'utf8');
     expect(committed.startsWith(GENERATED_HEADER)).toBe(true);

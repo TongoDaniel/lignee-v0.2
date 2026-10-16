@@ -7,4 +7,5 @@ export const charteDir = join(repoRoot, 'docs', 'charte');
 export const charteTokensPath = join(charteDir, 'tokens.json');
 export const charteFontsDir = join(charteDir, 'fonts');
 export const tokensOutputPath = join(packageRoot, 'src', 'tokens.ts');
+export const fontFilesOutputPath = join(packageRoot, 'src', 'fontFiles.ts');
 export const fontsOutputDir = join(packageRoot, 'assets', 'fonts');

@@ -1,10 +1,12 @@
-// Régénère packages/ui/src/tokens.ts depuis docs/charte/tokens.json.
+// Régénère packages/ui/src/tokens.ts et src/fontFiles.ts depuis docs/charte/tokens.json.
 // Lancement : `corepack pnpm --filter @lignee/ui tokens`.
 import { writeFileSync } from 'node:fs';
 import { relative } from 'node:path';
 
-import { repoRoot, tokensOutputPath } from './paths.ts';
-import { generateTokensFile } from './tokens.ts';
+import { repoRoot } from './paths.ts';
+import { generateTokensFiles } from './tokens.ts';
 
-writeFileSync(tokensOutputPath, await generateTokensFile(), 'utf8');
-console.log(`${relative(repoRoot, tokensOutputPath)} régénéré depuis docs/charte/tokens.json.`);
+for (const [path, content] of await generateTokensFiles()) {
+  writeFileSync(path, content, 'utf8');
+  console.log(`${relative(repoRoot, path)} régénéré depuis docs/charte/tokens.json.`);
+}

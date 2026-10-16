@@ -316,6 +316,37 @@ cibleTactile: ${String(cibleAines.value)},
 }
 
 /** Met le texte en forme avec la configuration Prettier du dépôt, pour que `format:check` passe. */
+export const FONT_FILES_HEADER = [
+  '// Fichier généré : ne pas modifier.',
+  '// Source : docs/charte/tokens.json (type.fonts). Générateur : packages/ui/scripts/generate-tokens.ts.',
+  '// Pour changer une valeur, modifiez la charte, puis lancez `corepack pnpm --filter @lignee/ui tokens`.',
+].join('\n');
+
+/**
+ * Texte brut de src/fontFiles.ts : les TTF à charger avec `useFonts(fontFiles)` d'expo-font
+ * (11-react-native.md), sous les noms de police de la charte.
+ */
+export function buildFontFilesSource(charte: CharteTokens): string {
+  const entries = charte.fonts
+    .map((f) => `${key(f.key)}: require('../assets/fonts/${f.key}.ttf'),`)
+    .join('\n');
+  return [
+    FONT_FILES_HEADER,
+    '',
+    '// Au démarrage de l’app : `const [loaded] = useFonts(fontFiles);` (expo-font).',
+    '// Les `require` sont résolus par Metro, qui embarque les TTF comme des assets et renvoie leur',
+    '// identifiant. Node ne sait pas les charger : ce fichier n’est importé ni par l’index du paquet',
+    '// ni par un test. Importez-le par `@lignee/ui/fontFiles`, depuis l’app seulement.',
+    "import type { FontName } from './tokens';",
+    '',
+    '// `require` de Metro (les types de Node sont exclus de src/).',
+    'declare const require: (path: string) => number;',
+    '',
+    `export const fontFiles: { readonly [K in FontName]: number } = {\n${entries}\n};`,
+    '',
+  ].join('\n');
+}
+
 export async function formatTokensSource(source: string, targetPath: string): Promise<string> {
   const config = await resolveConfig(targetPath);
   return format(source, { ...config, filepath: targetPath });
