@@ -1,3 +1,38 @@
 # kinship
 
 Moteur de parenté : graphe, chemins, vocabulaire FR et EN. Agent : moteur-parente.
+
+Paquet pur, à l'identique sur le téléphone (hors-ligne) et sur le serveur : il ne dépend que de `@lignee/domain`. Hors des tests, ESLint (`eslint.config.mjs`, `kinshipSourceRules`) interdit tout autre import, les outils de test et les globales de Node ou du réseau ; `tsconfig.src.json` vérifie le code sans types de Node.
+
+## Graphe et lien structurel (T-013)
+
+| Fichier | Contenu |
+| --- | --- |
+| `graph.ts` | `createKinshipGraph({ people, unions, filiations, parentCandidates? })` : graphe immuable des objets visibles du lecteur. Consultation par identifiant (`person`, `union`, `filiation`, `parentsOf`, `childrenOf`, `unionsOf`, `parentCandidatesOf`) ; `ancestors(id, types?)` : chaque ancêtre une seule fois (implexe), à sa génération la plus proche, mis en cache |
+| `kinship.ts` | `findRelationships(graph, a, b, options?)` : tous les chemins de A vers B ; `closestCommonAncestors(graph, a, b)` |
+| `relationship.ts` | Structure du résultat, sans mots ; `invertRelationship`, `relationshipKey` |
+
+Règles (définition d'un chemin, alliance, limites, ordre) : ADR 0010 (proposée).
+
+### Résultat
+
+`findRelationships` rend `same_person`, `none` (aucun chemin, ou personne absente du graphe : « Lien non disponible », sans autre indice) ou `related` avec la liste des chemins, du plus proche au plus lointain, le sang avant l'alliance, et `truncated` si une limite a été atteinte.
+
+Un chemin (`Relationship`) est une suite de segments :
+
+- segment de sang (`BloodSegment`) : `generationsUp` et `generationsDown` (1 et 1 : fratrie ; 2 et 1 : oncle ; 2 et 2 : cousins germains ; 3 et 3 : issus de germains ; 3 et 2 : « à la mode de Bretagne »), `commonAncestors` (avec la filiation de chaque côté), `ascent` et `descent` (filiations traversées, avec type et certitude), `sharing` (`full` : deux parents communs ; `half` : un seul ; `direct_line` ; `same_person` dans une alliance) ;
+- union (`UnionLink`) : identifiant, conjoints, rang de chacun.
+
+Résumé : `kind` (`blood`, `alliance`), `degree`, `unionCount`, `certainty` (la plus faible du chemin), `filiationTypes`, `unionIds`, `personIds` (pour surligner le chemin).
+
+Ce qui se branche dessus : fratrie détaillée et « frère ou demi-frère » (T-020, avec la nature des personnes et les parents candidats du graphe), alliance nommée et co-épouse selon la simultanéité des unions (T-021), chemins multiples et liens non biologiques (T-022), mots (T-026, T-027), budget sur le téléphone (T-028).
+
+## Tests
+
+```sh
+corepack pnpm --filter @lignee/kinship test
+```
+
+- `src/relationships.test.ts` : degrés du TRD, frères et demi-frères, places à compléter jamais confondues, polygamie et co-épouses, lévirat et implexe (tous les chemins, chaque ancêtre une fois), alliance, certitude, types de filiation, personne masquée sur le seul chemin, cycle dans des données corrompues. Arbres écrits au format des scénarios.
+- `src/properties.test.ts` (fast-check, 1 800 arbres générés avec polygamie, lévirat, sororat, implexe, places à compléter) : le lien de B vers A est l'inverse de celui de A vers B, dans le même ordre ; chaque chemin est bien formé, simple et trié ; un ancêtre commun est ancêtre des deux, une seule fois ; ancêtres sans doublon ; aucun chemin ne traverse une personne absente du graphe ; le résultat ne dépend pas de l'ordre des objets. La forme d'un chemin est vérifiée par `src/test-support/fixtures.ts`, sans se fier au moteur.
+- `src/performance.test.ts` (PAR-01, partie moteur) : arbre type de 5 000 personnes et chef de famille à 8 épouses et 40 enfants, moins de 200 ms par lien, graphe compris. Mesure sur le poste de développement (Windows 11, Node 24) : graphe en 31 ms, lien en 0,26 ms en moyenne, 12,7 ms au pire sur 400 paires ; chef de famille, 2 ms au pire.
