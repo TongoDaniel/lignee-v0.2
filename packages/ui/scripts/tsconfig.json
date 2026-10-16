@@ -1,0 +1,12 @@
+{
+  // Scripts de génération et leurs tests : ils tournent sous Node 24, sans compilation (suppression
+  // des types), d'où les types de Node et les imports relatifs qui gardent l'extension `.ts`.
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "declaration": false
+  },
+  "include": ["."]
+}

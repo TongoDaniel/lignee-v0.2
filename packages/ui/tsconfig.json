@@ -1,12 +1,12 @@
 {
+  // Code de l'app (src/) : aucun type de Node. React Native n'a ni `process`, ni `Buffer`, ni
+  // `node:fs` : les utiliser ici doit échouer au typecheck. Les scripts ont leur propre
+  // configuration (scripts/tsconfig.json).
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    // Les scripts de génération (scripts/) tournent directement sous Node 24, sans compilation :
-    // leurs imports relatifs gardent l'extension `.ts`.
-    "types": ["node"],
-    "allowImportingTsExtensions": true,
+    "types": [],
     "noEmit": true,
     "declaration": false
   },
-  "include": ["src", "scripts"]
+  "include": ["src"]
 }
