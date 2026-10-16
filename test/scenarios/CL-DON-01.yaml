@@ -1,0 +1,15 @@
+# Noms générés. Partie modèle (T-004) : prénoms et nom sont des champs séparés, et l'ordre
+# d'affichage est un réglage de l'arbre. Le découpage de la phrase dite revient à la voix.
+id: CL-DON-01
+titre: Nom donné dans l'ordre NOM Prénom
+arbre:
+  personnes: [lucien/M]
+  noms:
+    - { personne: lucien, type: naissance, prenoms: Lucien, nom: Abenzo }
+action:
+  saisie: "Abenzo Lucien"
+attendu:
+  champs: { prenoms: Lucien, nom: Abenzo }
+  affichage:
+    nom_puis_prenoms: "Abenzo Lucien"
+    prenoms_puis_nom: "Lucien Abenzo"

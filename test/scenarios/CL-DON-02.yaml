@@ -1,0 +1,14 @@
+# Noms générés. Une seule forme de nom, sans nom de famille : acceptée telle quelle, sans champ
+# vide inventé.
+id: CL-DON-02
+titre: Une seule forme de nom, sans nom de famille
+arbre:
+  personnes: [ayo/F, kossi/M]
+  noms:
+    - { personne: ayo, type: naissance, prenoms: Ayo }
+    - { personne: kossi, type: naissance, forme: Kossivi }
+attendu:
+  valide: true
+  affichage:
+    ayo: Ayo
+    kossi: Kossivi

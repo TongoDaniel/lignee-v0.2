@@ -1,0 +1,21 @@
+# Noms générés. Titre traditionnel daté, affiché sous le nom ; le libellé ne se traduit pas.
+id: CL-FAM-19
+titre: Titre traditionnel (Fon, chef, successeur désigné)
+arbre:
+  personnes: [ndi/M, tamfu/M]
+  noms:
+    - { personne: ndi, type: naissance, prenoms: Ndi, nom: Abenzo }
+    - { personne: tamfu, type: naissance, prenoms: Tamfu, nom: Abenzo }
+  filiations:
+    - { parents: [ndi], enfant: tamfu }
+  titres:
+    - { personne: ndi, libelle: Fon, debut: "1968", fin: "2004" }
+    - { personne: tamfu, libelle: "Successeur désigné", debut: "1999", fin: "2004" }
+    - { personne: tamfu, libelle: Fon, debut: "2004" }
+attendu:
+  valide: true
+  sous_le_nom:
+    ndi: [{ libelle: Fon, debut: "1968", fin: "2004" }]
+    tamfu:
+      - { libelle: "Successeur désigné", debut: "1999", fin: "2004" }
+      - { libelle: Fon, debut: "2004" }

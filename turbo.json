@@ -18,6 +18,11 @@
       "dependsOn": ["transit"],
       "outputs": []
     },
+    "@lignee/domain#test": {
+      "dependsOn": ["transit"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/test/scenarios/**"],
+      "outputs": []
+    },
     "@lignee/ci#test": {
       "dependsOn": ["transit"],
       "inputs": [

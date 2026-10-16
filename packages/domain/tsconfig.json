@@ -1,4 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // Types de Node pour les tests seulement (lecture des scénarios). Le code du paquet n'importe
+    // rien de Node : une règle ESLint l'interdit hors des fichiers de test.
+    "types": ["node"]
+  },
   "include": ["src"]
 }
