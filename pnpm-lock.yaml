@@ -16,12 +16,21 @@ catalogs:
     eslint:
       specifier: 10.11.0
       version: 10.11.0
+    fast-check:
+      specifier: 4.10.2
+      version: 4.10.2
     typescript:
       specifier: 6.0.3
       version: 6.0.3
     vitest:
       specifier: 5.0.3
       version: 5.0.3
+    yaml:
+      specifier: 2.9.1
+      version: 2.9.1
+    zod:
+      specifier: 4.6.5
+      version: 4.6.5
 
 importers:
 
@@ -115,7 +124,7 @@ importers:
   packages/domain:
     dependencies:
       zod:
-        specifier: 4.6.5
+        specifier: 'catalog:'
         version: 4.6.5
     devDependencies:
       '@types/node':
@@ -125,7 +134,7 @@ importers:
         specifier: 'catalog:'
         version: 10.11.0(jiti@2.6.1)
       fast-check:
-        specifier: 4.10.2
+        specifier: 'catalog:'
         version: 4.10.2
       typescript:
         specifier: 'catalog:'
@@ -134,7 +143,7 @@ importers:
         specifier: 'catalog:'
         version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
       yaml:
-        specifier: 2.9.1
+        specifier: 'catalog:'
         version: 2.9.1
 
   packages/i18n:
@@ -212,7 +221,7 @@ importers:
   tools/ci:
     dependencies:
       yaml:
-        specifier: 2.9.1
+        specifier: 'catalog:'
         version: 2.9.1
     devDependencies:
       '@types/node':
