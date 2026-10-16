@@ -6,32 +6,32 @@ describe('createTranslator', () => {
   it('speaks French by default, with the charter wording', () => {
     const { t, language } = createTranslator();
     expect(language).toBe('fr');
-    expect(t('commun:app.name')).toBe('Lignée');
-    expect(t('commun:actions.confirm')).toBe('Valider');
-    expect(t('commun:actions.yesAdd')).toBe('Oui, ajouter');
-    expect(t('commun:actions.dontKnow')).toBe('Je ne sais pas');
-    expect(t('commun:privacy.onlyYou')).toBe('Visible par vous seul');
+    expect(t('common:app.name')).toBe('Lignée');
+    expect(t('common:actions.confirm')).toBe('Valider');
+    expect(t('common:actions.yesAdd')).toBe('Oui, ajouter');
+    expect(t('common:actions.dontKnow')).toBe('Je ne sais pas');
+    expect(t('common:privacy.onlyYou')).toBe('Visible par vous seul');
   });
 
   it('speaks English when asked', () => {
     const { t } = createTranslator({ language: 'en' });
-    expect(t('commun:actions.confirm')).toBe('Confirm');
-    expect(t('commun:actions.dontKnow')).toBe('I don’t know');
+    expect(t('common:actions.confirm')).toBe('Confirm');
+    expect(t('common:actions.dontKnow')).toBe('I don’t know');
   });
 
   it('inserts parameters', () => {
-    expect(createTranslator().t('commun:tree.personJoined', { name: 'Awa' })).toBe(
+    expect(createTranslator().t('common:tree.personJoined', { name: 'Awa' })).toBe(
       'Awa a rejoint l’arbre.',
     );
     expect(
-      createTranslator({ language: 'en' }).t('commun:tree.personJoined', { name: 'Awa' }),
+      createTranslator({ language: 'en' }).t('common:tree.personJoined', { name: 'Awa' }),
     ).toBe('Awa has joined the tree.');
   });
 
   it('follows ICU plural rules of each language', () => {
     const fr = createTranslator({ language: 'fr' });
     const en = createTranslator({ language: 'en' });
-    const count = (tr: Translator, n: number): string => tr.t('commun:people.count', { count: n });
+    const count = (tr: Translator, n: number): string => tr.t('common:people.count', { count: n });
 
     expect(count(fr, 0)).toBe('Aucune personne');
     expect(count(fr, 1)).toBe('1 personne');
@@ -49,12 +49,12 @@ describe('createTranslator', () => {
   it('switches language at once, without a new instance (CPT-12)', async () => {
     const translator = createTranslator();
     const { t } = translator;
-    expect(t('commun:actions.cancel')).toBe('Annuler');
+    expect(t('common:actions.cancel')).toBe('Annuler');
 
     await translator.changeLanguage('en');
 
     expect(translator.language).toBe('en');
-    expect(t('commun:actions.cancel')).toBe('Cancel');
+    expect(t('common:actions.cancel')).toBe('Cancel');
     expect(translator.format.number(1234.5)).toBe('1,234.5');
   });
 
@@ -78,25 +78,25 @@ describe('createTranslator', () => {
     const a = createTranslator();
     const b = createTranslator();
     await a.changeLanguage('en');
-    expect(a.t('commun:actions.save')).toBe('Save');
-    expect(b.t('commun:actions.save')).toBe('Enregistrer');
+    expect(a.t('common:actions.save')).toBe('Save');
+    expect(b.t('common:actions.save')).toBe('Enregistrer');
   });
 
   it('rejects unknown keys and missing or wrong parameters at compile time', () => {
     // Jamais appelée : `tsc --noEmit` (typecheck) échoue si une seule de ces lignes compile.
     const compileTimeChecks = ({ t }: Translator): void => {
       // @ts-expect-error clé inconnue
-      t('commun:actions.unknown');
+      t('common:actions.unknown');
       // @ts-expect-error espace de noms absent
       t('actions.confirm');
       // @ts-expect-error paramètre manquant
-      t('commun:tree.personJoined');
+      t('common:tree.personJoined');
       // @ts-expect-error paramètre mal nommé
-      t('commun:tree.personJoined', { nom: 'Awa' });
+      t('common:tree.personJoined', { nom: 'Awa' });
       // @ts-expect-error un pluriel attend un nombre
-      t('commun:people.count', { count: 'deux' });
+      t('common:people.count', { count: 'deux' });
       // @ts-expect-error un message sans paramètre n'en accepte pas
-      t('commun:actions.confirm', { name: 'Awa' });
+      t('common:actions.confirm', { name: 'Awa' });
     };
     expect(compileTimeChecks).toBeTypeOf('function');
   });

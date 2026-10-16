@@ -63,15 +63,15 @@ describe('literalTexts', () => {
 describe('renderMessageParams', () => {
   it('writes one sorted entry per key, null without parameters', () => {
     const catalog = new Map([
-      ['commun:tree.personJoined', '{name} a rejoint l’arbre.'],
-      ['commun:actions.confirm', 'Valider'],
-      ['commun:people.count', '{count, plural, one {# personne} other {# personnes}} le {d, date}'],
+      ['common:tree.personJoined', '{name} a rejoint l’arbre.'],
+      ['common:actions.confirm', 'Valider'],
+      ['common:people.count', '{count, plural, one {# personne} other {# personnes}} le {d, date}'],
     ]);
     expect(renderMessageParams(catalog)).toContain(
       [
-        "  'commun:actions.confirm': null;",
-        "  'commun:people.count': { readonly count: number; readonly d: Date | number };",
-        "  'commun:tree.personJoined': { readonly name: string | number };",
+        "  'common:actions.confirm': null;",
+        "  'common:people.count': { readonly count: number; readonly d: Date | number };",
+        "  'common:tree.personJoined': { readonly name: string | number };",
       ].join('\n'),
     );
   });

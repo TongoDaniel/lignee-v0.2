@@ -8,7 +8,7 @@ i18next avec le format de messages ICU (`i18next-icu`, `intl-messageformat`) ; d
 
 | Chemin | Contenu |
 | --- | --- |
-| `messages/<langue>/<espace>.json` | Les textes, un fichier par langue et par espace de noms (`commun` pour l'instant). Le français fait référence. |
+| `messages/<langue>/<espace>.json` | Les textes, un fichier par langue et par espace de noms (`common` pour l'instant). Le français fait référence. |
 | `review/<langue>.json` | Relecture par un locuteur natif (ACC-05) : une entrée par message, `to-review` ou `reviewed` avec le texte relu. |
 | `src/generated/message-params.ts` | Types des clés et des paramètres, générés depuis les messages français. Ne pas modifier à la main. |
 | `src/translator.ts` | `createTranslator` : traduction typée, changement de langue à chaud, abonnement. |
@@ -17,7 +17,7 @@ i18next avec le format de messages ICU (`i18next-icu`, `intl-messageformat`) ; d
 
 ## Ajouter un texte
 
-1. Choisissez l'espace de noms (`commun` pour ce qui sert partout) et une clé **en anglais**, en camelCase, rangée par thème : `actions.invite`, `tree.emptyState`. Jamais le texte français comme clé.
+1. Choisissez l'espace de noms (`common` pour ce qui sert partout) et une clé **en anglais**, en camelCase, rangée par thème : `actions.invite`, `tree.emptyState`. Jamais le texte français comme clé.
 2. Écrivez le texte dans `messages/fr/<espace>.json` **et** dans `messages/en/<espace>.json`, au ton de `docs/charte/08-ton.md` : vouvoiement, un bouton commence par un verbe à l'infinitif (« Inviter », « Oui, ajouter »), vocabulaire de la charte (« fiche », « proches », « lien de parenté »), pas d'emoji. Anglais simple et chaleureux.
 3. Typographie, vérifiée par les tests : apostrophe ’ et guillemets « » ou “ ”, jamais ' ni " ; points de suspension … ; en français, espace insécable (U+202F ou U+00A0) avant ; : ! ? » et après «.
 4. Lancez la génération, qui met à jour les types et marque le texte « à relire » dans `review/` :
@@ -26,7 +26,7 @@ i18next avec le format de messages ICU (`i18next-icu`, `intl-messageformat`) ; d
    corepack pnpm --filter @lignee/i18n generate
    ```
 
-5. Utilisez la clé : `t('commun:actions.invite')`. Une clé inconnue, un paramètre manquant ou de mauvais type ne compile pas.
+5. Utilisez la clé : `t('common:actions.invite')`. Une clé inconnue, un paramètre manquant ou de mauvais type ne compile pas.
 6. `corepack pnpm --filter @lignee/i18n test` vérifie que chaque clé existe dans les deux langues avec les mêmes paramètres ICU, que les types et la relecture sont à jour, et la typographie.
 
 Un nouvel espace de noms : créez les deux fichiers, puis ajoutez-le à `namespaces` et à `resources` dans `src/resources.ts` (un test compare la liste aux fichiers).
@@ -43,8 +43,8 @@ Syntaxe ICU. Noms de paramètres en anglais, en camelCase ; certains noms sont r
 ```
 
 ```ts
-t('commun:tree.personJoined', { name: person.usualName });
-t('commun:people.count', { count: 3 }); // « 3 personnes », « 1 234 personnes »
+t('common:tree.personJoined', { name: person.usualName });
+t('common:people.count', { count: 3 }); // « 3 personnes », « 1 234 personnes »
 ```
 
 Attention au pluriel : en français, 0 et 1,5 sont au singulier (« one ») ; en anglais, au pluriel. Prévoyez `=0` quand « aucun » se dit autrement.

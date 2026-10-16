@@ -2,16 +2,16 @@
 // Source : messages/fr/*.json. Un message sans paramètre vaut `null`.
 
 export interface MessageParams {
-  'commun:actions.cancel': null;
-  'commun:actions.confirm': null;
-  'commun:actions.dontKnow': null;
-  'commun:actions.later': null;
-  'commun:actions.save': null;
-  'commun:actions.yesAdd': null;
-  'commun:app.name': null;
-  'commun:languages.en': null;
-  'commun:languages.fr': null;
-  'commun:people.count': { readonly count: number };
-  'commun:privacy.onlyYou': null;
-  'commun:tree.personJoined': { readonly name: string | number };
+  'common:actions.cancel': null;
+  'common:actions.confirm': null;
+  'common:actions.dontKnow': null;
+  'common:actions.later': null;
+  'common:actions.save': null;
+  'common:actions.yesAdd': null;
+  'common:app.name': null;
+  'common:languages.en': null;
+  'common:languages.fr': null;
+  'common:people.count': { readonly count: number };
+  'common:privacy.onlyYou': null;
+  'common:tree.personJoined': { readonly name: string | number };
 }

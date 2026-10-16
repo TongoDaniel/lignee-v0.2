@@ -3,43 +3,43 @@ import { describe, expect, it } from 'vitest';
 import { countReview, parseReviewFile, syncReview } from './review';
 
 const catalog = new Map([
-  ['commun:actions.cancel', 'Cancel'],
-  ['commun:actions.confirm', 'Confirm'],
-  ['commun:actions.save', 'Save'],
+  ['common:actions.cancel', 'Cancel'],
+  ['common:actions.confirm', 'Confirm'],
+  ['common:actions.save', 'Save'],
 ]);
 
 describe('syncReview', () => {
   it('marks new messages to review and drops removed ones', () => {
     const synced = syncReview(catalog, {
-      'commun:actions.cancel': { status: 'reviewed', text: 'Cancel' },
-      'commun:old.key': { status: 'reviewed', text: 'Old' },
+      'common:actions.cancel': { status: 'reviewed', text: 'Cancel' },
+      'common:old.key': { status: 'reviewed', text: 'Old' },
     });
     expect(synced).toEqual({
-      'commun:actions.cancel': { status: 'reviewed', text: 'Cancel' },
-      'commun:actions.confirm': { status: 'to-review' },
-      'commun:actions.save': { status: 'to-review' },
+      'common:actions.cancel': { status: 'reviewed', text: 'Cancel' },
+      'common:actions.confirm': { status: 'to-review' },
+      'common:actions.save': { status: 'to-review' },
     });
   });
 
   it('sends a message back to review when its text changed after review', () => {
     const synced = syncReview(catalog, {
-      'commun:actions.confirm': { status: 'reviewed', text: 'Validate' },
+      'common:actions.confirm': { status: 'reviewed', text: 'Validate' },
     });
-    expect(synced['commun:actions.confirm']).toEqual({ status: 'to-review' });
+    expect(synced['common:actions.confirm']).toEqual({ status: 'to-review' });
   });
 });
 
 describe('countReview', () => {
   it('counts only messages reviewed with their current text', () => {
     const count = countReview(catalog, {
-      'commun:actions.cancel': { status: 'reviewed', text: 'Cancel' },
-      'commun:actions.confirm': { status: 'reviewed', text: 'Validate' },
-      'commun:actions.save': { status: 'to-review' },
+      'common:actions.cancel': { status: 'reviewed', text: 'Cancel' },
+      'common:actions.confirm': { status: 'reviewed', text: 'Validate' },
+      'common:actions.save': { status: 'to-review' },
     });
     expect(count).toEqual({
       total: 3,
       reviewed: 1,
-      toReview: ['commun:actions.confirm', 'commun:actions.save'],
+      toReview: ['common:actions.confirm', 'common:actions.save'],
     });
   });
 });

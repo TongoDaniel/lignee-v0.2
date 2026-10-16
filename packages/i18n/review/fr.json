@@ -1,38 +1,38 @@
 {
-  "commun:actions.cancel": {
+  "common:actions.cancel": {
     "status": "to-review"
   },
-  "commun:actions.confirm": {
+  "common:actions.confirm": {
     "status": "to-review"
   },
-  "commun:actions.dontKnow": {
+  "common:actions.dontKnow": {
     "status": "to-review"
   },
-  "commun:actions.later": {
+  "common:actions.later": {
     "status": "to-review"
   },
-  "commun:actions.save": {
+  "common:actions.save": {
     "status": "to-review"
   },
-  "commun:actions.yesAdd": {
+  "common:actions.yesAdd": {
     "status": "to-review"
   },
-  "commun:app.name": {
+  "common:app.name": {
     "status": "to-review"
   },
-  "commun:languages.en": {
+  "common:languages.en": {
     "status": "to-review"
   },
-  "commun:languages.fr": {
+  "common:languages.fr": {
     "status": "to-review"
   },
-  "commun:people.count": {
+  "common:people.count": {
     "status": "to-review"
   },
-  "commun:privacy.onlyYou": {
+  "common:privacy.onlyYou": {
     "status": "to-review"
   },
-  "commun:tree.personJoined": {
+  "common:tree.personJoined": {
     "status": "to-review"
   }
 }
