@@ -321,10 +321,13 @@ jobs:
   # ---------------------------------------------------------------------------------------------
 
   # Cas limites : un fichier test/scenarios/<ID>.yaml par cas, joué par un test.
-  # Aucun scénario n'est encore joué : le lecteur arrive avec T-006, qui remplacera ce job par
-  # « échec si un scénario n'est lu par aucun test ». D'ici là, seuls les scénarios de
-  # PENDING_T006 sont tolérés (vert avec avertissement) ; tout autre fichier fait échouer le job.
-  # N'allongez pas cette liste pour faire passer un scénario : écrivez son test.
+  # Avant le lecteur complet de T-006, un scénario compte comme joué quand un fichier de test
+  # suivi par git (`*.test.ts`) cite son identifiant entre apostrophes (`loadScenario('CL-…', …)`,
+  # packages/domain/src/test-support/scenario.ts, lit le fichier et vérifie son `id`). T-006
+  # remplacera ce repérage par « échec si un scénario n'est lu par aucun test ». Les scénarios
+  # non joués de PENDING_T006 sont tolérés (vert avec avertissement) ; tout autre scénario non
+  # joué fait échouer le job. N'allongez pas cette liste pour faire passer un scénario : écrivez
+  # son test.
   cas-limites:
     name: cas-limites
     runs-on: ubuntu-24.04
@@ -340,9 +343,16 @@ jobs:
           # Scénarios écrits avant le lecteur de T-006, non joués : liste fermée.
           PENDING_T006: test/scenarios/CL-POL-03.yaml
         run: |
+          played=""
           pending=""
           unexpected=""
           for file in $(git ls-files 'test/scenarios/*.yaml' 'test/scenarios/*.yml'); do
+            id="$(basename "$file")"
+            id="${id%.*}"
+            if git grep -q -F -e "'$id'" -- '*.test.ts'; then
+              played="$played $file"
+              continue
+            fi
             case " $PENDING_T006 " in
               *" $file "*) pending="$pending $file" ;;
               *) unexpected="$unexpected $file" ;;
@@ -351,13 +361,16 @@ jobs:
           {
             echo "### Cas limites"
             echo
+            if [ -n "$played" ]; then
+              echo "Joués par un test :$played"
+            fi
             if [ -n "$pending" ]; then
               echo "Non joués, en attente du lecteur de scénarios (T-006) :$pending"
             fi
             if [ -n "$unexpected" ]; then
               echo "Non joués et hors de la liste d'attente :$unexpected"
             fi
-            if [ -z "$pending$unexpected" ]; then
+            if [ -z "$played$pending$unexpected" ]; then
               echo "Aucun scénario de cas limite pour l'instant."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
@@ -365,7 +378,7 @@ jobs:
             echo "::warning title=Cas limites non joués (T-006)::Scénarios présents mais joués par aucun test, en attente de T-006 :$pending"
           fi
           if [ -n "$unexpected" ]; then
-            echo "::error title=Cas limites non joués::Scénarios joués par aucun test :$unexpected. Le lecteur de scénarios arrive avec T-006 ; seuls ceux de PENDING_T006 sont tolérés d'ici là."
+            echo "::error title=Cas limites non joués::Scénarios joués par aucun test (aucun *.test.ts ne cite leur identifiant entre apostrophes) :$unexpected. Écrivez leur test ; seuls ceux de PENDING_T006 sont tolérés jusqu'à T-006."
             exit 1
           fi
           echo "Scénarios en attente de T-006 :${pending:- aucun}"
