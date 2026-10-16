@@ -16,12 +16,14 @@
     },
     "test": {
       "dependsOn": ["transit"],
-      "outputs": []
+      "outputs": [],
+      "passThroughEnv": ["LIGNEE_SCENARIOS_PLAYED_DIR"]
     },
     "@lignee/domain#test": {
       "dependsOn": ["transit"],
       "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/test/scenarios/**"],
-      "outputs": []
+      "outputs": [],
+      "passThroughEnv": ["LIGNEE_SCENARIOS_PLAYED_DIR"]
     },
     "@lignee/ci#test": {
       "dependsOn": ["transit"],
@@ -35,7 +37,8 @@
         "$TURBO_ROOT$/packages/db/initdb/**",
         "$TURBO_ROOT$/apps/*/Dockerfile"
       ],
-      "outputs": []
+      "outputs": [],
+      "passThroughEnv": ["LIGNEE_SCENARIOS_PLAYED_DIR"]
     },
     "//#format:write": {
       "cache": false
