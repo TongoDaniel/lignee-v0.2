@@ -18,16 +18,21 @@ export interface CommandResult {
 /** Utilisateurs de la base locale (packages/db/initdb/01-roles-et-extensions.sh). */
 export type DbUser = 'postgres' | 'lignee_app' | 'lignee_migration';
 
+export type MinioAlias = 'app' | 'root';
+
 /** Accès aux conteneurs démarrés par compose.yaml. */
 export interface Probe {
   /**
-   * Joue du SQL dans la base `lignee`, sortie brute (une valeur par ligne, colonnes séparées
-   * par `|`), arrêt à la première erreur. `postgres` passe par le socket local ; les deux
-   * autres par TCP avec leur mot de passe, comme l'API.
+   * Joue du SQL dans une base (`lignee` par défaut), sortie brute (une valeur par ligne,
+   * colonnes séparées par `|`), arrêt à la première erreur. `postgres` passe par le socket
+   * local ; les deux autres par TCP avec leur mot de passe, comme l'API.
    */
-  sql(user: DbUser, sql: string): Promise<CommandResult>;
-  /** Commande `mc` avec l'alias `app`, c'est-à-dire la clé S3 de l'application. */
-  mcAsApp(args: readonly string[], input?: string): Promise<CommandResult>;
+  sql(user: DbUser, sql: string, database?: string): Promise<CommandResult>;
+  /**
+   * Commande `mc` dans le conteneur de MinIO, avec l'alias `app` (clé S3 de l'application)
+   * ou `root` (administrateur, pour préparer les contrôles seulement).
+   */
+  mc(alias: MinioAlias, args: readonly string[], input?: string): Promise<CommandResult>;
   /** Code HTTP d'une requête GET anonyme sur MinIO (chemin commençant par `/`). */
   anonymousHttpStatus(path: string): Promise<number>;
 }
@@ -44,6 +49,15 @@ export const REQUIRED_EXTENSIONS = ['fuzzystrmatch', 'pg_trgm', 'unaccent'] as c
 
 const PROBE_TABLE = 'ci_probe_local_env';
 const PROBE_CONTENT = 'sonde\n';
+
+/** Compartiment créé par l'administrateur, hors de portée de la clé de l'application. */
+export const OTHER_BUCKET = 'ci-probe-autre-compartiment';
+
+/**
+ * Message de MinIO quand une clé n'a pas le droit (code S3 `AccessDenied`). Un contrôle négatif
+ * l'exige : une erreur réseau ou un objet absent ne comptent pas comme un refus.
+ */
+export const ACCESS_DENIED = 'Access Denied';
 
 function describeFailure(result: CommandResult): string {
   const output = (result.stderr.trim() || result.stdout.trim()).split('\n').slice(0, 3).join(' ');
@@ -176,6 +190,22 @@ export async function checkPostgres(probe: Probe): Promise<CheckOutcome[]> {
     ),
   );
 
+  // La base `postgres` existe dans toute installation : lignee_app ne doit pas s'y connecter
+  // pour y créer des tables temporaires ou des objets.
+  const otherDatabase = await probe.sql('lignee_app', 'SELECT 1', 'postgres');
+  const otherDescription = 'lignee_app ne se connecte pas à la base postgres';
+  outcomes.push(
+    otherDatabase.status !== 0 &&
+      `${otherDatabase.stderr}${otherDatabase.stdout}`.includes('permission denied for database')
+      ? { description: otherDescription, ok: true }
+      : {
+          description: otherDescription,
+          ok: false,
+          detail:
+            otherDatabase.status === 0 ? 'connexion acceptée' : describeFailure(otherDatabase),
+        },
+  );
+
   // Contre-épreuve : l'utilisateur de migration crée une table ; l'utilisateur applicatif en
   // lit et écrit les lignes (droits par défaut, séquence comprise), sans en changer la structure.
   const created = await expectSuccess(
@@ -222,24 +252,43 @@ export async function checkPostgres(probe: Probe): Promise<CheckOutcome[]> {
   return outcomes;
 }
 
-/** Compartiment privé et clé de l'application limitée à ce compartiment. */
+function commandOutcome(description: string, result: CommandResult): CheckOutcome {
+  return result.status === 0
+    ? { description, ok: true }
+    : { description, ok: false, detail: describeFailure(result) };
+}
+
+/** Réussit seulement si la commande échoue avec « Access Denied ». */
+function deniedOutcome(description: string, result: CommandResult): CheckOutcome {
+  if (result.status === 0) {
+    return { description, ok: false, detail: 'commande acceptée' };
+  }
+  return `${result.stderr}${result.stdout}`.includes(ACCESS_DENIED)
+    ? { description, ok: true }
+    : {
+        description,
+        ok: false,
+        detail: `refus attendu (« ${ACCESS_DENIED} »), obtenu ${describeFailure(result)}`,
+      };
+}
+
+/**
+ * Compartiment privé, et clé de l'application limitée à ce compartiment : elle n'en crée pas
+ * d'autre, et ne lit ni n'écrit dans un compartiment créé par l'administrateur.
+ */
 export async function checkMinio(probe: Probe, bucket: string): Promise<CheckOutcome[]> {
   const outcomes: CheckOutcome[] = [];
   const object = 'ci-probe-local-env.txt';
   const target = `app/${bucket}/${object}`;
-  const commandOutcome = (description: string, result: CommandResult): CheckOutcome =>
-    result.status === 0
-      ? { description, ok: true }
-      : { description, ok: false, detail: describeFailure(result) };
 
-  const written = await probe.mcAsApp(['pipe', target], PROBE_CONTENT);
+  const written = await probe.mc('app', ['pipe', target], PROBE_CONTENT);
   outcomes.push(commandOutcome(`la clé de l'application écrit dans ${bucket}`, written));
   if (written.status !== 0) {
     return outcomes;
   }
 
   try {
-    const read = await probe.mcAsApp(['cat', target]);
+    const read = await probe.mc('app', ['cat', target]);
     const readDescription = `la clé de l'application lit dans ${bucket}`;
     if (read.status !== 0) {
       outcomes.push(commandOutcome(readDescription, read));
@@ -263,16 +312,50 @@ export async function checkMinio(probe: Probe, bucket: string): Promise<CheckOut
       );
     }
 
-    const description = "la clé de l'application ne crée pas de compartiment";
-    const otherBucket = await probe.mcAsApp(['mb', 'app/ci-probe-autre-compartiment']);
     outcomes.push(
-      otherBucket.status === 0
-        ? { description, ok: false, detail: 'compartiment ci-probe-autre-compartiment créé' }
-        : { description, ok: true },
+      deniedOutcome(
+        "la clé de l'application ne crée pas de compartiment",
+        await probe.mc('app', ['mb', 'app/ci-probe-compartiment-refuse']),
+      ),
     );
   } finally {
-    const removed = await probe.mcAsApp(['rm', target]);
-    outcomes.push(commandOutcome("la clé de l'application supprime l'objet de contrôle", removed));
+    outcomes.push(
+      commandOutcome(
+        "la clé de l'application supprime l'objet de contrôle",
+        await probe.mc('app', ['rm', target]),
+      ),
+    );
+  }
+
+  // Second compartiment, avec un objet, créé par l'administrateur.
+  const otherObject = `${OTHER_BUCKET}/${object}`;
+  const prepared = await probe.mc('root', ['mb', '--ignore-existing', `root/${OTHER_BUCKET}`]);
+  const seeded =
+    prepared.status === 0
+      ? await probe.mc('root', ['pipe', `root/${otherObject}`], PROBE_CONTENT)
+      : prepared;
+  outcomes.push(commandOutcome(`l'administrateur prépare le compartiment ${OTHER_BUCKET}`, seeded));
+  if (seeded.status !== 0) {
+    return outcomes;
+  }
+  try {
+    outcomes.push(
+      deniedOutcome(
+        `la clé de l'application ne lit pas dans ${OTHER_BUCKET}`,
+        await probe.mc('app', ['cat', `app/${otherObject}`]),
+      ),
+      deniedOutcome(
+        `la clé de l'application n'écrit pas dans ${OTHER_BUCKET}`,
+        await probe.mc('app', ['pipe', `app/${OTHER_BUCKET}/ecrit-par-app.txt`], PROBE_CONTENT),
+      ),
+    );
+  } finally {
+    outcomes.push(
+      commandOutcome(
+        `l'administrateur supprime le compartiment ${OTHER_BUCKET}`,
+        await probe.mc('root', ['rb', '--force', `root/${OTHER_BUCKET}`]),
+      ),
+    );
   }
   return outcomes;
 }

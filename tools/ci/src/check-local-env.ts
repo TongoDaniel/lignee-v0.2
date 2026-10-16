@@ -13,6 +13,7 @@ import {
   type CheckOutcome,
   type CommandResult,
   type DbUser,
+  type MinioAlias,
   type Probe,
 } from './local-env.ts';
 
@@ -71,7 +72,6 @@ const psqlOptions = [
   '--tuples-only',
   '--no-align',
   '--set=ON_ERROR_STOP=1',
-  '--dbname=lignee',
 ];
 
 function createProbe(env: NodeJS.Dict<string>): { probe: Probe; bucket: string } {
@@ -88,16 +88,19 @@ function createProbe(env: NodeJS.Dict<string>): { probe: Probe; bucket: string }
   };
   const minioPort = env['LIGNEE_MINIO_PORT'] ?? '9000';
   // Vu depuis le conteneur de MinIO : son propre port, pas celui publié sur le poste.
-  const appS3Host =
-    `http://${encodeURIComponent(required('LIGNEE_S3_ACCESS_KEY_ID'))}:` +
-    `${encodeURIComponent(required('LIGNEE_S3_SECRET_ACCESS_KEY'))}@127.0.0.1:9000`;
+  // Identifiants encodés dans l'URL ; ils passent par l'environnement, jamais en argument.
+  const mcHost = (user: string, password: string): string =>
+    `http://${encodeURIComponent(user)}:${encodeURIComponent(password)}@127.0.0.1:9000`;
+  const mcHosts: Record<MinioAlias, string> = {
+    app: mcHost(required('LIGNEE_S3_ACCESS_KEY_ID'), required('LIGNEE_S3_SECRET_ACCESS_KEY')),
+    root: mcHost(required('LIGNEE_MINIO_ROOT_USER'), required('LIGNEE_MINIO_ROOT_PASSWORD')),
+  };
 
   const probe: Probe = {
-    sql(user, sql) {
+    sql(user, sql, database = 'lignee') {
+      const target = [`--dbname=${database}`, `--username=${user}`];
       if (user === 'postgres') {
-        return Promise.resolve(
-          compose(['exec', '-T', 'postgres', ...psqlOptions, '--username=postgres'], sql),
-        );
+        return Promise.resolve(compose(['exec', '-T', 'postgres', ...psqlOptions, ...target], sql));
       }
       return Promise.resolve(
         compose(
@@ -109,17 +112,18 @@ function createProbe(env: NodeJS.Dict<string>): { probe: Probe; bucket: string }
             'postgres',
             ...psqlOptions,
             '--host=127.0.0.1',
-            `--username=${user}`,
+            ...target,
           ],
           sql,
           { PGPASSWORD: passwords[user] },
         ),
       );
     },
-    mcAsApp(args, input = '') {
+    mc(alias, args, input = '') {
+      const variable = `MC_HOST_${alias}`;
       return Promise.resolve(
-        compose(['exec', '-T', '-e', 'MC_HOST_app', 'minio', 'mc', '--quiet', ...args], input, {
-          MC_HOST_app: appS3Host,
+        compose(['exec', '-T', '-e', variable, 'minio', 'mc', '--quiet', ...args], input, {
+          [variable]: mcHosts[alias],
         }),
       );
     },

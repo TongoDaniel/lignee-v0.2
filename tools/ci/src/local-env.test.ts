@@ -13,10 +13,12 @@ import { parse } from 'yaml';
 import {
   checkMinio,
   checkPostgres,
+  OTHER_BUCKET,
   refusalBlock,
   REQUIRED_EXTENSIONS,
   type CommandResult,
   type DbUser,
+  type MinioAlias,
   type Probe,
 } from './local-env.ts';
 
@@ -26,10 +28,31 @@ const read = (path: string): string => readFileSync(join(repoRoot, path), 'utf8'
 const ok = (stdout = ''): CommandResult => ({ status: 0, stdout, stderr: '' });
 const sqlError = (stderr: string): CommandResult => ({ status: 3, stdout: '', stderr });
 
-type SqlHandler = (user: DbUser, sql: string) => CommandResult | undefined;
+const accessDenied: CommandResult = {
+  status: 1,
+  stdout: '',
+  stderr: 'mc: <ERROR> Unable to complete the request. Access Denied.',
+};
+const networkError: CommandResult = {
+  status: 1,
+  stdout: '',
+  stderr:
+    'mc: <ERROR> Unable to complete the request. dial tcp 127.0.0.1:9000: connect: connection refused',
+};
+
+type SqlHandler = (user: DbUser, sql: string, database: string) => CommandResult | undefined;
 
 /** Réponses d'un environnement conforme. */
-const compliantSql: SqlHandler = (user, sql) => {
+const compliantSql: SqlHandler = (user, sql, database) => {
+  if (database !== 'lignee') {
+    return user === 'postgres'
+      ? ok('1\n')
+      : {
+          status: 2,
+          stdout: '',
+          stderr: `FATAL:  permission denied for database "${database}"`,
+        };
+  }
   if (sql.includes('FROM pg_extension')) return ok('fuzzystrmatch,pg_trgm,unaccent\n');
   if (sql.includes('similarity(')) return ok('t\n');
   if (sql.includes("rolname = 'lignee_app'")) return ok('f\n');
@@ -46,41 +69,63 @@ const compliantSql: SqlHandler = (user, sql) => {
 interface FakeOptions {
   /** Prioritaire sur l'environnement conforme quand il rend une réponse. */
   readonly sql?: SqlHandler;
-  readonly mc?: (args: readonly string[]) => CommandResult | undefined;
+  readonly mc?: (alias: MinioAlias, args: readonly string[]) => CommandResult | undefined;
   readonly httpStatus?: number;
+}
+
+const APP_BUCKET = 'lignee-medias-local';
+
+/**
+ * Faux MinIO : l'administrateur a tous les droits ; la clé de l'application n'agit que sur les
+ * objets de APP_BUCKET, comme la règle `lignee-medias-rw` de compose.yaml.
+ */
+function fakeMinio(): (alias: MinioAlias, args: readonly string[], input: string) => CommandResult {
+  const buckets = new Set([APP_BUCKET]);
+  const objects = new Map<string, string>();
+  return (alias, args, input) => {
+    const command = args[0];
+    const target = args.at(-1) ?? '';
+    const [, bucket = '', ...rest] = target.split('/');
+    const key = rest.join('/');
+    const allowed = alias === 'root' || (bucket === APP_BUCKET && command !== 'mb');
+    if (!allowed) return accessDenied;
+    switch (command) {
+      case 'mb':
+        buckets.add(bucket);
+        return ok();
+      case 'rb':
+        buckets.delete(bucket);
+        return ok();
+      case 'pipe':
+        if (!buckets.has(bucket)) return sqlError('The specified bucket does not exist');
+        objects.set(`${bucket}/${key}`, input);
+        return ok();
+      case 'cat': {
+        const content = objects.get(`${bucket}/${key}`);
+        return content === undefined ? sqlError('Object does not exist') : ok(content);
+      }
+      case 'rm':
+        objects.delete(`${bucket}/${key}`);
+        return ok(`Removed \`${target}\`.`);
+      default:
+        return sqlError(`commande inattendue : ${args.join(' ')}`);
+    }
+  };
 }
 
 function fakeProbe(options: FakeOptions = {}): Probe & { calls: string[] } {
   const calls: string[] = [];
-  const objects = new Map<string, string>();
+  const minio = fakeMinio();
   return {
     calls,
-    sql(user, sql) {
-      calls.push(`${user}: ${sql}`);
-      const result = options.sql?.(user, sql) ?? compliantSql(user, sql);
+    sql(user, sql, database = 'lignee') {
+      calls.push(`${user}@${database}: ${sql}`);
+      const result = options.sql?.(user, sql, database) ?? compliantSql(user, sql, database);
       return Promise.resolve(result ?? sqlError(`requête inattendue : ${sql}`));
     },
-    mcAsApp(args, input = '') {
-      calls.push(`mc ${args.join(' ')}`);
-      const overridden = options.mc?.(args);
-      if (overridden) return Promise.resolve(overridden);
-      const [command, target = ''] = args;
-      switch (command) {
-        case 'pipe':
-          objects.set(target, input);
-          return Promise.resolve(ok());
-        case 'cat':
-          return Promise.resolve(
-            objects.has(target) ? ok(objects.get(target)) : sqlError('Object does not exist'),
-          );
-        case 'rm':
-          objects.delete(target);
-          return Promise.resolve(ok(`Removed \`${target}\`.`));
-        case 'mb':
-          return Promise.resolve({ status: 1, stdout: '', stderr: 'Access Denied.' });
-        default:
-          return Promise.resolve(sqlError(`commande inattendue : ${args.join(' ')}`));
-      }
+    mc(alias, args, input = '') {
+      calls.push(`mc(${alias}) ${args.join(' ')}`);
+      return Promise.resolve(options.mc?.(alias, args) ?? minio(alias, args, input));
     },
     anonymousHttpStatus() {
       return Promise.resolve(options.httpStatus ?? 403);
@@ -104,6 +149,7 @@ describe('checkPostgres', () => {
       'lignee_app ne crée pas de table',
       'lignee_app ne crée pas de table temporaire',
       'lignee_app ne crée pas de schéma',
+      'lignee_app ne se connecte pas à la base postgres',
       'lignee_migration crée une table',
       'lignee_app écrit et lit une ligne de cette table',
       'lignee_app ne modifie pas la structure de cette table',
@@ -161,6 +207,17 @@ describe('checkPostgres', () => {
     expect(failures).toContain('lignee_app ne crée pas de table temporaire');
     expect(failures).toContain('lignee_app ne crée pas de schéma');
     expect(failures).toContain('extensions utilisables par lignee_app');
+    // Une connexion refusée pour une autre raison n'est pas le refus attendu sur `postgres`.
+    expect(failures).toContain('lignee_app ne se connecte pas à la base postgres');
+  });
+
+  it('échoue si lignee_app peut se connecter à la base postgres', async () => {
+    const probe = fakeProbe({
+      sql: (_user, _sql, database) => (database === 'postgres' ? ok('1\n') : undefined),
+    });
+    expect(failed(await checkPostgres(probe))).toEqual([
+      'lignee_app ne se connecte pas à la base postgres',
+    ]);
   });
 
   it('supprime la table de contrôle même si une vérification échoue', async () => {
@@ -172,7 +229,7 @@ describe('checkPostgres', () => {
     });
     const outcomes = await checkPostgres(probe);
     expect(failed(outcomes)).toEqual(['lignee_app écrit et lit une ligne de cette table']);
-    expect(probe.calls.at(-1)).toBe('lignee_migration: DROP TABLE ci_probe_local_env');
+    expect(probe.calls.at(-1)).toBe('lignee_migration@lignee: DROP TABLE ci_probe_local_env');
   });
 });
 
@@ -189,14 +246,27 @@ describe('refusalBlock', () => {
 });
 
 describe('checkMinio', () => {
-  const bucket = 'lignee-medias-local';
+  const bucket = APP_BUCKET;
+  const probeObject = `app/${bucket}/ci-probe-local-env.txt`;
 
-  it('passe sur un environnement conforme et supprime l’objet de contrôle', async () => {
+  it('passe sur un environnement conforme et remet tout en état', async () => {
     const probe = fakeProbe();
     const outcomes = await checkMinio(probe, bucket);
     expect(failed(outcomes)).toEqual([]);
-    expect(outcomes).toHaveLength(6);
-    expect(probe.calls.at(-1)).toBe(`mc rm app/${bucket}/ci-probe-local-env.txt`);
+    expect(outcomes.map(({ description }) => description)).toEqual([
+      `la clé de l'application écrit dans ${bucket}`,
+      `la clé de l'application lit dans ${bucket}`,
+      `aucun accès anonyme à /${bucket}/`,
+      `aucun accès anonyme à /${bucket}/ci-probe-local-env.txt`,
+      "la clé de l'application ne crée pas de compartiment",
+      "la clé de l'application supprime l'objet de contrôle",
+      `l'administrateur prépare le compartiment ${OTHER_BUCKET}`,
+      `la clé de l'application ne lit pas dans ${OTHER_BUCKET}`,
+      `la clé de l'application n'écrit pas dans ${OTHER_BUCKET}`,
+      `l'administrateur supprime le compartiment ${OTHER_BUCKET}`,
+    ]);
+    expect(probe.calls).toContain(`mc(app) rm ${probeObject}`);
+    expect(probe.calls.at(-1)).toBe(`mc(root) rb --force root/${OTHER_BUCKET}`);
   });
 
   it('échoue si le compartiment est lisible sans clé', async () => {
@@ -207,26 +277,74 @@ describe('checkMinio', () => {
     ]);
   });
 
-  it('échoue si le compartiment n’existe pas (404 au lieu de 403)', async () => {
-    const failures = failed(await checkMinio(fakeProbe({ httpStatus: 404 }), bucket));
-    expect(failures).toHaveLength(2);
+  it('échoue si le compartiment n’existe pas (404 au lieu de 403) ou si MinIO ne répond pas', async () => {
+    for (const httpStatus of [404, 0]) {
+      expect(failed(await checkMinio(fakeProbe({ httpStatus }), bucket))).toHaveLength(2);
+    }
   });
 
   it('échoue si la clé de l’application peut créer un compartiment', async () => {
-    const probe = fakeProbe({ mc: ([command]) => (command === 'mb' ? ok() : undefined) });
+    const probe = fakeProbe({
+      mc: (alias, [command]) => (alias === 'app' && command === 'mb' ? ok() : undefined),
+    });
     expect(failed(await checkMinio(probe, bucket))).toEqual([
       "la clé de l'application ne crée pas de compartiment",
     ]);
   });
 
+  it.each([
+    ['cat', `la clé de l'application ne lit pas dans ${OTHER_BUCKET}`],
+    ['pipe', `la clé de l'application n'écrit pas dans ${OTHER_BUCKET}`],
+  ])(
+    'échoue si la clé de l’application peut faire « mc %s » dans un autre compartiment',
+    async (allowedCommand, description) => {
+      const probe = fakeProbe({
+        mc: (alias, args) =>
+          alias === 'app' && args[0] === allowedCommand && args.at(-1)?.includes(OTHER_BUCKET)
+            ? ok('sonde\n')
+            : undefined,
+      });
+      expect(failed(await checkMinio(probe, bucket))).toEqual([description]);
+    },
+  );
+
+  it('ne compte pas une erreur réseau ni un objet absent comme un refus', async () => {
+    const probe = fakeProbe({
+      mc: (alias, args) => {
+        if (alias !== 'app') return undefined;
+        if (args[0] === 'mb') return networkError;
+        if (args[0] === 'cat' && args.at(-1)?.includes(OTHER_BUCKET)) {
+          return sqlError('Object does not exist');
+        }
+        if (args[0] === 'pipe' && args.at(-1)?.includes(OTHER_BUCKET)) return networkError;
+        return undefined;
+      },
+    });
+    expect(failed(await checkMinio(probe, bucket))).toEqual([
+      "la clé de l'application ne crée pas de compartiment",
+      `la clé de l'application ne lit pas dans ${OTHER_BUCKET}`,
+      `la clé de l'application n'écrit pas dans ${OTHER_BUCKET}`,
+    ]);
+  });
+
   it('échoue, sans aller plus loin, si la clé de l’application ne peut pas écrire', async () => {
     const probe = fakeProbe({
-      mc: ([command]) =>
-        command === 'pipe' ? { status: 1, stdout: '', stderr: 'Access Denied.' } : undefined,
+      mc: (alias, [command]) => (alias === 'app' && command === 'pipe' ? accessDenied : undefined),
     });
     const outcomes = await checkMinio(probe, bucket);
     expect(failed(outcomes)).toEqual([`la clé de l'application écrit dans ${bucket}`]);
     expect(outcomes).toHaveLength(1);
+  });
+
+  it('supprime le second compartiment même si un contrôle échoue', async () => {
+    const probe = fakeProbe({
+      mc: (alias, args) =>
+        alias === 'app' && args[0] === 'cat' && args.at(-1)?.includes(OTHER_BUCKET)
+          ? ok('sonde\n')
+          : undefined,
+    });
+    await checkMinio(probe, bucket);
+    expect(probe.calls.at(-1)).toBe(`mc(root) rb --force root/${OTHER_BUCKET}`);
   });
 });
 
@@ -273,6 +391,24 @@ describe('fichiers de l’environnement local', () => {
       for (const base of bases) {
         expect(base).toMatch(/^[\w./-]+:[\w.-]+@sha256:[0-9a-f]{64}$/);
       }
+    }
+  });
+
+  it('construit les images depuis le lockfile, sans `pnpm deploy --legacy`', () => {
+    const workspace = parse(read('pnpm-workspace.yaml')) as { injectWorkspacePackages?: boolean };
+    expect(workspace.injectWorkspacePackages).toBe(true);
+    for (const [, service] of services.filter(([, s]) => s.build !== undefined)) {
+      const dockerfile = read(service.build?.dockerfile ?? '');
+      expect(dockerfile).toMatch(/deploy --prod --frozen-lockfile/);
+      expect(dockerfile).not.toMatch(/--legacy/);
+      expect(dockerfile).toMatch(/grep -qi 'legacy deploy'/);
+    }
+  });
+
+  it('ne copie aucun fichier .env dans le contexte des images', () => {
+    const ignored = read('.dockerignore').split(/\r?\n/);
+    for (const pattern of ['.env', '.env.*', '**/.env', '**/.env.*', '!**/.env.example']) {
+      expect(ignored).toContain(pattern);
     }
   });
 
