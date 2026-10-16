@@ -1,6 +1,22 @@
 # i18n
 
-Textes d'interface en français et en anglais (ACC-04, ACC-05). Aucun texte en dur ailleurs : une règle ESLint le refuse dans le JSX de `apps/mobile`, `apps/web`, `apps/admin` et `packages/ui`. Agent : ecrans-lignee.
+Textes d'interface en français et en anglais (ACC-04, ACC-05). Aucun texte en dur ailleurs. Agent : ecrans-lignee.
+
+## Ce que le lint vérifie, et ce qu'il ne voit pas
+
+Dans `apps/mobile`, `apps/web`, `apps/admin` et `packages/ui` (tests exclus), ESLint refuse :
+
+- le texte dans le JSX : entre deux balises, en chaîne ou en gabarit (`{'Valider'}`, `accessibilityLabel="Ajouter votre mère"`, `{ok ? 'Oui' : 'Non'}`) ;
+- une chaîne ou un gabarit passé à `Alert.alert`, `Alert.prompt`, `ToastAndroid.show`, ou en `text` d'un bouton d'`Alert`, y compris dans un fichier `.ts`.
+
+Une valeur d'union littérale (`variant="primary"`), `testID`, `style` ou `key` restent permis. La preuve est dans `tools/ci/src/no-hardcoded-text.test.ts`.
+
+Le lint ne voit pas, et la relecture doit s'en charger :
+
+- une constante texte déclarée hors du JSX puis affichée (`const titre = 'Bienvenue'`, puis `<Text>{titre}</Text>`), ni les textes rangés dans un objet ou un tableau ;
+- un composant nommé en capitales (`FAQ`) : le greffon le prend pour une constante et ne le contrôle pas. Nommez les composants en PascalCase ;
+- dans un fichier `.ts`, tout ce qui n'est pas `Alert` ou `ToastAndroid` : titre de navigation, notification locale, hook qui renvoie du texte ;
+- les textes produits par le serveur (`apps/api`, `apps/worker` : notifications, courriels, erreurs), qui devront passer par ce paquet eux aussi.
 
 i18next avec le format de messages ICU (`i18next-icu`, `intl-messageformat`) ; dates et nombres par l'API `Intl`.
 

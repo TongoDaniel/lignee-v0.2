@@ -16,6 +16,22 @@ const jsxA11yPlugin = fixupPluginRules(jsxA11y);
 // Même précaution pour la règle contre les textes en dur (eslint-plugin-i18next).
 const i18nextPlugin = fixupPluginRules(i18next);
 
+// ACC-04 hors JSX : texte passé aux boîtes de dialogue natives de React Native.
+const nativeDialogCall =
+  "CallExpression[callee.type='MemberExpression']" +
+  ":matches([callee.object.name='Alert'][callee.property.name=/^(alert|prompt)$/]," +
+  " [callee.object.name='ToastAndroid'][callee.property.name=/^show/])";
+const hardcodedText = ':matches(Literal[value=/[A-Za-zÀ-ÿ]/], TemplateLiteral)';
+const nativeDialogMessage =
+  'Texte en dur dans une boîte de dialogue : ajoutez-le à @lignee/i18n et passez t("espace:cle")';
+const nativeDialogTextSelectors = [
+  { selector: `${nativeDialogCall} > ${hardcodedText}`, message: nativeDialogMessage },
+  {
+    selector: `${nativeDialogCall} Property[key.name='text'] > ${hardcodedText}`,
+    message: nativeDialogMessage,
+  },
+];
+
 export default tseslint.config(
   {
     ignores: [
@@ -68,10 +84,25 @@ export default tseslint.config(
   },
 
   // ACC-04 « Aucun texte écrit en dur dans le code » : dans les interfaces, tout texte affiché ou
-  // lu par le lecteur d'écran passe par @lignee/i18n. Interdit : le texte entre deux balises JSX,
-  // les chaînes et gabarits dans le JSX ({'Valider'}, accessibilityLabel="Ajouter votre mère").
-  // Grâce aux types, une valeur d'union littérale (variant="primary", accessibilityRole="button")
-  // reste permise. Les tests de composants peuvent écrire du texte factice.
+  // lu par le lecteur d'écran passe par @lignee/i18n. Prouvé par tools/ci/src/no-hardcoded-text.test.ts.
+  //
+  // Refusé :
+  // - le texte entre deux balises JSX, les chaînes et gabarits dans le JSX ({'Valider'},
+  //   accessibilityLabel="Ajouter votre mère", {ok ? 'Oui' : 'Non'}) ;
+  // - une chaîne ou un gabarit passé à Alert.alert, Alert.prompt, ToastAndroid.show, ou en
+  //   `text` d'un bouton d'Alert, y compris dans un fichier .ts.
+  // Permis : une valeur d'union littérale, grâce aux types (variant="primary",
+  // accessibilityRole="button") ; testID, style, key… ; le texte factice des tests.
+  //
+  // Limites connues, que la relecture doit couvrir :
+  // - une constante texte déclarée hors du JSX puis affichée (const titre = 'Bienvenue' ;
+  //   <Text>{titre}</Text>) passe, comme les textes rangés dans un objet ou un tableau ;
+  // - le greffon tient tout nom en capitales pour une constante et ignore son contenu :
+  //   un composant nommé `FAQ` ou `A` échappe au contrôle (nommez-les en PascalCase) ;
+  // - dans un fichier .ts, seuls Alert et ToastAndroid sont surveillés : un titre de navigation,
+  //   une notification locale ou un hook qui renvoie du texte passent ;
+  // - les textes produits par le serveur (apps/api, apps/worker : notifications, courriels,
+  //   messages d'erreur) ne sont pas couverts : ils devront passer par @lignee/i18n eux aussi.
   {
     files: [
       'apps/mobile/**/*.{tsx,jsx}',
@@ -95,6 +126,20 @@ export default tseslint.config(
           words: { exclude: ['[0-9\\s!-/:-@[-`{-~·–—…×−]+'] },
         },
       ],
+    },
+  },
+  {
+    files: [
+      'apps/mobile/**/*.{ts,tsx,js,jsx}',
+      'apps/web/**/*.{ts,tsx,js,jsx}',
+      'apps/admin/**/*.{ts,tsx,js,jsx}',
+      'packages/ui/**/*.{ts,tsx,js,jsx}',
+    ],
+    ignores: ['**/*.test.{ts,tsx,js,jsx}'],
+    rules: {
+      // Une autre configuration de no-restricted-syntax sur ces fichiers remplacerait celle-ci :
+      // reprenez alors ces sélecteurs.
+      'no-restricted-syntax': ['error', ...nativeDialogTextSelectors],
     },
   },
 
