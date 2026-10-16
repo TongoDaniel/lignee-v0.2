@@ -12,7 +12,7 @@ const VARIABLE = 'LIGNEE_SCENARIOS_PLAYED_DIR';
 const previous = process.env[VARIABLE];
 
 afterEach(() => {
-  if (previous === undefined) delete process.env[VARIABLE];
+  if (previous === undefined) delete process.env.LIGNEE_SCENARIOS_PLAYED_DIR;
   else process.env[VARIABLE] = previous;
 });
 
