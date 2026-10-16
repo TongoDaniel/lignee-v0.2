@@ -194,7 +194,13 @@ jobs:
       # exécuter src/index.ts et s'arrêter sans erreur, sous un utilisateur autre que root.
       - name: Démarrer chaque image
         run: |
-          for image in lignee/api:local lignee/worker:local; do
+          images=$(docker compose --profile '*' config --format json \
+            | jq -r '.services[] | select(.build != null) | .image' | sort -u)
+          if [ -z "$images" ]; then
+            echo "::error title=Aucune image::compose.yaml ne construit aucune image."
+            exit 1
+          fi
+          for image in $images; do
             uid=$(docker run --rm --entrypoint id "$image" -u)
             if [ "$uid" = "0" ]; then
               echo "::error title=Image lancée en root::$image tourne sous root."
@@ -240,6 +246,29 @@ jobs:
       - name: Extensions, droits des utilisateurs, compartiment privé
         run: node tools/ci/src/check-local-env.ts
 
+      # Réseau `poste` (compose.yaml, ADR 0007) : les ports publiés sur 127.0.0.1 répondent, mais
+      # les conteneurs ne sortent pas sur Internet. Témoin : le runner, lui, y accède.
+      - name: Ports publiés sur le poste, aucune sortie vers Internet
+        run: |
+          set -euo pipefail
+          set -a; . ./.env; set +a
+          if ! timeout 5 bash -c "exec 3<>/dev/tcp/127.0.0.1/${LIGNEE_PG_PORT}"; then
+            echo "::error title=Port non publié::PostgreSQL injoignable sur 127.0.0.1:${LIGNEE_PG_PORT}."
+            exit 1
+          fi
+          echo "ok - PostgreSQL publié sur 127.0.0.1:${LIGNEE_PG_PORT}"
+          # MinIO : déjà interrogé depuis le poste par check-local-env (accès anonyme refusé, 403).
+          url=https://github.com
+          if ! curl --silent --show-error --max-time 10 --output /dev/null "$url"; then
+            echo "::error title=Témoin::Le runner n'atteint pas $url : contrôle de sortie impossible."
+            exit 1
+          fi
+          if docker compose exec -T minio curl --silent --max-time 10 --output /dev/null "$url"; then
+            echo "::error title=Sortie vers Internet::Le conteneur minio atteint $url."
+            exit 1
+          fi
+          echo "ok - le conteneur minio n'atteint pas $url (le runner, si)"
+
       # Le compartiment et la clé existent déjà : le second passage ne doit rien casser.
       - name: Redémarrer sans remise à zéro
         run: |
@@ -250,12 +279,18 @@ jobs:
             exit 1
           fi
           echo "ok - second passage de minio-init sans erreur"
+
+      - name: Contrôles après le second passage
+        run: |
+          node tools/ci/src/check-local-env.ts
           {
             echo "### Environnement local"
             echo
-            echo "PostgreSQL : extensions pg_trgm, unaccent et fuzzystrmatch ; lignee_app ne crée ni table, ni table temporaire, ni schéma ; lignee_migration crée les tables."
+            echo "PostgreSQL : extensions pg_trgm, unaccent et fuzzystrmatch ; lignee_app ne crée ni table, ni table temporaire, ni schéma, et ne se connecte pas à la base postgres ; lignee_migration crée les tables."
             echo
-            echo "MinIO : compartiment privé, clé de l'application limitée à ce compartiment, second démarrage sans erreur."
+            echo "MinIO : compartiment privé ; la clé de l'application ne crée pas de compartiment et ne lit ni n'écrit dans un autre ; aucune sortie vers Internet."
+            echo
+            echo "Contrôles rejoués après un second passage de minio-init."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Journaux des conteneurs
