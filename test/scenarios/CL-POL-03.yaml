@@ -3,6 +3,7 @@
 # (rang de Rose absent : rang suivant, 1) et le plan attendu applicable à cet arbre. Reste : le
 # lien « frère ou demi-frère » (moteur, T-020 ; mots, T-026 et T-027), le rattachement au père
 # seul avec les épouses candidates à la saisie (T-033) et le plan de la dictée (voix, T-062).
+# Écart au TRD : `creer: samuel/M` au lieu de `creer: samuel`, le genre fixant « frère ».
 id: CL-POL-03
 titre: Enfant du grand-père, mère inconnue parmi ses épouses
 couverture:
@@ -22,7 +23,7 @@ action:
 attendu:
   questions: 0
   plan:
-    - creer: samuel
+    - creer: samuel/M
     - filiation: { parent: pierre, enfant: samuel, type: naissance }
     - candidats_mere: { enfant: samuel, candidates: [rose, odile] }
   lien: { de: joseph, vers: samuel, fr: "frère ou demi-frère", en: "brother or half-brother" }

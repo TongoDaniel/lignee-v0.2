@@ -8,12 +8,14 @@ import { z } from 'zod';
 
 import { textSchema } from '../common';
 import { filiationSchema, parentCandidateSchema } from '../filiation';
+import type { Id } from '../ids';
 import { personSchema } from '../person';
 import {
   coverageSchema,
   readScenarioYaml,
   SCENARIOS_DIR,
   scenarioFiliationTypes,
+  scenarioPersonSchema,
 } from './scenario';
 import { defaultName, scenarioTreeSchema, type ScenarioTree } from './scenario-tree';
 
@@ -55,11 +57,24 @@ export const expectedLinkSchema = z.strictObject({
 export type ExpectedLink = z.infer<typeof expectedLinkSchema>;
 
 /**
- * Pas d'un plan attendu (voix, T-062), dans le format du TRD. D'autres pas s'ajoutent ici quand
- * un scénario en a besoin.
+ * Personne créée par un plan : `samuel/M`, même notation que `personnes`. Écart au format du
+ * TRD, qui écrit `creer: samuel` : le genre compte pour le lien attendu (« frère »). La forme
+ * sans genre reste admise, le genre est alors non renseigné.
+ */
+export const expectedCreatedPersonSchema = z.union([
+  scenarioPersonSchema,
+  z
+    .string()
+    .regex(/^[a-z][a-z0-9_]*$/)
+    .transform((key) => ({ key, gender: 'unspecified' as const })),
+]);
+
+/**
+ * Pas d'un plan attendu (voix, T-062), dans le format du TRD (sauf le genre de `creer`).
+ * D'autres pas s'ajoutent ici quand un scénario en a besoin.
  */
 export const expectedPlanStepSchema = z.union([
-  z.strictObject({ creer: z.string() }),
+  z.strictObject({ creer: expectedCreatedPersonSchema }),
   z.strictObject({
     filiation: z.strictObject({
       parent: z.string(),
@@ -162,34 +177,40 @@ export function readScenarioFile(id: string): ScenarioFile {
 }
 
 /**
- * Applique un plan attendu à l'arbre d'un scénario : l'arbre tel qu'il sera après l'action, en
- * objets valides du modèle. Le moteur de parenté s'en sert pour vérifier le lien attendu sans
- * dépendre du résolveur vocal ; la voix compare son propre plan au plan attendu. Une personne
- * créée est connue, de genre non renseigné (le plan du TRD ne le donne pas), et porte son nom
- * court comme prénom, comme dans `buildScenarioTree`.
- * Renvoie l'identifiant de chaque personne créée, par nom court.
+ * Applique un plan attendu à l'arbre d'un scénario et renvoie l'arbre tel qu'il sera après
+ * l'action, en objets valides du modèle. L'arbre de départ n'est pas modifié : le résultat en
+ * est une copie (`structuredClone`), et le plan peut être rejoué. Le moteur de parenté s'en sert
+ * pour vérifier le lien attendu sans dépendre du résolveur vocal ; la voix compare son propre
+ * plan au plan attendu. Une personne créée est connue, du genre écrit dans le plan (`samuel/M`),
+ * et porte son nom court comme prénom, comme dans `buildScenarioTree`. `id`, `has` et `keyOf`
+ * du résultat connaissent aussi les personnes créées.
  */
-export function applyExpectedPlan(tree: ScenarioTree, plan: readonly ExpectedPlanStep[]) {
-  const { context, data } = tree;
-  const created = new Map<string, string>();
-  const idOf = (key: string) => {
+export function applyExpectedPlan(
+  tree: ScenarioTree,
+  plan: readonly ExpectedPlanStep[],
+): ScenarioTree {
+  const { context } = tree;
+  const data = structuredClone(tree.data);
+  const created = new Map<string, Id>();
+  const has = (key: string) => created.has(key) || tree.has(key);
+  const idOf = (key: string): Id => {
     const value = created.get(key) ?? (tree.has(key) ? tree.id(key) : undefined);
     if (value === undefined) throw new Error(`Unknown person in plan: ${key}`);
     return value;
   };
   for (const step of plan) {
     if ('creer' in step) {
-      if (tree.has(step.creer) || created.has(step.creer)) {
-        throw new Error(`Person already exists: ${step.creer}`);
-      }
+      const { key, gender } = step.creer;
+      if (has(key)) throw new Error(`Person already exists: ${key}`);
       const person = personSchema.parse({
-        id: context.personId(step.creer),
+        id: context.personId(key),
         treeId: context.treeId,
         nature: 'known',
+        gender,
       });
-      created.set(step.creer, person.id);
+      created.set(key, person.id);
       data.people.push(person);
-      data.names.push(defaultName(context, step.creer));
+      data.names.push(defaultName(context, key));
     } else if ('filiation' in step) {
       data.filiations.push(
         filiationSchema.parse({
@@ -214,5 +235,12 @@ export function applyExpectedPlan(tree: ScenarioTree, plan: readonly ExpectedPla
       }
     }
   }
-  return { id: idOf };
+  return {
+    data,
+    id: idOf,
+    has,
+    keyOf: (value) =>
+      tree.keyOf(value) ?? [...created].find(([, createdId]) => createdId === value)?.[0],
+    context,
+  };
 }

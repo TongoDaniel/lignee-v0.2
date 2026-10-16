@@ -56,8 +56,9 @@ describe('fichiers de scénarios', () => {
       expect(treeDataIssues(tree.data)).toEqual([]);
       if (scenario.action !== undefined && 'locuteur' in scenario.action) {
         const attendu = actionExpectedSchema.parse(scenario.attendu);
-        if (attendu.plan !== undefined) applyExpectedPlan(tree, attendu.plan);
-        expect(treeDataIssues(tree.data)).toEqual([]);
+        if (attendu.plan !== undefined) {
+          expect(treeDataIssues(applyExpectedPlan(tree, attendu.plan).data)).toEqual([]);
+        }
       }
     });
 
@@ -183,6 +184,42 @@ describe('le format refuse ce qui est mal formé', () => {
     ]);
   });
 
+  it('la construction refuse un rang déjà pris par la même personne, écrit ou déduit', () => {
+    const build = (unions: unknown[]) => () =>
+      buildScenarioTree(
+        scenarioTreeSchema.parse({ personnes: ['moussa/M', 'awa/F', 'fanta/F'], unions }),
+      );
+    // Rang écrit qui double un rang déduit.
+    expect(
+      build([{ conjoints: ['moussa', 'awa'] }, { conjoints: ['moussa', 'fanta'], rang_moussa: 1 }]),
+    ).toThrow(/Rank 1 is already used by moussa/);
+    // Deux rangs écrits identiques.
+    expect(
+      build([
+        { conjoints: ['moussa', 'awa'], rang_moussa: 2 },
+        { conjoints: ['moussa', 'fanta'], rang_moussa: 2 },
+      ]),
+    ).toThrow(/Rank 2/);
+    expect(
+      build([{ conjoints: ['moussa', 'awa'] }, { conjoints: ['moussa', 'fanta'], rang_moussa: 2 }]),
+    ).not.toThrow();
+  });
+
+  it('un plan crée une personne avec le genre écrit (samuel/M), non renseigné sans genre', () => {
+    const tree = buildScenarioTree(scenarioTreeSchema.parse({ personnes: ['ama/F'] }));
+    const steps = actionExpectedSchema.parse({
+      plan: [{ creer: 'samuel/M' }, { creer: 'kofi' }],
+    }).plan;
+    if (steps === undefined) throw new Error('missing plan');
+    const after = applyExpectedPlan(tree, steps);
+    const genderOf = (key: string) =>
+      after.data.people.find((person) => person.id === after.id(key))?.gender;
+    expect(genderOf('samuel')).toBe('male');
+    expect(genderOf('kofi')).toBe('unspecified');
+    expect(actionExpectedSchema.safeParse({ plan: [{ creer: 'samuel/X' }] }).success).toBe(false);
+    expect(actionExpectedSchema.safeParse({ plan: [{ creer: 'Samuel' }] }).success).toBe(false);
+  });
+
   it('la construction refuse une référence à une personne non déclarée', () => {
     const section = scenarioTreeSchema.parse({
       personnes: ['ama/F'],
@@ -201,7 +238,9 @@ describe('le format refuse ce qui est mal formé', () => {
 
   it('un plan attendu ne crée pas une personne qui existe, ni ne vise une personne absente', () => {
     const tree = buildScenarioTree(scenarioTreeSchema.parse({ personnes: ['ama/F'] }));
-    expect(() => applyExpectedPlan(tree, [{ creer: 'ama' }])).toThrow();
+    expect(() => applyExpectedPlan(tree, [{ creer: { key: 'ama', gender: 'female' } }])).toThrow(
+      /already exists/,
+    );
     expect(() =>
       applyExpectedPlan(tree, [{ filiation: { parent: 'yaw', enfant: 'ama', type: 'naissance' } }]),
     ).toThrow(/yaw/);

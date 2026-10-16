@@ -21,14 +21,16 @@ Sections de `arbre` (une section absente vaut une liste vide, une clé inconnue 
 | --- | --- | --- |
 | `personnes` | `pierre/M` : nom court et genre (`M`, `F`, `A` autre, `N` non renseigné) ; chaque nom court une seule fois | `Person` connue. Sans ligne dans `noms`, la personne porte son nom court comme prénom (« Pierre ») |
 | `noms` | `{ personne, type, prenoms?, nom?, forme?, debut?, fin? }` ; `type` : `naissance`, `usage`, `surnom`, `titre`, `variante`, `ancien` | `Name` |
-| `unions` | `{ conjoints: [a, b], rang_a?, rang_b? }` | `Union`. Un rang absent est le rang suivant de ce conjoint dans l'ordre des lignes (UNI-07) : dans CL-POL-03, Rose a le rang 1 |
+| `unions` | `{ conjoints: [a, b], rang_a?, rang_b? }` | `Union`. Un rang absent est le rang suivant de ce conjoint dans l'ordre des lignes (UNI-07) : dans CL-POL-03, Rose a le rang 1. Un rang déjà pris par la même personne, écrit ou déduit, est refusé |
 | `filiations` | `{ parents: [a, b?], enfant, type?, certitude? }` ; `type` : `naissance` (par défaut), `adoptive`, `a_eleve`, `confie`, `tuteur`, `donneur`, `gpa` ; `certitude` : `certain` (par défaut), `probable`, `hypothetique` | Une `Filiation` par parent |
 | `naissances_multiples` | `{ enfants: [a, b…], ordre? }` | `MultipleBirth` |
 | `titres` | `{ personne, libelle, debut?, fin? }` | `TitleRole` |
 
 Les dates d'un arbre (`debut`, `fin`) sont gardées comme texte d'origine (`fuzzyDateFromText`). Les dates floues complètes d'un cas (T-005) s'écrivent avec `scenarioFuzzyDateSchema` (`qualificatif`, `date` ou `de` et `a`, `precision`, `texte`, `calendrier`) et se convertissent avec `fuzzyDateInputFromScenario` (`scenario.ts`). Une section nouvelle (places à compléter, candidats, règles de visibilité…) s'ajoute dans `scenario-tree.ts` et dans ce tableau quand un scénario en a besoin, jamais dans un seul test.
 
-Plan attendu (`attendu.plan`, format du TRD) : `{ creer: samuel }`, `{ filiation: { parent, enfant, type } }`, `{ candidats_mere: { enfant, candidates: […] } }`. Lien attendu (`attendu.lien`) : `{ de, vers, fr, en }`.
+Plan attendu (`attendu.plan`) : `{ creer: samuel/M }`, `{ filiation: { parent, enfant, type } }`, `{ candidats_mere: { enfant, candidates: […] } }`. Lien attendu (`attendu.lien`) : `{ de, vers, fr, en }`.
+
+**Écart au format du TRD** : le TRD écrit `creer: samuel`, sans genre. Le genre de la personne créée compte pour le lien attendu (« frère ou demi-frère », pas « frère ou sœur ») ; `creer` prend donc la notation de `personnes` (`samuel/M`). La forme sans genre reste admise et crée une personne de genre non renseigné.
 
 ## Couverture partielle
 
@@ -65,14 +67,14 @@ it('CL-POL-03 — lien : frère ou demi-frère', () => {
   const { lien, plan = [] } = scenario.attendu;
   if (lien === undefined) throw new Error('CL-POL-03 attend un lien');
   const tree = buildScenarioTree(scenario.arbre); // arbre de départ, objets du modèle
-  const after = applyExpectedPlan(tree, plan); // arbre après l'action attendue
-  const result = relation(tree.data, after.id(lien.de), after.id(lien.vers));
+  const after = applyExpectedPlan(tree, plan); // copie : l'arbre de départ reste intact
+  const result = relation(after.data, after.id(lien.de), after.id(lien.vers));
   expect(result.fr).toBe(lien.fr);
   expect(result.en).toBe(lien.en);
 });
 ```
 
-- Moteur de parenté (T-013, T-020 à T-022, T-026, T-027) : `applyExpectedPlan` donne l'arbre après l'action sans passer par la voix ; comparez le lien calculé à `attendu.lien`.
+- Moteur de parenté (T-013, T-020 à T-022, T-026, T-027) : `applyExpectedPlan` renvoie une copie de l'arbre après l'action (un `ScenarioTree` dont `id`, `has` et `keyOf` connaissent aussi les personnes créées), sans passer par la voix et sans modifier l'arbre de départ : on peut rejouer le plan. Comparez le lien calculé à `attendu.lien`.
 - Voix (T-062, T-065) : jouez `action.dictee` avec les réponses de modèle enregistrées, depuis `action.locuteur`, puis comparez le plan produit à `attendu.plan` et le nombre de questions à `attendu.questions`.
 - Saisie et écrans (T-024, T-031, T-033) : construisez l'état de départ depuis `tree.data`.
 - Puis mettez à jour `couverture` dans le YAML. Un attendu dont la forme manque s'ajoute à `actionExpectedSchema` (`scenario-format.ts`), avec un test qui le refuse quand il est mal formé.

@@ -80,7 +80,8 @@ export interface ScenarioTree {
 
 /**
  * Construit l'arbre de départ : personnes connues, noms, unions (rang absent : rang suivant du
- * conjoint, dans l'ordre des lignes, comme l'app, UNI-07), filiations (de naissance et certaines
+ * conjoint, dans l'ordre des lignes, comme l'app, UNI-07 ; un rang déjà pris par la même personne
+ * est refusé), filiations (de naissance et certaines
  * sauf mention), naissances multiples, titres. Chaque objet passe son schéma, et chaque personne
  * avec ses noms forme une fiche valide (`personRecordSchema`). Lève une erreur sur toute
  * référence à une personne non déclarée.
@@ -119,10 +120,15 @@ export function buildScenarioTree(
     if (!named.has(id(key))) data.names.push(defaultName(context, key));
   }
 
-  const lastRank = new Map<string, number>();
+  // Rang absent : rang suivant du conjoint. Un rang écrit déjà pris par la même personne (écrit
+  // ou déduit) est refusé : deux unions de même rang ne disent pas lequel vient d'abord.
+  const ranks = new Map<string, Set<number>>();
   const rankOf = (key: string, given: number | undefined) => {
-    const rank = given ?? (lastRank.get(key) ?? 0) + 1;
-    lastRank.set(key, Math.max(rank, lastRank.get(key) ?? 0));
+    const taken = ranks.get(key) ?? new Set<number>();
+    const rank = given ?? Math.max(0, ...taken) + 1;
+    if (taken.has(rank)) throw new Error(`Rank ${String(rank)} is already used by ${key}`);
+    taken.add(rank);
+    ranks.set(key, taken);
     return rank;
   };
   data.unions = (section.unions ?? []).map((line) =>
