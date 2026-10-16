@@ -10,6 +10,11 @@ import { literalTexts, loadCatalog, namespacesOnDisk, signatureOf } from './tool
 import { generatedParamsFile, messagesDir, reviewFileOf } from './tooling/paths';
 import { countReview, parseReviewFile, renderReviewFile, syncReview } from './tooling/review';
 import { renderMessageParams } from './tooling/types';
+import {
+  commonTypographyIssues,
+  frenchSpacingIssues,
+  tutoiementIssues,
+} from './tooling/typography';
 
 const catalogs = new Map(
   languages.map((language) => [language, loadCatalog(messagesDir, language)]),
@@ -20,6 +25,16 @@ const catalogOf = (language: string): ReadonlyMap<string, string> => {
   return catalog;
 };
 const reference = catalogOf(defaultLanguage);
+// Problèmes trouvés dans le texte littéral de chaque message, préfixés par la clé.
+const issuesIn = (
+  catalog: ReadonlyMap<string, string>,
+  check: (literal: string) => string[],
+): string[] =>
+  [...catalog].flatMap(([key, text]) =>
+    literalTexts(text, key).flatMap((literal) =>
+      check(literal).map((issue) => `${key} : ${issue}`),
+    ),
+  );
 const REGENERATE = 'lancez `corepack pnpm --filter @lignee/i18n generate`';
 
 describe.each(languages)('messages %s', (language) => {
@@ -50,31 +65,19 @@ describe.each(languages)('messages %s', (language) => {
   });
 
   it('follows the charter typography: no emoji, curly apostrophes and quotes, ellipsis', () => {
-    for (const [key, text] of catalog) {
-      for (const literal of literalTexts(text, key)) {
-        expect(literal, `${key} : emoji`).not.toMatch(/\p{Extended_Pictographic}/u);
-        expect(literal, `${key} : apostrophe droite, utilisez ’`).not.toContain("'");
-        expect(literal, `${key} : guillemets droits, utilisez « » ou “ ”`).not.toContain('"');
-        expect(literal, `${key} : trois points, utilisez …`).not.toContain('...');
-        expect(literal, `${key} : points d'exclamation en série`).not.toMatch(/!{2,}/);
-      }
-    }
+    expect(issuesIn(catalog, commonTypographyIssues)).toEqual([]);
   });
 });
 
 describe('messages fr', () => {
-  // Espace insécable, fine (U+202F) ou non (U+00A0).
-  const NBSP = '\\u00a0\\u202f';
-  const missingBefore = new RegExp(`(^|[^${NBSP}])[;:!?»]`);
-  const missingAfter = new RegExp(`«[^${NBSP}]`);
+  const catalog = catalogOf('fr');
 
-  it('puts a non-breaking space before ; : ! ? and inside « »', () => {
-    for (const [key, text] of catalogOf('fr')) {
-      for (const literal of literalTexts(text, key)) {
-        expect(literal, `${key} : espace insécable avant ; : ! ? »`).not.toMatch(missingBefore);
-        expect(literal, `${key} : espace insécable après «`).not.toMatch(missingAfter);
-      }
-    }
+  it('puts a non-breaking space before ; : ! ? » and after «', () => {
+    expect(issuesIn(catalog, frenchSpacingIssues)).toEqual([]);
+  });
+
+  it('never uses the familiar « tu » form', () => {
+    expect(issuesIn(catalog, tutoiementIssues)).toEqual([]);
   });
 });
 
