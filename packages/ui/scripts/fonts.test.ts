@@ -28,7 +28,7 @@ let expectedFiles: Map<string, Uint8Array | string>;
 
 beforeAll(async () => {
   assets = await decompressCharteFonts();
-  expectedFiles = await buildFontFiles();
+  expectedFiles = await buildFontFiles(assets);
 });
 
 function committed(name: string): Buffer {
@@ -105,11 +105,20 @@ describe('licence des polices (SIL Open Font License 1.1)', () => {
     }
   });
 
-  it('aucune police n’a de nom réservé, donc « Fraunces Lignee » peut garder ce nom', () => {
+  it('aucune police ne déclare de nom réservé dans ses métadonnées', () => {
     // OFL, condition 3 : une version modifiée ne peut pas reprendre un « Reserved Font Name ».
     // Fraunces Lignee est une instance de Fraunces, et un TTF tiré d'un WOFF2 est une version
-    // modifiée au sens de l'OFL (changement de format). Si un nom réservé apparaît, il faut
-    // renommer la police : ce test le signale.
+    // modifiée au sens de l'OFL (changement de format).
+    //
+    // Ce test ne lit que les tables name des polices du dépôt. L'absence de nom réservé a été
+    // vérifiée à part, le 16 octobre 2026, dans les OFL.txt des dépôts amont : aucun ne déclare
+    // de « Reserved Font Name » après sa mention de copyright.
+    //   https://raw.githubusercontent.com/undercasetype/Fraunces/master/OFL.txt
+    //   https://raw.githubusercontent.com/google/fonts/main/ofl/fraunces/OFL.txt
+    //   https://raw.githubusercontent.com/Instrument/instrument-sans/master/OFL.txt
+    //   https://raw.githubusercontent.com/google/fonts/main/ofl/instrumentsans/OFL.txt
+    //   https://raw.githubusercontent.com/google/fonts/main/ofl/labelleaurore/OFL.txt
+    // Si un nom réservé apparaît un jour dans une police, il faut la renommer : ce test le signale.
     // Un nom réservé se déclare après la mention de copyright (« with Reserved Font Name … ») ;
     // le texte de la licence, lui, parle des noms réservés en général.
     for (const { face, ttf } of assets) {

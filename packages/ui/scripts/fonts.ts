@@ -153,9 +153,14 @@ export function buildManifest(assets: readonly FontAsset[]): FontManifestEntry[]
   }));
 }
 
-/** Tous les fichiers de packages/ui/assets/fonts, par nom, tels que le script les écrit. */
-export async function buildFontFiles(): Promise<Map<string, Uint8Array | string>> {
-  const assets = await decompressCharteFonts();
+/**
+ * Tous les fichiers de packages/ui/assets/fonts, par nom, tels que le script les écrit. Les
+ * polices déjà décompressées peuvent être passées pour ne pas refaire le travail.
+ */
+export async function buildFontFiles(
+  decompressed?: readonly FontAsset[],
+): Promise<Map<string, Uint8Array | string>> {
+  const assets = decompressed ?? (await decompressCharteFonts());
   const files = new Map<string, Uint8Array | string>();
   for (const { face, ttf } of assets) files.set(`${face.key}.ttf`, ttf);
   files.set(LICENSE_FILE, buildLicenseText(assets));
