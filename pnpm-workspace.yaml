@@ -1,3 +1,7 @@
+# `pnpm deploy` (images Docker de l'API et du worker) copie les paquets du monorepo au lieu de les
+# lier, et suit le lockfile partagé. Sans ce réglage, il faut `--legacy`, qui ignore le lockfile.
+injectWorkspacePackages: true
+
 packages:
   - "apps/*"
   - "packages/*"

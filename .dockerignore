@@ -3,7 +3,10 @@
 # d'image y resterait lisible.
 .env
 .env.*
+**/.env
+**/.env.*
 !.env.example
+!**/.env.example
 **/*.pem
 **/*.p8
 **/*.p12
