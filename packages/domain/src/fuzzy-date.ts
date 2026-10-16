@@ -297,7 +297,7 @@ function formatDay(number: number): string {
  * Clé de tri déduite d'une date floue (colonne de tri du TRD). Chaîne à comparer code par code
  * (`<` en JavaScript, collation « C » en base), jamais avec les règles d'une langue.
  *
- * Forme : `0:JJJJJ-MM-JJ:R:P:Q`, suivie de `:JJJJJ-MM-JJ` (dernier jour) pour « entre ».
+ * Forme : `0:AAAAA-MM-JJ:R:P:Q`, suivie de `:AAAAA-MM-JJ` (dernier jour) pour « entre ».
  * - Le jour est pris dans l'étendue nominale : le premier jour pour exacte, vers, calculée et
  *   entre ; la veille du début de la borne pour « avant » ; le lendemain de sa fin pour
  *   « après ». Une date qui finit avant qu'une autre commence a donc une clé plus petite.

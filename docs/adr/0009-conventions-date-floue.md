@@ -21,6 +21,7 @@ Le TRD (« Modèle de données ») décrit la date floue : « qualificatif (exac
    - La clé n'est pas stockée dans l'objet échangé : le serveur (T-042) et la base du téléphone la calculent à l'écriture avec la même fonction.
 7. **Calcul depuis un âge** (`birthDateFromAge`, VOX-14) : « mort à 80 ans en 2010 » donne une date `calculated`, à l'année, 2010 − 80 = 1930, dans le calendrier de la référence. La vraie naissance est en 1929 ou 1930 ; la date est marquée approximative (toute date autre qu'exacte l'est). Pas de calcul depuis un texte, une décennie, « avant », « après » ou « entre » : la date dite est gardée telle quelle.
 8. **Affichage** (`describeFuzzyDate`) : une structure sans aucun mot (point, intervalle ou texte, avec précision, calendrier et indicateur d'approximation) ; les mots viennent de `packages/i18n`.
+9. **Approximation** (`isApproximate`) : toute date est approximative sauf une date exacte, quelle que soit sa précision. Une décennie exacte (« dans les années 1940 », dite sans réserve) n'est donc pas marquée approximative, pas plus que « 1940 » exacte à l'année : la précision dit l'étendue de ce que l'on sait, le qualificatif dit si on en est sûr. « Vers les années 1940 » s'écrit `about` à la décennie, et l'est. Écarté : marquer approximative toute décennie, ce qui confondrait précision et incertitude et rendrait « années 1940 » et « vers les années 1940 » indiscernables à l'affichage.
 
 ## Écarté
 
