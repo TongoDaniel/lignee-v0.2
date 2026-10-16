@@ -96,6 +96,50 @@ function layoutSourceRules() {
   }));
 }
 
+// Règles du code de packages/kinship hors des tests : le moteur de parenté tourne à l'identique
+// sur le téléphone et sur le serveur (TRD, « Moteur de parenté ») : il n'importe que
+// @lignee/domain (sans ses outils de test) et ses propres fichiers, sans Node ni réseau.
+function kinshipSourceRules() {
+  const onlyDomain = {
+    regex: '^(?!@lignee/domain$|\\.{1,2}/)',
+    message: 'packages/kinship ne dépend que de @lignee/domain (TRD, « Moteur de parenté »).',
+  };
+  const message = 'packages/kinship : aucun import relatif hors de src/.';
+  const testSupport = {
+    regex: '(^|/)test-support(/|$)',
+    message: 'Le code de packages/kinship n’importe pas ses outils de test (test-support).',
+  };
+  const globals = [
+    'process',
+    'Buffer',
+    'require',
+    'fetch',
+    'global',
+    '__dirname',
+    '__filename',
+  ].map((name) => ({
+    name,
+    message: `packages/kinship ne dépend ni de Node ni du réseau (${name}).`,
+  }));
+  return [0, 1, 2].map((depth) => ({
+    files: [`packages/kinship/src/${'*/'.repeat(depth)}*.ts`],
+    ignores: ['packages/kinship/src/**/*.test.ts', 'packages/kinship/src/test-support/**'],
+    rules: {
+      'no-restricted-globals': ['error', ...globals],
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            onlyDomain,
+            testSupport,
+            { regex: `^(\\.\\./){${String(depth + 1)},}`, message },
+          ],
+        },
+      ],
+    },
+  }));
+}
+
 export default tseslint.config(
   {
     ignores: [
@@ -162,6 +206,9 @@ export default tseslint.config(
 
   // packages/layout tourne sur le téléphone et sur le serveur : @lignee/domain seul.
   ...layoutSourceRules(),
+
+  // packages/kinship : @lignee/domain seul, ni Node, ni React, ni Prisma, ni réseau.
+  ...kinshipSourceRules(),
 
   // Accessibilité React Native : app mobile et composants de la charte (TRD, « Tests et qualité »).
   {
