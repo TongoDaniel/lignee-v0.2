@@ -269,6 +269,19 @@ jobs:
           fi
           echo "ok - le conteneur minio n'atteint pas $url (le runner, si)"
 
+      # Limite connue (ADR 0007) : le résolveur embarqué de Docker relaie sans doute les requêtes
+      # DNS vers l'hôte. Relevé dans le résumé, sans faire échouer le job.
+      - name: Résolution DNS depuis minio (relevé)
+        run: |
+          if resolved=$(docker compose exec -T minio getent hosts github.com); then
+            message="Le conteneur minio résout github.com ($(echo "$resolved" | head -n 1)) sans pouvoir s'y connecter : limite connue de l'ADR 0007."
+            echo "::notice title=DNS depuis minio::$message"
+          else
+            message="Le conteneur minio ne résout pas github.com."
+          fi
+          echo "$message"
+          { echo "### Résolution DNS depuis minio"; echo; echo "$message"; } >> "$GITHUB_STEP_SUMMARY"
+
       # Le compartiment et la clé existent déjà : le second passage ne doit rien casser.
       - name: Redémarrer sans remise à zéro
         run: |
