@@ -1,8 +1,10 @@
 {
+  // Tout src, tests et outillage compris : celui qu'ESLint utilise. Les types Node y servent aux
+  // tests et à l'outillage (src/tooling), qui tourne directement sous Node 24 : ses imports
+  // relatifs gardent l'extension `.ts`. Le code d'exécution est vérifié sans Node par
+  // tsconfig.app.json.
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    // L'outillage (src/tooling) tourne directement sous Node 24, qui retire les types sans
-    // compilation : ses imports relatifs gardent l'extension `.ts`.
     "types": ["node"],
     "allowImportingTsExtensions": true,
     "noEmit": true,

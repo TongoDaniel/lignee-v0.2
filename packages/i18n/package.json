@@ -8,7 +8,7 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.app.json",
     "test": "vitest run",
     "generate": "node src/tooling/generate.cli.ts",
     "review:count": "node src/tooling/review-count.cli.ts"
