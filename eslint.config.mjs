@@ -50,6 +50,26 @@ export default tseslint.config(
     ...tseslint.configs.disableTypeChecked,
   },
 
+  // packages/domain est partagé par le téléphone et le serveur : Zod seul, ni Node, ni React,
+  // ni Expo, ni Prisma, ni réseau. Les tests et leurs aides peuvent lire des fichiers.
+  {
+    files: ['packages/domain/src/**/*.ts'],
+    ignores: ['packages/domain/src/**/*.test.ts', 'packages/domain/src/test-support/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              regex: '^(?!zod$|\\.{1,2}/)',
+              message: 'packages/domain ne dépend que de Zod (TRD, « Organisation du code »).',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   // Accessibilité React Native : app mobile et composants de la charte (TRD, « Tests et qualité »).
   {
     files: ['apps/mobile/**/*.{ts,tsx}', 'packages/ui/**/*.{ts,tsx}'],
