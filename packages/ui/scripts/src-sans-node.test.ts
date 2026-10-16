@@ -36,7 +36,8 @@ function typecheck(baseConfig: string): { status: number | null; output: string 
   return { status: result.status, output: `${result.stdout}${result.stderr}` };
 }
 
-describe('types de Node', () => {
+// Chaque cas lance tsc (une à deux secondes, davantage quand les autres tests tournent en parallèle).
+describe('types de Node', { timeout: 60_000 }, () => {
   it('sont absents de src/ : `process` y échoue au typecheck', () => {
     const { status, output } = typecheck('tsconfig.json');
     expect(status).not.toBe(0);
