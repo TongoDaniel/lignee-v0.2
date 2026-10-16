@@ -1,6 +1,7 @@
 // Lecture simple d'un scénario de cas limite (test/scenarios/<ID>.yaml), réservée aux tests.
 // Le lecteur complet, avec la validation du format, arrive avec T-006.
-import { readFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { parse } from 'yaml';
@@ -8,11 +9,44 @@ import { z } from 'zod';
 
 const SCENARIOS_DIR = fileURLToPath(new URL('../../../../test/scenarios/', import.meta.url));
 
-/** Lit `test/scenarios/<id>.yaml`, vérifie son identifiant et le valide avec `schema`. */
+/**
+ * Dossier où chaque scénario chargé laisse une trace (job `cas-limites` de la CI). Sans cette
+ * variable, rien n'est écrit.
+ */
+const PLAYED_DIR_VARIABLE = 'LIGNEE_SCENARIOS_PLAYED_DIR';
+
+/** Couverture partielle (test/scenarios/README.md) : parties testées, tickets qui complètent. */
+export const coverageSchema = z.strictObject({
+  teste: z.array(z.enum(['modele'])).min(1),
+  reste: z.array(z.string().regex(/^T-\d{3}$/)),
+});
+
+/**
+ * Schéma strict d'un scénario : en-tête commun, puis les sections lues par le test. Une clé que
+ * le test ne lit pas fait échouer la lecture.
+ */
+export function scenarioSchema<Shape extends z.ZodRawShape>(id: string, sections: Shape) {
+  return z.strictObject({
+    id: z.literal(id),
+    titre: z.string().min(1),
+    couverture: coverageSchema.optional(),
+    ...sections,
+  });
+}
+
+/**
+ * Lit `test/scenarios/<id>.yaml` et le valide avec `schema`. À appeler dans le corps d'un test
+ * (`it`), pas au chargement du fichier : un test ignoré ne compte pas comme joué.
+ */
 export function loadScenario<T extends z.ZodType>(id: string, schema: T): z.infer<T> {
   const raw: unknown = parse(readFileSync(`${SCENARIOS_DIR}${id}.yaml`, 'utf8'));
-  const header = z.looseObject({ id: z.literal(id), titre: z.string().min(1) }).parse(raw);
-  return schema.parse(header);
+  const scenario = schema.parse(raw);
+  const playedDir = process.env[PLAYED_DIR_VARIABLE];
+  if (playedDir !== undefined && playedDir !== '') {
+    mkdirSync(playedDir, { recursive: true });
+    writeFileSync(join(playedDir, id), '');
+  }
+  return scenario;
 }
 
 /** « pierre/M » → nom court et genre. */
@@ -47,3 +81,30 @@ export const scenarioNameSchema = z.strictObject({
   fin: z.string().optional(),
 });
 export type ScenarioName = z.infer<typeof scenarioNameSchema>;
+
+/**
+ * Union au format de CL-POL-03 : `{ conjoints: [a, b], rang_a: 1, rang_b: 1 }`. Exactement ces
+ * clés, avec un rang entier positif pour chaque conjoint.
+ */
+export const scenarioUnionSchema = z
+  .looseObject({ conjoints: z.tuple([z.string(), z.string()]) })
+  .transform((line, context) => {
+    const [a, b] = line.conjoints;
+    const expected = ['conjoints', `rang_${a}`, `rang_${b}`].sort();
+    const keys = Object.keys(line).sort();
+    const rankA = z.int().min(1).safeParse(line[`rang_${a}`]);
+    const rankB = z.int().min(1).safeParse(line[`rang_${b}`]);
+    if (keys.join() !== expected.join() || !rankA.success || !rankB.success) {
+      context.addIssue({
+        code: 'custom',
+        message: `Expected exactly ${expected.join(', ')} with positive integer ranks`,
+      });
+      return z.NEVER;
+    }
+    return { spouses: [a, b] as const, ranks: [rankA.data, rankB.data] as const };
+  });
+
+export const scenarioFiliationSchema = z.strictObject({
+  parents: z.array(z.string()).min(1).max(2),
+  enfant: z.string(),
+});

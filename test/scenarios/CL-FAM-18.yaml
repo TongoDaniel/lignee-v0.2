@@ -1,7 +1,10 @@
 # Noms générés. Noms successifs datés : mariage, conversion, francisation. Les dates restent du
-# texte tant que les dates floues (T-005) ne sont pas là.
+# texte tant que les dates floues (T-005) ne sont pas là. Reste : la saisie (T-031).
 id: CL-FAM-18
 titre: Changement de nom (mariage, conversion, francisation)
+couverture:
+  teste: [modele]
+  reste: [T-031]
 arbre:
   personnes: [marthe/F, ngassa/M]
   noms:

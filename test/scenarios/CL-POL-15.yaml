@@ -1,7 +1,11 @@
-# Noms générés. Partie modèle (T-004) : chaque fiche garde les noms saisis pour elle ; ni l'union
-# ni la filiation ne recopient un nom.
+# Noms générés. Partie modèle (T-004) : une famille polygame où chaque fiche porte ses propres
+# noms s'enregistre et se valide. « Aucun nom recopié automatiquement » se joue là où un nom
+# pourrait être recopié : la saisie à la main (T-031) et le plan d'une dictée (T-062).
 id: CL-POL-15
 titre: Épouses qui gardent leur nom, enfants qui ne portent pas celui du père
+couverture:
+  teste: [modele]
+  reste: [T-031, T-062]
 arbre:
   personnes: [samuel/M, rose/F, odile/F, joseph/M, comfort/F]
   noms:

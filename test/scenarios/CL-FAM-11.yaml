@@ -1,7 +1,10 @@
 # Noms générés. Jumeaux sans ordre connu, triplés avec ordre : une même naissance, retrouvée
-# depuis chaque fiche.
+# depuis chaque fiche. Reste : « Jumeaux » sur la fiche (T-024) et la saisie (T-033).
 id: CL-FAM-11
 titre: Jumeaux
+couverture:
+  teste: [modele]
+  reste: [T-024, T-033]
 arbre:
   personnes: [clarisse/F, awa/F, adama/M, ines/F, ivan/M, ilona/F]
   filiations:
