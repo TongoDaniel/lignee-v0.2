@@ -1,0 +1,21 @@
+# Partie date (T-005) : « entre 1935 et 1940 » est un intervalle à deux bornes ordonnées, de
+# même précision ; il couvre du premier jour de 1935 au dernier jour de 1940.
+id: CL-DON-06
+titre: « Entre 1935 et 1940 »
+action:
+  saisie: "entre 1935 et 1940"
+  date: { qualificatif: entre, de: "1935", a: "1940", texte: "entre 1935 et 1940" }
+attendu:
+  valide: true
+  approximative: true
+  intervalle: { du: "1935-01-01", au: "1940-12-31" }
+  # Placé au début de son intervalle : après 1934, avant le milieu de 1935.
+  ordre:
+    - { qualificatif: exacte, date: "1934" }
+    - { qualificatif: entre, de: "1935", a: "1940", texte: "entre 1935 et 1940" }
+    - { qualificatif: exacte, date: "1935-06" }
+  refuse:
+    - { qualificatif: entre, de: "1940", a: "1935" }
+    - { qualificatif: entre, de: "1940", a: "1940" }
+    - { qualificatif: entre, de: "1935-05", a: "1940" }
+    - { qualificatif: entre, de: "1935" }

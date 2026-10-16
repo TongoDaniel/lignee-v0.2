@@ -1,0 +1,26 @@
+# Partie date (T-005) : « vers 1940 » est une date approximative, placée à son rang dans un tri
+# de dates de précisions différentes. La chronologie qui la signale est V2.
+# Notation des dates : « date » vaut AAAA, AAAA-MM ou AAAA-MM-JJ, la précision en est déduite
+# sauf « decennie », écrite à part.
+id: CL-DON-05
+titre: « Né vers 1940 »
+action:
+  saisie: "né vers 1940"
+  date: { qualificatif: vers, date: "1940", texte: "vers 1940" }
+attendu:
+  valide: true
+  approximative: true
+  precision: annee
+  # Ordre attendu d'un tri, la date saisie comprise (« vers 1940 »), texte libre en fin.
+  ordre:
+    - { qualificatif: exacte, date: "1939-12-31" }
+    - { qualificatif: avant, date: "1940" }
+    - { qualificatif: exacte, date: "1940", precision: decennie }
+    - { qualificatif: exacte, date: "1940" }
+    - { qualificatif: vers, date: "1940", texte: "vers 1940" }
+    - { qualificatif: exacte, date: "1940-01-01" }
+    - { qualificatif: exacte, date: "1940-07" }
+    - { qualificatif: exacte, date: "1940-07-14" }
+    - { qualificatif: apres, date: "1940" }
+    - { qualificatif: exacte, date: "1941" }
+    - { qualificatif: texte, texte: "l'année de la grande sécheresse" }
