@@ -183,8 +183,46 @@ const OCCUPATIONS = [
 const TITLES = ['Chef de famille', 'Notable', 'Successeur désigné', 'Responsable d’association'];
 const KINSHIP_STEPS: readonly KinshipStep[] = ['parent', 'child', 'spouse', 'sibling'];
 
+/**
+ * Date floue simple autour de `year` (T-005) : année exacte, « vers », jour précis, intervalle
+ * « entre », ou texte seul, avec le texte d'origine quand il y en a un.
+ */
 function dateText(random: Random, year: number): FuzzyDate {
-  return fuzzyDateFromText(random.chance(0.4) ? `vers ${String(year)}` : String(year));
+  const draw = random.next();
+  const y = String(year);
+  if (draw < 0.4) {
+    return { qualifier: 'exact', precision: 'year', date: { year }, calendar: 'gregorian' };
+  }
+  if (draw < 0.7) {
+    return {
+      qualifier: 'about',
+      precision: 'year',
+      date: { year },
+      originalText: `vers ${y}`,
+      calendar: 'gregorian',
+    };
+  }
+  if (draw < 0.85) {
+    // Jour 1 à 28 : il existe dans tous les mois.
+    return {
+      qualifier: 'exact',
+      precision: 'day',
+      date: { year, month: random.int(1, 12), day: random.int(1, 28) },
+      calendar: 'gregorian',
+    };
+  }
+  if (draw < 0.95) {
+    const to = year + random.int(1, 5);
+    return {
+      qualifier: 'between',
+      precision: 'year',
+      from: { year },
+      to: { year: to },
+      originalText: `entre ${y} et ${String(to)}`,
+      calendar: 'gregorian',
+    };
+  }
+  return fuzzyDateFromText(`vers ${y}, d'après la famille`);
 }
 
 /**
