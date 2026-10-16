@@ -51,6 +51,12 @@ ALTER SCHEMA public OWNER TO lignee_migration;
 -- le schéma public. L'utilisateur applicatif peut seulement se connecter et y lire.
 REVOKE ALL ON DATABASE :"db_name" FROM PUBLIC;
 GRANT CONNECT ON DATABASE :"db_name" TO lignee_app;
+
+-- Les bases présentes dans toute installation non plus : sans cela, lignee_app pourrait s'y
+-- connecter et y créer des tables temporaires. La préproduction et la production (T-068)
+-- doivent faire de même.
+REVOKE ALL ON DATABASE postgres FROM PUBLIC;
+REVOKE ALL ON DATABASE template1 FROM PUBLIC;
 REVOKE ALL ON SCHEMA public FROM PUBLIC;
 GRANT USAGE ON SCHEMA public TO lignee_app;
 

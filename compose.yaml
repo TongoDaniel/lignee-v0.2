@@ -62,7 +62,7 @@ services:
       timeout: 5s
       retries: 20
       start_period: 30s
-    networks: [default, interne]
+    networks: [poste, interne]
 
   # Stockage compatible S3, à la place de Cloudflare R2.
   minio:
@@ -71,6 +71,10 @@ services:
     environment:
       MINIO_ROOT_USER: ${LIGNEE_MINIO_ROOT_USER:?copiez .env.example en .env}
       MINIO_ROOT_PASSWORD: ${LIGNEE_MINIO_ROOT_PASSWORD:?copiez .env.example en .env}
+      # Pas d'appel sortant de MinIO lui-même (recherche de mise à jour, télémétrie). Le réseau
+      # `poste` coupe de toute façon la sortie vers Internet (ADR 0007).
+      MINIO_UPDATE: "off"
+      MINIO_CALLHOME_ENABLE: "off"
     volumes:
       - minio-data:/data
     ports:
@@ -82,7 +86,7 @@ services:
       timeout: 5s
       retries: 20
       start_period: 10s
-    networks: [default, interne]
+    networks: [poste, interne]
 
   # Crée au démarrage le compartiment privé des médias et la clé de l'application, limitée à ce
   # compartiment (comme un jeton R2). Sans effet s'ils existent déjà ; s'arrête ensuite.
@@ -92,7 +96,10 @@ services:
       minio:
         condition: service_healthy
     environment:
-      MC_HOST_local: http://${LIGNEE_MINIO_ROOT_USER}:${LIGNEE_MINIO_ROOT_PASSWORD}@minio:9000
+      # Identifiants passés à `mc alias set` plutôt que dans une URL (MC_HOST_…) : aucun
+      # caractère à encoder.
+      ROOT_USER: ${LIGNEE_MINIO_ROOT_USER:?copiez .env.example en .env}
+      ROOT_PASSWORD: ${LIGNEE_MINIO_ROOT_PASSWORD:?copiez .env.example en .env}
       BUCKET: ${LIGNEE_S3_BUCKET:?copiez .env.example en .env}
       APP_ACCESS_KEY: ${LIGNEE_S3_ACCESS_KEY_ID:?copiez .env.example en .env}
       APP_SECRET_KEY: ${LIGNEE_S3_SECRET_ACCESS_KEY:?copiez .env.example en .env}
@@ -100,6 +107,7 @@ services:
     command:
       - |
         set -eu
+        mc alias set local http://minio:9000 "$$ROOT_USER" "$$ROOT_PASSWORD" > /dev/null
         mc mb --ignore-existing "local/$$BUCKET"
         mc anonymous set none "local/$$BUCKET"
         cat > /tmp/policy.json <<EOF
@@ -149,7 +157,7 @@ services:
         condition: service_completed_successfully
     ports:
       - 127.0.0.1:${LIGNEE_API_PORT:-3000}:3000
-    networks: [default, interne]
+    networks: [poste, interne]
 
   worker:
     profiles: [app]
@@ -169,6 +177,15 @@ services:
     networks: [interne]
 
 networks:
+  # Réseau des services dont un port est publié sur le poste. Docker ne publie pas les ports
+  # d'un conteneur relié seulement à un réseau `internal` ; ici, la publication marche, mais la
+  # traduction d'adresses vers l'extérieur est coupée : aucun conteneur ne sort sur Internet
+  # (vérifié sur Linux par le job environnement-local ; à confirmer sous Docker Desktop).
+  poste:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.enable_ip_masquerade: "false"
+  # Réseau sans aucune sortie, pour les services sans port publié.
   interne:
     internal: true
 

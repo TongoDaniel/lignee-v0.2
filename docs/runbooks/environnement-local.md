@@ -23,6 +23,8 @@ Qui : tout développeur, et la CI (job `environnement-local`). Durée : 2 minute
 
 Les ports ne sont ouverts que sur `127.0.0.1` : rien n'est joignable depuis le réseau local. Si un port est déjà pris (un PostgreSQL installé sur le poste, par exemple), changez la valeur dans `.env`.
 
+Aucun conteneur ne sort sur Internet (ADR 0007) : `postgres`, `minio` et `api` sont sur le réseau `poste`, qui publie les ports sur `127.0.0.1` mais coupe la sortie ; `minio-init` et `worker` sont sur le réseau `interne`, sans aucune sortie. Les images se téléchargent et se construisent normalement : c'est Docker, pas les conteneurs, qui accède au réseau.
+
 **Base de données** (`packages/db/initdb/01-roles-et-extensions.sh`, joué au premier démarrage seulement) :
 
 | Utilisateur | Mot de passe (`.env`) | Droits |
@@ -88,10 +90,17 @@ docker compose run --rm minio-init                          # rejoue la créatio
 | `postgres` reste « unhealthy », journaux `bad interpreter` ou `\r` | Script d'initialisation en fins de ligne CRLF | `.gitattributes` l'impose en LF ; `git rm --cached -r packages/db/initdb && git checkout -- packages/db/initdb`, puis remise à zéro |
 | `password authentication failed for user "lignee_app"` | `.env` modifié après la création du volume | Remise à zéro |
 | `minio-init` « exited (1) » | MinIO pas prêt, ou mot de passe root changé après la création du volume | `docker compose logs minio-init`, puis remise à zéro |
+| Port publié qui ne répond pas sous Docker Desktop, alors que le conteneur est « healthy » | Réseau `poste` sans traduction d'adresses, non vérifié sous Docker Desktop | Le signaler (ADR 0007) ; en attendant, retirer les trois lignes `driver_opts` du réseau `poste` dans une copie locale, sans la commiter |
 
 ## Retour arrière
 
 Rien à défaire hors du poste : `docker compose --profile app down --volumes` retire conteneurs, réseaux et volumes du projet `lignee`. Les images téléchargées se suppriment avec `docker image rm`.
+
+## Revue de l'image de MinIO
+
+Dependabot ne propose sans doute pas les nouvelles étiquettes `RELEASE.…` de `pgsty/minio` (ADR 0007). Tous les trois mois, et à chaque alerte de sécurité visant MinIO : dernière étiquette publiée depuis au moins 14 jours, correctifs de sécurité repris, projet actif ; puis étiquette et empreinte mises à jour dans `compose.yaml` (même étiquette dans `x-minio-image`, une seule ligne).
+
+- [ ] Revue du 16 janvier 2027 par … (étiquette retenue : …)
 
 ## Journal
 
