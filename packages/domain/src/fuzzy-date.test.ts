@@ -13,6 +13,7 @@ import {
   fuzzyDateSpan,
   isApproximate,
   type CalendarDay,
+  type DateBound,
   type FuzzyDate,
   type FuzzyDateInput,
 } from './fuzzy-date';
@@ -45,6 +46,125 @@ function compareDays(a: CalendarDay, b: CalendarDay): number {
 function meaning(date: FuzzyDate): string {
   if (date.qualifier === 'text') return JSON.stringify(date);
   return JSON.stringify({ ...date, originalText: undefined });
+}
+
+// --- Oracle indépendant : jours calculés par Date (UTC), départage écrit à part ----------------
+
+const DAY_MS = 86_400_000;
+
+/** Numéro de jour par Date (UTC), valable pour toute année de 0 à 10000. */
+function utcDay(year: number, month: number, dayOfMonth: number): number {
+  const date = new Date(0);
+  date.setUTCFullYear(year, month - 1, dayOfMonth);
+  return Math.round(date.getTime() / DAY_MS);
+}
+
+function toCalendarDay(number: number): CalendarDay {
+  const date = new Date(number * DAY_MS);
+  return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1, day: date.getUTCDate() };
+}
+
+function formatOracleDay(number: number): string {
+  const { year, month, day: dayOfMonth } = toCalendarDay(number);
+  return `${String(year).padStart(5, '0')}-${String(month).padStart(2, '0')}-${String(dayOfMonth).padStart(2, '0')}`;
+}
+
+type Precision = 'day' | 'month' | 'year' | 'decade';
+
+function oracleBound(bound: DateBound, precision: Precision): [number, number] {
+  const start = utcDay(bound.year, bound.month ?? 1, bound.day ?? 1);
+  const next = {
+    day: () => start + 1,
+    month: () => utcDay(bound.year, (bound.month ?? 1) + 1, 1),
+    year: () => utcDay(bound.year + 1, 1, 1),
+    decade: () => utcDay(bound.year + 10, 1, 1),
+  }[precision]();
+  return [start, next - 1];
+}
+
+function oracleSpan(date: FuzzyDate): { earliest?: number; latest?: number } {
+  if (date.qualifier === 'text') throw new Error('no span for text');
+  if (date.qualifier === 'between') {
+    return {
+      earliest: oracleBound(date.from, date.precision)[0],
+      latest: oracleBound(date.to, date.precision)[1],
+    };
+  }
+  const [start, end] = oracleBound(date.date, date.precision);
+  if (date.qualifier === 'before') return { latest: start - 1 };
+  if (date.qualifier === 'after') return { earliest: end + 1 };
+  return { earliest: start, latest: end };
+}
+
+/** Jour de tri attendu : la fin possible pour « avant », le début possible sinon. */
+function oracleSortDay(date: FuzzyDate): number {
+  const span = oracleSpan(date);
+  const day = date.qualifier === 'before' ? span.latest : span.earliest;
+  if (day === undefined) throw new Error('missing sort day');
+  return day;
+}
+
+/** Départage attendu (ADR 0009), écrit sans la clé : rang, précision, qualificatif, fin. */
+function tieBreak(date: FuzzyDate): number[] {
+  if (date.qualifier === 'text') throw new Error('no tie-break for text');
+  const rank = date.qualifier === 'after' ? 0 : date.qualifier === 'before' ? 2 : 1;
+  const precision = ['decade', 'year', 'month', 'day'].indexOf(date.precision);
+  const qualifier = ['exact', 'calculated', 'about', 'between'].indexOf(date.qualifier);
+  const end = date.qualifier === 'between' ? (oracleSpan(date).latest ?? 0) : 0;
+  return [rank, precision, qualifier, end];
+}
+
+function compareTieBreak(a: number[], b: number[]): number {
+  for (let index = 0; index < a.length; index += 1) {
+    const difference = (a[index] ?? 0) - (b[index] ?? 0);
+    if (difference !== 0) return difference;
+  }
+  return 0;
+}
+
+/**
+ * Toutes les dates dont le jour de tri est le 1er janvier de `year` (année en 0) : chaque
+ * qualificatif et chaque précision possibles, et plusieurs fins pour « entre ».
+ */
+function sameDayCandidates(year: number): FuzzyDate[] {
+  const starting: Record<Precision, DateBound> = {
+    decade: { year },
+    year: { year },
+    month: { year, month: 1 },
+    day: { year, month: 1, day: 1 },
+  };
+  const endingBefore: Partial<Record<Precision, DateBound>> = {
+    decade: { year: year - 10 },
+    year: { year: year - 1 },
+    month: { year: year - 1, month: 12 },
+    day: { year: year - 1, month: 12, day: 31 },
+  };
+  const laterEnds: Record<Precision, DateBound[]> = {
+    decade: [{ year: year + 10 }, { year: year + 30 }],
+    year: [{ year: year + 1 }, { year: year + 5 }],
+    month: [
+      { year, month: 2 },
+      { year, month: 7 },
+    ],
+    day: [
+      { year, month: 1, day: 2 },
+      { year, month: 3, day: 1 },
+    ],
+  };
+  const dates: FuzzyDate[] = [];
+  for (const precision of ['decade', 'year', 'month', 'day'] as const) {
+    for (const qualifier of ['exact', 'calculated', 'about'] as const) {
+      dates.push(parse({ qualifier, precision, date: starting[precision] }));
+    }
+    for (const to of laterEnds[precision]) {
+      dates.push(parse({ qualifier: 'between', precision, from: starting[precision], to }));
+    }
+    const ending = endingBefore[precision];
+    if (ending !== undefined) dates.push(parse({ qualifier: 'after', precision, date: ending }));
+  }
+  // « Avant » au 1er janvier : la borne commence le 2 janvier, au jour seulement.
+  dates.push(parse({ qualifier: 'before', precision: 'day', date: { year, month: 1, day: 2 } }));
+  return dates;
 }
 
 describe('date floue : schéma (TRD, Modèle de données)', () => {
@@ -166,6 +286,7 @@ describe('date floue : approximative et étendue', () => {
     expect(isApproximate(between(1930, 1935))).toBe(true);
     expect(isApproximate(fuzzyDateFromText('jadis'))).toBe(true);
     expect(isApproximate(year(1930))).toBe(false);
+    expect(isApproximate(decade(1940))).toBe(false);
   });
 
   it('donne l’étendue nominale, ouverte pour « avant » et « après »', () => {
@@ -332,35 +453,34 @@ describe('date floue : propriétés sur des dates générées', () => {
     );
   });
 
-  it('le tri ne dépend pas de l’ordre d’arrivée', () => {
-    const datesAndShuffle = fc
-      .array(fc.option(anyDate, { nil: undefined }), { maxLength: 30 })
-      .chain((dates) =>
-        fc.tuple(
-          fc.constant(dates),
-          fc.shuffledSubarray(dates, { minLength: dates.length, maxLength: dates.length }),
-        ),
-      );
+  it('au même jour, départage : après, puis du moins au plus précis, exacte, calculée, vers, entre, avant', () => {
     fc.assert(
-      fc.property(datesAndShuffle, ([dates, shuffled]) => {
-        const keys = [...dates].sort(compareFuzzyDates).map(fuzzyDateSortKey);
-        expect([...shuffled].sort(compareFuzzyDates).map(fuzzyDateSortKey)).toEqual(keys);
-        expect(keys).toEqual([...keys].sort());
+      fc.property(fc.integer({ min: 2, max: 996 }), (tens) => {
+        const candidates = sameDayCandidates(tens * 10);
+        const expected = [...candidates].sort((a, b) => compareTieBreak(tieBreak(a), tieBreak(b)));
+        // Tous au même jour (calculé à part, par Date) : seul le départage les ordonne.
+        expect(new Set(candidates.map((date) => oracleSortDay(date))).size).toBe(1);
+        expect([...candidates].reverse().sort(compareFuzzyDates)).toEqual(expected);
+        for (let index = 1; index < expected.length; index += 1) {
+          expect(compareFuzzyDates(expected[index - 1], expected[index])).toBeLessThan(0);
+        }
       }),
-      { numRuns: 300 },
+      { numRuns: 200 },
     );
   });
 
-  it('la comparaison est un ordre total : réflexive, antisymétrique, transitive', () => {
+  it('l’étendue et le jour de la clé suivent le calendrier de Date (UTC)', () => {
     fc.assert(
-      fc.property(anyDate, anyDate, anyDate, (a, b, c) => {
-        expect(compareFuzzyDates(a, a)).toBe(0);
-        expect(compareFuzzyDates(a, b) + compareFuzzyDates(b, a)).toBe(0);
-        if (compareFuzzyDates(a, b) <= 0 && compareFuzzyDates(b, c) <= 0) {
-          expect(compareFuzzyDates(a, c)).toBeLessThanOrEqual(0);
-        }
+      fc.property(fuzzyDateArbitrary(), (date) => {
+        const oracle = oracleSpan(date);
+        expect(fuzzyDateSpan(date)).toEqual({
+          earliest: oracle.earliest === undefined ? undefined : toCalendarDay(oracle.earliest),
+          latest: oracle.latest === undefined ? undefined : toCalendarDay(oracle.latest),
+        });
+        const [, keyDay] = fuzzyDateSortKey(date).split(':');
+        expect(keyDay).toBe(formatOracleDay(oracleSortDay(date)));
       }),
-      { numRuns: 1000 },
+      { numRuns: 3000 },
     );
   });
 
