@@ -9,11 +9,20 @@
   "scripts": {
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "generate": "node src/tooling/generate.cli.ts",
+    "review:count": "node src/tooling/review-count.cli.ts"
   },
   "devDependencies": {
+    "@formatjs/icu-messageformat-parser": "3.5.18",
+    "@types/node": "catalog:",
     "eslint": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
+  },
+  "dependencies": {
+    "i18next": "26.4.2",
+    "i18next-icu": "2.4.4",
+    "intl-messageformat": "11.2.15"
   }
 }

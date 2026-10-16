@@ -1,4 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // L'outillage (src/tooling) tourne directement sous Node 24, qui retire les types sans
+    // compilation : ses imports relatifs gardent l'extension `.ts`.
+    "types": ["node"],
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "declaration": false
+  },
   "include": ["src"]
 }
