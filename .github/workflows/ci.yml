@@ -353,7 +353,7 @@ jobs:
       - name: Jouer les tests en relevant les scénarios chargés
         env:
           LIGNEE_SCENARIOS_PLAYED_DIR: ${{ runner.temp }}/scenarios-joues
-        run: pnpm turbo run test --force
+        run: pnpm run test --force
 
       - name: Scénarios non joués
         env:
