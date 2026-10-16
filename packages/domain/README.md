@@ -107,11 +107,11 @@ corepack pnpm --filter @lignee/domain test
 
 ## Outils de test (T-006)
 
-`src/test-support/`, exporté pour les tests des autres paquets sous `@lignee/domain/test-support` (jamais importé par l'app : ce code lit des fichiers avec Node). Exclu de `tsconfig.src.json` et des règles ESLint du code du paquet.
+`src/test-support/`, exporté pour les tests des autres paquets sous `@lignee/domain/test-support` (jamais importé par l'app : ce code lit des fichiers avec Node). Exclu de `tsconfig.src.json` et des règles ESLint du code du paquet. ESLint (`eslint.config.mjs`) interdit d'importer `@lignee/domain/test-support` hors des fichiers `*.test.ts` et des dossiers `test-support`, et interdit au code de `packages/domain` d'importer son propre `test-support`.
 
 | Fichier | Contenu |
 | --- | --- |
-| `tree-generator.ts` | `generateTree({ seed, size, rates? })` : arbre reproductible de `size` personnes exactement ; `referenceTree(100 \| 1000 \| 5000)` : arbres types, graine fixe, mis en cache |
+| `tree-generator.ts` | `generateTree({ seed, size, rates? })` : arbre reproductible de `size` personnes exactement ; `referenceTree(100 \| 1000 \| 5000)` : arbres types, graine fixe, générés une fois puis renvoyés en copie (`structuredClone`, environ 110 ms pour 5 000 personnes sur le poste de développement) : un test peut modifier sa copie sans toucher celle des autres. Pour une mesure de performance, prenez la copie une fois, hors de la boucle mesurée |
 | `arbitraries.ts` | `treeArbitrary({ minSize?, maxSize?, rates? })`, `treeOptionsArbitrary`, `treeRatesArbitrary` (fast-check) |
 | `tree-data.ts` | `TreeData` (tous les objets d'un arbre) et `treeDataIssues` : schémas Zod, références, identifiants uniques, fiches (personne et noms), règles de visibilité |
 | `generated-names.ts`, `random.ts` | Noms faits de syllabes inventées ; aléa et identifiants UUIDv7 tirés de la graine |
