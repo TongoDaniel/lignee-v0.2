@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   formatCalendarDate,
@@ -78,6 +78,25 @@ describe('formatDateTime', () => {
     expect(formatDateTime(instant, 'en', 'Africa/Douala')).toMatch(
       fullMatch(`March 12, 2026 at 2:05[ \\u00a0\\u202f]PM`),
     );
+  });
+});
+
+describe('formatDateTime without a time zone', () => {
+  const initialTz = process.env['TZ'];
+  afterEach(() => {
+    if (initialTz === undefined) delete process.env['TZ'];
+    else process.env['TZ'] = initialTz;
+  });
+
+  it('follows the device time zone when it changes, despite the cache', () => {
+    // 13 h 05 UTC ; Paris est encore à l'heure d'hiver le 12 mars.
+    const instant = new Date(Date.UTC(2026, 2, 12, 13, 5));
+    process.env['TZ'] = 'Africa/Douala';
+    expect(formatDateTime(instant, 'fr')).toBe('12 mars 2026 à 14:05');
+    process.env['TZ'] = 'America/New_York';
+    expect(formatDateTime(instant, 'fr')).toBe('12 mars 2026 à 09:05');
+    process.env['TZ'] = 'Asia/Tokyo';
+    expect(formatDateTime(instant, 'fr')).toBe('12 mars 2026 à 22:05');
   });
 });
 

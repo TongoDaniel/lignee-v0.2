@@ -95,14 +95,13 @@ function withFrenchOrdinal(
  * fuseau donné : « 1er mars 2026 à 14:05 » en français, « March 1, 2026 at 2:05 PM » en anglais.
  */
 export function formatDateTime(value: Date, language: Language, timeZone?: string): string {
+  // Le fuseau de l'appareil est relu à chaque appel et entre dans la clé du cache : un formateur
+  // gardé ne fige pas l'ancien fuseau quand la personne voyage ou change de réglage.
+  const zone = timeZone ?? new Intl.DateTimeFormat().resolvedOptions().timeZone;
   const formatter = cached(
-    `datetime:${language}:${timeZone ?? ''}`,
+    `datetime:${language}:${zone}`,
     () =>
-      new Intl.DateTimeFormat(language, {
-        dateStyle: 'long',
-        timeStyle: 'short',
-        ...(timeZone !== undefined && { timeZone }),
-      }),
+      new Intl.DateTimeFormat(language, { dateStyle: 'long', timeStyle: 'short', timeZone: zone }),
   );
   return withFrenchOrdinal(formatter, value, language);
 }
