@@ -33,6 +33,14 @@ const accessDenied: CommandResult = {
   stdout: '',
   stderr: 'mc: <ERROR> Unable to complete the request. Access Denied.',
 };
+/** Sortie réelle de `mc cat` refusé, relevée dans le job environnement-local. */
+const insufficientPermissions = (target: string): CommandResult => ({
+  status: 1,
+  stdout: '',
+  stderr:
+    `mc: <ERROR> Unable to read from \`${target}\`. Insufficient permissions to access this ` +
+    `path \`http://127.0.0.1:9000/${target.replace(/^app\//, '')}\`.`,
+});
 const networkError: CommandResult = {
   status: 1,
   stdout: '',
@@ -88,7 +96,7 @@ function fakeMinio(): (alias: MinioAlias, args: readonly string[], input: string
     const [, bucket = '', ...rest] = target.split('/');
     const key = rest.join('/');
     const allowed = alias === 'root' || (bucket === APP_BUCKET && command !== 'mb');
-    if (!allowed) return accessDenied;
+    if (!allowed) return command === 'mb' ? accessDenied : insufficientPermissions(target);
     switch (command) {
       case 'mb':
         buckets.add(bucket);
@@ -307,6 +315,20 @@ describe('checkMinio', () => {
       expect(failed(await checkMinio(probe, bucket))).toEqual([description]);
     },
   );
+
+  it.each([
+    ['Access Denied', accessDenied],
+    [
+      'Insufficient permissions to access this path',
+      insufficientPermissions(`app/${OTHER_BUCKET}/ci-probe-local-env.txt`),
+    ],
+  ])('accepte le refus « %s » de mc', async (_message, refusal) => {
+    const probe = fakeProbe({
+      mc: (alias, args) =>
+        alias === 'app' && args.at(-1)?.includes(OTHER_BUCKET) ? refusal : undefined,
+    });
+    expect(failed(await checkMinio(probe, APP_BUCKET))).toEqual([]);
+  });
 
   it('ne compte pas une erreur réseau ni un objet absent comme un refus', async () => {
     const probe = fakeProbe({

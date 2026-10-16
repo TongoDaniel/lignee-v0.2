@@ -54,10 +54,15 @@ const PROBE_CONTENT = 'sonde\n';
 export const OTHER_BUCKET = 'ci-probe-autre-compartiment';
 
 /**
- * Message de MinIO quand une clé n'a pas le droit (code S3 `AccessDenied`). Un contrôle négatif
- * l'exige : une erreur réseau ou un objet absent ne comptent pas comme un refus.
+ * Messages de `mc` quand une clé n'a pas le droit (code S3 `AccessDenied`) : « Access Denied »
+ * pour la création d'un compartiment, « Insufficient permissions to access this path » pour la
+ * lecture ou l'écriture d'un objet (relevé dans le job environnement-local). Un contrôle
+ * négatif exige l'un d'eux : une erreur réseau ou un objet absent ne comptent pas comme un refus.
  */
-export const ACCESS_DENIED = 'Access Denied';
+export const REFUSAL_MESSAGES = [
+  'Access Denied',
+  'Insufficient permissions to access this path',
+] as const;
 
 function describeFailure(result: CommandResult): string {
   const output = (result.stderr.trim() || result.stdout.trim()).split('\n').slice(0, 3).join(' ');
@@ -258,17 +263,18 @@ function commandOutcome(description: string, result: CommandResult): CheckOutcom
     : { description, ok: false, detail: describeFailure(result) };
 }
 
-/** Réussit seulement si la commande échoue avec « Access Denied ». */
+/** Réussit seulement si la commande échoue avec un message de refus de droits. */
 function deniedOutcome(description: string, result: CommandResult): CheckOutcome {
   if (result.status === 0) {
     return { description, ok: false, detail: 'commande acceptée' };
   }
-  return `${result.stderr}${result.stdout}`.includes(ACCESS_DENIED)
+  const output = `${result.stderr}${result.stdout}`;
+  return REFUSAL_MESSAGES.some((message) => output.includes(message))
     ? { description, ok: true }
     : {
         description,
         ok: false,
-        detail: `refus attendu (« ${ACCESS_DENIED} »), obtenu ${describeFailure(result)}`,
+        detail: `refus de droits attendu, obtenu ${describeFailure(result)}`,
       };
 }
 
