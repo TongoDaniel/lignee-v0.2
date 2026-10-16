@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { filiationSchema, filiationTypeSchema, parentCandidateSchema } from './filiation';
+import {
+  filiationSchema,
+  filiationTypeSchema,
+  parentCandidateSchema,
+  proposesOnlyMeByDefault,
+} from './filiation';
 import { testTree } from './test-support/fixtures';
 
 const tree = testTree();
@@ -66,6 +71,39 @@ describe('filiations (UNI-09, UNI-10)', () => {
         certainty: 'certain',
       }).success,
     ).toBe(false);
+  });
+});
+
+describe('paternité non officielle et « moi seul » proposé (CON-04)', () => {
+  it('la reconnaissance est distincte de la certitude, inconnue par défaut', () => {
+    const certainButUnofficial = filiationSchema.parse({
+      ...base(),
+      type: 'birth',
+      certainty: 'certain',
+      recognitionStatus: 'unofficial',
+    });
+    expect(certainButUnofficial.recognitionStatus).toBe('unofficial');
+    expect(
+      filiationSchema.parse({ ...base(), type: 'birth', certainty: 'certain' }).recognitionStatus,
+    ).toBe('unknown');
+    expect(
+      filiationSchema.safeParse({
+        ...base(),
+        type: 'birth',
+        certainty: 'certain',
+        recognitionStatus: 'secret',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('propose « moi seul » pour donneur, GPA, adoption et paternité non officielle, et seulement eux', () => {
+    const proposed = filiationTypeSchema.options.filter((type) =>
+      proposesOnlyMeByDefault({ type, recognitionStatus: 'official' }),
+    );
+    expect(proposed).toEqual(['adoptive', 'donor', 'surrogacy']);
+    expect(proposesOnlyMeByDefault({ type: 'birth', recognitionStatus: 'unofficial' })).toBe(true);
+    expect(proposesOnlyMeByDefault({ type: 'birth', recognitionStatus: 'unknown' })).toBe(false);
+    expect(proposesOnlyMeByDefault({ type: 'raised', recognitionStatus: 'official' })).toBe(false);
   });
 });
 

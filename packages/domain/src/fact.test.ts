@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { factSchema, titleRoleSchema, type FactInput } from './fact';
+import {
+  factSchema,
+  multipleBirthSchema,
+  projectMultipleBirth,
+  titleRoleSchema,
+  type FactInput,
+} from './fact';
 import { fuzzyDateFromText } from './fuzzy-date';
 import { testTree } from './test-support/fixtures';
 
@@ -65,6 +71,7 @@ describe('titres et rôles datés (UNI-17)', () => {
       personId: tree.personId('chef'),
       label: 'Lamido',
       start: fuzzyDateFromText('1985'),
+      authorAccountId: tree.authorAccountId,
     });
     expect(title.label).toBe('Lamido');
     expect(
@@ -73,7 +80,50 @@ describe('titres et rôles datés (UNI-17)', () => {
         treeId: tree.treeId,
         personId: tree.personId('chef'),
         label: ' ',
+        authorAccountId: tree.authorAccountId,
       }).success,
     ).toBe(false);
+    expect(
+      titleRoleSchema.safeParse({
+        id: tree.nextId(),
+        treeId: tree.treeId,
+        personId: tree.personId('chef'),
+        label: 'Fon',
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe('reconnaissance tardive (CL-FAM-13)', () => {
+  it('désigne la filiation reconnue, et seul ce type de fait le fait', () => {
+    const filiationId = tree.nextId();
+    expect(
+      factSchema.safeParse(
+        fact({ type: 'recognition', date: fuzzyDateFromText('1994'), filiationId }),
+      ).success,
+    ).toBe(true);
+    expect(factSchema.safeParse(fact({ type: 'recognition' })).success).toBe(false);
+    expect(factSchema.safeParse(fact({ type: 'birth', filiationId })).success).toBe(false);
+  });
+});
+
+describe('naissance multiple vue par un lecteur', () => {
+  const birth = multipleBirthSchema.parse({
+    id: tree.nextId(),
+    treeId: tree.treeId,
+    members: ['t1', 't2', 't3'].map((key) => ({ personId: tree.personId(key) })),
+  });
+  const hidden =
+    (...keys: string[]) =>
+    (id: string) =>
+      !keys.some((key) => tree.personId(key) === id);
+
+  it('retire les enfants masqués', () => {
+    expect(projectMultipleBirth(birth, hidden('t3'))?.members).toEqual(birth.members.slice(0, 2));
+  });
+
+  it('disparaît s’il reste moins de deux enfants visibles : « Jumeaux » ne trahit personne', () => {
+    expect(projectMultipleBirth(birth, hidden('t2', 't3'))).toBeUndefined();
+    expect(projectMultipleBirth(birth, hidden('t1', 't2', 't3'))).toBeUndefined();
   });
 });

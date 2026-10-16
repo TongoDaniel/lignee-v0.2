@@ -43,6 +43,20 @@ describe('personnes (UNI-01, UNI-02)', () => {
     expect(result.success).toBe(false);
   });
 
+  it('UNI-22 : une personne connue qui n’a qu’un ancien prénom est refusée', () => {
+    const result = personRecordSchema.safeParse({
+      person: { id: personId, treeId: tree.treeId, nature: 'known' },
+      names: [name({ type: 'former', givenNames: 'Ancien' })],
+    });
+    expect(result.success).toBe(false);
+    expect(
+      personRecordSchema.safeParse({
+        person: { id: personId, treeId: tree.treeId, nature: 'known' },
+        names: [name({ type: 'former', givenNames: 'Ancien' }), name({ givenNames: 'Nadège' })],
+      }).success,
+    ).toBe(true);
+  });
+
   it('UNI-01, UNI-02 : « Inconnu » est une personne à compléter, sans nom enregistré', () => {
     const record = personRecordSchema.parse({
       person: { id: personId, treeId: tree.treeId, nature: 'placeholder' },

@@ -70,6 +70,15 @@ describe('identifiants UUIDv7', () => {
     );
   });
 
+  it('dans la même milliseconde, le compteur avance d’un pas aléatoire, pas de 1', () => {
+    const next = createUuidV7Generator(scriptedSource([1_790_000_000_000], [17, 200, 3, 91, 44]));
+    const counter = (id: string) => Number.parseInt(id.slice(15, 18), 16);
+    const counters = Array.from({ length: 20 }, () => counter(next()));
+    const steps = counters.slice(1).map((value, index) => value - (counters[index] ?? 0));
+    expect(steps.every((step) => step >= 1 && step <= 64)).toBe(true);
+    expect(steps.some((step) => step > 1)).toBe(true);
+  });
+
   it('reste croissant au-delà de 4 096 identifiants dans la même milliseconde', () => {
     const next = createUuidV7Generator(scriptedSource([1_790_000_000_000], [255]));
     let previous = next();

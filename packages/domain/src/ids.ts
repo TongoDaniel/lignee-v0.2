@@ -48,6 +48,8 @@ export const defaultUuidV7Source: UuidV7Source = {
 
 const MAX_TIMESTAMP = 2 ** 48 - 1;
 const MAX_COUNTER = 0xfff;
+/** Pas aléatoire du compteur dans une milliseconde : 1 + (0 à 63). */
+const MAX_STEP_JITTER = 0x3f;
 
 function hex(bytes: Uint8Array): string {
   let out = '';
@@ -58,7 +60,10 @@ function hex(bytes: Uint8Array): string {
 /**
  * Crée un générateur d'UUIDv7 strictement croissants, même dans la même milliseconde ou si
  * l'horloge recule (RFC 9562, section 6.2, méthode 1 : les 12 bits `rand_a` servent de compteur,
- * remis à une valeur aléatoire de 11 bits à chaque nouvelle milliseconde).
+ * remis à une valeur aléatoire de 11 bits à chaque nouvelle milliseconde). Dans la même
+ * milliseconde, le compteur avance d'un pas aléatoire de 1 à 64 et non de 1 : deux identifiants
+ * voisins ne laissent pas deviner, par un trou, un objet masqué créé entre eux (section 6.2,
+ * incrément aléatoire). Risque résiduel accepté : l'horodatage reste lisible (ADR 0008).
  */
 export function createUuidV7Generator(source: UuidV7Source = defaultUuidV7Source): () => Id {
   let lastTimestamp = -1;
@@ -74,8 +79,8 @@ export function createUuidV7Generator(source: UuidV7Source = defaultUuidV7Source
     if (now > lastTimestamp) {
       lastTimestamp = now;
       counter = (((random[0] ?? 0) << 8) | (random[1] ?? 0)) & 0x7ff;
-    } else if (counter < MAX_COUNTER) {
-      counter += 1;
+    } else if (counter + 1 + MAX_STEP_JITTER <= MAX_COUNTER) {
+      counter += 1 + ((random[0] ?? 0) & MAX_STEP_JITTER);
     } else {
       // Compteur épuisé dans la milliseconde : on avance l'horodatage d'une milliseconde.
       lastTimestamp += 1;

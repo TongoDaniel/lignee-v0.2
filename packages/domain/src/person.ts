@@ -106,10 +106,12 @@ export const personRecordSchema = z
     names: z.array(nameSchema),
   })
   .superRefine((record, context) => {
-    if (record.person.nature === 'known' && record.names.length === 0) {
+    // L'ancien prénom ne compte pas : il est masqué par défaut (UNI-22), la fiche n'aurait plus
+    // de nom à afficher.
+    if (record.person.nature === 'known' && !record.names.some((name) => name.type !== 'former')) {
       context.addIssue({
         code: 'custom',
-        message: 'A known person needs at least one name',
+        message: 'A known person needs at least one name other than a former name',
         path: ['names'],
       });
     }

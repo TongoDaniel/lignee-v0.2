@@ -17,7 +17,8 @@ export type FactSubject = z.infer<typeof factSubjectSchema>;
  * Type de fait. La cause de décès est un fait à part (`death_cause`), distinct du décès : c'est
  * une donnée de santé, avec sa propre règle de visibilité, visible de son seul auteur par défaut
  * (UNI-15, TRD « Confidentialité appliquée »). Le décès lui-même (date, lieu) suit la personne.
- * `recognition` : reconnaissance tardive d'un enfant, en fait daté (CL-FAM-13).
+ * `recognition` : reconnaissance tardive d'un enfant, en fait daté (CL-FAM-13) ; il désigne la
+ * filiation reconnue (`filiationId`) et en prend la visibilité, pour ne pas révéler un lien masqué.
  */
 export const factTypeSchema = z.enum([
   'birth',
@@ -53,12 +54,21 @@ export const factSchema = z
     value: textSchema.optional(),
     certainty: certaintySchema.optional(),
     sourceId: idSchema.optional(),
+    /** Filiation reconnue : obligatoire pour `recognition`, absente pour les autres types. */
+    filiationId: idSchema.optional(),
     /** Compte qui a saisi le fait : « son auteur » des règles de visibilité par défaut. */
     authorAccountId: idSchema,
   })
   .superRefine((fact, context) => {
     if (VALUE_REQUIRED.has(fact.type) && fact.value === undefined) {
       context.addIssue({ code: 'custom', message: 'This fact needs a value', path: ['value'] });
+    }
+    if ((fact.type === 'recognition') !== (fact.filiationId !== undefined)) {
+      context.addIssue({
+        code: 'custom',
+        message: 'A recognition fact, and only it, names the recognised filiation',
+        path: ['filiationId'],
+      });
     }
     if (PERSON_ONLY.has(fact.type) && fact.subject.kind !== 'person') {
       context.addIssue({
@@ -74,7 +84,8 @@ export type FactInput = z.input<typeof factSchema>;
 /**
  * Titre ou rôle daté (UNI-17) : chef, notable, successeur, Fon, Lamido, responsable
  * d'association. Le libellé est libre (les titres traditionnels ne se traduisent pas) ; il
- * s'affiche sous le nom, avec ses dates.
+ * s'affiche sous le nom, avec ses dates. Sans règle propre : il prend la visibilité de la
+ * personne (ADR 0008).
  */
 export const titleRoleSchema = z.strictObject({
   id: idSchema,
@@ -85,6 +96,8 @@ export const titleRoleSchema = z.strictObject({
   end: fuzzyDateSchema.optional(),
   placeId: idSchema.optional(),
   notes: textSchema.optional(),
+  /** Compte qui a saisi le titre. */
+  authorAccountId: idSchema,
 });
 export type TitleRole = z.infer<typeof titleRoleSchema>;
 
@@ -124,4 +137,17 @@ export function findMultipleBirth(
   births: readonly MultipleBirth[],
 ): MultipleBirth | undefined {
   return births.find((birth) => birth.members.some((member) => member.personId === personId));
+}
+
+/**
+ * Naissance multiple telle qu'un lecteur la voit : les enfants qu'il ne voit pas en sont retirés,
+ * et elle disparaît s'il en reste moins de deux (sinon « Jumeaux » trahirait un enfant masqué).
+ * `isVisible` vient du module de droits (T-052) ; cette fonction ne décide rien d'autre.
+ */
+export function projectMultipleBirth(
+  birth: MultipleBirth,
+  isVisible: (personId: string) => boolean,
+): MultipleBirth | undefined {
+  const members = birth.members.filter((member) => isVisible(member.personId));
+  return members.length < 2 ? undefined : { ...birth, members };
 }
