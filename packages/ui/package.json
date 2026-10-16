@@ -16,7 +16,7 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "eslint": "catalog:",
-    "prettier": "3.9.9",
+    "prettier": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "wawoff2": "2.0.1"
