@@ -100,7 +100,23 @@ Ces objets ne portent pas de règle (`visibilityTargetTypeSchema` ne les vise pa
 corepack pnpm --filter @lignee/domain test
 ```
 
-- Les cas limites de T-004 (CL-POL-15, CL-DON-01, CL-DON-02, CL-FAM-11, CL-FAM-17, CL-FAM-18, CL-FAM-19) sont lus dans `test/scenarios/<ID>.yaml` par `src/scenarios/model-scenarios.test.ts`, avec la lecture simple de `src/test-support/scenario.ts` ; chaque YAML dit dans `couverture` la partie testée (le modèle) et les tickets qui le compléteront. Le job `cas-limites` de la CI les compte comme joués parce que `loadScenario` les a réellement chargés pendant les tests (`test/scenarios/README.md`). Le lecteur complet est T-006.
-- Les cas limites de T-005 (CL-DON-05, CL-DON-06, CL-VOI-16) sont joués par `src/scenarios/fuzzy-date-scenarios.test.ts`.
-- Tests de propriétés (fast-check) : croissance des identifiants, validité des unions ; dates floues générées par `src/test-support/fuzzy-date-arbitrary.ts` (tri total, indépendant de l'ordre d'arrivée et cohérent avec l'étendue, clé injective, aller-retour JSON). Ceux sur des arbres générés arrivent avec le générateur de T-006.
+- Les cas limites de T-004 (CL-POL-15, CL-DON-01, CL-DON-02, CL-FAM-11, CL-FAM-17, CL-FAM-18, CL-FAM-19) sont joués par `src/scenarios/model-scenarios.test.ts`, ceux de T-005 (CL-DON-05, CL-DON-06, CL-VOI-16) par `src/scenarios/fuzzy-date-scenarios.test.ts`, CL-POL-03 (partie lecture) par `src/scenarios/action-scenarios.test.ts`. Chaque YAML dit dans `couverture` la partie testée et les tickets qui le compléteront. Le job `cas-limites` de la CI les compte comme joués parce que `loadScenario` les a réellement chargés pendant les tests (`test/scenarios/README.md`).
+- `src/test-support/scenario-format.test.ts` valide le format de tous les fichiers de `test/scenarios` et construit leur arbre de départ.
+- Tests de propriétés (fast-check) : croissance des identifiants, validité des unions ; dates floues générées par `src/test-support/fuzzy-date-arbitrary.ts` (tri total, indépendant de l'ordre d'arrivée et cohérent avec l'étendue, clé injective, aller-retour JSON) ; et, sur des milliers d'arbres générés (`src/properties/generated-trees.test.ts`) : chaque objet passe son schéma et chaque référence existe ; une union relie deux personnes distinctes, avec des rangs 1, 2, 3… par personne ; au plus deux parents de naissance ; aucun cycle de filiation.
 - Noms générés seulement, jamais une vraie famille.
+
+## Outils de test (T-006)
+
+`src/test-support/`, exporté pour les tests des autres paquets sous `@lignee/domain/test-support` (jamais importé par l'app : ce code lit des fichiers avec Node). Exclu de `tsconfig.src.json` et des règles ESLint du code du paquet.
+
+| Fichier | Contenu |
+| --- | --- |
+| `tree-generator.ts` | `generateTree({ seed, size, rates? })` : arbre reproductible de `size` personnes exactement ; `referenceTree(100 \| 1000 \| 5000)` : arbres types, graine fixe, mis en cache |
+| `arbitraries.ts` | `treeArbitrary({ minSize?, maxSize?, rates? })`, `treeOptionsArbitrary`, `treeRatesArbitrary` (fast-check) |
+| `tree-data.ts` | `TreeData` (tous les objets d'un arbre) et `treeDataIssues` : schémas Zod, références, identifiants uniques, fiches (personne et noms), règles de visibilité |
+| `generated-names.ts`, `random.ts` | Noms faits de syllabes inventées ; aléa et identifiants UUIDv7 tirés de la graine |
+| `scenario.ts`, `scenario-tree.ts`, `scenario-format.ts` | Lecture des scénarios (`loadScenario`, trace « joué »), section `arbre` et sa construction (`buildScenarioTree`), format complet, attendu partagé (`actionExpectedSchema`), `applyExpectedPlan` |
+
+Ce que contient un arbre généré, chaque probabilité étant réglable (`DEFAULT_TREE_GENERATOR_RATES`) : lignées fondatrices nées entre 1870 et 1915 ; polygamie (unions simultanées, rangs 1, 2, 3… pour chaque conjoint, option « polygamie » parfois déclarée) ; unions successives après décès, divorce ou séparation ; lévirat (la veuve épouse le frère du défunt) ; sororat (épouse supplémentaire, ou nouvelle épouse d'un veuf, sœur de l'épouse) ; implexe (mariage entre cousins germains) ; enfant rattaché à son père seul, les épouses étant mères candidates (CL-POL-03) ; places à compléter (conjoint ou parents d'un conjoint) ; adoption, « a élevé », confiage, tutelle par une co-épouse, un oncle ou une tante ; jumeaux et triplés ; personnes « à placer » ; faits (naissance, décès, cause de décès, profession, reconnaissance d'une paternité non officielle) et titres ; dates floues simples (« 1952 », « vers 1952 », en texte jusqu'à T-005) ; noms de naissance, d'usage, surnoms seuls, formes uniques, anciens prénoms ; comptes membres reliés à des fiches distinctes ; et des objets (personnes, unions, filiations, faits, noms) masqués au hasard par une règle « moi seul », « personnes choisies » ou « branche », pour les tests de non-fuite (T-057). `features` compte ce qui a été produit ; `tree-generator.test.ts` le retrouve dans l'arbre par des vérifications indépendantes du générateur.
+
+Mesure sur le poste de développement (Windows 11, Node 24) : arbre de 100 personnes en 7 ms, 1 000 en 76 ms, 5 000 en 395 ms. Le test échoue au-delà de 3 s par arbre.

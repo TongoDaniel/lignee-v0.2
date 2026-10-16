@@ -1,5 +1,6 @@
-// Lecture simple d'un scénario de cas limite (test/scenarios/<ID>.yaml), réservée aux tests.
-// Le lecteur complet, avec la validation du format, arrive avec T-006.
+// Lecture d'un scénario de cas limite (test/scenarios/<ID>.yaml), réservée aux tests : fichier,
+// trace du scénario joué, formats des lignes. Le format complet (arbre, action, attendu) et la
+// construction de l'arbre sont dans scenario-format.ts et scenario-tree.ts (T-006).
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 import { z } from 'zod';
 
-const SCENARIOS_DIR = fileURLToPath(new URL('../../../../test/scenarios/', import.meta.url));
+export const SCENARIOS_DIR = fileURLToPath(new URL('../../../../test/scenarios/', import.meta.url));
 
 /**
  * Dossier où chaque scénario chargé laisse une trace (job `cas-limites` de la CI). Sans cette
@@ -15,9 +16,13 @@ const SCENARIOS_DIR = fileURLToPath(new URL('../../../../test/scenarios/', impor
  */
 const PLAYED_DIR_VARIABLE = 'LIGNEE_SCENARIOS_PLAYED_DIR';
 
-/** Couverture partielle (test/scenarios/README.md) : parties testées, tickets qui complètent. */
+/**
+ * Couverture partielle (test/scenarios/README.md) : parties testées, tickets qui complètent.
+ * `lecture` : le scénario est lu et son arbre de départ construit en objets valides du modèle,
+ * sans que son attendu soit encore vérifié.
+ */
 export const coverageSchema = z.strictObject({
-  teste: z.array(z.enum(['modele'])).min(1),
+  teste: z.array(z.enum(['lecture', 'modele'])).min(1),
   reste: z.array(z.string().regex(/^T-\d{3}$/)),
 });
 
@@ -39,14 +44,18 @@ export function scenarioSchema<Shape extends z.ZodRawShape>(id: string, sections
  * (`it`), pas au chargement du fichier : un test ignoré ne compte pas comme joué.
  */
 export function loadScenario<T extends z.ZodType>(id: string, schema: T): z.infer<T> {
-  const raw: unknown = parse(readFileSync(`${SCENARIOS_DIR}${id}.yaml`, 'utf8'));
-  const scenario = schema.parse(raw);
+  const scenario = schema.parse(readScenarioYaml(id));
   const playedDir = process.env[PLAYED_DIR_VARIABLE];
   if (playedDir !== undefined && playedDir !== '') {
     mkdirSync(playedDir, { recursive: true });
     writeFileSync(join(playedDir, id), '');
   }
   return scenario;
+}
+
+/** Contenu brut de `test/scenarios/<id>.yaml`, sans validation ni trace. */
+export function readScenarioYaml(id: string): unknown {
+  return parse(readFileSync(`${SCENARIOS_DIR}${id}.yaml`, 'utf8'));
 }
 
 /** « pierre/M » → nom court et genre. */
@@ -83,30 +92,59 @@ export const scenarioNameSchema = z.strictObject({
 export type ScenarioName = z.infer<typeof scenarioNameSchema>;
 
 /**
- * Union au format de CL-POL-03 : `{ conjoints: [a, b], rang_a: 1, rang_b: 1 }`. Exactement ces
- * clés, avec un rang entier positif pour chaque conjoint.
+ * Union au format de CL-POL-03 : `{ conjoints: [a, b], rang_a: 1 }`. Le rang de chaque conjoint
+ * est facultatif (le TRD n'écrit que `rang_pierre`) : absent, la construction de l'arbre donne
+ * le rang suivant de ce conjoint, comme l'app (UNI-07). Aucune autre clé.
  */
 export const scenarioUnionSchema = z
   .looseObject({ conjoints: z.tuple([z.string(), z.string()]) })
   .transform((line, context) => {
     const [a, b] = line.conjoints;
-    const expected = ['conjoints', `rang_${a}`, `rang_${b}`].sort();
-    const keys = Object.keys(line).sort();
-    const rankA = z.int().min(1).safeParse(line[`rang_${a}`]);
-    const rankB = z.int().min(1).safeParse(line[`rang_${b}`]);
-    if (keys.join() !== expected.join() || !rankA.success || !rankB.success) {
+    const allowed = new Set(['conjoints', `rang_${a}`, `rang_${b}`]);
+    const extra = Object.keys(line).filter((key) => !allowed.has(key));
+    const rank = (key: string) =>
+      line[key] === undefined
+        ? { success: true as const, data: undefined }
+        : z.int().min(1).safeParse(line[key]);
+    const rankA = rank(`rang_${a}`);
+    const rankB = rank(`rang_${b}`);
+    if (extra.length > 0 || !rankA.success || !rankB.success) {
       context.addIssue({
         code: 'custom',
-        message: `Expected exactly ${expected.join(', ')} with positive integer ranks`,
+        message: `Expected conjoints and optional rang_${a}, rang_${b} (positive integers)`,
       });
       return z.NEVER;
     }
     return { spouses: [a, b] as const, ranks: [rankA.data, rankB.data] as const };
   });
 
+/** Types de filiation, dans les mots du cahier (UNI-09). Sans type : de naissance. */
+export const scenarioFiliationTypes = {
+  naissance: 'birth',
+  adoptive: 'adoptive',
+  a_eleve: 'raised',
+  confie: 'fostered',
+  tuteur: 'guardian',
+  donneur: 'donor',
+  gpa: 'surrogacy',
+} as const;
+
+/** Certitude, dans les mots du cahier (UNI-10). Sans certitude : certain. */
+export const scenarioCertainties = {
+  certain: 'certain',
+  probable: 'probable',
+  hypothetique: 'hypothetical',
+} as const;
+
 export const scenarioFiliationSchema = z.strictObject({
   parents: z.array(z.string()).min(1).max(2),
   enfant: z.string(),
+  type: z
+    .enum(Object.keys(scenarioFiliationTypes) as [keyof typeof scenarioFiliationTypes])
+    .optional(),
+  certitude: z
+    .enum(Object.keys(scenarioCertainties) as [keyof typeof scenarioCertainties])
+    .optional(),
 });
 
 /** Qualificatifs de date, dans les mots du cahier. */

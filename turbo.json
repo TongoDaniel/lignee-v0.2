@@ -21,7 +21,12 @@
     },
     "@lignee/domain#test": {
       "dependsOn": ["transit"],
-      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/test/scenarios/**"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/test/scenarios/**",
+        "$TURBO_ROOT$/docs/cahier-des-charges/cahier-des-charges-4-cas-limites.md",
+        "$TURBO_ROOT$/docs/plan/v1-decoupage.md"
+      ],
       "outputs": [],
       "passThroughEnv": ["LIGNEE_SCENARIOS_PLAYED_DIR"]
     },
