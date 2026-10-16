@@ -120,6 +120,17 @@ describe('générateur d’arbres', () => {
     );
   });
 
+  it('un arbre type est une copie : le modifier ne change pas celui des tests suivants', () => {
+    const first = referenceTree(100);
+    const person = first.people[0];
+    if (person === undefined) throw new Error('missing person');
+    person.vitalStatus = 'deceased';
+    first.people.pop();
+    const second = referenceTree(100);
+    expect(second.people).toHaveLength(100);
+    expect(second).toEqual(generateTree({ seed: 20_260_100, size: 100 }));
+  });
+
   it('refuse un arbre vide', () => {
     expect(() => generateTree({ seed: 1, size: 0 })).toThrow(RangeError);
   });

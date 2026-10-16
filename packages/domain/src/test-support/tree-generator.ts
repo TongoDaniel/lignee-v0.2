@@ -1083,7 +1083,9 @@ const referenceTrees = new Map<ReferenceTreeSize, GeneratedTree>();
 
 /**
  * Arbre type de 100, 1 000 ou 5 000 personnes, avec les probabilités par défaut et une graine
- * fixe : le même pour tous les paquets (moteur de parenté, disposition, synchro). Mis en cache.
+ * fixe : le même pour tous les paquets (moteur de parenté, disposition, synchro). L'arbre est
+ * généré une fois et mis en cache ; chaque appel en renvoie une copie (`structuredClone`) : un
+ * test qui la modifie ne change pas l'arbre des tests suivants.
  */
 export function referenceTree(size: ReferenceTreeSize): GeneratedTree {
   let tree = referenceTrees.get(size);
@@ -1091,5 +1093,5 @@ export function referenceTree(size: ReferenceTreeSize): GeneratedTree {
     tree = generateTree({ seed: 20_260_000 + size, size });
     referenceTrees.set(size, tree);
   }
-  return tree;
+  return structuredClone(tree);
 }

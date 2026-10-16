@@ -50,15 +50,20 @@ function birthParentCounts(filiations: readonly Filiation[]) {
   return counts;
 }
 
-/** Rangs d'union de chaque personne. */
-function ranksByPerson(unions: readonly Union[]) {
+/**
+ * Personnes dont les rangs d'union ne sont pas exactement 1, 2, 3… (un rang en double ou un
+ * trou) : vide si la propriété tient.
+ */
+function rankIssues(unions: readonly Union[]): Id[] {
   const ranks = new Map<Id, number[]>();
   for (const union of unions) {
     for (const spouse of union.spouses) {
       ranks.set(spouse.personId, [...(ranks.get(spouse.personId) ?? []), spouse.rank]);
     }
   }
-  return ranks;
+  return [...ranks]
+    .filter(([, own]) => [...own].sort((x, y) => x - y).some((rank, index) => rank !== index + 1))
+    .map(([personId]) => personId);
 }
 
 describe('propriétés des arbres générés', () => {
@@ -78,9 +83,7 @@ describe('propriétés des arbres générés', () => {
           expect(union.spouses).toHaveLength(2);
           expect(union.spouses[0].personId).not.toBe(union.spouses[1].personId);
         }
-        for (const ranks of ranksByPerson(tree.unions).values()) {
-          expect([...ranks].sort((a, b) => a - b)).toEqual(ranks.map((_, index) => index + 1));
-        }
+        expect(rankIssues(tree.unions)).toEqual([]);
       }),
       { numRuns: 2000 },
     );
@@ -109,6 +112,10 @@ describe('propriétés des arbres générés', () => {
   it('les mêmes propriétés tiennent sur un arbre de 5 000 personnes', () => {
     const tree = generateTree({ seed: 7, size: 5000, rates: { polygamy: 0.5, implex: 0.3 } });
     expect(hasFiliationCycle(tree.people, tree.filiations)).toBe(false);
+    for (const union of tree.unions) {
+      expect(union.spouses[0].personId).not.toBe(union.spouses[1].personId);
+    }
+    expect(rankIssues(tree.unions)).toEqual([]);
     for (const count of birthParentCounts(tree.filiations).values())
       expect(count).toBeLessThanOrEqual(2);
     expect(treeDataIssues(tree)).toEqual([]);
@@ -138,6 +145,32 @@ describe('les vérifications détectent un arbre fautif', () => {
     const extra: Filiation[] = [0, 1].map(() => ({ ...child, parentId: stranger.id }));
     const counts = birthParentCounts([...tree.filiations, ...extra]);
     expect(Math.max(...counts.values())).toBeGreaterThan(2);
+  });
+
+  it('un rang d’union en double ou un trou dans les rangs est vu', () => {
+    const polygamous = tree.unions.find((union) =>
+      tree.unions.some(
+        (other) => other !== union && other.spouses[0].personId === union.spouses[0].personId,
+      ),
+    );
+    if (polygamous === undefined) throw new Error('missing polygamous union');
+    const person = polygamous.spouses[0].personId;
+    expect(rankIssues(tree.unions)).toEqual([]);
+    const withRank = (rank: number) =>
+      tree.unions.map((union) =>
+        union === polygamous
+          ? {
+              ...union,
+              spouses: [{ ...union.spouses[0], rank }, union.spouses[1]] satisfies Union['spouses'],
+            }
+          : union,
+      );
+    const otherRank = tree.unions.find(
+      (union) => union !== polygamous && union.spouses[0].personId === person,
+    )?.spouses[0].rank;
+    if (otherRank === undefined) throw new Error('missing rank');
+    expect(rankIssues(withRank(otherRank))).toContain(person);
+    expect(rankIssues(withRank(99))).toContain(person);
   });
 
   it('un objet invalide, une référence perdue ou un identifiant pris deux fois sont signalés', () => {
