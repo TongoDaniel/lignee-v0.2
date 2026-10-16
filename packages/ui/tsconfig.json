@@ -1,4 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": ["src"]
+  "compilerOptions": {
+    // Les scripts de génération (scripts/) tournent directement sous Node 24, sans compilation :
+    // leurs imports relatifs gardent l'extension `.ts`.
+    "types": ["node"],
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "declaration": false
+  },
+  "include": ["src", "scripts"]
 }

@@ -174,15 +174,24 @@ importers:
 
   packages/ui:
     devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.0
       eslint:
         specifier: 'catalog:'
         version: 10.11.0(jiti@2.6.1)
+      prettier:
+        specifier: 3.9.9
+        version: 3.9.9
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
         version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
+      wawoff2:
+        specifier: 2.0.1
+        version: 2.0.1
 
   packages/voice:
     devDependencies:
@@ -1737,6 +1746,10 @@ packages:
         optional: true
       jsdom:
         optional: true
+
+  wawoff2@2.0.1:
+    resolution: {integrity: sha512-r0CEmvpH63r4T15ebFqeOjGqU4+EgTx4I510NtK35EMciSdcTxCw3Byy3JnBonz7iyIFZ0AbVo0bbFpEVuhCYA==}
+    hasBin: true
 
   which-boxed-primitive@1.1.1:
     resolution: {integrity: sha512-TbX3mj8n0odCBFVlY8AxkqcHASw3L60jIuF8jFP78az3C2YhmGvqbHBpAjTRH2/xqYunrJ9g1jSyjCjpoWzIAA==}
@@ -3392,6 +3405,10 @@ snapshots:
       '@types/node': 24.19.0
     transitivePeerDependencies:
       - msw
+
+  wawoff2@2.0.1:
+    dependencies:
+      argparse: 2.0.1
 
   which-boxed-primitive@1.1.1:
     dependencies:
