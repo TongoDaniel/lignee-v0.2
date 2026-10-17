@@ -11,7 +11,7 @@
 # Node est épinglé par version et par empreinte (Dependabot propose les mises à jour,
 # .github/dependabot.yml). Même image que .nvmrc (24).
 
-FROM node:24.20.0-trixie-slim@sha256:50c3b2f6988dfc307b86e5301d69611af31f4789bdf232863b07d3b02fe55ae0 AS build
+FROM node:26.9.0-trixie-slim@sha256:3a771f83944bb763050c23c0225c260638c4b7899e7a72485ef75e5e570499e5 AS build
 # Corepack (livré avec Node 24) prend la version de pnpm fixée dans package.json.
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 WORKDIR /repo
@@ -26,7 +26,7 @@ RUN corepack pnpm --filter @lignee/worker deploy --prod --frozen-lockfile /out >
       exit 1; \
     fi
 
-FROM node:24.20.0-trixie-slim@sha256:50c3b2f6988dfc307b86e5301d69611af31f4789bdf232863b07d3b02fe55ae0
+FROM node:26.9.0-trixie-slim@sha256:3a771f83944bb763050c23c0225c260638c4b7899e7a72485ef75e5e570499e5
 ENV NODE_ENV=production
 WORKDIR /app
 # Fichiers à root, en lecture seule pour l'utilisateur qui fait tourner le programme.
