@@ -27,8 +27,8 @@ describe('unions (UNI-05 à UNI-08)', () => {
       id: tree.nextId(),
       treeId: tree.treeId,
       spouses: [
-        { personId: tree.personId('a'), rank: 2 },
-        { personId: tree.personId('b'), rank: 1 },
+        { personId: tree.personId('a'), rank: 2, simultaneity: 'simultaneous' },
+        { personId: tree.personId('b'), rank: 1, simultaneity: 'successive' },
       ],
       type: 'customary',
       start: fuzzyDateFromText('vers 1975'),
@@ -37,7 +37,6 @@ describe('unions (UNI-05 à UNI-08)', () => {
       declaredOption: 'polygamy',
       placeId: tree.nextId(),
       notes: 'Dot versée au village',
-      simultaneity: 'simultaneous',
     });
     expect(union.spouses.map((spouse) => spouse.rank)).toEqual([2, 1]);
   });
@@ -60,10 +59,9 @@ describe('unions (UNI-05 à UNI-08)', () => {
         id: tree.nextId(),
         treeId: tree.treeId,
         spouses: [
-          { personId: center, rank: index + 1 },
+          { personId: center, rank: index + 1, simultaneity: 'simultaneous' },
           { personId: tree.personId(`conjoint${String(index)}`), rank: 1 },
         ],
-        simultaneity: 'simultaneous',
       }),
     );
     expect(unions).toHaveLength(12);

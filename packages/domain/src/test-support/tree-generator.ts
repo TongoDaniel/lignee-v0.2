@@ -15,7 +15,7 @@ import type { Id } from '../ids';
 import type { Name, Person } from '../person';
 import type { KinshipStep, Place } from '../place';
 import type { Tree } from '../tree';
-import type { Union, UnionType } from '../union';
+import type { Union, UnionSimultaneity, UnionType } from '../union';
 import type { VisibilityRule } from '../visibility';
 import {
   generateGivenName,
@@ -147,7 +147,13 @@ interface UnionInfo {
   startYear: number;
   endYear: number | undefined;
   endReason: Union['endReason'];
-  simultaneity: Union['simultaneity'];
+  /** Simultanéité de l'union quand elle a été créée ; sert à l'option « polygamie » déclarée. */
+  simultaneity: UnionSimultaneity | undefined;
+  /**
+   * Réponse gardée pour chaque conjoint (ADR 0012) : la place de l'union parmi les autres unions
+   * de ce conjoint ; absente quand la question n'a pas encore été posée.
+   */
+  answers: [UnionSimultaneity | undefined, UnionSimultaneity | undefined];
   type: UnionType;
 }
 
@@ -516,7 +522,7 @@ export function generateTree(options: TreeGeneratorOptions): GeneratedTree {
     a: PersonInfo,
     b: PersonInfo,
     earliestStart: number,
-    simultaneity: Union['simultaneity'],
+    simultaneity: UnionSimultaneity | undefined,
   ): UnionInfo {
     const lowest = Math.min(a.deathYear ?? CURRENT_YEAR, b.deathYear ?? CURRENT_YEAR, CURRENT_YEAR);
     const start = Math.min(
@@ -524,6 +530,13 @@ export function generateTree(options: TreeGeneratorOptions): GeneratedTree {
       lowest,
     );
     const divorced = simultaneity === undefined && random.chance(0.04);
+    // Pour chaque conjoint : simultanée s'il a déjà une union en cours, successive sinon.
+    const answerFor = (spouse: PersonInfo): UnionSimultaneity | undefined =>
+      simultaneity === undefined
+        ? undefined
+        : simultaneity === 'simultaneous' && ongoingUnions(spouse).length > 0
+          ? 'simultaneous'
+          : 'successive';
     const union: UnionInfo = {
       id: nextId(),
       spouses: [a, b],
@@ -532,6 +545,7 @@ export function generateTree(options: TreeGeneratorOptions): GeneratedTree {
       endYear: undefined,
       endReason: undefined,
       simultaneity,
+      answers: [answerFor(a), answerFor(b)],
       type: random.pick(UNION_TYPES),
     };
     if (divorced && start + 3 < lowest) {
@@ -542,7 +556,10 @@ export function generateTree(options: TreeGeneratorOptions): GeneratedTree {
       // Les unions en cours de chaque conjoint deviennent simultanées avec la nouvelle (UNI-08).
       for (const spouse of [a, b]) {
         const ongoing = ongoingUnions(spouse);
-        for (const other of ongoing) other.simultaneity = 'simultaneous';
+        for (const other of ongoing) {
+          other.simultaneity = 'simultaneous';
+          other.answers[other.spouses[0] === spouse ? 0 : 1] = 'simultaneous';
+        }
         if (ongoing.length > 0 && !polygamous.has(spouse.id)) {
           polygamous.add(spouse.id);
           features.polygamousPeople += 1;
@@ -842,14 +859,21 @@ export function generateTree(options: TreeGeneratorOptions): GeneratedTree {
         id: union.id,
         treeId,
         spouses: [
-          { personId: a.id, rank: union.ranks[0] },
-          { personId: b.id, rank: union.ranks[1] },
+          {
+            personId: a.id,
+            rank: union.ranks[0],
+            ...(union.answers[0] === undefined ? {} : { simultaneity: union.answers[0] }),
+          },
+          {
+            personId: b.id,
+            rank: union.ranks[1],
+            ...(union.answers[1] === undefined ? {} : { simultaneity: union.answers[1] }),
+          },
         ],
         type: union.type,
         ...(random.chance(0.6) ? { start: dateText(random, union.startYear) } : {}),
         ...(union.endYear === undefined ? {} : { end: dateText(random, union.endYear) }),
         ...(union.endReason === undefined ? {} : { endReason: union.endReason }),
-        ...(union.simultaneity === undefined ? {} : { simultaneity: union.simultaneity }),
         ...(union.simultaneity === 'simultaneous' && random.chance(0.3)
           ? { declaredOption: 'polygamy' as const }
           : {}),

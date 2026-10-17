@@ -26,16 +26,23 @@ export const declaredOptionSchema = z.enum(['monogamy', 'polygamy']);
 export type DeclaredOption = z.infer<typeof declaredOptionSchema>;
 
 /**
- * Simultanéité saisie (UNI-08). Elle se déduit des dates ; sans dates, la réponse donnée à la
- * question unique est gardée ici, modifiable.
+ * Simultanéité saisie (UNI-08) : la réponse à la question posée quand les dates ne suffisent pas
+ * (`union-simultaneity.ts`), gardée et modifiable. Elle est portée par chaque conjoint, pas par
+ * l'union (ADR 0012) : dans un lévirat, la même union est « simultanée » pour le frère déjà marié
+ * et « successive » pour la veuve.
  */
 export const unionSimultaneitySchema = z.enum(['simultaneous', 'successive']);
 export type UnionSimultaneity = z.infer<typeof unionSimultaneitySchema>;
 
-/** Un conjoint et le rang de cette union pour lui (UNI-07 : 2e de l'un, 1re de l'autre). */
+/**
+ * Un conjoint, le rang de cette union pour lui (UNI-07 : 2e de l'un, 1re de l'autre) et, si la
+ * question a été posée, la place de cette union parmi les autres unions de ce conjoint :
+ * simultanée ou successive (UNI-08, ADR 0012).
+ */
 export const spouseSchema = z.strictObject({
   personId: idSchema,
   rank: rankSchema,
+  simultaneity: unionSimultaneitySchema.optional(),
 });
 export type Spouse = z.infer<typeof spouseSchema>;
 
@@ -56,7 +63,6 @@ export const unionSchema = z
     declaredOption: declaredOptionSchema.optional(),
     placeId: idSchema.optional(),
     notes: textSchema.optional(),
-    simultaneity: unionSimultaneitySchema.optional(),
   })
   .refine((union) => union.spouses[0].personId !== union.spouses[1].personId, {
     message: 'A union links two different people',

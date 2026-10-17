@@ -201,6 +201,23 @@ function dayFromNumber(number: number): CalendarDay {
   return { year: yearOfEra + era * 400 + (month <= 2 ? 1 : 0), month, day };
 }
 
+/** Ordre de deux jours du calendrier grégorien : négatif, nul ou positif. */
+export function compareCalendarDays(a: CalendarDay, b: CalendarDay): number {
+  return a.year - b.year || a.month - b.month || a.day - b.day;
+}
+
+/**
+ * Le même jour, `months` mois plus tard (ou plus tôt si négatif). Un jour qui n'existe pas dans
+ * le mois d'arrivée devient le dernier du mois (31 mars moins un mois : 28 ou 29 février).
+ * Ajouter des années, c'est ajouter douze mois par année.
+ */
+export function addMonthsToDay(day: CalendarDay, months: number): CalendarDay {
+  const index = day.year * 12 + (day.month - 1) + months;
+  const year = Math.floor(index / 12);
+  const month = index - year * 12 + 1;
+  return { year, month, day: Math.min(day.day, daysInMonth('gregorian', year, month)) };
+}
+
 /** Premier et dernier jour couverts par une borne grégorienne, à sa précision. */
 function boundDays(bound: DateBound, precision: FuzzyDatePrecision): [number, number] {
   const { year } = bound;
