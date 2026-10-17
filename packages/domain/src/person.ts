@@ -23,16 +23,48 @@ export type Gender = z.infer<typeof genderSchema>;
 export const vitalStatusSchema = z.enum(['living', 'deceased', 'unknown']);
 export type VitalStatus = z.infer<typeof vitalStatusSchema>;
 
-export const personSchema = z.strictObject({
-  id: idSchema,
-  treeId: idSchema,
-  nature: personNatureSchema,
-  gender: genderSchema.default('unspecified'),
-  vitalStatus: vitalStatusSchema.default('unknown'),
-  notes: textSchema.optional(),
-  /** Version de la fiche, pour la synchronisation (TRD, table `personnes`). */
-  version: z.int().min(0).default(0),
-});
+export const personSchema = z
+  .strictObject({
+    id: idSchema,
+    treeId: idSchema,
+    nature: personNatureSchema,
+    gender: genderSchema.default('unspecified'),
+    vitalStatus: vitalStatusSchema.default('unknown'),
+    notes: textSchema.optional(),
+    /**
+     * Place à compléter seulement : personnes qu'elle n'est pas, dit explicitement (« mon frère
+     * de même père » : sa mère n'est pas la mienne, CL-VOI-08 ; ADR 0017). Sans cette mention,
+     * une place à compléter peut se révéler être n'importe qui (fusion, UNI-03) : rien n'est
+     * supposé. Disparaît avec la place quand elle est précisée.
+     */
+    distinctFrom: z.array(idSchema).min(1).optional(),
+    /** Version de la fiche, pour la synchronisation (TRD, table `personnes`). */
+    version: z.int().min(0).default(0),
+  })
+  .superRefine((person, context) => {
+    if (person.distinctFrom === undefined) return;
+    if (person.nature !== 'placeholder') {
+      context.addIssue({
+        code: 'custom',
+        message: 'Only a placeholder can be declared distinct from other people',
+        path: ['distinctFrom'],
+      });
+    }
+    if (person.distinctFrom.includes(person.id)) {
+      context.addIssue({
+        code: 'custom',
+        message: 'A person cannot be distinct from itself',
+        path: ['distinctFrom'],
+      });
+    }
+    if (new Set(person.distinctFrom).size !== person.distinctFrom.length) {
+      context.addIssue({
+        code: 'custom',
+        message: 'Duplicate person in distinctFrom',
+        path: ['distinctFrom'],
+      });
+    }
+  });
 export type Person = z.infer<typeof personSchema>;
 export type PersonInput = z.input<typeof personSchema>;
 

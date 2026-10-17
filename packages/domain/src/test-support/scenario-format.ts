@@ -86,8 +86,15 @@ export const expectedPlanStepSchema = z.union([
   z.strictObject({
     candidats_mere: z.strictObject({ enfant: z.string(), candidates: z.array(z.string()).min(1) }),
   }),
-  /** Crée une place à compléter (UNI-02) : « la mère de Bruno », identité inconnue. */
-  z.strictObject({ a_completer: expectedCreatedPersonSchema }),
+  /**
+   * Crée une place à compléter (UNI-02) : « la mère de Bruno », identité inconnue. `distincte_de`
+   * : personnes qu'elle n'est pas, dit explicitement (« de même père », sa mère n'est pas la
+   * mienne : CL-VOI-08, ADR 0017).
+   */
+  z.strictObject({
+    a_completer: expectedCreatedPersonSchema,
+    distincte_de: z.array(z.string()).min(1).optional(),
+  }),
   /**
    * Précise une place à compléter : c'est en fait `personne` (« même père même mère »,
    * CL-VOI-08). Ses filiations, unions et candidatures passent à `personne`, et la place
@@ -288,7 +295,19 @@ function precisePlaceholder(data: TreeData, placeId: Id, personId: Id): void {
     candidateId: swap(candidate.candidateId),
   }));
   data.names = data.names.filter((name) => name.personId !== placeId);
-  data.people = data.people.filter((person) => person.id !== placeId);
+  // La mention « distincte de » de la place disparaît avec elle : préciser l'emporte (correction
+  // dictée, « en fait, même mère », CL-VOI-08). Celles des autres places passent à la personne.
+  data.people = data.people
+    .filter((person) => person.id !== placeId)
+    .map((person) => {
+      if (person.distinctFrom === undefined) return person;
+      const distinctFrom = [...new Set(person.distinctFrom.map(swap))].filter(
+        (id) => id !== person.id,
+      );
+      const rest = { ...person };
+      delete rest.distinctFrom;
+      return distinctFrom.length === 0 ? rest : { ...rest, distinctFrom };
+    });
 }
 
 /**
@@ -340,11 +359,13 @@ export function applyExpectedPlan(
     } else if ('a_completer' in step) {
       const { key, gender } = step.a_completer;
       if (has(key)) throw new Error(`Person already exists: ${key}`);
+      const distinct = (step.distincte_de ?? []).map(idOf);
       const person = personSchema.parse({
         id: context.personId(key),
         treeId: context.treeId,
         nature: 'placeholder',
         gender,
+        ...(distinct.length === 0 ? {} : { distinctFrom: distinct }),
       });
       created.set(key, person.id);
       data.people.push(person);

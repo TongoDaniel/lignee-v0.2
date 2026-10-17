@@ -307,7 +307,7 @@ describe('le format refuse ce qui est mal formé', () => {
     const plan = actionExpectedSchema.parse({
       plan: [
         { creer: 'bruno/M' },
-        { a_completer: 'mere/F' },
+        { a_completer: 'mere/F', distincte_de: ['irene'] },
         { filiation: { parent: 'jules', enfant: 'bruno', type: 'naissance' } },
         { filiation: { parent: 'mere', enfant: 'bruno', type: 'naissance' } },
       ],
@@ -315,9 +315,19 @@ describe('le format refuse ce qui est mal formé', () => {
     if (plan === undefined) throw new Error('missing plan');
     const first = applyExpectedPlan(tree, plan);
     expect(treeDataIssues(first.data)).toEqual([]);
-    expect(first.data.people.find((person) => person.id === first.id('mere'))?.nature).toBe(
-      'placeholder',
-    );
+    const mere = first.data.people.find((person) => person.id === first.id('mere'));
+    expect(mere?.nature).toBe('placeholder');
+    expect(mere?.distinctFrom).toEqual([first.id('irene')]);
+    expect(() =>
+      applyExpectedPlan(tree, [
+        { a_completer: { key: 'x', gender: 'female' }, distincte_de: ['yaw'] },
+      ]),
+    ).toThrow(/yaw/);
+    // Une mention qui vise une personne absente de l'arbre est signalée.
+    const dangling = structuredClone(first.data);
+    dangling.people = dangling.people.filter((person) => person.id !== first.id('irene'));
+    expect(treeDataIssues(dangling).some((issue) => issue.message.includes('missing'))).toBe(true);
+    // Préciser l'emporte sur la mention (correction dictée, CL-VOI-08).
     const second = applyExpectedPlan(first, [{ preciser: { place: 'mere', personne: 'irene' } }]);
     expect(treeDataIssues(second.data)).toEqual([]);
     expect(second.data.people.some((person) => person.id === first.id('mere'))).toBe(false);
