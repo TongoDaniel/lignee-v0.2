@@ -9,17 +9,36 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p scripts/tsconfig.json",
-    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p test/tsconfig.json && tsc --noEmit -p scripts/tsconfig.json",
+    "test": "vitest run && jest",
     "tokens": "node scripts/generate-tokens.ts",
-    "fonts": "node scripts/generate-fonts.ts"
+    "fonts": "node scripts/generate-fonts.ts",
+    "assets": "node scripts/generate-assets.ts"
   },
   "devDependencies": {
+    "@testing-library/react-native": "13.3.3",
+    "@types/jest": "29.5.14",
     "@types/node": "catalog:",
+    "@types/react": "19.2.18",
+    "@types/react-test-renderer": "19.3.0",
     "eslint": "catalog:",
+    "expo": "57.0.26",
+    "jest": "29.7.0",
+    "jest-expo": "57.0.5",
     "prettier": "catalog:",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "5.7.0",
+    "react-native-svg": "15.15.4",
+    "react-test-renderer": "19.2.3",
     "typescript": "catalog:",
     "vitest": "catalog:",
     "wawoff2": "2.0.1"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "react-native-safe-area-context": "*",
+    "react-native-svg": "*"
   }
 }
