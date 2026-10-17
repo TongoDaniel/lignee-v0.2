@@ -1,0 +1,19 @@
+{
+  // Tout le code, tests compris (celui qu'ESLint utilise) : types de Jest et de Node pour les
+  // tests et app.config.ts. Le code embarqué est vérifié sans Node par tsconfig.app.json.
+  // Réglages d'Expo (JSX, résolution « bundler », condition react-native), puis la rigueur du
+  // monorepo (tsconfig.base.json) : strict, noUncheckedIndexedAccess, exactOptionalPropertyTypes…
+  "extends": ["expo/tsconfig.base", "../../tsconfig.base.json"],
+  "compilerOptions": {
+    "target": "ESNext",
+    "lib": ["DOM", "ESNext"],
+    "module": "preserve",
+    "jsx": "react-jsx",
+    "customConditions": ["react-native"],
+    "types": ["jest", "node"],
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "declaration": false
+  },
+  "include": ["src", "app.config.ts", "jest.setup.ts", ".expo/types/**/*.ts", "expo-env.d.ts"]
+}

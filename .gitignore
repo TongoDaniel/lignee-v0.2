@@ -36,3 +36,6 @@ recup_claude_ai/
 
 # Réglages Claude Code personnels
 .claude/settings.local.json
+
+# Types générés par Expo Router (typedRoutes)
+expo-env.d.ts

@@ -55,7 +55,12 @@ export default tseslint.config(
         projectService: {
           // Fichiers de configuration à la racine d'un paquet (vitest.config.ts…), hors de
           // `include`. Les motifs partent de la racine du dépôt ; `**` n'y est pas admis.
-          allowDefaultProject: ['*.config.ts', 'apps/*/*.config.ts', 'packages/*/*.config.ts'],
+          // apps/mobile/app.config.ts est dans le tsconfig de l'app : il n'est pas listé ici.
+          allowDefaultProject: [
+            '*.config.ts',
+            'apps/{admin,api,web,worker}/*.config.ts',
+            'packages/*/*.config.ts',
+          ],
         },
         tsconfigRootDir: import.meta.dirname,
       },
