@@ -37,3 +37,14 @@ Le test qui contrôle le `pnpm-lock.yaml` du dépôt dépend d'un fichier hors d
 Côté MinIO, l'administrateur crée un second compartiment avec un objet : la clé de l'application ne doit ni y lire ni y écrire, ni créer de compartiment. Un contrôle négatif n'est réussi que si `mc` répond par un refus de droits (« Access Denied » pour un compartiment, « Insufficient permissions to access this path » pour un objet, `REFUSAL_MESSAGES`) : une erreur réseau ou un objet absent le font échouer.
 
 Les droits refusés se vérifient par un bloc `DO` qui ne réussit que si PostgreSQL répond « droits insuffisants » (SQLSTATE 42501) : une instruction acceptée, ou une erreur d'une autre nature, fait échouer le contrôle.
+
+## Audit des dépendances : exceptions
+
+Le job `audit-dependances` (`pnpm audit --audit-level high`) échoue sur toute faille haute ou critique. Deux identifiants sont ignorés (`pnpm.auditConfig.ignoreGhsas` dans le `package.json` racine), parce qu'aucune version corrigée n'existe et que les paquets ne servent qu'aux outils du poste, jamais dans l'app publiée ni sur le serveur ([ADR 0008](../../docs/adr/0008-failles-sans-correctif-outils-mobile.md)) :
+
+| Identifiant | Paquet et chemin | Pourquoi l'app publiée n'est pas touchée | Revue |
+| --- | --- | --- | --- |
+| GHSA-86w9-cpqp-85rv | `node-forge` <= 1.4.0 : `apps/mobile` > `expo` > `@expo/cli` > `node-forge` | Ligne de commande d'Expo sur le poste, pour lire le certificat de signature iOS ; Metro ne l'embarque pas | 17 janvier 2027, ou au changement de SDK Expo |
+| GHSA-vfj7-8cjw-p6xm | `braces` <= 3.0.3 : `apps/mobile` > `@react-native/jest-preset` > `babel-jest` > `@jest/transform` > `micromatch` > `braces` | Jest, en test seulement, sur des motifs de notre configuration | 17 janvier 2027, ou au changement de Jest |
+
+Retirez l'exception dès qu'une version corrigée existe. N'en ajoutez pas sans ADR.
