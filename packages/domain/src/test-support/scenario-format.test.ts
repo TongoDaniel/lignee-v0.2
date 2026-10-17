@@ -16,6 +16,8 @@ import {
   readScenarioFile,
   scenarioFileSchema,
   scenarioIdSchema,
+  stepsExpectedSchema,
+  stepsScenarioSchema,
   unexpectedScenarioFiles,
 } from './scenario-format';
 import { buildScenarioTree, scenarioTreeSchema } from './scenario-tree';
@@ -58,6 +60,14 @@ describe('fichiers de scénarios', () => {
         const attendu = actionExpectedSchema.parse(scenario.attendu);
         if (attendu.plan !== undefined) {
           expect(treeDataIssues(applyExpectedPlan(tree, attendu.plan).data)).toEqual([]);
+        }
+      }
+      if (scenario.action !== undefined && 'etapes' in scenario.action) {
+        // Dictées successives : chaque plan s'applique à l'arbre laissé par les précédents.
+        let current = tree;
+        for (const step of stepsExpectedSchema.parse(scenario.attendu).etapes) {
+          current = applyExpectedPlan(current, step.plan ?? []);
+          expect(treeDataIssues(current.data)).toEqual([]);
         }
       }
     });
@@ -271,6 +281,93 @@ describe('le format refuse ce qui est mal formé', () => {
       unions: [{ conjoints: ['ama', 'ama'] }],
     });
     expect(() => buildScenarioTree(section)).toThrow();
+  });
+
+  it('la section a_completer construit des places à compléter, sans nom, et refuse un inconnu', () => {
+    const tree = buildScenarioTree(
+      scenarioTreeSchema.parse({ personnes: ['ama/F', 'x/N'], a_completer: ['x'] }),
+    );
+    expect(treeDataIssues(tree.data)).toEqual([]);
+    const natureOf = (key: string) =>
+      tree.data.people.find((person) => person.id === tree.id(key))?.nature;
+    expect(natureOf('x')).toBe('placeholder');
+    expect(natureOf('ama')).toBe('known');
+    expect(tree.data.names.some((name) => name.personId === tree.id('x'))).toBe(false);
+    const unknown = scenarioTreeSchema.parse({ personnes: ['ama/F'], a_completer: ['kofi'] });
+    expect(() => buildScenarioTree(unknown)).toThrow(/kofi/);
+  });
+
+  it('un plan crée une place à compléter, puis la précise : ses filiations passent à la personne', () => {
+    const tree = buildScenarioTree(
+      scenarioTreeSchema.parse({
+        personnes: ['jules/M', 'irene/F', 'carine/F'],
+        filiations: [{ parents: ['jules', 'irene'], enfant: 'carine' }],
+      }),
+    );
+    const plan = actionExpectedSchema.parse({
+      plan: [
+        { creer: 'bruno/M' },
+        { a_completer: 'mere/F' },
+        { filiation: { parent: 'jules', enfant: 'bruno', type: 'naissance' } },
+        { filiation: { parent: 'mere', enfant: 'bruno', type: 'naissance' } },
+      ],
+    }).plan;
+    if (plan === undefined) throw new Error('missing plan');
+    const first = applyExpectedPlan(tree, plan);
+    expect(treeDataIssues(first.data)).toEqual([]);
+    expect(first.data.people.find((person) => person.id === first.id('mere'))?.nature).toBe(
+      'placeholder',
+    );
+    const second = applyExpectedPlan(first, [{ preciser: { place: 'mere', personne: 'irene' } }]);
+    expect(treeDataIssues(second.data)).toEqual([]);
+    expect(second.data.people.some((person) => person.id === first.id('mere'))).toBe(false);
+    expect(
+      second.data.filiations
+        .filter((filiation) => filiation.childId === second.id('bruno'))
+        .map((filiation) => second.keyOf(filiation.parentId)),
+    ).toEqual(['jules', 'irene']);
+    // L'arbre d'avant est intact.
+    expect(first.data.people.some((person) => person.id === first.id('mere'))).toBe(true);
+    // Seule une place à compléter se précise.
+    expect(() =>
+      applyExpectedPlan(first, [{ preciser: { place: 'jules', personne: 'irene' } }]),
+    ).toThrow(/Not a placeholder/);
+    expect(() =>
+      applyExpectedPlan(first, [{ preciser: { place: 'mere', personne: 'mere' } }]),
+    ).toThrow(/itself/);
+    expect(() =>
+      applyExpectedPlan(first, [{ preciser: { place: 'mere', personne: 'bruno' } }]),
+    ).toThrow(/own parent/);
+  });
+
+  it('des dictées successives (etapes) : une forme de dictée et un attendu par étape', () => {
+    const steps = {
+      id: 'CL-POL-03',
+      titre: 'Essai',
+      arbre: { personnes: ['ama/F', 'kofi/M'] },
+      action: {
+        etapes: [
+          { locuteur: 'ama', dictee: 'Kofi est mon frère de même père' },
+          { locuteur: 'ama', dictee: 'Même père même mère' },
+        ],
+      },
+      attendu: { etapes: [{ questions: 0 }, { questions: 0 }] },
+    };
+    expect(parse(steps)).toBe(true);
+    expect(stepsScenarioSchema('CL-POL-03').safeParse(steps).success).toBe(true);
+    const shorter = { ...steps, attendu: { etapes: [{ questions: 0 }, { questions: 0 }, {}] } };
+    expect(parse(shorter)).toBe(false);
+    expect(stepsScenarioSchema('CL-POL-03').safeParse(shorter).success).toBe(false);
+    const stranger = {
+      ...steps,
+      action: { etapes: [steps.action.etapes[0], { locuteur: 'yaw', dictee: 'Bonjour' }] },
+    };
+    expect(parse(stranger)).toBe(false);
+    expect(parse({ ...steps, attendu: { etapes: [{ humeur: 'bonne' }, {}] } })).toBe(false);
+  });
+
+  it('la couverture reconnaît la partie lien', () => {
+    expect(parse({ ...base, couverture: { teste: ['lecture', 'lien'], reste: [] } })).toBe(true);
   });
 
   it('un plan attendu ne crée pas une personne qui existe, ni ne vise une personne absente', () => {

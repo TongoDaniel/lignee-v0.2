@@ -20,10 +20,12 @@ const PLAYED_DIR_VARIABLE = 'LIGNEE_SCENARIOS_PLAYED_DIR';
  * Couverture partielle (test/scenarios/README.md) : parties testées, tickets qui complètent.
  * `lecture` : le scénario est lu et son arbre de départ construit en objets valides du modèle,
  * sans que son attendu soit encore vérifié. `disposition` : générations et foyers calculés par
- * packages/layout et comparés à l'attendu (T-008).
+ * packages/layout et comparés à l'attendu (T-008). `lien` : le lien attendu (`attendu.lien`) est
+ * vérifié sur la structure calculée par packages/kinship (fratrie, T-020) ; les mots restent à
+ * T-026 et T-027.
  */
 export const coverageSchema = z.strictObject({
-  teste: z.array(z.enum(['lecture', 'modele', 'disposition'])).min(1),
+  teste: z.array(z.enum(['lecture', 'modele', 'disposition', 'lien'])).min(1),
   reste: z.array(z.string().regex(/^T-\d{3}$/)),
 });
 

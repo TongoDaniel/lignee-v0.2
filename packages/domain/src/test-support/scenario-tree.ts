@@ -69,6 +69,8 @@ export type ScenarioFact = z.infer<typeof scenarioFactSchema>;
 export const scenarioTreeSchema = z
   .strictObject({
     personnes: z.array(scenarioPersonSchema).min(1),
+    /** Personnes de `personnes` qui sont « à compléter » (UNI-02, UNI-12) : sans nom par défaut. */
+    a_completer: z.array(z.string()).optional(),
     noms: z.array(scenarioNameSchema).optional(),
     unions: z.array(scenarioUnionSchema).optional(),
     filiations: z.array(scenarioFiliationSchema).optional(),
@@ -107,7 +109,7 @@ export interface ScenarioTree {
 }
 
 /**
- * Construit l'arbre de départ : personnes connues, noms, unions (rang absent : rang suivant du
+ * Construit l'arbre de départ : personnes connues ou à compléter (`a_completer`), noms, unions (rang absent : rang suivant du
  * conjoint, dans l'ordre des lignes, comme l'app, UNI-07 ; un rang déjà pris par la même personne
  * est refusé), filiations (de naissance et certaines sauf mention), naissances multiples, titres,
  * naissances et décès datés (T-007). Chaque objet passe son schéma, et chaque personne
@@ -134,18 +136,28 @@ export function buildScenarioTree(
     }),
   );
 
+  // Places à compléter : nature `placeholder`, existence certaine, identité inconnue (UNI-02).
+  // Un nom absent de `personnes` est une erreur, comme ailleurs.
+  const placeholders = new Set(section.a_completer ?? []);
+  for (const key of placeholders) id(key);
   data.people = section.personnes.map(({ key, gender }) =>
-    personSchema.parse({ id: id(key), treeId: context.treeId, nature: 'known', gender }),
+    personSchema.parse({
+      id: id(key),
+      treeId: context.treeId,
+      nature: placeholders.has(key) ? 'placeholder' : 'known',
+      gender,
+    }),
   );
   data.names = (section.noms ?? []).map((line) => {
     id(line.personne);
     return nameSchema.parse(nameFromScenario(context, line));
   });
-  // Une personne sans ligne dans `noms` porte son nom court comme prénom (« pierre » : Pierre) :
-  // le format du TRD ne nomme les personnes que par ce nom court, et une fiche connue a un nom.
+  // Une personne connue sans ligne dans `noms` porte son nom court comme prénom (« pierre » :
+  // Pierre) : le format du TRD ne nomme les personnes que par ce nom court, et une fiche connue a
+  // un nom. Une place à compléter n'en reçoit pas (« Inconnu » à l'écran, jamais enregistré).
   const named = new Set(data.names.map((name) => name.personId));
   for (const { key } of section.personnes) {
-    if (!named.has(id(key))) data.names.push(defaultName(context, key));
+    if (!named.has(id(key)) && !placeholders.has(key)) data.names.push(defaultName(context, key));
   }
 
   // Rang absent : rang suivant du conjoint. Un rang écrit déjà pris par la même personne (écrit

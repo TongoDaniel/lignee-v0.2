@@ -7,7 +7,7 @@ import { readdirSync } from 'node:fs';
 import { z } from 'zod';
 
 import { textSchema } from '../common';
-import { filiationSchema, parentCandidateSchema } from '../filiation';
+import { filiationSchema, parentCandidateSchema, type Filiation } from '../filiation';
 import type { Id } from '../ids';
 import { personSchema } from '../person';
 import {
@@ -18,6 +18,7 @@ import {
   scenarioPersonSchema,
 } from './scenario';
 import { defaultName, scenarioTreeSchema, type ScenarioTree } from './scenario-tree';
+import type { TreeData } from './tree-data';
 
 /** Identifiant de l'onglet Cas limites : `CL-POL-03`. */
 export const scenarioIdSchema = z.string().regex(/^CL-[A-Z]{3}-\d{2}$/);
@@ -85,6 +86,14 @@ export const expectedPlanStepSchema = z.union([
   z.strictObject({
     candidats_mere: z.strictObject({ enfant: z.string(), candidates: z.array(z.string()).min(1) }),
   }),
+  /** Crée une place à compléter (UNI-02) : « la mère de Bruno », identité inconnue. */
+  z.strictObject({ a_completer: expectedCreatedPersonSchema }),
+  /**
+   * Précise une place à compléter : c'est en fait `personne` (« même père même mère »,
+   * CL-VOI-08). Ses filiations, unions et candidatures passent à `personne`, et la place
+   * disparaît.
+   */
+  z.strictObject({ preciser: z.strictObject({ place: z.string(), personne: z.string() }) }),
 ]);
 export type ExpectedPlanStep = z.infer<typeof expectedPlanStepSchema>;
 
@@ -101,6 +110,35 @@ export const actionExpectedSchema = z
   })
   .refine((expected) => Object.keys(expected).length > 0, { message: 'Nothing is expected' });
 export type ActionExpected = z.infer<typeof actionExpectedSchema>;
+
+/**
+ * Scénario en plusieurs dictées successives (CL-VOI-08 : « mon frère de même père », puis « même
+ * père même mère ») : `action.etapes` et `attendu.etapes`, de même longueur ; l'attendu d'une
+ * étape porte sur l'arbre après les plans de cette étape et des précédentes.
+ */
+export const stepsActionSchema = z.strictObject({
+  etapes: z.array(scenarioActionSchema).min(2),
+});
+export const stepsExpectedSchema = z.strictObject({
+  etapes: z.array(actionExpectedSchema).min(2),
+});
+
+export function stepsScenarioSchema(id: string) {
+  return z
+    .strictObject({
+      id: z.literal(id),
+      titre: textSchema,
+      couverture: coverageSchema.optional(),
+      arbre: scenarioTreeSchema,
+      action: stepsActionSchema,
+      attendu: stepsExpectedSchema,
+    })
+    .refine((scenario) => scenario.action.etapes.length === scenario.attendu.etapes.length, {
+      message: 'Each step needs its expectation',
+      path: ['attendu', 'etapes'],
+    });
+}
+export type StepsScenario = z.infer<ReturnType<typeof stepsScenarioSchema>>;
 
 /**
  * Scénario avec action (format de CL-POL-03) : arbre de départ, action, attendu. À passer à
@@ -142,7 +180,7 @@ export function scenarioFileSchema(id: string) {
       attendu: nonEmptyRecord,
     })
     .superRefine((scenario, context) => {
-      if (scenario.action === undefined || !('locuteur' in scenario.action)) return;
+      if (scenario.action === undefined) return;
       const relay = (prefix: string, issues: readonly z.core.$ZodIssue[]) => {
         for (const issue of issues) {
           context.addIssue({
@@ -152,18 +190,40 @@ export function scenarioFileSchema(id: string) {
           });
         }
       };
-      const action = scenarioActionSchema.safeParse(scenario.action);
-      if (!action.success) relay('action', action.error.issues);
       const keys = new Set(scenario.arbre?.personnes.map(({ key }) => key) ?? []);
-      if (action.success && !keys.has(action.data.locuteur)) {
+      const checkSpeaker = (speaker: string, path: (string | number)[]) => {
+        if (keys.has(speaker)) return;
         context.addIssue({
           code: 'custom',
-          message: `Speaker ${action.data.locuteur} is not in the tree`,
-          path: ['action', 'locuteur'],
+          message: `Speaker ${speaker} is not in the tree`,
+          path,
         });
+      };
+      if ('locuteur' in scenario.action) {
+        const action = scenarioActionSchema.safeParse(scenario.action);
+        if (!action.success) relay('action', action.error.issues);
+        if (action.success) checkSpeaker(action.data.locuteur, ['action', 'locuteur']);
+        const expected = actionExpectedSchema.safeParse(scenario.attendu);
+        if (!expected.success) relay('attendu', expected.error.issues);
+      } else if ('etapes' in scenario.action) {
+        // Dictées successives (CL-VOI-08) : chaque étape a la forme d'une dictée.
+        const action = stepsActionSchema.safeParse(scenario.action);
+        if (!action.success) relay('action', action.error.issues);
+        action.data?.etapes.forEach((step, index) => {
+          checkSpeaker(step.locuteur, ['action', 'etapes', index, 'locuteur']);
+        });
+        const expected = stepsExpectedSchema.safeParse(scenario.attendu);
+        if (!expected.success) relay('attendu', expected.error.issues);
+        if (action.data !== undefined && expected.data !== undefined) {
+          if (action.data.etapes.length !== expected.data.etapes.length) {
+            context.addIssue({
+              code: 'custom',
+              message: 'Each step needs its expectation',
+              path: ['attendu', 'etapes'],
+            });
+          }
+        }
       }
-      const expected = actionExpectedSchema.safeParse(scenario.attendu);
-      if (!expected.success) relay('attendu', expected.error.issues);
     });
 }
 export type ScenarioFile = z.infer<ReturnType<typeof scenarioFileSchema>>;
@@ -174,6 +234,61 @@ export type ScenarioFile = z.infer<ReturnType<typeof scenarioFileSchema>>;
  */
 export function readScenarioFile(id: string): ScenarioFile {
   return scenarioFileSchema(id).parse(readScenarioYaml(id));
+}
+
+/**
+ * Remplace une place à compléter par la personne qu'elle était (pas `preciser` d'un plan) : ses
+ * filiations, unions et candidatures passent à `personId`, la place disparaît. Une filiation qui
+ * ferait double emploi (même parent, même enfant, même type) n'est pas recopiée. Refuse une place
+ * qui n'est pas à compléter, une place citée ailleurs (faits, titres, naissances multiples) et une
+ * filiation d'une personne vers elle-même.
+ */
+function precisePlaceholder(data: TreeData, placeId: Id, personId: Id): void {
+  const place = data.people.find((person) => person.id === placeId);
+  if (place?.nature !== 'placeholder') throw new Error(`Not a placeholder: ${placeId}`);
+  if (placeId === personId) throw new Error('A placeholder cannot be precised as itself');
+  const citedElsewhere =
+    data.facts.some(
+      (fact) => fact.subject.kind === 'person' && fact.subject.personId === placeId,
+    ) ||
+    data.titleRoles.some((title) => title.personId === placeId) ||
+    data.multipleBirths.some((birth) =>
+      birth.members.some((member) => member.personId === placeId),
+    );
+  if (citedElsewhere) throw new Error(`Placeholder ${placeId} is cited outside its links`);
+  const swap = (value: Id) => (value === placeId ? personId : value);
+
+  const filiations: Filiation[] = [];
+  for (const filiation of data.filiations) {
+    const moved = {
+      ...filiation,
+      parentId: swap(filiation.parentId),
+      childId: swap(filiation.childId),
+    };
+    if (moved.parentId === moved.childId) throw new Error('A person cannot be their own parent');
+    const duplicate = filiations.some(
+      (kept) =>
+        kept.parentId === moved.parentId &&
+        kept.childId === moved.childId &&
+        kept.type === moved.type,
+    );
+    if (!duplicate) filiations.push(moved);
+  }
+  data.filiations = filiations;
+  data.unions = data.unions.map((union) => ({
+    ...union,
+    spouses: [
+      { ...union.spouses[0], personId: swap(union.spouses[0].personId) },
+      { ...union.spouses[1], personId: swap(union.spouses[1].personId) },
+    ],
+  }));
+  data.parentCandidates = data.parentCandidates.map((candidate) => ({
+    ...candidate,
+    childId: swap(candidate.childId),
+    candidateId: swap(candidate.candidateId),
+  }));
+  data.names = data.names.filter((name) => name.personId !== placeId);
+  data.people = data.people.filter((person) => person.id !== placeId);
 }
 
 /**
@@ -222,6 +337,19 @@ export function applyExpectedPlan(
           certainty: 'certain',
         }),
       );
+    } else if ('a_completer' in step) {
+      const { key, gender } = step.a_completer;
+      if (has(key)) throw new Error(`Person already exists: ${key}`);
+      const person = personSchema.parse({
+        id: context.personId(key),
+        treeId: context.treeId,
+        nature: 'placeholder',
+        gender,
+      });
+      created.set(key, person.id);
+      data.people.push(person);
+    } else if ('preciser' in step) {
+      precisePlaceholder(data, idOf(step.preciser.place), idOf(step.preciser.personne));
     } else {
       for (const candidate of step.candidats_mere.candidates) {
         data.parentCandidates.push(

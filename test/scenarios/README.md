@@ -20,6 +20,7 @@ Sections de `arbre` (une section absente vaut une liste vide, une clé inconnue 
 | Section | Ligne | Objets du modèle |
 | --- | --- | --- |
 | `personnes` | `pierre/M` : nom court et genre (`M`, `F`, `A` autre, `N` non renseigné) ; chaque nom court une seule fois | `Person` connue. Sans ligne dans `noms`, la personne porte son nom court comme prénom (« Pierre ») |
+| `a_completer` | Noms courts de `personnes` qui sont des places à compléter (UNI-02, UNI-12) | `Person` de nature `placeholder`, sans nom par défaut |
 | `noms` | `{ personne, type, prenoms?, nom?, forme?, debut?, fin? }` ; `type` : `naissance`, `usage`, `surnom`, `titre`, `variante`, `ancien` | `Name` |
 | `unions` | `{ conjoints: [a, b], rang_a?, rang_b?, debut?, fin?, motif? }` ; `debut` et `fin` au format `scenarioFuzzyDateSchema` ; `motif` : `deces`, `divorce`, `separation`, `non_renseigne` | `Union`. Un rang absent est le rang suivant de ce conjoint dans l'ordre des lignes (UNI-07) : dans CL-POL-03, Rose a le rang 1. Un rang déjà pris par la même personne, écrit ou déduit, est refusé |
 | `filiations` | `{ parents: [a, b?], enfant, type?, certitude? }` ; `type` : `naissance` (par défaut), `adoptive`, `a_eleve`, `confie`, `tuteur`, `donneur`, `gpa` ; `certitude` : `certain` (par défaut), `probable`, `hypothetique` | Une `Filiation` par parent |
@@ -31,7 +32,9 @@ Sections de `arbre` (une section absente vaut une liste vide, une clé inconnue 
 
 Les dates `debut` et `fin` d'un nom ou d'un titre sont gardées comme texte d'origine (`fuzzyDateFromText`) ; celles d'une union sont des dates floues complètes. Les dates floues complètes d'un cas (T-005) s'écrivent avec `scenarioFuzzyDateSchema` (`qualificatif`, `date` ou `de` et `a`, `precision`, `texte`, `calendrier`) et se convertissent avec `fuzzyDateInputFromScenario` (`scenario.ts`). Une section nouvelle (places à compléter, candidats, règles de visibilité…) s'ajoute dans `scenario-tree.ts` et dans ce tableau quand un scénario en a besoin, jamais dans un seul test.
 
-Plan attendu (`attendu.plan`) : `{ creer: samuel/M }`, `{ filiation: { parent, enfant, type } }`, `{ candidats_mere: { enfant, candidates: […] } }`. Lien attendu (`attendu.lien`) : `{ de, vers, fr, en }`.
+Plan attendu (`attendu.plan`) : `{ creer: samuel/M }`, `{ a_completer: mere_de_bruno/F }` (place à compléter), `{ filiation: { parent, enfant, type } }`, `{ candidats_mere: { enfant, candidates: […] } }`, `{ preciser: { place, personne } }` (la place à compléter est en fait cette personne : ses filiations, unions et candidatures passent à elle, la place disparaît). Lien attendu (`attendu.lien`) : `{ de, vers, fr, en }`.
+
+Dictées successives (CL-VOI-08) : `action.etapes` (au moins deux `{ locuteur, dictee }`) et `attendu.etapes` (un attendu de dictée par étape, même nombre), lus par `stepsScenarioSchema` ; le plan de chaque étape s'applique à l'arbre laissé par les précédentes.
 
 **Écart au format du TRD** : le TRD écrit `creer: samuel`, sans genre. Le genre de la personne créée compte pour le lien attendu (« frère ou demi-frère », pas « frère ou sœur ») ; `creer` prend donc la notation de `personnes` (`samuel/M`). La forme sans genre reste admise et crée une personne de genre non renseigné.
 
@@ -45,7 +48,7 @@ couverture:
   reste: [T-024, T-031]    # tickets du plan qui doivent compléter le scénario
 ```
 
-Parties reconnues dans `teste` : `lecture` (le scénario est lu, son arbre construit en objets valides du modèle et son plan attendu applicable, sans que le comportement attendu soit vérifié) `modele` (l'attendu porte sur le modèle et il est vérifié) et `disposition` (générations et foyers calculés par `packages/layout` et comparés à l'attendu, T-008). Un ticket qui joue une autre partie l'ajoute à l'énumération de `coverageSchema` (`packages/domain/src/test-support/scenario.ts`) et à cette liste. Un ticket de `reste` qui joue sa partie l'ajoute à `teste` et se retire de `reste`. Quand `reste` est vide, le champ peut disparaître.
+Parties reconnues dans `teste` : `lecture` (le scénario est lu, son arbre construit en objets valides du modèle et son plan attendu applicable, sans que le comportement attendu soit vérifié), `modele` (l'attendu porte sur le modèle et il est vérifié), `disposition` (générations et foyers calculés par `packages/layout` et comparés à l'attendu, T-008) et `lien` (le lien attendu, écrit en mots, est ramené à sa structure et comparé à la fratrie calculée par `packages/kinship`, T-020 ; les mots eux-mêmes restent à T-026 et T-027). Un ticket qui joue une autre partie l'ajoute à l'énumération de `coverageSchema` (`packages/domain/src/test-support/scenario.ts`) et à cette liste. Un ticket de `reste` qui joue sa partie l'ajoute à `teste` et se retire de `reste`. Quand `reste` est vide, le champ peut disparaître.
 
 ## Scénario joué
 
