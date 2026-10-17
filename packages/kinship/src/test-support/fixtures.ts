@@ -19,6 +19,8 @@ export interface FixtureOptions {
   placeholders?: readonly string[];
   /** Personnes retirées du graphe du lecteur, comme le ferait le filtre de visibilité. */
   hidden?: readonly string[];
+  /** Places à compléter dites distinctes d'autres personnes (`distinctFrom`, ADR 0017). */
+  distinct?: Readonly<Record<string, readonly string[]>>;
 }
 
 /** Petit arbre au format de la section `arbre` des scénarios (test/scenarios/README.md). */
@@ -28,9 +30,16 @@ export function fixture(section: unknown, options: FixtureOptions = {}): Fixture
   const hidden = new Set((options.hidden ?? []).map((key) => tree.id(key)));
   const data: TreeData = {
     ...tree.data,
-    people: tree.data.people.map((person) =>
-      placeholders.has(person.id) ? { ...person, nature: 'placeholder' as const } : person,
-    ),
+    people: tree.data.people.map((person) => {
+      if (!placeholders.has(person.id)) return person;
+      const key = tree.keyOf(person.id) ?? '';
+      const distinct = (options.distinct?.[key] ?? []).map((other) => tree.id(other));
+      return {
+        ...person,
+        nature: 'placeholder' as const,
+        ...(distinct.length === 0 ? {} : { distinctFrom: distinct }),
+      };
+    }),
   };
   // Seules les personnes sont retirées : unions et filiations qui les citent restent, pour
   // vérifier que le moteur ne les traverse jamais (défense en profondeur).

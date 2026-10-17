@@ -8,7 +8,9 @@
 // - siblingsOf rend exactement les personnes pour lesquelles siblingLink donne un lien ;
 // - retirer à A l'un de ses deux parents communs avec B donne « frère ou demi-frère » ; le
 //   préciser (PAR-03, UNI-13) redonne « frère » si c'est l'autre parent de B, « demi-frère » si
-//   c'est une autre personne connue.
+//   c'est une autre personne connue (et que l'autre parent de B l'est aussi) ou une place à
+//   compléter dite distincte de lui, « frère ou demi-frère » sinon ;
+// - une place à compléter n'est jamais supposée différente d'un autre parent (ADR 0017).
 import type { Filiation, Id, Person } from '@lignee/domain';
 import { treeArbitrary, type GeneratedTree } from '@lignee/domain/test-support';
 import fc from 'fast-check';
@@ -99,6 +101,18 @@ describe('propriétés de la fratrie sur des arbres générés', () => {
               expect(forward.sharing).toBe('full_or_half');
             }
             if (shared.length >= 2) expect(forward.sharing).toBe('full');
+            // Un seul parent commun, deux autres parents : demi-frères seulement si l'on sait
+            // qu'ils sont deux personnes (deux connues, ou une place dite distincte de l'autre).
+            const [oa] = [...pa].filter((p) => !pb.has(p));
+            const [ob] = [...pb].filter((p) => !pa.has(p));
+            if (shared.length === 1 && pa.size === 2 && pb.size === 2 && oa && ob) {
+              const known = (p: Id) => graph.person(p)?.nature === 'known';
+              const distinct =
+                (known(oa) && known(ob)) ||
+                (graph.person(oa)?.distinctFrom?.includes(ob) ?? false) ||
+                (graph.person(ob)?.distinctFrom?.includes(oa) ?? false);
+              expect(forward.sharing).toBe(distinct ? 'half' : 'full_or_half');
+            }
           }
         }),
         { numRuns: RUNS },
@@ -219,8 +233,8 @@ describe('propriétés de la fratrie sur des arbres générés', () => {
             const same = siblingLink(precise(removed), a, b);
             expect(same?.kind === 'sibling' && same.sharing).toBe('full');
             // Précisé : une autre personne connue, de l'autre genre que le parent commun.
-            // Demi-frères, du même côté qu'avant, que l'autre parent de B soit connu ou à
-            // compléter (une personne connue et une place à compléter : deux personnes, ADR 0017).
+            // Demi-frères, du même côté qu'avant, si l'autre parent de B est connu ; « frère ou
+            // demi-frère » s'il est à compléter, rien ne disant qu'il n'est pas cette personne.
             const common = graph.person(kept)?.gender;
             const stranger: Person = {
               id: 'precise-stranger',
@@ -232,8 +246,21 @@ describe('propriétés de la fratrie sur des arbres générés', () => {
             };
             const other = siblingLink(precise(stranger.id, [stranger]), a, b);
             if (other?.kind !== 'sibling') throw new Error('Expected a sibling');
-            expect(other.sharing).toBe('half');
+            const removedIsKnown = graph.person(removed)?.nature === 'known';
+            expect(other.sharing).toBe(removedIsKnown ? 'half' : 'full_or_half');
             expect(other.side).toBe(unspecified.side);
+            // Précisé : une place à compléter. Sans mention, « frère ou demi-frère » ; dite
+            // distincte de l'autre parent de B (« de même père »), demi-frères.
+            const place = (distinctFrom?: Id[]): Person => ({
+              ...stranger,
+              id: 'precise-place',
+              nature: 'placeholder',
+              ...(distinctFrom === undefined ? {} : { distinctFrom }),
+            });
+            const open = siblingLink(precise('precise-place', [place()]), a, b);
+            expect(open?.kind === 'sibling' && open.sharing).toBe('full_or_half');
+            const said = siblingLink(precise('precise-place', [place([removed])]), a, b);
+            expect(said?.kind === 'sibling' && said.sharing).toBe('half');
           }
         }),
         { numRuns: RUNS },

@@ -27,11 +27,12 @@ export type ParentSide = 'father' | 'mother' | 'parent';
 /**
  * Partage entre deux enfants :
  * - `full` : au moins deux parents communs (frère, sœur) ;
- * - `half` : un seul parent commun, et leurs autres parents sont deux personnes différentes
- *   (demi-frère, même père ou même mère) ;
- * - `full_or_half` : un seul parent commun connu, et l'autre parent pourrait être le même : non
- *   précisé d'un côté (avec ou sans candidats, UNI-11), ou deux places à compléter différentes,
- *   jamais supposées identiques (TRD) : « frère ou demi-frère ».
+ * - `half` : un seul parent commun, et leurs autres parents sont sûrement deux personnes
+ *   différentes : deux personnes connues, ou une place à compléter dite distincte de l'autre
+ *   (`distinctFrom`) (demi-frère, même père ou même mère) ;
+ * - `full_or_half` : un seul parent commun, et l'autre parent pourrait être le même : non précisé
+ *   d'un côté (avec ou sans candidats, UNI-11), ou une place à compléter que rien ne dit distincte
+ *   de l'autre parent, jamais supposée identique ni différente (TRD) : « frère ou demi-frère ».
  */
 export type SiblingSharing = 'full' | 'half' | 'full_or_half';
 
@@ -229,14 +230,28 @@ function otherParentState(
 
 /**
  * Deux autres parents différents font des demi-frères si l'on sait qu'ils sont deux personnes :
- * deux personnes connues, ou une connue et une place à compléter (créée faute d'avoir reconnu la
- * personne connue : « sans mère commune », CL-VOI-08). Deux places à compléter différentes, ou
- * un parent non précisé, laissent « frère ou demi-frère » (ADR 0017).
+ * deux personnes connues, ou une place à compléter dite explicitement distincte de l'autre parent
+ * (`distinctFrom` : « mon frère de même père », CL-VOI-08). Sinon, une place à compléter peut se
+ * révéler être l'autre parent (fusion, UNI-03) : « frère ou demi-frère », sans rien supposer
+ * (« un arbre juste avant un arbre complet », PRD). Un parent non précisé, avec ou sans
+ * candidats, laisse aussi « frère ou demi-frère » (ADR 0017).
  */
-function sharingWithOne(from: OtherParentState, to: OtherParentState): SiblingSharing {
+function sharingWithOne(
+  graph: KinshipGraph,
+  from: OtherParentState,
+  to: OtherParentState,
+): SiblingSharing {
   if (from.status === 'unspecified' || to.status === 'unspecified') return 'full_or_half';
-  if (from.status === 'placeholder' && to.status === 'placeholder') return 'full_or_half';
-  return 'half';
+  if (from.status === 'known' && to.status === 'known') return 'half';
+  return declaredDistinct(graph, from.personId, to.personId) ? 'half' : 'full_or_half';
+}
+
+/** Vrai si l'une des deux personnes est une place à compléter dite distincte de l'autre. */
+function declaredDistinct(graph: KinshipGraph, a: Id, b: Id): boolean {
+  return (
+    (graph.person(a)?.distinctFrom?.includes(b) ?? false) ||
+    (graph.person(b)?.distinctFrom?.includes(a) ?? false)
+  );
 }
 
 function typesOf(links: readonly FiliationLink[]): FiliationType[] {
@@ -324,7 +339,7 @@ function siblingByParents(
   const toOtherParent = otherParentState(graph, bId, toBirth, only.personId);
   return {
     ...base,
-    sharing: sharingWithOne(fromOtherParent, toOtherParent),
+    sharing: sharingWithOne(graph, fromOtherParent, toOtherParent),
     side,
     fromOtherParent,
     toOtherParent,

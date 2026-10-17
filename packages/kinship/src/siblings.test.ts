@@ -172,19 +172,57 @@ describe('« frère ou demi-frère » tant qu’un parent n’est pas précisé 
     expect(summary(f, 'lea', 'tom')).toBe('full - male');
   });
 
-  it('une mère à compléter face à une mère connue : demi-frère (CL-VOI-08, « sans mère commune »)', () => {
+  it('une mère à compléter face à une mère connue : frère ou demi-frère, rien n’est supposé', () => {
+    const section = {
+      personnes: ['jules/M', 'irene/F', 'x/F', 'carine/F', 'bruno/M'],
+      filiations: [
+        { parents: ['jules', 'irene'], enfant: 'carine' },
+        { parents: ['jules', 'x'], enfant: 'bruno' },
+      ],
+    };
+    // La place à compléter peut se révéler être Irène (fusion, UNI-03).
+    const open = fixture(section, { placeholders: ['x'] });
+    expect(summary(open, 'carine', 'bruno')).toBe('full_or_half father male');
+    expect(summary(open, 'bruno', 'carine')).toBe('full_or_half father female');
+    // « Mon frère de même père » : la mère de Bruno est dite distincte d'Irène (CL-VOI-08).
+    const distinct = fixture(section, { placeholders: ['x'], distinct: { x: ['irene'] } });
+    expect(summary(distinct, 'carine', 'bruno')).toBe('half father male');
+    expect(summary(distinct, 'bruno', 'carine')).toBe('half father female');
+    // Dite distincte d'une autre personne seulement : toujours rien de sûr pour Irène.
+    const elsewhere = fixture(
+      { ...section, personnes: [...section.personnes, 'rose/F'] },
+      { placeholders: ['x'], distinct: { x: ['rose'] } },
+    );
+    expect(summary(elsewhere, 'carine', 'bruno')).toBe('full_or_half father male');
+  });
+
+  it('deux places à compléter, l’une dite distincte de l’autre : demi-frères', () => {
+    const f = fixture(
+      {
+        personnes: ['paul/M', 'x/F', 'y/F', 'lea/F', 'tom/M'],
+        filiations: [
+          { parents: ['paul', 'x'], enfant: 'lea' },
+          { parents: ['paul', 'y'], enfant: 'tom' },
+        ],
+      },
+      { placeholders: ['x', 'y'], distinct: { y: ['x'] } },
+    );
+    expect(summary(f, 'lea', 'tom')).toBe('half father male');
+    expect(summary(f, 'tom', 'lea')).toBe('half father female');
+  });
+
+  it('mention « distincte de » vers une personne masquée : comme jamais saisie', () => {
     const f = fixture(
       {
         personnes: ['jules/M', 'irene/F', 'x/F', 'carine/F', 'bruno/M'],
         filiations: [
-          { parents: ['jules', 'irene'], enfant: 'carine' },
+          { parents: ['jules'], enfant: 'carine' },
           { parents: ['jules', 'x'], enfant: 'bruno' },
         ],
       },
-      { placeholders: ['x'] },
+      { placeholders: ['x'], distinct: { x: ['irene'] }, hidden: ['irene'] },
     );
-    expect(summary(f, 'carine', 'bruno')).toBe('half father male');
-    expect(summary(f, 'bruno', 'carine')).toBe('half father female');
+    expect(f.graph.person(f.id('x'))?.distinctFrom).toBeUndefined();
   });
 
   it('les deux sans autre parent, ou un seul : frère ou demi-frère', () => {

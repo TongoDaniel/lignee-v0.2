@@ -23,8 +23,12 @@ import type {
   Union,
 } from '@lignee/domain';
 
-/** Une personne, réduite à ce dont le calcul a besoin. */
-export type KinshipPerson = Pick<Person, 'id' | 'nature' | 'gender'>;
+/**
+ * Une personne, réduite à ce dont le calcul a besoin. `distinctFrom` (place à compléter dite
+ * distincte de certaines personnes, ADR 0017) ne garde que des personnes présentes : une mention
+ * qui viserait une personne masquée ne laisse aucune trace.
+ */
+export type KinshipPerson = Pick<Person, 'id' | 'nature' | 'gender' | 'distinctFrom'>;
 
 /**
  * Une union, réduite à sa structure : conjoints et rangs (renumérotés dans le graphe), type et
@@ -153,6 +157,18 @@ export class KinshipGraph {
       ids.push(person.id);
     }
     this.ids = ids;
+    // Mentions « distincte de » : seulement sur une place à compléter, vers des personnes
+    // présentes, triées et sans doublon.
+    for (const person of input.people) {
+      if (person.nature !== 'placeholder' || person.distinctFrom === undefined) continue;
+      const kept = [...new Set(person.distinctFrom)]
+        .filter((id) => id !== person.id && this.index.has(id))
+        .sort(compareIds);
+      const projected = this.peopleById.get(person.id);
+      if (projected !== undefined && kept.length > 0) {
+        this.peopleById.set(person.id, { ...projected, distinctFrom: kept });
+      }
+    }
 
     // Unions entre personnes présentes, puis rangs renumérotés par personne : rang saisi, puis
     // identifiant, donnent l'ordre ; le rang exposé est la place dans cet ordre.

@@ -108,6 +108,21 @@ describe('CL-VOI-08 — « mon frère de même père », puis « même père mê
       if (expected.lien === undefined) throw new Error('CL-VOI-08 attend un lien à chaque étape');
       expectLink(tree, expected.lien);
       seen.push(expected.lien.fr);
+      if (seen.length === 1) {
+        // Sans la mention « distincte d'Irène », la mère à compléter pourrait être Irène :
+        // « frère ou demi-frère », rien n'est supposé (ADR 0017).
+        const people = tree.data.people.map((person) => {
+          const copy = { ...person };
+          delete copy.distinctFrom;
+          return copy;
+        });
+        const open = siblingLink(
+          graphOf({ ...tree, data: { ...tree.data, people } }),
+          tree.id(expected.lien.de),
+          tree.id(expected.lien.vers),
+        );
+        expect(open?.kind === 'sibling' && open.sharing).toBe('full_or_half');
+      }
     }
     expect(seen).toEqual(['demi-frère, même père', 'frère']);
   });
