@@ -265,6 +265,83 @@ function usefulAncestors(
   return useful;
 }
 
+/**
+ * Sommets possibles d'un chemin de sang : les ancêtres communs que A et B atteignent par deux
+ * montées sans personne commune. Par le théorème de Menger, c'est le cas si et seulement si
+ * aucune personne autre que le sommet ne se trouve sur toutes les montées de A et de B vers lui :
+ * son dominateur immédiat, depuis une racine fictive reliée à A et à B, est cette racine. Sous
+ * une échelle d'implexe, les ancêtres au-dessus du parent commun de deux frères sont ainsi
+ * écartés avant toute énumération. A ou B lui-même (ligne directe) reste un sommet possible.
+ * Rend `undefined` si `nodes` contient un cycle (données corrompues) : pas de filtre.
+ */
+function viableApexes(
+  graph: KinshipGraph,
+  a: number,
+  b: number,
+  nodes: ReadonlySet<number>,
+  common: readonly number[],
+  mask: FiliationTypeMask,
+): Set<number> | undefined {
+  const root = -1;
+  // Arêtes de l'enfant vers le parent ; la racine fictive mène à A et à B.
+  const preds = new Map<number, number[]>();
+  const succs = new Map<number, number[]>();
+  const addEdge = (from: number, to: number) => {
+    const list = preds.get(to);
+    if (list === undefined) preds.set(to, [from]);
+    else list.push(from);
+    const out = succs.get(from);
+    if (out === undefined) succs.set(from, [to]);
+    else out.push(to);
+  };
+  addEdge(root, a);
+  addEdge(root, b);
+  for (const node of nodes) {
+    for (const edge of graph.parentEdges[node] ?? []) {
+      if ((edge.typeBit & mask) !== 0 && nodes.has(edge.parent)) addEdge(node, edge.parent);
+    }
+  }
+  // Ordre topologique (Kahn) depuis la racine.
+  const remaining = new Map<number, number>();
+  for (const [node, list] of preds) remaining.set(node, list.length);
+  const order: number[] = [root];
+  const position = new Map<number, number>([[root, 0]]);
+  for (let index = 0; index < order.length; index += 1) {
+    const node = order[index];
+    if (node === undefined) break;
+    for (const next of succs.get(node) ?? []) {
+      const left = (remaining.get(next) ?? 0) - 1;
+      remaining.set(next, left);
+      if (left === 0) {
+        position.set(next, order.length);
+        order.push(next);
+      }
+    }
+  }
+  if (order.length !== nodes.size + 1) return undefined;
+  // Dominateurs immédiats (Cooper, Harvey et Kennedy) : un seul passage suffit sur un graphe
+  // sans cycle parcouru dans l'ordre topologique.
+  const idom = new Map<number, number>([[root, root]]);
+  const rank = (node: number) => position.get(node) ?? 0;
+  const intersect = (x: number, y: number) => {
+    let left = x;
+    let right = y;
+    while (left !== right) {
+      while (rank(left) > rank(right)) left = idom.get(left) ?? root;
+      while (rank(right) > rank(left)) right = idom.get(right) ?? root;
+    }
+    return left;
+  };
+  for (const node of order.slice(1)) {
+    let dominator: number | undefined;
+    for (const pred of preds.get(node) ?? []) {
+      dominator = dominator === undefined ? pred : intersect(dominator, pred);
+    }
+    idom.set(node, dominator ?? root);
+  }
+  return new Set(common.filter((node) => node === a || node === b || idom.get(node) === root));
+}
+
 /** Chaînes rangées par profondeur. */
 function byDepth(chains: readonly Chain[]): Chain[][] {
   const levels: Chain[][] = [];
@@ -291,8 +368,17 @@ function bloodPaths(
 
   const limitA = budget(options.maxChains);
   const limitB = budget(options.maxChains);
-  const usefulA = usefulAncestors(graph, a, ofA, common, mask);
-  const usefulB = usefulAncestors(graph, b, ofB, common, mask);
+  // Montées vers un ancêtre commun, puis seulement vers un sommet possible (deux montées
+  // disjointes) : l'implexe ne fait ni exploser l'énumération ni signaler une fausse limite.
+  const reachable = new Set([
+    ...usefulAncestors(graph, a, ofA, common, mask),
+    ...usefulAncestors(graph, b, ofB, common, mask),
+  ]);
+  const viable = viableApexes(graph, a, b, reachable, common, mask);
+  const apexes = viable === undefined ? common : [...viable];
+  if (apexes.length === 0) return { paths: [], truncated: false };
+  const usefulA = usefulAncestors(graph, a, ofA, apexes, mask);
+  const usefulB = usefulAncestors(graph, b, ofB, apexes, mask);
   const levelsA = byDepth(upChains(graph, a, mask, Number.POSITIVE_INFINITY, limitA, usefulA));
   const fromB = new Map<number, Chain[][]>();
   let deepestB = 0;

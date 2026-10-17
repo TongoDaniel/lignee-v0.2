@@ -54,9 +54,10 @@ function builder() {
  * personnes, toutes deux parents des deux personnes de la génération du dessous. Le nombre de
  * chaînes montantes double à chaque génération.
  */
-function ladder(tree: ReturnType<typeof builder>, base: Id, height: number) {
+function ladder(tree: ReturnType<typeof builder>, base: Id, height: number): [Id, Id] {
   let x = tree.person();
   let y = tree.person();
+  const bottom: [Id, Id] = [x, y];
   tree.child(x, base);
   tree.child(y, base);
   for (let level = 0; level < height; level += 1) {
@@ -66,6 +67,7 @@ function ladder(tree: ReturnType<typeof builder>, base: Id, height: number) {
     x = nx;
     y = ny;
   }
+  return bottom;
 }
 
 function expectInverse(graph: KinshipGraph, a: Id, b: Id, options = {}) {
@@ -87,7 +89,7 @@ function sharingOf(result: KinshipResult) {
 }
 
 describe('échelle d’implexe', () => {
-  it('deux frères sous une échelle de 30 générations : frères, dans les deux sens, limite signalée', () => {
+  it('deux frères sous une échelle de 30 générations : frères, dans les deux sens, complet', () => {
     const tree = builder();
     const [a, b, p, q] = [tree.person(), tree.person(), tree.person(), tree.person()];
     for (const parent of [p, q]) for (const child of [a, b]) tree.child(parent, child);
@@ -97,6 +99,30 @@ describe('échelle d’implexe', () => {
     const result = expectInverse(graph, a, b);
     expect(performance.now() - started).toBeLessThan(1000);
     expect(sharingOf(result)).toBe('full');
+    // Aucun ancêtre au-dessus de P n'est atteint par deux montées disjointes : écartés avant
+    // l'énumération, aucune fausse limite.
+    expect(result.status === 'related' && result.truncated).toBe(false);
+    expect(
+      commonAncestorsOfPaths(graph, a, b)
+        .ancestors.map((c) => c.personId)
+        .sort(),
+    ).toEqual([p, q].sort());
+  });
+
+  it('cousins dans l’échelle : des chemins réellement innombrables, limite signalée', () => {
+    const tree = builder();
+    const base = tree.person();
+    const [x, y] = ladder(tree, base, 30);
+    const [a, b] = [tree.person(), tree.person()];
+    tree.child(x, a);
+    tree.child(y, b);
+    const graph = tree.graph();
+    const started = performance.now();
+    const result = expectInverse(graph, a, b);
+    expect(performance.now() - started).toBeLessThan(1000);
+    // Cousins germains par les deux grands-parents d'abord, puis d'autres chemins par l'implexe.
+    expect(sharingOf(result)).toBe('full');
+    expect(result.status === 'related' && result.relationships.length).toBe(32);
     expect(result.status === 'related' && result.truncated).toBe(true);
   });
 

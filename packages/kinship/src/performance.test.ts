@@ -190,18 +190,26 @@ describe('PAR-01 : temps de réponse du moteur', () => {
       }
       ends.push(current);
     }
+    // Graphe neuf : le premier appel calcule les ensembles d'ancêtres (cache froid), l'appel
+    // suivant les retrouve en cache.
     const graph = createKinshipGraph({ people, unions: [], filiations });
     const [a, b] = ends;
     if (a === undefined || b === undefined) throw new Error('Missing ends');
-    let result = findRelationships(graph, a, b);
-    const elapsed = measure(() => {
-      result = findRelationships(graph, a, b);
+    const results: ReturnType<typeof findRelationships>[] = [];
+    const cold = measure(() => {
+      results.push(findRelationships(graph, a, b));
     });
+    const warm = measure(() => {
+      results.push(findRelationships(graph, a, b));
+    });
+    const [result] = results;
     console.info(
-      `PAR-01, cas profond (${String(people.length)} personnes) : ${elapsed.toFixed(2)} ms`,
+      `PAR-01, cas profond (${String(people.length)} personnes) : premier appel, cache froid ` +
+        `${cold.toFixed(2)} ms ; appel suivant, cache chaud ${warm.toFixed(2)} ms`,
     );
-    expect(elapsed).toBeLessThan(PAR_01_BUDGET_MS);
-    const segment = result.status === 'related' ? result.relationships[0]?.segments[0] : undefined;
+    expect(cold).toBeLessThan(PAR_01_BUDGET_MS);
+    expect(warm).toBeLessThan(PAR_01_BUDGET_MS);
+    const segment = result?.status === 'related' ? result.relationships[0]?.segments[0] : undefined;
     expect(
       segment?.kind === 'blood' && [
         segment.generationsUp,
