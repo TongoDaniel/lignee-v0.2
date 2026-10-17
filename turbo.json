@@ -18,6 +18,11 @@
       "dependsOn": ["transit"],
       "outputs": []
     },
+    "@lignee/ci#test": {
+      "dependsOn": ["transit"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/pnpm-lock.yaml"],
+      "outputs": []
+    },
     "//#format:write": {
       "cache": false
     },

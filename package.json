@@ -3,9 +3,9 @@
   "private": true,
   "description": "Lignée — arbre généalogique familial, monorepo",
   "type": "module",
-  "packageManager": "pnpm@9.15.9",
+  "packageManager": "pnpm@10.34.6",
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.18.0"
   },
   "scripts": {
     "lint": "turbo run lint",
@@ -15,7 +15,8 @@
     "format:check": "turbo run //#format:verify",
     "format:write": "prettier --write .",
     "format:verify": "prettier --check .",
-    "commitlint": "commitlint"
+    "commitlint": "commitlint",
+    "check:forbidden-dependencies": "node tools/ci/src/check-forbidden-dependencies.ts"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.3",
@@ -27,7 +28,7 @@
     "eslint-plugin-jsx-a11y": "6.10.2",
     "eslint-plugin-react-native-a11y": "3.5.1",
     "globals": "17.12.0",
-    "pnpm": "9.15.9",
+    "pnpm": "10.34.6",
     "prettier": "3.9.9",
     "turbo": "2.11.6",
     "typescript": "catalog:",

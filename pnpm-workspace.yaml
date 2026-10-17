@@ -1,6 +1,7 @@
 packages:
   - "apps/*"
   - "packages/*"
+  - "tools/*"
 
 # Versions partagées par tous les paquets (protocole `catalog:`).
 catalog:

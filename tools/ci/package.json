@@ -1,0 +1,21 @@
+{
+  "name": "@lignee/ci",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Contrôles de l'intégration continue (CON-12…), hors app et hors serveur",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "yaml": "2.9.1"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

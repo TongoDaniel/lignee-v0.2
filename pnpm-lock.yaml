@@ -54,8 +54,8 @@ importers:
         specifier: 17.12.0
         version: 17.12.0
       pnpm:
-        specifier: 9.15.9
-        version: 9.15.9
+        specifier: 10.34.6
+        version: 10.34.6
       prettier:
         specifier: 3.9.9
         version: 3.9.9
@@ -82,7 +82,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
 
   apps/worker:
     devDependencies:
@@ -97,7 +97,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
 
   packages/db:
     devDependencies:
@@ -109,7 +109,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
 
   packages/domain:
     devDependencies:
@@ -121,7 +121,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
 
   packages/i18n:
     devDependencies:
@@ -133,7 +133,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
 
   packages/kinship:
     devDependencies:
@@ -145,7 +145,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
 
   packages/layout:
     devDependencies:
@@ -157,7 +157,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
 
   packages/sync:
     devDependencies:
@@ -169,7 +169,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
 
   packages/ui:
     devDependencies:
@@ -181,7 +181,7 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
 
   packages/voice:
     devDependencies:
@@ -193,7 +193,26 @@ importers:
         version: 6.0.3
       vitest:
         specifier: 'catalog:'
-        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
+
+  tools/ci:
+    dependencies:
+      yaml:
+        specifier: 2.9.1
+        version: 2.9.1
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.19.0
+      eslint:
+        specifier: 'catalog:'
+        version: 10.11.0(jiti@2.6.1)
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      vitest:
+        specifier: 'catalog:'
+        version: 5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
 
 packages:
 
@@ -431,36 +450,42 @@ packages:
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   '@rolldown/binding-linux-arm64-musl@1.2.14':
     resolution: {integrity: sha512-BJ2CL19M6uuWesMgnqJzgxoI+N+eV7b0A9O9vLV42y+gitC41fNa8KElau1tHVzuLWX5GzEuxMPhAO0tQXQMkg==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   '@rolldown/binding-linux-ppc64-gnu@1.2.14':
     resolution: {integrity: sha512-4+Kl8daPV8NDHaD7mfCcc1pRM+Qg7ab8DyMm5FG5WoZgv4h2i3KFN1CybYBNbQqmuYm7ftJLvmMI1eHYJ22S/Q==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [ppc64]
     os: [linux]
+    libc: [glibc]
 
   '@rolldown/binding-linux-s390x-gnu@1.2.14':
     resolution: {integrity: sha512-V/h8ePq1fKDrmtFMz6xcCN3DKvuvMRrwwD1q0PkBeeo4DpK64biaKvqWGVxqCeYKqeRk7gE7/iKPxLCn08O97A==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [s390x]
     os: [linux]
+    libc: [glibc]
 
   '@rolldown/binding-linux-x64-gnu@1.2.14':
     resolution: {integrity: sha512-WxalXzgrLVpKC93xfpaJ3gCXUWzeCr+FRCbDVD2mUAy4L6Vo3lNVz0epUEUpxPWJkLNYUwM4OSIikv36OJ9mLg==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   '@rolldown/binding-linux-x64-musl@1.2.14':
     resolution: {integrity: sha512-3G3tnAmTpdk9jO3GQtyHXqeFD2SlecfTws/Y3M2mmj9nMBwwuLT4kur8sZKeu7ENUHSpVO3cIsm5A52LEWWwlg==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   '@rolldown/binding-openharmony-arm64@1.2.14':
     resolution: {integrity: sha512-qyr5XiNGxm2ytx17vvtcJ9nXn6v1gENETi503bJx3OGwZ1tSonj7BosxbMa/xeAfSl5iS9X6KjEWYXLu6v1L7Q==}
@@ -1279,24 +1304,28 @@ packages:
     engines: {node: '>= 12.0.0'}
     cpu: [arm64]
     os: [linux]
+    libc: [glibc]
 
   lightningcss-linux-arm64-musl@1.33.0:
     resolution: {integrity: sha512-yiO5ROMuYQgXbC60yjZU5CYSFZGKXL0HFATXt9mHJn1+zW55oCtMI9NfcVhYLMFDL7gV7oBPon/EmMMGg2OvtQ==}
     engines: {node: '>= 12.0.0'}
     cpu: [arm64]
     os: [linux]
+    libc: [musl]
 
   lightningcss-linux-x64-gnu@1.33.0:
     resolution: {integrity: sha512-ar+Ju7LmcN0Jo4FpL4hpFybwNG9/3A/Br5KW2n2jyODg3MEZXaDYADdemoNS+BDNfMgKvylJLj4S5tyRActuAg==}
     engines: {node: '>= 12.0.0'}
     cpu: [x64]
     os: [linux]
+    libc: [glibc]
 
   lightningcss-linux-x64-musl@1.33.0:
     resolution: {integrity: sha512-RYiYbkokw0trfKqqzfF55lginwEPrD3OJDfTuJzFs1MK6iFnDenaz1fqLLtX4ITG3OktJQXOeTaw1awrBAlZPw==}
     engines: {node: '>= 12.0.0'}
     cpu: [x64]
     os: [linux]
+    libc: [musl]
 
   lightningcss-win32-arm64-msvc@1.33.0:
     resolution: {integrity: sha512-1K+MPfLSFVpphzpdbfkhlWk6wBrTObBzS2T6db10PNOZgR9GoVsAWzwNyuhUYYbTp23j+4RrncfujZ4uAzXvwA==}
@@ -1409,8 +1438,8 @@ packages:
     resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
     engines: {node: '>=12'}
 
-  pnpm@9.15.9:
-    resolution: {integrity: sha512-aARhQYk8ZvrQHAeSMRKOmvuJ74fiaR1p5NQO7iKJiClf1GghgbrlW1hBjDolO95lpQXsfF+UA+zlzDzTfc8lMQ==}
+  pnpm@10.34.6:
+    resolution: {integrity: sha512-fhrmaoOpFDwRjMGUTzfMTyuKzd7aSwAc+niQj25G5F4VKSc5ymydAmQmzHV+kxjMmMVVHWoWwWUJewAouoe05g==}
     engines: {node: '>=18.12'}
     hasBin: true
 
@@ -1745,6 +1774,11 @@ packages:
   y18n@5.0.8:
     resolution: {integrity: sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==}
     engines: {node: '>=10'}
+
+  yaml@2.9.1:
+    resolution: {integrity: sha512-3NxN8+78OdzbT7C/WjGsyfPAtJaN3FNDsWxv7Y7mcDsT/oOmgW8BpyQQFFBnvZE3j9Y2Sdz1ULFLezL7Eb2yFw==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
 
   yargs-parser@22.0.0:
     resolution: {integrity: sha512-rwu/ClNdSMpkSrUb+d6BRsSkLUq1fmfsY6TOpYzTwvwkg1/NRG85KBy3kq++A8LKQwX6lsu+aWad+2khvuXrqw==}
@@ -2155,14 +2189,14 @@ snapshots:
       '@typescript-eslint/types': 8.71.0
       eslint-visitor-keys: 5.0.1
 
-  '@vitest/mocker@5.0.3(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))':
+  '@vitest/mocker@5.0.3(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       '@vitest/spy': 5.0.3
       estree-walker: 3.0.3
       magic-string: 1.4.3
     optionalDependencies:
-      vite: 8.3.4(@types/node@24.19.0)(jiti@2.6.1)
+      vite: 8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1)
 
   '@vitest/spy@5.0.3': {}
 
@@ -3040,7 +3074,7 @@ snapshots:
 
   picomatch@4.0.7: {}
 
-  pnpm@9.15.9: {}
+  pnpm@10.34.6: {}
 
   possible-typed-array-names@1.1.0: {}
 
@@ -3324,7 +3358,7 @@ snapshots:
 
   verkit@0.5.0: {}
 
-  vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1):
+  vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
@@ -3335,11 +3369,12 @@ snapshots:
       '@types/node': 24.19.0
       fsevents: 2.3.3
       jiti: 2.6.1
+      yaml: 2.9.1
 
-  vitest@5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)):
+  vitest@5.0.3(@types/node@24.19.0)(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1)):
     dependencies:
       '@types/chai': 5.2.3
-      '@vitest/mocker': 5.0.3(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1))
+      '@vitest/mocker': 5.0.3(vite@8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1))
       chai: 6.3.0
       es-module-lexer: 2.3.2
       expect-type: 1.4.0
@@ -3350,7 +3385,7 @@ snapshots:
       tinybench: 6.2.2
       tinyexec: 1.3.1
       tinyglobby: 0.2.17
-      vite: 8.3.4(@types/node@24.19.0)(jiti@2.6.1)
+      vite: 8.3.4(@types/node@24.19.0)(jiti@2.6.1)(yaml@2.9.1)
       why-is-node-running: 3.2.1
     optionalDependencies:
       '@types/node': 24.19.0
@@ -3413,6 +3448,8 @@ snapshots:
       strip-ansi: 7.2.0
 
   y18n@5.0.8: {}
+
+  yaml@2.9.1: {}
 
   yargs-parser@22.0.0: {}
 
