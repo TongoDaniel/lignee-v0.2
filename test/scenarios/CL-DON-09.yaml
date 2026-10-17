@@ -1,0 +1,60 @@
+# Noms générés. Un enfant né plus de 10 mois après la mort de son père, ou après celle de sa
+# mère : alerte expliquée, qu'on peut passer outre (UNI-18), jamais un refus. Une naissance
+# posthume dans les 10 mois ne déclenche rien. Marges des dates approximatives : ADR 0011. Chaque
+# variante ne garde que le décès du parent qu'elle nomme, et remplace la naissance de l'enfant.
+# Reste : l'affichage de l'alerte et le choix de passer outre à la saisie (T-031, T-033).
+id: CL-DON-09
+titre: Enfant né deux ans après la mort de son père
+couverture:
+  teste: [modele]
+  reste: [T-031, T-033]
+arbre:
+  personnes: [tanyi/M, mbeng/F, ebai/M]
+  unions:
+    - { conjoints: [tanyi, mbeng] }
+  filiations:
+    - { parents: [tanyi, mbeng], enfant: ebai }
+  faits:
+    - { personne: tanyi, type: deces, date: { qualificatif: exacte, date: "1971-03-14" } }
+    - { personne: ebai, type: naissance, date: { qualificatif: exacte, date: "1973-05-02" } }
+attendu:
+  alertes:
+    - { code: born_long_after_father_death, severite: alerte, personnes: [tanyi, ebai] }
+  variantes:
+    # Naissance posthume, neuf mois après : rien.
+    - parent: tanyi
+      deces: { qualificatif: exacte, date: "1971-03-14" }
+      naissance: { qualificatif: exacte, date: "1971-12-20" }
+      alertes: []
+    # Dix mois tout juste : rien ; un jour de plus : l'alerte.
+    - parent: tanyi
+      deces: { qualificatif: exacte, date: "1971-03-14" }
+      naissance: { qualificatif: exacte, date: "1972-01-14" }
+      alertes: []
+    - parent: tanyi
+      deces: { qualificatif: exacte, date: "1971-03-14" }
+      naissance: { qualificatif: exacte, date: "1972-01-15" }
+      alertes: [born_long_after_father_death]
+    # Mort « vers 1971 » : la marge de 5 ans couvre le doute.
+    - parent: tanyi
+      deces: { qualificatif: vers, date: "1971" }
+      naissance: { qualificatif: exacte, date: "1973" }
+      alertes: []
+    # Même année : peut-être avant la mort.
+    - parent: tanyi
+      deces: { qualificatif: exacte, date: "1973" }
+      naissance: { qualificatif: exacte, date: "1973-05-02" }
+      alertes: []
+    # La mère : morte la veille de la naissance, l'alerte ; le jour même, rien.
+    - parent: mbeng
+      deces: { qualificatif: exacte, date: "1973-05-01" }
+      naissance: { qualificatif: exacte, date: "1973-05-02" }
+      alertes: [born_after_mother_death]
+    - parent: mbeng
+      deces: { qualificatif: exacte, date: "1973-05-02" }
+      naissance: { qualificatif: exacte, date: "1973-05-02" }
+      alertes: []
+    - parent: mbeng
+      deces: { qualificatif: texte, texte: "pendant la saison des pluies" }
+      naissance: { qualificatif: exacte, date: "1973-05-02" }
+      alertes: []

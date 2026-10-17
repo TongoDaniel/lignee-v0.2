@@ -1,0 +1,27 @@
+# Noms générés. Ajouter un lien qui ferait d'une personne son propre ancêtre est refusé, quel que
+# soit le type du lien, avec l'explication : le chemin qui reviendrait sur elle (UNI-18). Le même
+# contrôle sur l'arbre entier retrouve le cycle si le lien a été enregistré malgré tout.
+# Reste : le message à la saisie (T-033) et le refus par le serveur (T-060).
+id: CL-DON-10
+titre: Personne qui deviendrait son propre ancêtre
+couverture:
+  teste: [modele]
+  reste: [T-033, T-060]
+arbre:
+  personnes: [abena/F, kwesi/M, yaa/F, kofi/M]
+  filiations:
+    - { parents: [abena], enfant: kwesi }
+    - { parents: [kwesi], enfant: yaa }
+    - { parents: [yaa], enfant: kofi, type: a_eleve }
+action:
+  ajout_filiation: { parent: kofi, enfant: abena }
+attendu:
+  refus:
+    code: filiation_cycle
+    severite: refus
+    # Le chemin qui ferait d'Abena sa propre ancêtre : d'elle, de parent en enfant, jusqu'au
+    # parent du nouveau lien, puis le nouveau lien qui revient sur elle.
+    chemin: [abena, kwesi, yaa, kofi, abena]
+  types_refuses: [naissance, adoptive, a_eleve, confie, tuteur, donneur, gpa]
+  # Le même lien dans l'autre sens ne forme pas de cycle.
+  accepte: { parent: abena, enfant: kofi, type: a_eleve }

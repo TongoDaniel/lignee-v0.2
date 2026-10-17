@@ -3,17 +3,19 @@
 // le modèle fait échouer le test qui le lit.
 import { z } from 'zod';
 
-import { multipleBirthSchema, titleRoleSchema } from '../fact';
+import { factSchema, multipleBirthSchema, titleRoleSchema, type Fact } from '../fact';
 import { filiationSchema } from '../filiation';
-import { fuzzyDateFromText } from '../fuzzy-date';
+import { fuzzyDateFromText, fuzzyDateSchema } from '../fuzzy-date';
 import type { Id } from '../ids';
 import { nameSchema, personRecordSchema, personSchema } from '../person';
 import { treeSchema } from '../tree';
 import { unionSchema } from '../union';
 import { nameFromScenario, testTree, type TestTree } from './fixtures';
 import {
+  fuzzyDateInputFromScenario,
   scenarioCertainties,
   scenarioFiliationSchema,
+  scenarioFuzzyDateSchema,
   scenarioFiliationTypes,
   scenarioNameSchema,
   scenarioPersonSchema,
@@ -36,6 +38,20 @@ export const scenarioMultipleBirthSchema = z.strictObject({
 });
 export type ScenarioMultipleBirth = z.infer<typeof scenarioMultipleBirthSchema>;
 
+/** Types de fait datés d'un scénario, dans les mots du cahier. */
+export const scenarioFactTypes = { naissance: 'birth', deces: 'death' } as const;
+
+/**
+ * Naissance ou décès daté d'une personne (contrôles de cohérence, T-007) : la date est une date
+ * floue complète (`scenarioFuzzyDateSchema`), validée par `fuzzyDateSchema` à la construction.
+ */
+export const scenarioFactSchema = z.strictObject({
+  personne: z.string(),
+  type: z.enum(Object.keys(scenarioFactTypes) as [keyof typeof scenarioFactTypes]),
+  date: scenarioFuzzyDateSchema,
+});
+export type ScenarioFact = z.infer<typeof scenarioFactSchema>;
+
 /**
  * Section `arbre` complète. Une section absente vaut une liste vide ; une clé inconnue est
  * refusée ; chaque personne n'est déclarée qu'une fois. Une section nouvelle s'ajoute ici et dans
@@ -49,6 +65,7 @@ export const scenarioTreeSchema = z
     filiations: z.array(scenarioFiliationSchema).optional(),
     naissances_multiples: z.array(scenarioMultipleBirthSchema).optional(),
     titres: z.array(scenarioTitleSchema).optional(),
+    faits: z.array(scenarioFactSchema).optional(),
   })
   .superRefine((section, context) => {
     const seen = new Set<string>();
@@ -81,8 +98,8 @@ export interface ScenarioTree {
 /**
  * Construit l'arbre de départ : personnes connues, noms, unions (rang absent : rang suivant du
  * conjoint, dans l'ordre des lignes, comme l'app, UNI-07 ; un rang déjà pris par la même personne
- * est refusé), filiations (de naissance et certaines
- * sauf mention), naissances multiples, titres. Chaque objet passe son schéma, et chaque personne
+ * est refusé), filiations (de naissance et certaines sauf mention), naissances multiples, titres,
+ * naissances et décès datés (T-007). Chaque objet passe son schéma, et chaque personne
  * avec ses noms forme une fiche valide (`personRecordSchema`). Lève une erreur sur toute
  * référence à une personne non déclarée.
  */
@@ -171,6 +188,8 @@ export function buildScenarioTree(
     }),
   );
 
+  data.facts = (section.faits ?? []).map((line) => factFromScenario(context, line, id));
+
   // Chaque personne et ses noms forment une fiche valide.
   for (const person of data.people) {
     personRecordSchema.parse({
@@ -217,4 +236,23 @@ export function multipleBirthInput(
       return { personId: id(key), ...(birthOrder === undefined ? {} : { birthOrder }) };
     }),
   };
+}
+
+/**
+ * Fait daté d'un scénario (naissance ou décès), validé par `factSchema` ; sa date passe
+ * `fuzzyDateSchema`. Sert aussi aux tests qui rejouent un scénario avec d'autres dates.
+ */
+export function factFromScenario(
+  context: TestTree,
+  line: ScenarioFact,
+  id: (key: string) => Id = context.personId,
+): Fact {
+  return factSchema.parse({
+    id: context.nextId(),
+    treeId: context.treeId,
+    subject: { kind: 'person', personId: id(line.personne) },
+    type: scenarioFactTypes[line.type],
+    date: fuzzyDateSchema.parse(fuzzyDateInputFromScenario(line.date)),
+    authorAccountId: context.authorAccountId,
+  });
 }

@@ -1,0 +1,22 @@
+# Noms générés. Un homme a deux unions, sans aucune date : Lignée ne peut rien déduire et pose une
+# seule question pour ses deux unions. La réponse est gardée sur chaque union, du côté de ce
+# conjoint (ADR 0012) ; une fois donnée, la question ne revient plus, et la réponse reste
+# modifiable. Avec des dates, la simultanéité se déduit sans question (tests de l'UNI-08).
+# Reste : la question à la saisie d'une union (T-032) et dans une dictée (T-065).
+id: CL-POL-05
+titre: Aucune date, unions simultanées ou successives ?
+couverture:
+  teste: [modele]
+  reste: [T-032, T-065]
+arbre:
+  personnes: [fon/M, ngum/F, lum/F]
+  unions:
+    - { conjoints: [fon, ngum] }
+    - { conjoints: [fon, lum] }
+action:
+  # Première réponse, puis réponse modifiée.
+  reponses: [simultanees, successives]
+attendu:
+  questions:
+    - { personne: fon, unions: [[fon, ngum], [fon, lum]] }
+  questions_apres_reponse: 0

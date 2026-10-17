@@ -25,8 +25,9 @@ Sections de `arbre` (une section absente vaut une liste vide, une clé inconnue 
 | `filiations` | `{ parents: [a, b?], enfant, type?, certitude? }` ; `type` : `naissance` (par défaut), `adoptive`, `a_eleve`, `confie`, `tuteur`, `donneur`, `gpa` ; `certitude` : `certain` (par défaut), `probable`, `hypothetique` | Une `Filiation` par parent |
 | `naissances_multiples` | `{ enfants: [a, b…], ordre? }` | `MultipleBirth` |
 | `titres` | `{ personne, libelle, debut?, fin? }` | `TitleRole` |
+| `faits` | `{ personne, type, date }` ; `type` : `naissance`, `deces` ; `date` : date floue complète (`scenarioFuzzyDateSchema`, ci-dessous) | `Fact` daté (T-007 : CL-DON-08, CL-DON-09) ; `factFromScenario` en crée d'autres pour rejouer un cas avec d'autres dates |
 
-Les dates d'un arbre (`debut`, `fin`) sont gardées comme texte d'origine (`fuzzyDateFromText`). Les dates floues complètes d'un cas (T-005) s'écrivent avec `scenarioFuzzyDateSchema` (`qualificatif`, `date` ou `de` et `a`, `precision`, `texte`, `calendrier`) et se convertissent avec `fuzzyDateInputFromScenario` (`scenario.ts`). Une section nouvelle (places à compléter, candidats, règles de visibilité…) s'ajoute dans `scenario-tree.ts` et dans ce tableau quand un scénario en a besoin, jamais dans un seul test.
+Les dates `debut` et `fin` d'un arbre sont gardées comme texte d'origine (`fuzzyDateFromText`). Les dates floues complètes d'un cas (T-005) s'écrivent avec `scenarioFuzzyDateSchema` (`qualificatif`, `date` ou `de` et `a`, `precision`, `texte`, `calendrier`) et se convertissent avec `fuzzyDateInputFromScenario` (`scenario.ts`). Une section nouvelle (places à compléter, candidats, règles de visibilité…) s'ajoute dans `scenario-tree.ts` et dans ce tableau quand un scénario en a besoin, jamais dans un seul test.
 
 Plan attendu (`attendu.plan`) : `{ creer: samuel/M }`, `{ filiation: { parent, enfant, type } }`, `{ candidats_mere: { enfant, candidates: […] } }`. Lien attendu (`attendu.lien`) : `{ de, vers, fr, en }`.
 

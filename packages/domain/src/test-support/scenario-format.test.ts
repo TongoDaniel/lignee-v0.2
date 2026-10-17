@@ -220,6 +220,43 @@ describe('le format refuse ce qui est mal formé', () => {
     expect(actionExpectedSchema.safeParse({ plan: [{ creer: 'Samuel' }] }).success).toBe(false);
   });
 
+  it('la section faits construit des naissances et des décès datés, et refuse une date invalide', () => {
+    const tree = buildScenarioTree(
+      scenarioTreeSchema.parse({
+        personnes: ['ama/F'],
+        faits: [
+          { personne: 'ama', type: 'naissance', date: { qualificatif: 'vers', date: '1940' } },
+          { personne: 'ama', type: 'deces', date: { qualificatif: 'exacte', date: '2001-03-04' } },
+        ],
+      }),
+    );
+    expect(treeDataIssues(tree.data)).toEqual([]);
+    expect(tree.data.facts.map((fact) => [fact.type, fact.date?.qualifier])).toEqual([
+      ['birth', 'about'],
+      ['death', 'exact'],
+    ]);
+    expect(
+      scenarioTreeSchema.safeParse({
+        personnes: ['ama/F'],
+        faits: [
+          { personne: 'ama', type: 'mariage', date: { qualificatif: 'exacte', date: '1960' } },
+        ],
+      }).success,
+    ).toBe(false);
+    const invalid = scenarioTreeSchema.parse({
+      personnes: ['ama/F'],
+      faits: [{ personne: 'ama', type: 'naissance', date: { qualificatif: 'entre', de: '1940' } }],
+    });
+    expect(() => buildScenarioTree(invalid)).toThrow();
+    const unknown = scenarioTreeSchema.parse({
+      personnes: ['ama/F'],
+      faits: [
+        { personne: 'kofi', type: 'naissance', date: { qualificatif: 'exacte', date: '1940' } },
+      ],
+    });
+    expect(() => buildScenarioTree(unknown)).toThrow(/kofi/);
+  });
+
   it('la construction refuse une référence à une personne non déclarée', () => {
     const section = scenarioTreeSchema.parse({
       personnes: ['ama/F'],
