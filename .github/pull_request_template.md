@@ -14,5 +14,5 @@
 - [ ] Textes en français et en anglais, avec le vocabulaire de la charte.
 - [ ] Accessibilité : libellés pour le lecteur d'écran, zones de 48 px, texte à 200 % sans troncature.
 - [ ] Budget de données respecté.
-- [ ] Relue par l'autre développeur ; documentation du module à jour.
+- [ ] Relue par `relecteur-code` (verdict joint), puis par Daniel, qui fusionne (ADR 0005) ; documentation du module à jour.
 - [ ] Si elle touche aux droits, à la visibilité, à la synchro ou à la voix : relue par `gardien-confidentialite`.
