@@ -4,16 +4,20 @@
 import { z } from 'zod';
 
 import { factSchema, multipleBirthSchema, titleRoleSchema, type Fact } from '../fact';
-import { filiationSchema } from '../filiation';
+import { filiationSchema, parentCandidateSchema } from '../filiation';
 import { fuzzyDateFromText, fuzzyDateSchema } from '../fuzzy-date';
 import type { Id } from '../ids';
 import { nameSchema, personRecordSchema, personSchema } from '../person';
 import { treeSchema } from '../tree';
-import { unionSchema } from '../union';
+import { simultaneityAnswerSchema, unionSchema } from '../union';
+import { unionPair } from '../union-simultaneity';
 import { nameFromScenario, testTree, type TestTree } from './fixtures';
 import {
   fuzzyDateInputFromScenario,
+  scenarioCandidatesSchema,
   scenarioCertainties,
+  scenarioSimultaneities,
+  scenarioSimultaneityAnswerSchema,
   scenarioFiliationSchema,
   scenarioFuzzyDateSchema,
   scenarioFiliationTypes,
@@ -22,6 +26,11 @@ import {
   scenarioUnionSchema,
 } from './scenario';
 import { emptyTreeData, type TreeData } from './tree-data';
+
+/** Date de début ou de fin d'une union de scénario, en date floue validée. */
+function unionDate(line: z.infer<typeof scenarioFuzzyDateSchema>) {
+  return fuzzyDateSchema.parse(fuzzyDateInputFromScenario(line));
+}
 
 /** Titre ou rôle daté (CL-FAM-19). */
 export const scenarioTitleSchema = z.strictObject({
@@ -66,6 +75,8 @@ export const scenarioTreeSchema = z
     naissances_multiples: z.array(scenarioMultipleBirthSchema).optional(),
     titres: z.array(scenarioTitleSchema).optional(),
     faits: z.array(scenarioFactSchema).optional(),
+    candidats: z.array(scenarioCandidatesSchema).optional(),
+    simultaneites: z.array(scenarioSimultaneityAnswerSchema).optional(),
   })
   .superRefine((section, context) => {
     const seen = new Set<string>();
@@ -152,10 +163,13 @@ export function buildScenarioTree(
     unionSchema.parse({
       id: context.nextId(),
       treeId: context.treeId,
-      spouses: [
-        { personId: id(line.spouses[0]), rank: rankOf(line.spouses[0], line.ranks[0]) },
-        { personId: id(line.spouses[1]), rank: rankOf(line.spouses[1], line.ranks[1]) },
-      ],
+      spouses: ([0, 1] as const).map((side) => ({
+        personId: id(line.spouses[side]),
+        rank: rankOf(line.spouses[side], line.ranks[side]),
+      })),
+      ...(line.start === undefined ? {} : { start: unionDate(line.start) }),
+      ...(line.end === undefined ? {} : { end: unionDate(line.end) }),
+      ...(line.endReason === undefined ? {} : { endReason: line.endReason }),
     }),
   );
 
@@ -189,6 +203,43 @@ export function buildScenarioTree(
   );
 
   data.facts = (section.faits ?? []).map((line) => factFromScenario(context, line, id));
+
+  // Réponses de simultanéité : chaque paire des unions citées, rangée (ADR 0012).
+  const unionBetween = ([a, b]: readonly [string, string]): Id => {
+    const ids = new Set([id(a), id(b)]);
+    const matches = data.unions.filter((union) =>
+      union.spouses.every((spouse) => ids.has(spouse.personId)),
+    );
+    const [only, ...others] = matches;
+    if (only === undefined || others.length > 0) {
+      throw new Error(`Expected exactly one union between ${a} and ${b}`);
+    }
+    return only.id;
+  };
+  data.simultaneityAnswers = (section.simultaneites ?? []).flatMap((line) => {
+    const unionIds = line.unions.map(unionBetween);
+    return unionIds.flatMap((first, index) =>
+      unionIds.slice(index + 1).map((second) =>
+        simultaneityAnswerSchema.parse({
+          id: context.nextId(),
+          treeId: context.treeId,
+          unionIds: unionPair(first, second),
+          simultaneity: scenarioSimultaneities[line.reponse],
+        }),
+      ),
+    );
+  });
+
+  data.parentCandidates = (section.candidats ?? []).flatMap((line) =>
+    line.candidates.map((candidate) =>
+      parentCandidateSchema.parse({
+        id: context.nextId(),
+        treeId: context.treeId,
+        childId: id(line.enfant),
+        candidateId: id(candidate),
+      }),
+    ),
+  );
 
   // Chaque personne et ses noms forment une fiche valide.
   for (const person of data.people) {
