@@ -21,13 +21,15 @@ Sections de `arbre` (une section absente vaut une liste vide, une clé inconnue 
 | --- | --- | --- |
 | `personnes` | `pierre/M` : nom court et genre (`M`, `F`, `A` autre, `N` non renseigné) ; chaque nom court une seule fois | `Person` connue. Sans ligne dans `noms`, la personne porte son nom court comme prénom (« Pierre ») |
 | `noms` | `{ personne, type, prenoms?, nom?, forme?, debut?, fin? }` ; `type` : `naissance`, `usage`, `surnom`, `titre`, `variante`, `ancien` | `Name` |
-| `unions` | `{ conjoints: [a, b], rang_a?, rang_b? }` | `Union`. Un rang absent est le rang suivant de ce conjoint dans l'ordre des lignes (UNI-07) : dans CL-POL-03, Rose a le rang 1. Un rang déjà pris par la même personne, écrit ou déduit, est refusé |
+| `unions` | `{ conjoints: [a, b], rang_a?, rang_b?, debut?, fin?, motif? }` ; `debut` et `fin` au format `scenarioFuzzyDateSchema` ; `motif` : `deces`, `divorce`, `separation`, `non_renseigne` | `Union`. Un rang absent est le rang suivant de ce conjoint dans l'ordre des lignes (UNI-07) : dans CL-POL-03, Rose a le rang 1. Un rang déjà pris par la même personne, écrit ou déduit, est refusé |
 | `filiations` | `{ parents: [a, b?], enfant, type?, certitude? }` ; `type` : `naissance` (par défaut), `adoptive`, `a_eleve`, `confie`, `tuteur`, `donneur`, `gpa` ; `certitude` : `certain` (par défaut), `probable`, `hypothetique` | Une `Filiation` par parent |
+| `candidats` | `{ enfant, candidates: [a, b…] }` | Un `ParentCandidate` par candidate (UNI-11) |
+| `simultaneites` | `{ unions: [[a, b], [a, c]…], reponse }` ; chaque union désignée par ses conjoints (une seule union entre eux) ; `reponse` : `simultanees` ou `successives` | Une `SimultaneityAnswer` par paire des unions citées, toutes de même valeur (UNI-08, ADR 0012) |
 | `naissances_multiples` | `{ enfants: [a, b…], ordre? }` | `MultipleBirth` |
 | `titres` | `{ personne, libelle, debut?, fin? }` | `TitleRole` |
 | `faits` | `{ personne, type, date }` ; `type` : `naissance`, `deces` ; `date` : date floue complète (`scenarioFuzzyDateSchema`, ci-dessous) | `Fact` daté (T-007 : CL-DON-08, CL-DON-09) ; `factFromScenario` en crée d'autres pour rejouer un cas avec d'autres dates |
 
-Les dates `debut` et `fin` d'un arbre sont gardées comme texte d'origine (`fuzzyDateFromText`). Les dates floues complètes d'un cas (T-005) s'écrivent avec `scenarioFuzzyDateSchema` (`qualificatif`, `date` ou `de` et `a`, `precision`, `texte`, `calendrier`) et se convertissent avec `fuzzyDateInputFromScenario` (`scenario.ts`). Une section nouvelle (places à compléter, candidats, règles de visibilité…) s'ajoute dans `scenario-tree.ts` et dans ce tableau quand un scénario en a besoin, jamais dans un seul test.
+Les dates `debut` et `fin` d'un nom ou d'un titre sont gardées comme texte d'origine (`fuzzyDateFromText`) ; celles d'une union sont des dates floues complètes. Les dates floues complètes d'un cas (T-005) s'écrivent avec `scenarioFuzzyDateSchema` (`qualificatif`, `date` ou `de` et `a`, `precision`, `texte`, `calendrier`) et se convertissent avec `fuzzyDateInputFromScenario` (`scenario.ts`). Une section nouvelle (places à compléter, candidats, règles de visibilité…) s'ajoute dans `scenario-tree.ts` et dans ce tableau quand un scénario en a besoin, jamais dans un seul test.
 
 Plan attendu (`attendu.plan`) : `{ creer: samuel/M }`, `{ filiation: { parent, enfant, type } }`, `{ candidats_mere: { enfant, candidates: […] } }`. Lien attendu (`attendu.lien`) : `{ de, vers, fr, en }`.
 
@@ -43,7 +45,7 @@ couverture:
   reste: [T-024, T-031]    # tickets du plan qui doivent compléter le scénario
 ```
 
-Parties reconnues dans `teste` : `lecture` (le scénario est lu, son arbre construit en objets valides du modèle et son plan attendu applicable, sans que le comportement attendu soit vérifié) et `modele` (l'attendu porte sur le modèle et il est vérifié). Un ticket qui joue une autre partie l'ajoute à l'énumération de `coverageSchema` (`packages/domain/src/test-support/scenario.ts`) et à cette liste. Un ticket de `reste` qui joue sa partie l'ajoute à `teste` et se retire de `reste`. Quand `reste` est vide, le champ peut disparaître.
+Parties reconnues dans `teste` : `lecture` (le scénario est lu, son arbre construit en objets valides du modèle et son plan attendu applicable, sans que le comportement attendu soit vérifié) `modele` (l'attendu porte sur le modèle et il est vérifié) et `disposition` (générations et foyers calculés par `packages/layout` et comparés à l'attendu, T-008). Un ticket qui joue une autre partie l'ajoute à l'énumération de `coverageSchema` (`packages/domain/src/test-support/scenario.ts`) et à cette liste. Un ticket de `reste` qui joue sa partie l'ajoute à `teste` et se retire de `reste`. Quand `reste` est vide, le champ peut disparaître.
 
 ## Scénario joué
 
@@ -81,3 +83,15 @@ it('CL-POL-03 — lien : frère ou demi-frère', () => {
 - Puis mettez à jour `couverture` dans le YAML. Un attendu dont la forme manque s'ajoute à `actionExpectedSchema` (`scenario-format.ts`), avec un test qui le refuse quand il est mal formé.
 
 Pour les tests de propriétés, `treeArbitrary()` (fast-check) et `referenceTree(100 | 1000 | 5000)` donnent des arbres générés valides (`packages/domain/README.md`).
+
+## Disposition (packages/layout, T-008)
+
+Les scénarios de disposition (CL-POL-01, 04, 06, 13, 14, 18) déclarent `teste: [disposition]`. Leur arbre suit le format commun, avec les dates, la fin et la simultanéité des unions et les candidats (sections ci-dessus) ; leur action et leur attendu sont lus en schéma strict par `packages/layout/src/test-support/layout-scenario.ts` :
+
+| Clé | Contenu |
+| --- | --- |
+| `action.centre` | Personne centrale de la disposition |
+| `action.autres_centres` | Facultatif : autres personnes centrales, pour `attendu.vers_centre_depuis` |
+| `action.puis` | Facultatif : modifications avant un second calcul : `{ rang: { conjoints, de, rang } }` (UNI-07), `{ preciser_parent: { enfant, parent } }` (ARB-05) |
+| `attendu.unites` | Liste complète des unités, par personne au centre : `forme` (`seul`, `couple`, `successives`, `simultanees`), `foyers` dans l'ordre (`conjoint`, `enfants` sans ordre, `en_cours?`, `vers_centre?`), `non_precise?` (`manque` : `mere`, `pere`, `parent` ; `enfants` ; `candidates` dans l'ordre) |
+| `attendu.generations`, `attendu.apres`, `attendu.vers_centre_depuis`, `attendu.sans_regle_de_genre` | Facultatifs : rangées attendues ; unités après `action.puis` ; foyers `[centre, conjoint]` qui mènent à chaque autre personne centrale ; même disposition genres inversés |
