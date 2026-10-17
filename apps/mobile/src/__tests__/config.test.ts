@@ -78,6 +78,18 @@ describe('eas.json', () => {
     expect(eas.build['production']).not.toHaveProperty('developmentClient');
   });
 
+  // Node des builds EAS : la version exacte des images Docker du serveur (mise à jour par
+  // Dependabot), dans la version majeure de .nvmrc (poste et CI). .nvmrc ne donne que la majeure.
+  it('construit avec le Node du serveur, dans la majeure de .nvmrc', () => {
+    const repoRoot = join(appRoot, '..', '..');
+    const node = (eas.build['base'] as { node?: string }).node;
+    const dockerfile = readFileSync(join(repoRoot, 'apps', 'api', 'Dockerfile'), 'utf8');
+    const dockerNode = /^FROM node:(\d+\.\d+\.\d+)-/m.exec(dockerfile)?.[1];
+    const nvmrc = readFileSync(join(repoRoot, '.nvmrc'), 'utf8').trim();
+    expect(node).toBe(dockerNode);
+    expect(node?.split('.')[0]).toBe(nvmrc.split('.')[0]);
+  });
+
   it('ne contient ni identifiant ni secret', () => {
     const text = JSON.stringify(eas);
     expect(text).not.toMatch(/projectId|password|apiKey|serviceAccount|ascAppId|appleId|token/i);

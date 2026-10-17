@@ -10,6 +10,7 @@ Expo SDK 57, React Native 0.86, Hermes et nouvelle architecture (imposés par le
 | --- | --- |
 | `app.config.ts` | Nom, icônes et écran de lancement (fichiers de `docs/charte/assets/Applications`, couleurs des tokens), Jour/Nuit automatique, langues déclarées au système |
 | `eas.json` | Profils `development` (et `development-simulator`), `preproduction`, `production` ; aucun identifiant ni secret |
+| `index.ts` | Point d'entrée (`main`) : polyfills Intl, puis `expo-router/entry` |
 | `src/app/` | Routes d'Expo Router : `_layout.tsx` (polices, thème, langue), `(tabs)/` (onglets Arbre et Famille) |
 | `src/intl/polyfills.ts` | Polyfills Intl de FormatJS, installés seulement si Hermes en a besoin, pour `fr` et `en` |
 | `src/theme/`, `src/i18n/` | Fournisseurs de thème (`getTheme` de `@lignee/ui`) et de traduction (`@lignee/i18n`, langue de l'appareil suivie à chaud) |
@@ -20,7 +21,7 @@ La barre d'onglets, les icônes et le fournisseur de thème sont provisoirement 
 
 ## Onglets
 
-La charte prévoit Arbre, Famille, Santé, Mémoire. En V1 : **Arbre** et **Famille** seulement. Santé est la V3 et Mémoire la V2 ; ils s'ajouteront dans `src/navigation/tabs.ts`, à leur place.
+La charte prévoit Arbre, Famille, Santé, Mémoire. En V1 : **Arbre** et **Famille** seulement ([ADR 0015](../../docs/adr/0015-onglets-de-la-v1.md)). Santé est la V3 et Mémoire la V2 ; ils s'ajouteront dans `src/navigation/tabs.ts`, à leur place.
 
 ## Vérifications
 
