@@ -11,7 +11,7 @@ import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
 import { createKinshipGraph, type KinshipGraph } from './graph';
-import { closestCommonAncestors, findRelationships } from './kinship';
+import { commonAncestorsOfPaths, findRelationships } from './kinship';
 import { invertRelationship } from './relationship';
 import { relationshipIssues } from './test-support/fixtures';
 
@@ -88,6 +88,44 @@ describe('propriétés du moteur de parenté sur des arbres générés', () => {
   );
 
   it(
+    'l’inverse reste exact quand une limite est atteinte (maxChains, maxPathChecks, maxRelationships)',
+    () => {
+      const limits = fc.record({
+        maxChains: fc.integer({ min: 1, max: 40 }),
+        maxPathChecks: fc.integer({ min: 1, max: 40 }),
+        maxRelationships: fc.integer({ min: 1, max: 4 }),
+      });
+      fc.assert(
+        fc.property(trees, pairs, limits, (tree, chosen, options) => {
+          const graph = graphOf(tree);
+          for (const [i, j] of chosen) {
+            const a = pick(tree, i);
+            const b = pick(tree, j);
+            const forward = findRelationships(graph, a, b, options);
+            const backward = findRelationships(graph, b, a, options);
+            if (forward.status !== 'related' || backward.status !== 'related') {
+              expect(backward).toEqual(forward);
+              continue;
+            }
+            expect(backward.relationships).toEqual(forward.relationships.map(invertRelationship));
+            expect(backward.truncated).toBe(forward.truncated);
+            expect(forward.relationships.length).toBeLessThanOrEqual(options.maxRelationships);
+            for (const relationship of forward.relationships) {
+              expect(relationshipIssues(graph, relationship, a, b)).toEqual([]);
+            }
+            // Sans limite, on trouve au moins ces chemins-là, et « none » n'apparaît jamais à
+            // cause d'une limite.
+            const free = findRelationships(graph, a, b);
+            expect(free.status).toBe('related');
+          }
+        }),
+        { numRuns: RUNS },
+      );
+    },
+    TIMEOUT,
+  );
+
+  it(
     'chaque chemin est bien formé, simple, trié : sang avant alliance, du plus proche au plus lointain',
     () => {
       fc.assert(
@@ -132,8 +170,8 @@ describe('propriétés du moteur de parenté sur des arbres générés', () => {
           for (const [i, j] of chosen) {
             const a = pick(tree, i);
             const b = pick(tree, j);
-            const common = closestCommonAncestors(graph, a, b);
-            const ids = common.map((entry) => entry.personId);
+            const common = commonAncestorsOfPaths(graph, a, b);
+            const ids = common.ancestors.map((entry) => entry.personId);
             expect(new Set(ids).size).toBe(ids.length);
             const ofA = naiveAncestors(tree.filiations, present, a).add(a);
             const ofB = naiveAncestors(tree.filiations, present, b).add(b);

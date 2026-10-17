@@ -1,11 +1,11 @@
 // « Quel lien entre A et B ? » (TRD, « Moteur de parenté », question 1), partie structurelle.
 //
 // Sang : un chemin de sang monte de A par des filiations jusqu'à un ancêtre commun, puis descend
-// jusqu'à B, sans passer deux fois par la même personne. Cette condition suffit à ne garder que
-// les ancêtres communs les plus proches de chaque chemin : les grands-parents de deux frères ne
-// sont atteints qu'en repassant par leur parent commun. Les chemins qui ne diffèrent que par
-// l'ancêtre au sommet, atteint par des filiations de mêmes types, sont réunis : deux parents
-// communs font des frères (`full`), un seul des demi-frères (`half`).
+// jusqu'à B, sans passer deux fois par la même personne. Les grands-parents de deux frères ne
+// sont atteints qu'en repassant par leur parent commun : ils ne sont pas au sommet d'un chemin.
+// Les chemins qui ne diffèrent que par l'ancêtre au sommet, atteint par des filiations de mêmes
+// types, sont réunis : deux parents communs font des frères (`full`), un seul des demi-frères
+// (`half`).
 //
 // Alliance : segments de sang, éventuellement vides, reliés par une ou deux unions (conjoint,
 // parents du conjoint, conjoint d'un parent, co-épouse, enfant du conjoint d'un parent…), dans
@@ -14,6 +14,12 @@
 //
 // Tous les chemins sont gardés, du plus proche au plus lointain, le sang avant l'alliance, avec
 // la certitude la plus faible du chemin. Aucun mot ici : T-026 et T-027.
+//
+// Calcul borné (ADR 0010, point 7) : chaque côté a son propre budget de chaînes, le sang et
+// l'alliance ont des budgets séparés, et les paires sont examinées de la plus proche à la plus
+// lointaine. Le calcul se fait toujours dans le même sens (A et B rangés par identifiant), puis
+// s'inverse : le lien de B vers A est exactement l'inverse de celui de A vers B, même quand une
+// limite est atteinte.
 import type { Certainty, FiliationType, Id } from '@lignee/domain';
 
 import {
@@ -25,9 +31,10 @@ import {
   type FiliationEdge,
   type FiliationTypeMask,
   type KinshipGraph,
-  type UnionEdge,
+  type UnionPairEdge,
 } from './graph';
 import {
+  invertRelationship,
   relationshipKey,
   type BloodSegment,
   type CommonAncestor,
@@ -49,8 +56,10 @@ export interface KinshipOptions {
   maxTwoUnionAllianceDegree?: number;
   /** Chemins rendus au plus, les plus proches. Par défaut 32. */
   maxRelationships?: number;
-  /** Chaînes explorées au plus depuis une personne (garde-fou). Par défaut 4 096. */
+  /** Chaînes explorées au plus par côté et par recherche (garde-fou). Par défaut 4 096. */
   maxChains?: number;
+  /** Paires de chaînes examinées au plus pour le sang (garde-fou). Par défaut 65 536. */
+  maxPathChecks?: number;
 }
 
 const DEFAULTS = {
@@ -59,6 +68,7 @@ const DEFAULTS = {
   maxTwoUnionAllianceDegree: 2,
   maxRelationships: 32,
   maxChains: 4096,
+  maxPathChecks: 65_536,
 } as const;
 
 interface ResolvedOptions {
@@ -68,6 +78,7 @@ interface ResolvedOptions {
   maxTwoUnionAllianceDegree: number;
   maxRelationships: number;
   maxChains: number;
+  maxPathChecks: number;
 }
 
 function resolve(options: KinshipOptions): ResolvedOptions {
@@ -79,6 +90,7 @@ function resolve(options: KinshipOptions): ResolvedOptions {
       options.maxTwoUnionAllianceDegree ?? DEFAULTS.maxTwoUnionAllianceDegree,
     maxRelationships: options.maxRelationships ?? DEFAULTS.maxRelationships,
     maxChains: options.maxChains ?? DEFAULTS.maxChains,
+    maxPathChecks: options.maxPathChecks ?? DEFAULTS.maxPathChecks,
   };
 }
 
@@ -107,21 +119,28 @@ function chainEdges(chain: Chain): FiliationEdge[] {
   return edges.reverse();
 }
 
+/** Budget d'une recherche ; `truncated` dit qu'il a été épuisé. */
 interface Budget {
   remaining: number;
   truncated: boolean;
 }
 
+function budget(amount: number): Budget {
+  return { remaining: amount, truncated: false };
+}
+
 /**
  * Chaînes montantes depuis `start` (elle comprise, profondeur 0), en largeur : les plus courtes
- * d'abord, de sorte qu'une limite atteinte n'écarte que les plus lointaines.
+ * d'abord, de sorte qu'une limite atteinte n'écarte que les plus lointaines. `allowed` : seules
+ * ces personnes peuvent être atteintes.
  */
 function upChains(
   graph: KinshipGraph,
   start: number,
   mask: FiliationTypeMask,
   maxDepth: number,
-  budget: Budget,
+  limit: Budget,
+  allowed?: ReadonlySet<number>,
 ): Chain[] {
   const chains: Chain[] = [{ node: start, edge: undefined, prev: undefined, depth: 0 }];
   for (let index = 0; index < chains.length; index += 1) {
@@ -129,11 +148,12 @@ function upChains(
     if (chain === undefined || chain.depth >= maxDepth) continue;
     for (const edge of graph.parentEdges[chain.node] ?? []) {
       if ((edge.typeBit & mask) === 0 || onChain(chain, edge.parent)) continue;
-      if (budget.remaining <= 0) {
-        budget.truncated = true;
+      if (allowed !== undefined && !allowed.has(edge.parent)) continue;
+      if (limit.remaining <= 0) {
+        limit.truncated = true;
         return chains;
       }
-      budget.remaining -= 1;
+      limit.remaining -= 1;
       chains.push({ node: edge.parent, edge, prev: chain, depth: chain.depth + 1 });
     }
   }
@@ -154,7 +174,7 @@ interface RawBlood {
 
 interface RawUnion {
   kind: 'union';
-  edge: UnionEdge;
+  edge: UnionPairEdge;
 }
 
 type RawSegment = RawBlood | RawUnion;
@@ -191,13 +211,12 @@ function nearWalks(
   start: number,
   mask: FiliationTypeMask,
   maxDegree: number,
-  budget: Budget,
+  limit: Budget,
 ): RawBlood[] {
   const walks: RawBlood[] = [];
-  for (const up of upChains(graph, start, mask, maxDegree, budget)) {
+  for (const up of upChains(graph, start, mask, maxDegree, limit)) {
     const upEdges = chainEdges(up);
     walks.push(rawBlood(start, upEdges, []));
-    if (up.depth === 0 && maxDegree === 0) continue;
     // Descente en profondeur depuis le sommet, sans repasser par la montée.
     const stack: Chain[] = [{ node: up.node, edge: undefined, prev: undefined, depth: 0 }];
     while (stack.length > 0) {
@@ -205,14 +224,12 @@ function nearWalks(
       if (down === undefined || up.depth + down.depth >= maxDegree) continue;
       for (const edge of graph.childEdges[down.node] ?? []) {
         if ((edge.typeBit & mask) === 0) continue;
-        // Descendre vers l'enfant d'où l'on vient (ou vers une personne déjà sur le chemin)
-        // n'est pas un chemin simple.
         if (onChain(up, edge.child) || onChain(down, edge.child)) continue;
-        if (budget.remaining <= 0) {
-          budget.truncated = true;
+        if (limit.remaining <= 0) {
+          limit.truncated = true;
           return walks;
         }
-        budget.remaining -= 1;
+        limit.remaining -= 1;
         const next: Chain = { node: edge.child, edge, prev: down, depth: down.depth + 1 };
         walks.push(rawBlood(start, upEdges, chainEdges(next)));
         stack.push(next);
@@ -222,37 +239,96 @@ function nearWalks(
   return walks;
 }
 
-/** Tous les chemins de sang de A vers B (A ≠ B). */
+/**
+ * Personnes utiles pour monter depuis `start` : ses ancêtres (et elle) qui descendent d'un
+ * ancêtre commun ou en sont un. Une montée hors de cet ensemble n'atteint aucun sommet possible.
+ */
+function usefulAncestors(
+  graph: KinshipGraph,
+  start: number,
+  own: ReadonlySet<number>,
+  common: readonly number[],
+  mask: FiliationTypeMask,
+): Set<number> {
+  const useful = new Set<number>(common);
+  const stack = [...common];
+  while (stack.length > 0) {
+    const node = stack.pop();
+    if (node === undefined) break;
+    for (const edge of graph.childEdges[node] ?? []) {
+      if ((edge.typeBit & mask) === 0 || useful.has(edge.child) || !own.has(edge.child)) continue;
+      useful.add(edge.child);
+      stack.push(edge.child);
+    }
+  }
+  useful.add(start);
+  return useful;
+}
+
+/** Chaînes rangées par profondeur. */
+function byDepth(chains: readonly Chain[]): Chain[][] {
+  const levels: Chain[][] = [];
+  for (const chain of chains) (levels[chain.depth] ??= []).push(chain);
+  return levels;
+}
+
+/**
+ * Chemins de sang de A vers B (A ≠ B), des plus courts aux plus longs. Les montées sont limitées
+ * aux ancêtres qui mènent à un ancêtre commun (ensembles d'ancêtres du graphe, en cache) ; chaque
+ * côté a son budget, et les paires de chaînes ont le leur.
+ */
 function bloodPaths(
   graph: KinshipGraph,
   a: number,
   b: number,
   options: ResolvedOptions,
-  budget: Budget,
-): RawBlood[] {
-  const fromA = upChains(graph, a, options.mask, Number.POSITIVE_INFINITY, budget);
-  const fromB = upChains(graph, b, options.mask, Number.POSITIVE_INFINITY, budget);
-  const byApex = new Map<number, Chain[]>();
-  for (const chain of fromB) {
-    const list = byApex.get(chain.node);
-    if (list === undefined) byApex.set(chain.node, [chain]);
-    else list.push(chain);
+): { paths: RawBlood[]; truncated: boolean } {
+  const { mask } = options;
+  const ofA = new Set(graph.ancestorGenerations(a, mask).keys()).add(a);
+  const ofB = new Set(graph.ancestorGenerations(b, mask).keys()).add(b);
+  const common = [...ofA].filter((node) => ofB.has(node));
+  if (common.length === 0) return { paths: [], truncated: false };
+
+  const limitA = budget(options.maxChains);
+  const limitB = budget(options.maxChains);
+  const usefulA = usefulAncestors(graph, a, ofA, common, mask);
+  const usefulB = usefulAncestors(graph, b, ofB, common, mask);
+  const levelsA = byDepth(upChains(graph, a, mask, Number.POSITIVE_INFINITY, limitA, usefulA));
+  const fromB = new Map<number, Chain[][]>();
+  let deepestB = 0;
+  for (const chain of upChains(graph, b, mask, Number.POSITIVE_INFINITY, limitB, usefulB)) {
+    const levels = fromB.get(chain.node) ?? [];
+    (levels[chain.depth] ??= []).push(chain);
+    fromB.set(chain.node, levels);
+    deepestB = Math.max(deepestB, chain.depth);
   }
+
   const paths: RawBlood[] = [];
-  for (const chainA of fromA) {
-    const candidates = byApex.get(chainA.node);
-    if (candidates === undefined) continue;
-    for (const chainB of candidates) {
-      // Les deux côtés ne se rejoignent qu'au sommet.
-      let disjoint = true;
-      for (let link = chainB.prev; link !== undefined && disjoint; link = link.prev) {
-        if (onChain(chainA.prev, link.node)) disjoint = false;
+  let checks = options.maxPathChecks;
+  let truncated = limitA.truncated || limitB.truncated;
+  // Du degré le plus petit au plus grand : une limite atteinte n'écarte que les plus lointains.
+  search: for (let total = 1; total <= levelsA.length - 1 + deepestB; total += 1) {
+    for (let up = 0; up <= Math.min(total, levelsA.length - 1); up += 1) {
+      for (const chainA of levelsA[up] ?? []) {
+        const candidates = fromB.get(chainA.node)?.[total - up];
+        if (candidates === undefined) continue;
+        for (const chainB of candidates) {
+          if (checks <= 0) {
+            truncated = true;
+            break search;
+          }
+          checks -= 1;
+          // Les deux côtés ne se rejoignent qu'au sommet.
+          let disjoint = true;
+          for (let link = chainB.prev; link !== undefined && disjoint; link = link.prev) {
+            if (onChain(chainA.prev, link.node)) disjoint = false;
+          }
+          if (disjoint) paths.push(rawBlood(a, chainEdges(chainA), chainEdges(chainB).reverse()));
+        }
       }
-      if (!disjoint) continue;
-      paths.push(rawBlood(a, chainEdges(chainA), chainEdges(chainB).reverse()));
     }
   }
-  return paths;
+  return { paths, truncated };
 }
 
 /**
@@ -264,7 +340,7 @@ function bloodPaths(
 function crossingIsUseful(
   graph: KinshipGraph,
   left: RawBlood,
-  union: UnionEdge,
+  union: UnionPairEdge,
   right: RawBlood,
   mask: FiliationTypeMask,
 ): boolean {
@@ -297,21 +373,26 @@ function indexByEnd(walks: readonly RawBlood[]): Map<number, RawBlood[]> {
   return byEnd;
 }
 
-/** Chemins par une ou deux unions de A vers B. */
+/** Chemins par une ou deux unions de A vers B ; chaque recherche de segments a son budget. */
 function alliancePaths(
   graph: KinshipGraph,
   a: number,
   b: number,
   options: ResolvedOptions,
-  budget: Budget,
-): RawSegment[][] {
+): { paths: RawSegment[][]; truncated: boolean } {
   const { mask, maxUnions } = options;
-  if (maxUnions < 1) return [];
+  if (maxUnions < 1) return { paths: [], truncated: false };
   const one = options.maxAllianceDegree;
   const two = maxUnions >= 2 ? options.maxTwoUnionAllianceDegree : -1;
   const reach = Math.max(one, two);
-  const fromA = nearWalks(graph, a, mask, reach, budget);
-  const fromB = indexByEnd(nearWalks(graph, b, mask, reach, budget));
+  const limits: Budget[] = [];
+  const walksFrom = (node: number, degree: number) => {
+    const limit = budget(options.maxChains);
+    limits.push(limit);
+    return nearWalks(graph, node, mask, degree, limit);
+  };
+  const fromA = walksFrom(a, reach);
+  const fromB = indexByEnd(walksFrom(b, reach));
   const paths: RawSegment[][] = [];
 
   const middleCache = new Map<string, RawBlood[]>();
@@ -319,7 +400,7 @@ function alliancePaths(
     const key = `${String(node)}:${String(degree)}`;
     let walks = middleCache.get(key);
     if (walks === undefined) {
-      walks = nearWalks(graph, node, mask, degree, budget);
+      walks = walksFrom(node, degree);
       middleCache.set(key, walks);
     }
     return walks;
@@ -344,7 +425,6 @@ function alliancePaths(
         const centerDegree = leftDegree + degreeOf(center);
         if (!crossingIsUseful(graph, left, first, center, mask)) continue;
         for (const second of graph.unionEdges[center.end] ?? []) {
-          if (second.union.id === first.union.id) continue;
           for (const walk of fromB.get(second.spouse) ?? []) {
             if (centerDegree + degreeOf(walk) > two) continue;
             const right = invertRaw(walk);
@@ -362,7 +442,7 @@ function alliancePaths(
       }
     }
   }
-  return paths;
+  return { paths, truncated: limits.some((limit) => limit.truncated) };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -409,8 +489,9 @@ function edgeIds(edges: readonly FiliationEdge[]): string {
 function groupKey(segments: readonly GroupedSegment[], loose: number): string {
   return segments
     .map((segment, index) => {
-      if (segment.kind === 'union')
-        return `U${segment.edge.union.id}>${String(segment.edge.spouse)}`;
+      if (segment.kind === 'union') {
+        return `U${String(segment.edge.self)}>${String(segment.edge.spouse)}`;
+      }
       const apexes =
         index === loose
           ? segment.apexes
@@ -434,10 +515,8 @@ function groupApexes(paths: readonly GroupedSegment[][], graph: KinshipGraph): G
     const order: string[] = [];
     for (const path of current) {
       const segment = path[index];
-      const key =
-        segment?.kind === 'blood' && isCollateral(segment)
-          ? `${String(path.length)}#${groupKey(path, index)}`
-          : `${String(path.length)}#${groupKey(path, -1)}`;
+      const loose = segment?.kind === 'blood' && isCollateral(segment) ? index : -1;
+      const key = `${String(path.length)}#${groupKey(path, loose)}`;
       const existing = groups.get(key);
       if (existing === undefined) {
         groups.set(
@@ -481,6 +560,7 @@ function toPublic(graph: KinshipGraph, path: readonly GroupedSegment[]): Relatio
   const unionIds: Id[] = [];
   let certainty: Certainty = 'certain';
   let degree = 0;
+  let unionCount = 0;
   const visit = (edge: FiliationEdge) => {
     types.add(edge.filiation.type);
     certainty = weakestCertainty(certainty, edge.filiation.certainty);
@@ -491,13 +571,16 @@ function toPublic(graph: KinshipGraph, path: readonly GroupedSegment[]): Relatio
       const { edge } = segment;
       segments.push({
         kind: 'union',
-        unionId: edge.union.id,
         fromId: graph.idAt(edge.self),
         toId: graph.idAt(edge.spouse),
-        fromRank: edge.selfRank,
-        toRank: edge.spouseRank,
+        unions: edge.unions.map((ref) => ({
+          unionId: ref.union.id,
+          fromRank: ref.selfRank,
+          toRank: ref.spouseRank,
+        })),
       });
-      unionIds.push(edge.union.id);
+      unionCount += 1;
+      unionIds.push(...edge.unions.map((ref) => ref.union.id));
       continue;
     }
     const first = segment.apexes[0];
@@ -545,10 +628,10 @@ function toPublic(graph: KinshipGraph, path: readonly GroupedSegment[]): Relatio
   }
 
   return {
-    kind: unionIds.length === 0 ? 'blood' : 'alliance',
+    kind: unionCount === 0 ? 'blood' : 'alliance',
     segments,
     degree,
-    unionCount: unionIds.length,
+    unionCount,
     certainty,
     filiationTypes: FILIATION_TYPES.filter((type) => types.has(type)),
     unionIds,
@@ -567,7 +650,7 @@ function imbalance(relationship: Relationship): number {
 /**
  * Ordre des chemins : le sang avant l'alliance, puis du plus court au plus long, le moins
  * d'unions, le plus équilibré, le plus certain ; à égalité, une clé identique pour un chemin et
- * son inverse, de sorte que B vers A donne les inverses dans le même ordre.
+ * son inverse.
  */
 function sortRelationships(relationships: Relationship[]): Relationship[] {
   const keyed = relationships.map((relationship) => ({
@@ -588,9 +671,38 @@ function sortRelationships(relationships: Relationship[]): Relationship[] {
   return keyed.map(({ relationship }) => relationship);
 }
 
+/** Calcul dans le sens canonique (A avant B par identifiant). */
+function computeRelationships(
+  graph: KinshipGraph,
+  a: number,
+  b: number,
+  options: ResolvedOptions,
+): KinshipResult {
+  const blood = bloodPaths(graph, a, b, options);
+  const alliance = alliancePaths(graph, a, b, options);
+  const grouped = groupApexes(
+    [
+      ...blood.paths.map((path) => [toGrouped(path)]),
+      ...alliance.paths.map((p) => p.map(toGrouped)),
+    ],
+    graph,
+  );
+  const limited = blood.truncated || alliance.truncated;
+  if (grouped.length === 0)
+    return limited ? { status: 'incomplete', truncated: true } : { status: 'none' };
+  const sorted = sortRelationships(grouped.map((path) => toPublic(graph, path)));
+  const relationships = sorted.slice(0, options.maxRelationships);
+  return {
+    status: 'related',
+    relationships,
+    truncated: limited || relationships.length < sorted.length,
+  };
+}
+
 /**
  * Tous les liens de A vers B, dans le graphe du lecteur. Le résultat ne dépend que du contenu du
- * graphe, pas de l'ordre des objets ; celui de B vers A en est exactement l'inverse.
+ * graphe, pas de l'ordre des objets ; celui de B vers A en est exactement l'inverse, dans le
+ * même ordre, limites comprises.
  */
 export function findRelationships(
   graph: KinshipGraph,
@@ -602,56 +714,53 @@ export function findRelationships(
   const b = graph.indexOf(bId);
   if (a === undefined || b === undefined) return { status: 'none' };
   if (a === b) return { status: 'same_person' };
-
   const resolved = resolve(options);
-  const budget: Budget = { remaining: resolved.maxChains, truncated: false };
-  const blood = bloodPaths(graph, a, b, resolved, budget).map((path) => [toGrouped(path)]);
-  const alliance = alliancePaths(graph, a, b, resolved, budget).map((path) => path.map(toGrouped));
-  const grouped = groupApexes([...blood, ...alliance], graph);
-  if (grouped.length === 0) return { status: 'none' };
-
-  const sorted = sortRelationships(grouped.map((path) => toPublic(graph, path)));
-  const relationships = sorted.slice(0, resolved.maxRelationships);
-  return {
-    status: 'related',
-    relationships,
-    truncated: budget.truncated || relationships.length < sorted.length,
-  };
+  if (compareIds(aId, bId) < 0) return computeRelationships(graph, a, b, resolved);
+  const result = computeRelationships(graph, b, a, resolved);
+  return result.status === 'related'
+    ? { ...result, relationships: result.relationships.map(invertRelationship) }
+    : result;
 }
 
-/** Un ancêtre commun le plus proche, et ses générations les plus proches de chaque côté. */
-export interface ClosestCommonAncestor {
+/** Un ancêtre au sommet d'un chemin de sang, et ses générations les plus proches de chaque côté. */
+export interface PathCommonAncestor {
   personId: Id;
   generationsFromA: number;
   generationsFromB: number;
 }
 
 /**
- * Ancêtres communs les plus proches de A et B : les sommets des chemins de sang, chacun une
- * seule fois (implexe), avec la génération la plus proche de chaque côté. En ligne directe,
- * l'ancêtre est A ou B lui-même (0 génération de son côté). Triés du plus proche au plus
- * lointain, puis par identifiant.
+ * Ancêtres communs au sommet des chemins de sang entre A et B, chacun une seule fois, avec la
+ * génération la plus proche de chaque côté. Ce ne sont pas les ancêtres communs « les plus
+ * proches au sens strict » (aucun descendant commun plus proche) : avec l'implexe ou le lévirat,
+ * un ancêtre plus lointain est aussi au sommet d'un chemin simple (deux frères dont les parents
+ * sont cousins ont aussi leurs arrière-grands-parents communs). Les grands-parents de deux frères
+ * n'y sont pas : ils ne sont atteints qu'en repassant par le parent commun. En ligne directe,
+ * l'ancêtre est A ou B (0 génération de son côté). Triés du plus proche au plus lointain, puis
+ * par identifiant. `truncated` : une limite a été atteinte, la liste peut être incomplète.
  */
-export function closestCommonAncestors(
+export function commonAncestorsOfPaths(
   graph: KinshipGraph,
   aId: Id,
   bId: Id,
-  options: Pick<KinshipOptions, 'filiationTypes' | 'maxChains'> = {},
-): ClosestCommonAncestor[] {
+  options: Pick<KinshipOptions, 'filiationTypes' | 'maxChains' | 'maxPathChecks'> = {},
+): { ancestors: PathCommonAncestor[]; truncated: boolean } {
   const a = graph.indexOf(aId);
   const b = graph.indexOf(bId);
-  if (a === undefined || b === undefined || a === b) return [];
-  const resolved = resolve(options);
-  const budget: Budget = { remaining: resolved.maxChains, truncated: false };
+  if (a === undefined || b === undefined || a === b) return { ancestors: [], truncated: false };
+  const swap = compareIds(aId, bId) > 0;
+  const { paths, truncated } = bloodPaths(graph, swap ? b : a, swap ? a : b, resolve(options));
   const best = new Map<number, [number, number]>();
-  for (const path of bloodPaths(graph, a, b, resolved, budget)) {
+  for (const path of paths) {
+    const fromA = swap ? path.down.length : path.up.length;
+    const fromB = swap ? path.up.length : path.down.length;
     const known = best.get(path.apex);
     best.set(path.apex, [
-      Math.min(known?.[0] ?? Number.POSITIVE_INFINITY, path.up.length),
-      Math.min(known?.[1] ?? Number.POSITIVE_INFINITY, path.down.length),
+      Math.min(known?.[0] ?? Number.POSITIVE_INFINITY, fromA),
+      Math.min(known?.[1] ?? Number.POSITIVE_INFINITY, fromB),
     ]);
   }
-  return [...best]
+  const ancestors = [...best]
     .map(([node, [fromA, fromB]]) => ({
       personId: graph.idAt(node),
       generationsFromA: fromA,
@@ -662,4 +771,5 @@ export function closestCommonAncestors(
         x.generationsFromA + x.generationsFromB - (y.generationsFromA + y.generationsFromB) ||
         compareIds(x.personId, y.personId),
     );
+  return { ancestors, truncated };
 }

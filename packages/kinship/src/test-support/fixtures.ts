@@ -99,6 +99,7 @@ export function relationshipIssues(
   let degree = 0;
   const types = new Set<string>();
   const unionIds: Id[] = [];
+  let crossings = 0;
   const checkLink = (link: BloodSegment['ascent'][number], where: string) => {
     const filiation = graph.filiation(link.filiationId);
     if (
@@ -115,19 +116,26 @@ export function relationshipIssues(
 
   for (const segment of segments) {
     if (segment.kind === 'union') {
-      const union = graph.union(segment.unionId);
-      const spouses = union?.spouses.map((spouse) => spouse.personId) ?? [];
-      if (!spouses.includes(segment.fromId) || !spouses.includes(segment.toId)) {
-        issues.push(`union ${segment.unionId} does not link ${segment.fromId} and ${segment.toId}`);
+      crossings += 1;
+      // Toutes les unions présentes entre les deux conjoints, triées, avec leurs rangs.
+      const expected = graph
+        .unionsOf(segment.fromId)
+        .filter((union) => union.spouses.some((spouse) => spouse.personId === segment.toId))
+        .map((union) => union.id)
+        .sort();
+      const listed = segment.unions.map((union) => union.unionId);
+      if (listed.length === 0 || JSON.stringify(listed) !== JSON.stringify(expected)) {
+        issues.push(`unions between ${segment.fromId} and ${segment.toId} are not all listed`);
       }
-      const ranks = new Map(union?.spouses.map((spouse) => [spouse.personId, spouse.rank]));
-      if (
-        ranks.get(segment.fromId) !== segment.fromRank ||
-        ranks.get(segment.toId) !== segment.toRank
-      ) {
-        issues.push(`union ${segment.unionId}: wrong ranks`);
+      for (const ref of segment.unions) {
+        const ranks = new Map(
+          graph.union(ref.unionId)?.spouses.map((spouse) => [spouse.personId, spouse.rank]),
+        );
+        if (ranks.get(segment.fromId) !== ref.fromRank || ranks.get(segment.toId) !== ref.toRank) {
+          issues.push(`union ${ref.unionId}: wrong ranks`);
+        }
       }
-      unionIds.push(segment.unionId);
+      unionIds.push(...listed);
       continue;
     }
     degree += segment.generationsUp + segment.generationsDown;
@@ -226,11 +234,10 @@ export function relationshipIssues(
   if (JSON.stringify(sortedPeople) !== JSON.stringify(relationship.personIds))
     issues.push('wrong personIds');
   if (relationship.degree !== degree) issues.push('wrong degree');
-  if (relationship.unionCount !== unionIds.length) issues.push('wrong unionCount');
+  if (relationship.unionCount !== crossings) issues.push('wrong unionCount');
   if (JSON.stringify(relationship.unionIds) !== JSON.stringify(unionIds))
     issues.push('wrong unionIds');
-  if (relationship.kind !== (unionIds.length === 0 ? 'blood' : 'alliance'))
-    issues.push('wrong kind');
+  if (relationship.kind !== (crossings === 0 ? 'blood' : 'alliance')) issues.push('wrong kind');
   if (order[relationship.certainty] !== weakest)
     issues.push('certainty is not the weakest of the path');
   if (

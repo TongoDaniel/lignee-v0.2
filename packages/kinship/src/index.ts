@@ -8,12 +8,16 @@ export {
   createKinshipGraph,
   weakestCertainty,
   type AncestorEntry,
+  type KinshipFiliation,
   type KinshipGraphInput,
+  type KinshipParentCandidate,
+  type KinshipPerson,
+  type KinshipUnion,
 } from './graph';
 export {
-  closestCommonAncestors,
+  commonAncestorsOfPaths,
   findRelationships,
-  type ClosestCommonAncestor,
+  type PathCommonAncestor,
   type KinshipOptions,
 } from './kinship';
 export {
@@ -27,4 +31,5 @@ export {
   type Segment,
   type Sharing,
   type UnionLink,
+  type UnionRank,
 } from './relationship';

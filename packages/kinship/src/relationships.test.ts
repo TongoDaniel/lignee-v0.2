@@ -3,7 +3,7 @@
 // Arbres inventés, noms courts au format des scénarios.
 import { describe, expect, it } from 'vitest';
 
-import { closestCommonAncestors, findRelationships } from './kinship';
+import { commonAncestorsOfPaths, findRelationships } from './kinship';
 import type { BloodSegment, KinshipResult, Relationship } from './relationship';
 import {
   describeRelationship,
@@ -101,7 +101,12 @@ describe('liens de sang : générations de chaque côté (TRD)', () => {
   });
 
   it('ancêtres communs les plus proches seulement (pas les grands-parents de deux frères)', () => {
-    const common = closestCommonAncestors(lineage.graph, lineage.id('caro'), lineage.id('cedi'));
+    const { ancestors: common, truncated } = commonAncestorsOfPaths(
+      lineage.graph,
+      lineage.id('caro'),
+      lineage.id('cedi'),
+    );
+    expect(truncated).toBe(false);
     expect(
       common.map((c) => [lineage.keyOf(c.personId), c.generationsFromA, c.generationsFromB]).sort(),
     ).toEqual([
@@ -156,7 +161,7 @@ describe('polygamie : demi-frères, co-épouses (PAR-03, PAR-04)', () => {
       '0/0[fanta] =moussa 0/0[moussa] =awa 0/0[awa]',
     );
     const ranks = relationship?.segments.flatMap((s) =>
-      s.kind === 'union' ? [[s.fromRank, s.toRank]] : [],
+      s.kind === 'union' ? s.unions.map((u) => [u.fromRank, u.toRank]) : [],
     );
     expect(ranks).toEqual([
       [1, 1],
@@ -385,7 +390,10 @@ describe('visibilité : le graphe ne contient que ce que le lecteur voit (PAR-09
     const f = fixture(section, { hidden: ['gp'] });
     // Les filiations qui citent gp sont restées dans l'entrée : le moteur les ignore.
     expect(findRelationships(f.graph, f.id('moi'), f.id('cousin'))).toEqual({ status: 'none' });
-    expect(closestCommonAncestors(f.graph, f.id('moi'), f.id('cousin'))).toEqual([]);
+    expect(commonAncestorsOfPaths(f.graph, f.id('moi'), f.id('cousin'))).toEqual({
+      ancestors: [],
+      truncated: false,
+    });
     expect(f.graph.ancestors(f.id('moi')).map((a) => f.keyOf(a.personId))).toEqual(['pere']);
   });
 

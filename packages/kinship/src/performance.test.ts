@@ -2,7 +2,7 @@
 // personnes ». Mesuré ici sur le poste de développement ; le budget fin (50 ms sur l'Android de
 // référence, calcul découpé) est T-028. Arbre type de 5 000 personnes (graine fixe), et un chef
 // de famille à 8 épouses et 40 enfants (TRD, Performance ; agent moteur-parente).
-import type { Id } from '@lignee/domain';
+import type { Filiation, Id, Person } from '@lignee/domain';
 import { referenceTree, testTree } from '@lignee/domain/test-support';
 import { describe, expect, it } from 'vitest';
 
@@ -10,6 +10,7 @@ import { createKinshipGraph } from './graph';
 import { findRelationships } from './kinship';
 
 const PAR_01_BUDGET_MS = 200;
+const TREE_OPENING_BUDGET_MS = 1000;
 
 /** Graine fixe pour tirer les paires (reproductible). */
 function* pairsOf(ids: readonly Id[], count: number): Generator<[Id, Id]> {
@@ -32,7 +33,7 @@ function measure(run: () => void): number {
 }
 
 describe('PAR-01 : temps de réponse du moteur', () => {
-  it('arbre de 5 000 personnes : chaque lien en moins de 200 ms, graphe compris', () => {
+  it('arbre de 5 000 personnes : chaque lien en moins de 200 ms, graphe en moins de 1 s', () => {
     // La copie de l'arbre type (environ 110 ms) est faite hors des mesures.
     const tree = referenceTree(5000);
     let graph = createKinshipGraph(tree);
@@ -43,13 +44,17 @@ describe('PAR-01 : temps de réponse du moteur', () => {
     const ids = tree.people.map((person) => person.id);
     // Paires au hasard, plus des paires proches (même famille) : les plus coûteuses, car elles
     // ont le plus de chemins de sang et d'alliance.
-    const close: [Id, Id][] = tree.filiations
-      .slice(0, 100)
-      .map((filiation) => [
-        filiation.childId,
-        graph.childrenOf(filiation.parentId).at(-1)?.childId ?? filiation.parentId,
-      ]);
-    const samples = [...pairsOf(ids, 300), ...close];
+    // jamais une personne avec elle-même (réponse immédiate, qui fausserait la mesure).
+    const close: [Id, Id][] = tree.filiations.slice(0, 150).flatMap((filiation): [Id, Id][] =>
+      graph
+        .childrenOf(filiation.parentId)
+        .map((sibling) => sibling.childId)
+        .filter((sibling) => sibling !== filiation.childId)
+        .slice(0, 1)
+        .map((sibling) => [filiation.childId, sibling]),
+    );
+    expect(close.length).toBeGreaterThan(50);
+    const samples = [...pairsOf(ids, 300), ...close].filter(([a, b]) => a !== b);
     const times = samples.map(([a, b]) => measure(() => findRelationships(graph, a, b)));
     times.sort((x, y) => x - y);
     const max = times.at(-1) ?? 0;
@@ -59,7 +64,10 @@ describe('PAR-01 : temps de réponse du moteur', () => {
       `PAR-01, 5 000 personnes : graphe ${build.toFixed(1)} ms ; ${String(times.length)} liens, ` +
         `moyenne ${mean.toFixed(2)} ms, 95e centile ${p95.toFixed(2)} ms, max ${max.toFixed(2)} ms`,
     );
-    expect(build + max).toBeLessThan(PAR_01_BUDGET_MS);
+    // Le graphe se construit une fois, à l'ouverture de l'arbre (TRD : moins de 1 s) ; chaque
+    // question « qui est-ce pour moi ? » ne paie ensuite que le calcul du lien.
+    expect(build).toBeLessThan(TREE_OPENING_BUDGET_MS);
+    expect(max).toBeLessThan(PAR_01_BUDGET_MS);
   });
 
   it('chef de famille à 8 épouses et 40 enfants, avec leurs petits-enfants', () => {
@@ -117,9 +125,9 @@ describe('PAR-01 : temps de réponse du moteur', () => {
     }
     const graph = createKinshipGraph({ people, unions, filiations });
     const ids = people.map((p) => p.id);
-    const times = [...pairsOf(ids, 300)].map(([a, b]) =>
-      measure(() => findRelationships(graph, a, b)),
-    );
+    const times = [...pairsOf(ids, 300)]
+      .filter(([a, b]) => a !== b)
+      .map(([a, b]) => measure(() => findRelationships(graph, a, b)));
     const max = Math.max(...times);
     console.info(
       `PAR-01, chef de famille (${String(people.length)} personnes, 8 épouses, 40 enfants) : max ${max.toFixed(2)} ms`,
@@ -140,5 +148,66 @@ describe('PAR-01 : temps de réponse du moteur', () => {
     const segment =
       halfSiblings.status === 'related' ? halfSiblings.relationships[0]?.segments[0] : undefined;
     expect(segment?.kind === 'blood' && segment.sharing).toBe('half');
+  });
+
+  it('cas profond : deux lignées de 150 générations depuis un même couple', () => {
+    const context = testTree();
+    const treeId = context.treeId;
+    const people: Person[] = [];
+    const filiations: Filiation[] = [];
+    const person = () => {
+      const id = context.nextId();
+      people.push({
+        id,
+        treeId,
+        nature: 'known',
+        gender: 'unspecified',
+        vitalStatus: 'unknown',
+        version: 0,
+      });
+      return id;
+    };
+    const child = (parentId: Id, childId: Id) =>
+      filiations.push({
+        id: context.nextId(),
+        treeId,
+        parentId,
+        childId,
+        type: 'birth',
+        certainty: 'certain',
+        recognitionStatus: 'unknown',
+      });
+    const [father, mother] = [person(), person()];
+    const ends: Id[] = [];
+    for (let branch = 0; branch < 2; branch += 1) {
+      let current = person();
+      child(father, current);
+      child(mother, current);
+      for (let generation = 1; generation < 150; generation += 1) {
+        const next = person();
+        child(current, next);
+        current = next;
+      }
+      ends.push(current);
+    }
+    const graph = createKinshipGraph({ people, unions: [], filiations });
+    const [a, b] = ends;
+    if (a === undefined || b === undefined) throw new Error('Missing ends');
+    let result = findRelationships(graph, a, b);
+    const elapsed = measure(() => {
+      result = findRelationships(graph, a, b);
+    });
+    console.info(
+      `PAR-01, cas profond (${String(people.length)} personnes) : ${elapsed.toFixed(2)} ms`,
+    );
+    expect(elapsed).toBeLessThan(PAR_01_BUDGET_MS);
+    const segment = result.status === 'related' ? result.relationships[0]?.segments[0] : undefined;
+    expect(
+      segment?.kind === 'blood' && [
+        segment.generationsUp,
+        segment.generationsDown,
+        segment.sharing,
+      ],
+    ).toEqual([150, 150, 'full']);
   });
 });

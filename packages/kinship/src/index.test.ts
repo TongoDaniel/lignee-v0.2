@@ -6,7 +6,7 @@ describe('@lignee/kinship', () => {
   it('expose le graphe et le calcul des liens', () => {
     expect(typeof kinship.createKinshipGraph).toBe('function');
     expect(typeof kinship.findRelationships).toBe('function');
-    expect(typeof kinship.closestCommonAncestors).toBe('function');
+    expect(typeof kinship.commonAncestorsOfPaths).toBe('function');
     expect(typeof kinship.invertRelationship).toBe('function');
   });
 });

@@ -2,8 +2,14 @@
 // lecteur a le droit de les voir. Le graphe est construit à partir d'objets déjà filtrés par
 // packages/domain : il ne contient rien de masqué et ne peut donc rien en révéler (PAR-09).
 //
-// Défense en profondeur : une union ou une filiation qui cite une personne absente du graphe est
-// ignorée, jamais traversée. Un objet masqué oublié par le filtre ne crée donc aucun chemin.
+// Le graphe ne garde que la structure (ADR 0010) : ni notes, ni lieux, ni sources, ni statut de
+// reconnaissance. Défense en profondeur, pour qu'un objet masqué ne se devine pas :
+// - une union ou une filiation qui cite une personne absente est ignorée, jamais traversée ;
+// - les rangs d'union sont renumérotés parmi les unions présentes (1, 2, 3…) : un rang 3 sans
+//   rang 2 trahirait un foyer masqué ;
+// - l'union d'origine d'une filiation est retirée si cette union est absente ;
+// - un parent candidat n'est gardé que si une union présente le relie à un parent présent de
+//   l'enfant (« mère parmi ses épouses » révélerait sinon une union masquée).
 //
 // Le graphe est immuable. Un changement dans l'arbre donne un nouveau graphe ; les ensembles
 // d'ancêtres sont mis en cache dans chaque graphe (le recalcul partiel est T-028).
@@ -17,13 +23,33 @@ import type {
   Union,
 } from '@lignee/domain';
 
+/** Une personne, réduite à ce dont le calcul a besoin. */
+export type KinshipPerson = Pick<Person, 'id' | 'nature' | 'gender'>;
+
+/**
+ * Une union, réduite à sa structure : conjoints et rangs (renumérotés dans le graphe), type,
+ * dates et simultanéité (co-épouse ou épouse successive, T-021).
+ */
+export type KinshipUnion = Pick<
+  Union,
+  'id' | 'spouses' | 'type' | 'start' | 'end' | 'endReason' | 'simultaneity'
+>;
+
+/** Une filiation, réduite à sa structure. */
+export type KinshipFiliation = Pick<
+  Filiation,
+  'id' | 'parentId' | 'childId' | 'type' | 'certainty' | 'originUnionId'
+>;
+
+export type KinshipParentCandidate = Pick<ParentCandidate, 'childId' | 'candidateId'>;
+
 /** Ce que le moteur reçoit : les objets visibles du lecteur, rien d'autre. */
 export interface KinshipGraphInput {
-  people: readonly Person[];
-  unions: readonly Union[];
-  filiations: readonly Filiation[];
+  people: readonly KinshipPerson[];
+  unions: readonly KinshipUnion[];
+  filiations: readonly KinshipFiliation[];
   /** Mères ou pères possibles d'un enfant (UNI-11) ; jamais traversés, consultables (T-020). */
-  parentCandidates?: readonly ParentCandidate[];
+  parentCandidates?: readonly KinshipParentCandidate[];
 }
 
 /** Tous les types de filiation, dans l'ordre du modèle (UNI-09). */
@@ -62,20 +88,30 @@ export function filiationTypeMask(types: readonly FiliationType[]): FiliationTyp
 
 /** Une filiation du graphe, entre deux personnes présentes (indices internes). */
 export interface FiliationEdge {
-  readonly filiation: Filiation;
+  readonly filiation: KinshipFiliation;
   readonly parent: number;
   readonly child: number;
   /** Bit du type, pour les masques. */
   readonly typeBit: number;
 }
 
-/** Une union du graphe vue depuis l'un des conjoints (indices internes). */
-export interface UnionEdge {
-  readonly union: Union;
-  readonly self: number;
-  readonly spouse: number;
+/** Une union entre deux personnes, avec les rangs renumérotés de chacune. */
+export interface UnionRef {
+  readonly union: KinshipUnion;
   readonly selfRank: number;
   readonly spouseRank: number;
+}
+
+/**
+ * Les unions entre deux personnes, vues depuis l'une (indices internes). Deux personnes mariées
+ * deux fois (divorce puis remariage) n'ont qu'un passage, qui porte les deux unions : un chemin
+ * ne se dédouble pas pour autant.
+ */
+export interface UnionPairEdge {
+  readonly self: number;
+  readonly spouse: number;
+  /** Triées par identifiant d'union. */
+  readonly unions: readonly UnionRef[];
 }
 
 /** Un ancêtre et la génération la plus proche à laquelle on l'atteint (1 = parent). */
@@ -87,31 +123,116 @@ export interface AncestorEntry {
 /**
  * Graphe de parenté immuable. Les champs indexés (`parentEdges`, `childEdges`, `unionEdges`,
  * `indexOf`, `ids`) servent au calcul des liens dans ce paquet ; l'extérieur passe par les
- * méthodes, qui parlent en identifiants et en objets du modèle.
+ * méthodes, qui parlent en identifiants et en objets réduits du modèle.
  */
 export class KinshipGraph {
   /** Identifiant de chaque personne, par indice interne. */
   readonly ids: readonly Id[];
   readonly parentEdges: readonly (readonly FiliationEdge[])[];
   readonly childEdges: readonly (readonly FiliationEdge[])[];
-  readonly unionEdges: readonly (readonly UnionEdge[])[];
+  readonly unionEdges: readonly (readonly UnionPairEdge[])[];
 
   private readonly index = new Map<Id, number>();
-  private readonly peopleById = new Map<Id, Person>();
-  private readonly unionsById = new Map<Id, Union>();
-  private readonly filiationsById = new Map<Id, Filiation>();
+  private readonly peopleById = new Map<Id, KinshipPerson>();
+  private readonly unionsById = new Map<Id, KinshipUnion>();
+  private readonly filiationsById = new Map<Id, KinshipFiliation>();
+  private readonly unionsByPerson = new Map<Id, KinshipUnion[]>();
   private readonly candidates = new Map<Id, Id[]>();
-  private readonly ancestorCache = new Map<string, readonly AncestorEntry[]>();
+  private readonly ancestorCache = new Map<string, ReadonlyMap<number, number>>();
 
   constructor(input: KinshipGraphInput) {
     const ids: Id[] = [];
     for (const person of input.people) {
       if (this.index.has(person.id)) throw new Error(`Duplicate person id ${person.id}`);
       this.index.set(person.id, ids.length);
-      this.peopleById.set(person.id, person);
+      this.peopleById.set(person.id, {
+        id: person.id,
+        nature: person.nature,
+        gender: person.gender,
+      });
       ids.push(person.id);
     }
     this.ids = ids;
+
+    // Unions entre personnes présentes, puis rangs renumérotés par personne : rang saisi, puis
+    // identifiant, donnent l'ordre ; le rang exposé est la place dans cet ordre.
+    const kept: KinshipUnion[] = [];
+    const keptIds = new Set<Id>();
+    for (const union of input.unions) {
+      const [first, second] = union.spouses;
+      const a = this.index.get(first.personId);
+      const b = this.index.get(second.personId);
+      if (a === undefined || b === undefined || a === b || keptIds.has(union.id)) continue;
+      keptIds.add(union.id);
+      kept.push(union);
+    }
+    const byPerson = new Map<Id, KinshipUnion[]>();
+    for (const union of kept) {
+      for (const spouse of union.spouses) {
+        const list = byPerson.get(spouse.personId) ?? [];
+        list.push(union);
+        byPerson.set(spouse.personId, list);
+      }
+    }
+    const projectedRank = new Map<string, number>();
+    for (const [personId, list] of byPerson) {
+      const rankOf = (union: KinshipUnion) =>
+        union.spouses.find((spouse) => spouse.personId === personId)?.rank ?? 0;
+      list.sort((x, y) => rankOf(x) - rankOf(y) || compareIds(x.id, y.id));
+      list.forEach((union, position) => projectedRank.set(`${union.id}:${personId}`, position + 1));
+    }
+    const rankIn = (union: KinshipUnion, personId: Id) =>
+      projectedRank.get(`${union.id}:${personId}`) ?? 1;
+    for (const union of kept) {
+      const [first, second] = union.spouses;
+      this.unionsById.set(union.id, {
+        id: union.id,
+        spouses: [
+          { personId: first.personId, rank: rankIn(union, first.personId) },
+          { personId: second.personId, rank: rankIn(union, second.personId) },
+        ],
+        type: union.type,
+        ...(union.start === undefined ? {} : { start: union.start }),
+        ...(union.end === undefined ? {} : { end: union.end }),
+        ...(union.endReason === undefined ? {} : { endReason: union.endReason }),
+        ...(union.simultaneity === undefined ? {} : { simultaneity: union.simultaneity }),
+      });
+    }
+    for (const [personId, list] of byPerson) {
+      const projected: KinshipUnion[] = [];
+      for (const union of list) {
+        const found = this.unionsById.get(union.id);
+        if (found !== undefined) projected.push(found);
+      }
+      this.unionsByPerson.set(personId, projected);
+    }
+
+    const pairs = new Map<string, { self: number; spouse: number; unions: UnionRef[] }>();
+    for (const union of this.unionsById.values()) {
+      const [first, second] = union.spouses;
+      const a = this.index.get(first.personId);
+      const b = this.index.get(second.personId);
+      if (a === undefined || b === undefined) continue;
+      const sides: [number, number, number, number][] = [
+        [a, b, first.rank, second.rank],
+        [b, a, second.rank, first.rank],
+      ];
+      for (const [self, spouse, selfRank, spouseRank] of sides) {
+        const key = `${String(self)}:${String(spouse)}`;
+        const pair = pairs.get(key) ?? { self, spouse, unions: [] };
+        pair.unions.push({ union, selfRank, spouseRank });
+        pairs.set(key, pair);
+      }
+    }
+    const unionEdges: UnionPairEdge[][] = ids.map(() => []);
+    for (const pair of pairs.values()) {
+      pair.unions.sort((x, y) => compareIds(x.union.id, y.union.id));
+      unionEdges[pair.self]?.push(pair);
+    }
+    for (const list of unionEdges) {
+      list.sort((x, y) => compareIds(this.idAt(x.spouse), this.idAt(y.spouse)));
+    }
+    this.unionEdges = unionEdges;
 
     const parentEdges: FiliationEdge[][] = ids.map(() => []);
     const childEdges: FiliationEdge[][] = ids.map(() => []);
@@ -120,9 +241,18 @@ export class KinshipGraph {
       const child = this.index.get(filiation.childId);
       if (parent === undefined || child === undefined || parent === child) continue;
       if (this.filiationsById.has(filiation.id)) continue;
-      this.filiationsById.set(filiation.id, filiation);
+      const origin = filiation.originUnionId;
+      const projected: KinshipFiliation = {
+        id: filiation.id,
+        parentId: filiation.parentId,
+        childId: filiation.childId,
+        type: filiation.type,
+        certainty: filiation.certainty,
+        ...(origin !== undefined && this.unionsById.has(origin) ? { originUnionId: origin } : {}),
+      };
+      this.filiationsById.set(filiation.id, projected);
       const edge: FiliationEdge = {
-        filiation,
+        filiation: projected,
         parent,
         child,
         typeBit: 1 << FILIATION_TYPES.indexOf(filiation.type),
@@ -130,49 +260,29 @@ export class KinshipGraph {
       parentEdges[child]?.push(edge);
       childEdges[parent]?.push(edge);
     }
-
-    const unionEdges: UnionEdge[][] = ids.map(() => []);
-    for (const union of input.unions) {
-      const [first, second] = union.spouses;
-      const a = this.index.get(first.personId);
-      const b = this.index.get(second.personId);
-      if (a === undefined || b === undefined || a === b) continue;
-      if (this.unionsById.has(union.id)) continue;
-      this.unionsById.set(union.id, union);
-      unionEdges[a]?.push({
-        union,
-        self: a,
-        spouse: b,
-        selfRank: first.rank,
-        spouseRank: second.rank,
-      });
-      unionEdges[b]?.push({
-        union,
-        self: b,
-        spouse: a,
-        selfRank: second.rank,
-        spouseRank: first.rank,
-      });
-    }
-
-    for (const candidate of input.parentCandidates ?? []) {
-      if (!this.index.has(candidate.childId) || !this.index.has(candidate.candidateId)) continue;
-      const list = this.candidates.get(candidate.childId) ?? [];
-      if (!list.includes(candidate.candidateId)) list.push(candidate.candidateId);
-      this.candidates.set(candidate.childId, list);
-    }
-
     // Ordre stable, indépendant de l'ordre d'arrivée des objets : le résultat d'un calcul ne
     // dépend que du contenu du graphe.
     const byFiliationId = (x: FiliationEdge, y: FiliationEdge) =>
       compareIds(x.filiation.id, y.filiation.id);
     for (const list of parentEdges) list.sort(byFiliationId);
     for (const list of childEdges) list.sort(byFiliationId);
-    for (const list of unionEdges) list.sort((x, y) => compareIds(x.union.id, y.union.id));
-
     this.parentEdges = parentEdges;
     this.childEdges = childEdges;
-    this.unionEdges = unionEdges;
+
+    // Parent candidat : présent, et relié par une union présente à un parent présent de l'enfant.
+    for (const candidate of input.parentCandidates ?? []) {
+      const child = this.index.get(candidate.childId);
+      const target = this.index.get(candidate.candidateId);
+      if (child === undefined || target === undefined) continue;
+      const linked = (parentEdges[child] ?? []).some((edge) =>
+        (unionEdges[edge.parent] ?? []).some((pair) => pair.spouse === target),
+      );
+      if (!linked) continue;
+      const list = this.candidates.get(candidate.childId) ?? [];
+      if (!list.includes(candidate.candidateId)) list.push(candidate.candidateId);
+      this.candidates.set(candidate.childId, list);
+    }
+    for (const list of this.candidates.values()) list.sort(compareIds);
   }
 
   /** Nombre de personnes. */
@@ -190,37 +300,37 @@ export class KinshipGraph {
     return this.index.get(personId);
   }
 
-  person(personId: Id): Person | undefined {
+  person(personId: Id): KinshipPerson | undefined {
     return this.peopleById.get(personId);
   }
 
-  union(unionId: Id): Union | undefined {
+  /** Une union, avec les rangs renumérotés parmi les unions présentes de chaque conjoint. */
+  union(unionId: Id): KinshipUnion | undefined {
     return this.unionsById.get(unionId);
   }
 
-  filiation(filiationId: Id): Filiation | undefined {
+  filiation(filiationId: Id): KinshipFiliation | undefined {
     return this.filiationsById.get(filiationId);
   }
 
   /** Filiations vers les parents d'une personne (tous types), triées par identifiant. */
-  parentsOf(personId: Id): readonly Filiation[] {
+  parentsOf(personId: Id): readonly KinshipFiliation[] {
     const index = this.index.get(personId);
     return index === undefined ? [] : (this.parentEdges[index] ?? []).map((edge) => edge.filiation);
   }
 
   /** Filiations vers les enfants d'une personne (tous types), triées par identifiant. */
-  childrenOf(personId: Id): readonly Filiation[] {
+  childrenOf(personId: Id): readonly KinshipFiliation[] {
     const index = this.index.get(personId);
     return index === undefined ? [] : (this.childEdges[index] ?? []).map((edge) => edge.filiation);
   }
 
-  /** Unions d'une personne, triées par identifiant. */
-  unionsOf(personId: Id): readonly Union[] {
-    const index = this.index.get(personId);
-    return index === undefined ? [] : (this.unionEdges[index] ?? []).map((edge) => edge.union);
+  /** Unions d'une personne, dans l'ordre de ses rangs (1, 2, 3…). */
+  unionsOf(personId: Id): readonly KinshipUnion[] {
+    return this.unionsByPerson.get(personId) ?? [];
   }
 
-  /** Parents candidats d'un enfant (« mère parmi ses épouses », UNI-11). */
+  /** Parents candidats d'un enfant (« mère parmi ses épouses », UNI-11), triés. */
   parentCandidatesOf(childId: Id): readonly Id[] {
     return this.candidates.get(childId) ?? [];
   }
@@ -234,22 +344,13 @@ export class KinshipGraph {
   }
 
   /**
-   * Ancêtres d'une personne, chacun une seule fois (implexe, ARB-06), avec la génération la plus
-   * proche ; triés par génération puis par identifiant. La personne elle-même n'y figure jamais,
-   * même si des données corrompues formaient un cycle (le parcours s'arrête toujours). Mis en
-   * cache par personne et par ensemble de types de filiation suivis.
+   * Ancêtres (indices internes) et génération la plus proche, la personne exclue ; mis en cache
+   * par personne et par masque de types. Le parcours s'arrête toujours, même sur un cycle.
    */
-  ancestors(
-    personId: Id,
-    types: readonly FiliationType[] = FILIATION_TYPES,
-  ): readonly AncestorEntry[] {
-    const start = this.index.get(personId);
-    if (start === undefined) return [];
-    const mask = filiationTypeMask(types);
+  ancestorGenerations(start: number, mask: FiliationTypeMask): ReadonlyMap<number, number> {
     const key = `${String(start)}:${String(mask)}`;
     const cached = this.ancestorCache.get(key);
     if (cached !== undefined) return cached;
-
     const generations = new Map<number, number>([[start, 0]]);
     let frontier = [start];
     let depth = 0;
@@ -266,11 +367,24 @@ export class KinshipGraph {
       frontier = next;
     }
     generations.delete(start);
-    const entries = [...generations]
-      .map(([node, generation]) => ({ personId: this.idAt(node), generations: generation }))
+    this.ancestorCache.set(key, generations);
+    return generations;
+  }
+
+  /**
+   * Ancêtres d'une personne, chacun une seule fois (implexe, ARB-06), avec la génération la plus
+   * proche ; triés par génération puis par identifiant. La personne elle-même n'y figure jamais,
+   * même si des données corrompues formaient un cycle.
+   */
+  ancestors(
+    personId: Id,
+    types: readonly FiliationType[] = FILIATION_TYPES,
+  ): readonly AncestorEntry[] {
+    const start = this.index.get(personId);
+    if (start === undefined) return [];
+    return [...this.ancestorGenerations(start, filiationTypeMask(types))]
+      .map(([node, generations]) => ({ personId: this.idAt(node), generations }))
       .sort((x, y) => x.generations - y.generations || compareIds(x.personId, y.personId));
-    this.ancestorCache.set(key, entries);
-    return entries;
   }
 
   /** Identifiant d'un indice interne. */

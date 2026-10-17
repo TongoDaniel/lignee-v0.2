@@ -64,14 +64,28 @@ export interface BloodSegment {
   sharing: Sharing;
 }
 
-/** Une union traversée, de `fromId` vers son conjoint `toId`, avec le rang de chacun (UNI-07). */
-export interface UnionLink {
-  kind: 'union';
+/** Une union entre les deux conjoints d'un passage, avec le rang de chacun (UNI-07). */
+export interface UnionRank {
   unionId: Id;
-  fromId: Id;
-  toId: Id;
+  /**
+   * Rangs renumérotés parmi les unions de chaque conjoint présentes dans le graphe du lecteur
+   * (1, 2, 3…) : un foyer masqué ne laisse pas de trou (ADR 0010).
+   */
   fromRank: number;
   toRank: number;
+}
+
+/**
+ * Passage d'une personne `fromId` à son conjoint `toId`. Deux personnes unies deux fois
+ * (divorce puis remariage) n'ont qu'un passage, qui porte les deux unions (`unions`, triées par
+ * identifiant) : le chemin n'est pas dédoublé. T-021 et T-022 choisissent l'union à nommer
+ * (simultanéité, dates) dans le graphe.
+ */
+export interface UnionLink {
+  kind: 'union';
+  fromId: Id;
+  toId: Id;
+  unions: UnionRank[];
 }
 
 export type Segment = BloodSegment | UnionLink;
@@ -90,13 +104,13 @@ export interface Relationship {
   segments: Segment[];
   /** Somme des générations des segments de sang (degré civil pour un lien de sang). */
   degree: number;
-  /** Nombre d'unions traversées (0 pour le sang). */
+  /** Nombre de passages par une union (0 pour le sang). */
   unionCount: number;
   /** Certitude la plus faible de toutes les filiations du chemin (PAR-08). */
   certainty: Certainty;
   /** Types des filiations traversées, sans doublon, dans l'ordre du modèle (PAR-06). */
   filiationTypes: FiliationType[];
-  /** Unions traversées, dans l'ordre du chemin. */
+  /** Unions traversées, dans l'ordre des passages (par identifiant dans un même passage). */
   unionIds: Id[];
   /** Toutes les personnes du chemin, A et B compris, triées par identifiant (surlignage, T-029). */
   personIds: Id[];
@@ -107,24 +121,32 @@ export interface Relationship {
  * - `same_person` : A et B sont la même personne.
  * - `none` : aucun chemin visible, ou A ou B absent du graphe du lecteur. Les deux cas ne sont
  *   pas distingués : « Lien non disponible », sans autre indice (PAR-09, CL-SEC-02).
- * - `related` : tous les chemins trouvés, du plus proche au plus lointain, le sang avant
- *   l'alliance. `truncated` : une limite de calcul a été atteinte (chemins les plus lointains
- *   omis).
+ * - `incomplete` : aucun chemin trouvé avant qu'une limite de calcul soit atteinte ; un chemin
+ *   peut exister. Jamais confondu avec `none`.
+ * - `related` : les chemins trouvés, du plus proche au plus lointain, le sang avant l'alliance.
+ *   `truncated` : une limite de calcul a été atteinte, des chemins plus lointains peuvent
+ *   manquer.
+ *
+ * Les limites ne dépendent que du graphe : `incomplete` et `truncated` ne disent rien d'un objet
+ * masqué.
  */
 export type KinshipResult =
   | { status: 'same_person' }
   | { status: 'none' }
+  | { status: 'incomplete'; truncated: true }
   | { status: 'related'; relationships: Relationship[]; truncated: boolean };
 
 function invertSegment(segment: Segment): Segment {
   if (segment.kind === 'union') {
     return {
       kind: 'union',
-      unionId: segment.unionId,
       fromId: segment.toId,
       toId: segment.fromId,
-      fromRank: segment.toRank,
-      toRank: segment.fromRank,
+      unions: segment.unions.map((union) => ({
+        unionId: union.unionId,
+        fromRank: union.toRank,
+        toRank: union.fromRank,
+      })),
     };
   }
   return {
@@ -149,10 +171,13 @@ function invertSegment(segment: Segment): Segment {
  * de A vers B (`findRelationships(g, b, a)` donne exactement les inverses, dans le même ordre).
  */
 export function invertRelationship(relationship: Relationship): Relationship {
+  const segments = [...relationship.segments].reverse().map(invertSegment);
   return {
     ...relationship,
-    segments: [...relationship.segments].reverse().map(invertSegment),
-    unionIds: [...relationship.unionIds].reverse(),
+    segments,
+    unionIds: segments.flatMap((segment) =>
+      segment.kind === 'union' ? segment.unions.map((union) => union.unionId) : [],
+    ),
   };
 }
 
