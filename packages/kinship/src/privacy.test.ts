@@ -106,13 +106,13 @@ describe('objets réduits à leur structure', () => {
         'type',
       ]);
     }
-    // L'objet complet du modèle, avec des champs que le graphe ne doit pas recopier.
-    const complete: Union = {
-      ...union,
-      notes: 'Note privée',
-      placeId: sourceId,
-      declaredOption: 'polygamy',
-    };
+    // L'objet complet du modèle, avec des champs que le graphe ne doit pas recopier, dont une
+    // ancienne simultanéité par union (retirée du modèle par l'ADR 0012) : elle trahirait un
+    // second foyer masqué.
+    const complete: Union = Object.assign(
+      { ...union, notes: 'Note privée', placeId: sourceId, declaredOption: 'polygamy' as const },
+      { simultaneity: 'simultaneous' },
+    );
     const full = createKinshipGraph({
       people: f.data.people,
       unions: [complete],

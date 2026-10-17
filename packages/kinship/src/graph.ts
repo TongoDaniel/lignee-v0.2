@@ -27,13 +27,13 @@ import type {
 export type KinshipPerson = Pick<Person, 'id' | 'nature' | 'gender'>;
 
 /**
- * Une union, réduite à sa structure : conjoints et rangs (renumérotés dans le graphe), type,
- * dates et simultanéité (co-épouse ou épouse successive, T-021).
+ * Une union, réduite à sa structure : conjoints et rangs (renumérotés dans le graphe), type et
+ * dates. La simultanéité n'est pas dans le graphe : elle se garde par paire d'unions
+ * (`SimultaneityAnswer`, ADR 0012) et T-021 la lit avec `resolveSimultaneity` de
+ * @lignee/domain, sur l'arbre déjà filtré du lecteur (une réponse n'y figure que si ses deux
+ * unions sont visibles).
  */
-export type KinshipUnion = Pick<
-  Union,
-  'id' | 'spouses' | 'type' | 'start' | 'end' | 'endReason' | 'simultaneity'
->;
+export type KinshipUnion = Pick<Union, 'id' | 'spouses' | 'type' | 'start' | 'end' | 'endReason'>;
 
 /** Une filiation, réduite à sa structure. */
 export type KinshipFiliation = Pick<
@@ -195,7 +195,6 @@ export class KinshipGraph {
         ...(union.start === undefined ? {} : { start: union.start }),
         ...(union.end === undefined ? {} : { end: union.end }),
         ...(union.endReason === undefined ? {} : { endReason: union.endReason }),
-        ...(union.simultaneity === undefined ? {} : { simultaneity: union.simultaneity }),
       });
     }
     for (const [personId, list] of byPerson) {
