@@ -32,6 +32,25 @@ export function useDeviceLanguage(): Language {
   return resolveLanguage(locales.map((locale) => locale.languageTag));
 }
 
+/**
+ * Passe l'interface dans `next`. Si le changement échoue, l'interface reste dans la langue
+ * précédente : un écran à moitié traduit serait pire. Rien n'est journalisé (ni langue ni
+ * contenu) ; la prochaine préférence de l'appareil retentera.
+ */
+export async function switchLanguage(translator: Translator, next: Language): Promise<void> {
+  const previous = translator.language;
+  if (previous === next) return;
+  try {
+    await translator.changeLanguage(next);
+  } catch {
+    try {
+      await translator.changeLanguage(previous);
+    } catch {
+      // La langue précédente reste celle du traducteur si i18next n'a rien changé.
+    }
+  }
+}
+
 export function I18nProvider({ children, translator: given }: I18nProviderProps) {
   const deviceLanguage = useDeviceLanguage();
   const [translator] = useState(() => given ?? createTranslator({ language: deviceLanguage }));
@@ -40,7 +59,7 @@ export function I18nProvider({ children, translator: given }: I18nProviderProps)
   // La langue du téléphone a changé pendant que l'app tournait : l'interface suit.
   // Quand la langue du profil existera (CPT-12), elle passera avant celle de l'appareil.
   useEffect(() => {
-    if (given === undefined) void translator.changeLanguage(deviceLanguage);
+    if (given === undefined) void switchLanguage(translator, deviceLanguage);
   }, [deviceLanguage, given, translator]);
 
   const value = useMemo(() => ({ translator, language }), [translator, language]);
