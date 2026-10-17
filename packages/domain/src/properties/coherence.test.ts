@@ -32,7 +32,7 @@ import type { Id } from '../ids';
 import type { Gender } from '../person';
 import { treeArbitrary } from '../test-support/arbitraries';
 import { fuzzyDateArbitrary } from '../test-support/fuzzy-date-arbitrary';
-import type { TreeData } from '../test-support/tree-data';
+import { treeDataIssues, type TreeData } from '../test-support/tree-data';
 import { generateTree, referenceTree } from '../test-support/tree-generator';
 import type { Union, UnionSimultaneity } from '../union';
 import {
@@ -411,7 +411,7 @@ describe('dates floues générées', () => {
           });
           const a = union('a', startA, endA);
           const b = union('b', startB, endB);
-          const deduced = simultaneityFromDates({ unions: [a, b], facts: [] }, a, b);
+          const deduced = simultaneityFromDates({ facts: [] }, a, b);
           if (deduced === undefined) return;
           const [sa, ea, sb, eb] = [startA, endA, startB, endB].map((date, index) =>
             possibleDay(date, draws[index] as number),
@@ -439,31 +439,46 @@ describe('dates floues générées', () => {
 });
 
 describe('questions de simultanéité sur des arbres générés', () => {
-  it('une question par personne au plus ; une fois répondue, elle ne revient pas, et la réponse se modifie (500 arbres)', () => {
+  it('une question par personne au plus, chaque paire une fois ; une fois répondue paire par paire, elle ne revient pas, et chaque réponse se modifie (500 arbres)', () => {
     fc.assert(
-      fc.property(
-        treeArbitrary({ maxSize: 150, rates: 'varied' }),
-        fc.constantFrom<UnionSimultaneity>('simultaneous', 'successive'),
-        (tree, value) => {
-          const questions = simultaneityQuestions(tree);
-          const asked = questions.map((question) => question.personId);
-          expect(new Set(asked).size).toBe(asked.length);
-          let unions = tree.unions;
-          for (const question of questions) unions = answerSimultaneity(unions, question, value);
-          expect(simultaneityQuestions({ ...tree, unions })).toEqual([]);
-          // Réponse modifiée : toujours aucune question, et la nouvelle réponse est lue.
-          const other: UnionSimultaneity = value === 'simultaneous' ? 'successive' : 'simultaneous';
-          for (const question of questions) unions = answerSimultaneity(unions, question, other);
-          expect(simultaneityQuestions({ ...tree, unions })).toEqual([]);
-          for (const question of questions) {
-            const own = unions.filter((union) => question.unionIds.includes(union.id));
-            const [a, b] = own;
-            if (a === undefined || b === undefined) continue;
-            const resolved = resolveSimultaneity({ ...tree, unions }, question.personId, a, b);
-            if (resolved.source === 'answer') expect(resolved.value).toBe(other);
-          }
-        },
-      ),
+      fc.property(treeArbitrary({ maxSize: 150, rates: 'varied' }), fc.nat(), (tree, salt) => {
+        const questions = simultaneityQuestions(tree);
+        const asked = questions.map((question) => question.personId);
+        expect(new Set(asked).size).toBe(asked.length);
+        const pairs = questions.flatMap((question) => question.pairs);
+        expect(new Set(pairs.map((pair) => pair.join('|'))).size).toBe(pairs.length);
+        // Une valeur tirée pour chaque paire.
+        const pick = (index: number, flip: boolean): UnionSimultaneity =>
+          ((salt >> (index % 30)) & 1) === (flip ? 1 : 0) ? 'simultaneous' : 'successive';
+        let counter = 0;
+        const context = {
+          treeId: tree.tree.id,
+          nextId: () => `0190a000-0000-7000-8000-${String((counter += 1)).padStart(12, '0')}`,
+        };
+        const answerAll = (answers: TreeData['simultaneityAnswers'], flip: boolean) =>
+          answerSimultaneity(
+            answers,
+            pairs.map((unionIds, index) => ({ unionIds, simultaneity: pick(index, flip) })),
+            context,
+          );
+        const byId = new Map(tree.unions.map((union) => [union.id, union]));
+        const expectValues = (data: TreeData, flip: boolean) => {
+          expect(simultaneityQuestions(data)).toEqual([]);
+          pairs.forEach(([a, b], index) => {
+            const resolved = resolveSimultaneity(data, byId.get(a) as Union, byId.get(b) as Union);
+            expect(resolved).toEqual({ source: 'answer', value: pick(index, flip) });
+          });
+        };
+        const first = { ...tree, simultaneityAnswers: answerAll(tree.simultaneityAnswers, false) };
+        expectValues(first, false);
+        const second = {
+          ...first,
+          simultaneityAnswers: answerAll(first.simultaneityAnswers, true),
+        };
+        expectValues(second, true);
+        expect(second.simultaneityAnswers).toHaveLength(first.simultaneityAnswers.length);
+        expect(treeDataIssues(second)).toEqual([]);
+      }),
       { numRuns: 500 },
     );
   }, 180_000);

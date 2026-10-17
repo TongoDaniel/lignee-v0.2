@@ -147,13 +147,11 @@ interface UnionInfo {
   startYear: number;
   endYear: number | undefined;
   endReason: Union['endReason'];
-  /** Simultanéité de l'union quand elle a été créée ; sert à l'option « polygamie » déclarée. */
-  simultaneity: UnionSimultaneity | undefined;
   /**
-   * Réponse gardée pour chaque conjoint (ADR 0012) : la place de l'union parmi les autres unions
-   * de ce conjoint ; absente quand la question n'a pas encore été posée.
+   * Simultanéité de l'union quand elle a été créée ; sert à l'option « polygamie » déclarée.
+   * Absente : la question « simultanées ou successives » n'a pas été posée pour ses paires.
    */
-  answers: [UnionSimultaneity | undefined, UnionSimultaneity | undefined];
+  simultaneity: UnionSimultaneity | undefined;
   type: UnionType;
 }
 
@@ -269,7 +267,6 @@ export function generateTree(options: TreeGeneratorOptions): GeneratedTree {
   /** Célibataires nés dans l'arbre, par génération et par sexe : conjoints possibles. */
   const pools = new Map<string, PersonInfo[]>();
   const ancestorCache = new Map<Id, ReadonlySet<Id>>();
-  const polygamous = new Set<Id>();
 
   const remaining = () => size - people.length;
 
@@ -530,13 +527,6 @@ export function generateTree(options: TreeGeneratorOptions): GeneratedTree {
       lowest,
     );
     const divorced = simultaneity === undefined && random.chance(0.04);
-    // Pour chaque conjoint : simultanée s'il a déjà une union en cours, successive sinon.
-    const answerFor = (spouse: PersonInfo): UnionSimultaneity | undefined =>
-      simultaneity === undefined
-        ? undefined
-        : simultaneity === 'simultaneous' && ongoingUnions(spouse).length > 0
-          ? 'simultaneous'
-          : 'successive';
     const union: UnionInfo = {
       id: nextId(),
       spouses: [a, b],
@@ -545,7 +535,6 @@ export function generateTree(options: TreeGeneratorOptions): GeneratedTree {
       endYear: undefined,
       endReason: undefined,
       simultaneity,
-      answers: [answerFor(a), answerFor(b)],
       type: random.pick(UNION_TYPES),
     };
     if (divorced && start + 3 < lowest) {
@@ -554,16 +543,9 @@ export function generateTree(options: TreeGeneratorOptions): GeneratedTree {
     }
     if (simultaneity === 'simultaneous') {
       // Les unions en cours de chaque conjoint deviennent simultanées avec la nouvelle (UNI-08).
+      // La polygamie annoncée est comptée à la fin, sur les réponses gardées.
       for (const spouse of [a, b]) {
-        const ongoing = ongoingUnions(spouse);
-        for (const other of ongoing) {
-          other.simultaneity = 'simultaneous';
-          other.answers[other.spouses[0] === spouse ? 0 : 1] = 'simultaneous';
-        }
-        if (ongoing.length > 0 && !polygamous.has(spouse.id)) {
-          polygamous.add(spouse.id);
-          features.polygamousPeople += 1;
-        }
+        for (const other of ongoingUnions(spouse)) other.simultaneity = 'simultaneous';
       }
     }
     a.unions.push(union);
@@ -640,11 +622,14 @@ export function generateTree(options: TreeGeneratorOptions): GeneratedTree {
   function addChildren(union: UnionInfo) {
     const [a, b] = union.spouses;
     const mother = a.gender === 'female' ? a : b.gender === 'female' ? b : undefined;
+    // Un enfant naît au plus tard l'année qui précède la mort de chacun de ses parents : les
+    // jours des dates sont tirés au hasard dans l'année, et une naissance l'année du décès
+    // pourrait tomber après la mort de la mère, ou plus de 10 mois après celle du père (UNI-18).
     const lastYear = Math.min(
       CURRENT_YEAR - 1,
       (mother?.birthYear ?? union.startYear) + 45,
-      a.deathYear ?? CURRENT_YEAR,
-      b.deathYear ?? CURRENT_YEAR,
+      (a.deathYear ?? CURRENT_YEAR) - 1,
+      (b.deathYear ?? CURRENT_YEAR) - 1,
       union.endYear ?? CURRENT_YEAR,
     );
     let year = union.startYear + random.int(1, 3);
@@ -671,7 +656,8 @@ export function generateTree(options: TreeGeneratorOptions): GeneratedTree {
     if (wives.length < 2) return;
     const start = Math.max(...ongoingUnions(father).map((union) => union.startYear));
     const year = start + random.int(1, 8);
-    if (year > Math.min(CURRENT_YEAR - 1, father.deathYear ?? CURRENT_YEAR)) return;
+    // Même règle : au plus tard l'année qui précède la mort du père.
+    if (year > Math.min(CURRENT_YEAR, father.deathYear ?? CURRENT_YEAR) - 1) return;
     const child = addChild([father], year, undefined);
     if (child === undefined) return;
     for (const wife of wives) candidates.push({ child, candidate: wife });
@@ -859,16 +845,8 @@ export function generateTree(options: TreeGeneratorOptions): GeneratedTree {
         id: union.id,
         treeId,
         spouses: [
-          {
-            personId: a.id,
-            rank: union.ranks[0],
-            ...(union.answers[0] === undefined ? {} : { simultaneity: union.answers[0] }),
-          },
-          {
-            personId: b.id,
-            rank: union.ranks[1],
-            ...(union.answers[1] === undefined ? {} : { simultaneity: union.answers[1] }),
-          },
+          { personId: a.id, rank: union.ranks[0] },
+          { personId: b.id, rank: union.ranks[1] },
         ],
         type: union.type,
         ...(random.chance(0.6) ? { start: dateText(random, union.startYear) } : {}),
@@ -906,6 +884,31 @@ export function generateTree(options: TreeGeneratorOptions): GeneratedTree {
         });
       }
     }
+
+    // Réponses « simultanées ou successives » (UNI-08, ADR 0012) : une par paire d'unions d'une
+    // même personne, d'après le chevauchement réel des années, quand la question a été posée pour
+    // les deux unions (simultanéité connue à leur création). Les autres paires restent à demander.
+    // La polygamie annoncée est recomptée sur ces réponses : une union crue en cours à la création
+    // d'une autre a pu finir avant, par un décès traité plus tard.
+    const answered = new Set<string>();
+    const polygamousAnswered = new Set<Id>();
+    const overlap = (u: UnionInfo, v: UnionInfo) =>
+      u.startYear < (v.endYear ?? Infinity) && v.startYear < (u.endYear ?? Infinity);
+    for (const info of people) {
+      info.unions.forEach((u, index) => {
+        for (const v of info.unions.slice(index + 1)) {
+          if (u === v || u.simultaneity === undefined || v.simultaneity === undefined) continue;
+          const unionIds = [u.id, v.id].sort() as [Id, Id];
+          const key = unionIds.join('|');
+          if (answered.has(key)) continue;
+          answered.add(key);
+          const simultaneity = overlap(u, v) ? 'simultaneous' : 'successive';
+          if (simultaneity === 'simultaneous') polygamousAnswered.add(info.id);
+          data.simultaneityAnswers.push({ id: nextId(), treeId, unionIds, simultaneity });
+        }
+      });
+    }
+    features.polygamousPeople = polygamousAnswered.size;
 
     for (const info of people) {
       data.people.push({

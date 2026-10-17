@@ -26,23 +26,16 @@ export const declaredOptionSchema = z.enum(['monogamy', 'polygamy']);
 export type DeclaredOption = z.infer<typeof declaredOptionSchema>;
 
 /**
- * Simultanéité saisie (UNI-08) : la réponse à la question posée quand les dates ne suffisent pas
- * (`union-simultaneity.ts`), gardée et modifiable. Elle est portée par chaque conjoint, pas par
- * l'union (ADR 0012) : dans un lévirat, la même union est « simultanée » pour le frère déjà marié
- * et « successive » pour la veuve.
+ * Deux unions d'une même personne, simultanées ou successives (UNI-08). Se déduit des dates ;
+ * sinon, la réponse à la question est gardée par paire d'unions (`simultaneityAnswerSchema`).
  */
 export const unionSimultaneitySchema = z.enum(['simultaneous', 'successive']);
 export type UnionSimultaneity = z.infer<typeof unionSimultaneitySchema>;
 
-/**
- * Un conjoint, le rang de cette union pour lui (UNI-07 : 2e de l'un, 1re de l'autre) et, si la
- * question a été posée, la place de cette union parmi les autres unions de ce conjoint :
- * simultanée ou successive (UNI-08, ADR 0012).
- */
+/** Un conjoint et le rang de cette union pour lui (UNI-07 : 2e de l'un, 1re de l'autre). */
 export const spouseSchema = z.strictObject({
   personId: idSchema,
   rank: rankSchema,
-  simultaneity: unionSimultaneitySchema.optional(),
 });
 export type Spouse = z.infer<typeof spouseSchema>;
 
@@ -70,3 +63,23 @@ export const unionSchema = z
   });
 export type Union = z.infer<typeof unionSchema>;
 export type UnionInput = z.input<typeof unionSchema>;
+
+/**
+ * Réponse gardée pour une paire d'unions qui ont un conjoint en commun (UNI-08, ADR 0012) :
+ * simultanées ou successives. La paire est rangée (plus petit identifiant d'abord), si bien
+ * qu'il n'y a qu'une réponse par paire ; elle se modifie en remplaçant `simultaneity`. Que les
+ * deux unions aient ou non un conjoint en commun se vérifie sur l'arbre (`treeDataIssues`,
+ * synchronisation). Sans règle de visibilité propre : visible de qui voit les deux unions.
+ */
+export const simultaneityAnswerSchema = z
+  .strictObject({
+    id: idSchema,
+    treeId: idSchema,
+    unionIds: z.tuple([idSchema, idSchema]),
+    simultaneity: unionSimultaneitySchema,
+  })
+  .refine((answer) => answer.unionIds[0] < answer.unionIds[1], {
+    message: 'A pair holds two different unions, smallest id first',
+    path: ['unionIds'],
+  });
+export type SimultaneityAnswer = z.infer<typeof simultaneityAnswerSchema>;

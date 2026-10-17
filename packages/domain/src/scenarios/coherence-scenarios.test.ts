@@ -18,6 +18,7 @@ import {
   answerSimultaneity,
   resolveSimultaneity,
   simultaneityQuestions,
+  uniformPairAnswers,
 } from '../union-simultaneity';
 import {
   loadScenario,
@@ -362,16 +363,27 @@ describe('CL-POL-05 — aucune date : unions simultanées ou successives ?', () 
     let data = tree.data;
     const [question] = questions;
     if (question === undefined) throw new Error('missing question');
+    expect(question.pairs).toHaveLength(1);
+    const answerIds: string[] = [];
     for (const answer of scenario.action.reponses) {
-      data = { ...data, unions: answerSimultaneity(data.unions, question, answers[answer]) };
+      const simultaneityAnswers = answerSimultaneity(
+        data.simultaneityAnswers,
+        uniformPairAnswers(question, answers[answer]),
+        { treeId: tree.context.treeId, nextId: tree.context.nextId },
+      );
+      data = { ...data, simultaneityAnswers };
       expect(simultaneityQuestions(data)).toHaveLength(scenario.attendu.questions_apres_reponse);
       const [first, second] = data.unions;
       if (first === undefined || second === undefined) throw new Error('missing unions');
-      expect(resolveSimultaneity(data, question.personId, first, second)).toEqual({
+      expect(resolveSimultaneity(data, first, second)).toEqual({
         source: 'answer',
         value: answers[answer],
       });
       expect(treeDataIssues(data)).toEqual([]);
+      // Une seule réponse gardée pour la paire ; la modifier garde le même objet.
+      expect(data.simultaneityAnswers).toHaveLength(1);
+      answerIds.push(data.simultaneityAnswers[0]?.id ?? '');
     }
+    expect(new Set(answerIds).size).toBe(1);
   });
 });

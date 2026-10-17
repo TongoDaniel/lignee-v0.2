@@ -65,14 +65,14 @@ function observeStructures(data: TreeData) {
       });
     }
   }
-  // Polygamie : au moins deux unions dites simultanées du côté de cette personne (ADR 0012).
-  const polygamous = [...unionsOf].filter(
-    ([personId, own]) =>
-      own.filter((union) =>
-        union.spouses.some(
-          (spouse) => spouse.personId === personId && spouse.simultaneity === 'simultaneous',
-        ),
-      ).length >= 2,
+  // Polygamie : une personne dont deux unions sont dites simultanées (ADR 0012).
+  const unionsWith = (id: Id) => new Set((unionsOf.get(id) ?? []).map((union) => union.id));
+  const polygamous = [...unionsOf.keys()].filter((personId) =>
+    data.simultaneityAnswers.some(
+      (answer) =>
+        answer.simultaneity === 'simultaneous' &&
+        answer.unionIds.every((unionId) => unionsWith(personId).has(unionId)),
+    ),
   ).length;
   const unknownParent = new Set(
     data.parentCandidates

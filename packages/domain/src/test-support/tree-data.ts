@@ -21,7 +21,12 @@ import type { Id } from '../ids';
 import { nameSchema, personRecordSchema, personSchema, type Name, type Person } from '../person';
 import { placeSchema, toPlaceSchema, type Place, type ToPlace } from '../place';
 import { treeSchema, type Tree } from '../tree';
-import { unionSchema, type Union } from '../union';
+import {
+  simultaneityAnswerSchema,
+  unionSchema,
+  type SimultaneityAnswer,
+  type Union,
+} from '../union';
 import { visibilityRuleSetSchema, type VisibilityRule } from '../visibility';
 
 export interface TreeData {
@@ -29,6 +34,8 @@ export interface TreeData {
   people: Person[];
   names: Name[];
   unions: Union[];
+  /** Réponses « simultanées ou successives », par paire d'unions (UNI-08, ADR 0012). */
+  simultaneityAnswers: SimultaneityAnswer[];
   filiations: Filiation[];
   parentCandidates: ParentCandidate[];
   facts: Fact[];
@@ -46,6 +53,7 @@ export function emptyTreeData(tree: Tree): TreeData {
     people: [],
     names: [],
     unions: [],
+    simultaneityAnswers: [],
     filiations: [],
     parentCandidates: [],
     facts: [],
@@ -114,6 +122,25 @@ export function treeDataIssues(data: TreeData): TreeDataIssue[] {
     ['spouses[1]', union.spouses[1].personId, people],
     ['placeId', union.placeId, places],
   ]);
+  check('simultaneityAnswers', data.simultaneityAnswers, simultaneityAnswerSchema, (answer) => [
+    ['unionIds[0]', answer.unionIds[0], unions],
+    ['unionIds[1]', answer.unionIds[1], unions],
+  ]);
+  // Une réponse par paire, pour deux unions qui ont un conjoint en commun.
+  const spousesOf = new Map(
+    data.unions.map((union) => [union.id, union.spouses.map((spouse) => spouse.personId)]),
+  );
+  const pairs = new Set<string>();
+  data.simultaneityAnswers.forEach((answer, index) => {
+    const path = `simultaneityAnswers[${String(index)}]`;
+    const key = answer.unionIds.join('|');
+    if (pairs.has(key)) issues.push({ path, message: 'Two answers for the same pair' });
+    pairs.add(key);
+    const [first, second] = answer.unionIds.map((id) => spousesOf.get(id) ?? []);
+    if (!first?.some((person) => second?.includes(person))) {
+      issues.push({ path, message: 'The two unions share no spouse' });
+    }
+  });
   check('filiations', data.filiations, filiationSchema, (filiation) => [
     ['parentId', filiation.parentId, people],
     ['childId', filiation.childId, people],

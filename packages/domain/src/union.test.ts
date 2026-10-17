@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { fuzzyDateFromText } from './fuzzy-date';
 import { idSchema } from './ids';
 import { testTree } from './test-support/fixtures';
-import { unionSchema, unionTypeSchema } from './union';
+import { simultaneityAnswerSchema, unionSchema, unionTypeSchema } from './union';
 
 const tree = testTree();
 
@@ -27,8 +27,8 @@ describe('unions (UNI-05 à UNI-08)', () => {
       id: tree.nextId(),
       treeId: tree.treeId,
       spouses: [
-        { personId: tree.personId('a'), rank: 2, simultaneity: 'simultaneous' },
-        { personId: tree.personId('b'), rank: 1, simultaneity: 'successive' },
+        { personId: tree.personId('a'), rank: 2 },
+        { personId: tree.personId('b'), rank: 1 },
       ],
       type: 'customary',
       start: fuzzyDateFromText('vers 1975'),
@@ -59,7 +59,7 @@ describe('unions (UNI-05 à UNI-08)', () => {
         id: tree.nextId(),
         treeId: tree.treeId,
         spouses: [
-          { personId: center, rank: index + 1, simultaneity: 'simultaneous' },
+          { personId: center, rank: index + 1 },
           { personId: tree.personId(`conjoint${String(index)}`), rank: 1 },
         ],
       }),
@@ -109,5 +109,29 @@ describe('unions (UNI-05 à UNI-08)', () => {
         },
       ),
     );
+  });
+});
+
+describe('réponse gardée par paire d’unions (UNI-08, ADR 0012)', () => {
+  const [first, second] = [tree.nextId(), tree.nextId()].sort();
+  const base = { id: tree.nextId(), treeId: tree.treeId, simultaneity: 'simultaneous' };
+
+  it('une paire de deux unions distinctes, la plus petite d’abord', () => {
+    expect(simultaneityAnswerSchema.parse({ ...base, unionIds: [first, second] }).unionIds).toEqual(
+      [first, second],
+    );
+    expect(simultaneityAnswerSchema.safeParse({ ...base, unionIds: [second, first] }).success).toBe(
+      false,
+    );
+    expect(simultaneityAnswerSchema.safeParse({ ...base, unionIds: [first, first] }).success).toBe(
+      false,
+    );
+    expect(
+      simultaneityAnswerSchema.safeParse({
+        ...base,
+        unionIds: [first, second],
+        simultaneity: 'unknown',
+      }).success,
+    ).toBe(false);
   });
 });
