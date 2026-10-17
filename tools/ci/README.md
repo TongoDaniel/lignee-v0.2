@@ -17,6 +17,8 @@ Le script lit `pnpm-lock.yaml` (dépendances directes et transitives, de tous le
 
 Une bibliothèque native peut entrer sans paquet npm à son nom : dépendance Gradle ou pod CocoaPods ajoutés par un plugin de configuration Expo, par exemple ML Kit Face Detection. Le même script lit donc aussi, pour chaque app de `apps/` (`src/forbidden-native.ts`) : `app.config.*` et `app.json`, tout le dossier `plugins/` de l'app, et les fichiers Gradle (`*.gradle`, `*.gradle.kts`, `libs.versions.toml`) et CocoaPods (`Podfile`, `Podfile.lock`, `*.podspec`) de `android/` et `ios/` quand `expo prebuild` les a générés sur le poste. Il y cherche les coordonnées connues (`com.google.mlkit:face-…`, `GoogleMLKit/Face…`, `MLKitFace…`, `VNDetectFace…` de Vision) et les motifs de visages (`face-detection`, `FaceDetector`, `FACE_RECOGNITION`…, jamais à l'intérieur d'un mot comme `SurfaceDetection`), en plus des motifs npm. Il donne le fichier et la ligne.
 
+Faux positif assumé : le contrôle lit le texte ligne par ligne, commentaires compris. Un commentaire de `app.config.ts` qui contient un mot interdit (« pas de face-detection ici ») fait échouer CON-12 : reformulez le commentaire, n'ajoutez pas d'exception.
+
 Limite : en CI, `android/` et `ios/` ne sont pas générés (ils ne sont pas commités) : ce qu'un plugin npm injecte au `prebuild` sans le nommer dans `app.config.ts` n'est vu que sur un poste après `prebuild`. Le paquet du plugin, lui, passe par le contrôle du lockfile.
 
 ### Hors du périmètre, volontairement
@@ -37,6 +39,10 @@ Le test qui contrôle le `pnpm-lock.yaml` du dépôt dépend d'un fichier hors d
 Côté MinIO, l'administrateur crée un second compartiment avec un objet : la clé de l'application ne doit ni y lire ni y écrire, ni créer de compartiment. Un contrôle négatif n'est réussi que si `mc` répond par un refus de droits (« Access Denied » pour un compartiment, « Insufficient permissions to access this path » pour un objet, `REFUSAL_MESSAGES`) : une erreur réseau ou un objet absent le font échouer.
 
 Les droits refusés se vérifient par un bloc `DO` qui ne réussit que si PostgreSQL répond « droits insuffisants » (SQLSTATE 42501) : une instruction acceptée, ou une erreur d'une autre nature, fait échouer le contrôle.
+
+## Overrides des paquets d'Expo
+
+`pnpm.overrides`, dans le `package.json` racine, fige quatre paquets qu'Expo installe lui-même (`@expo/cli`, `@expo/router-server`, `expo-asset`, `expo-constants`) sur des versions publiées depuis au moins 14 jours. `src/expo-overrides.test.ts` vérifie que chaque override reste dans la plage demandée par l'`expo` installé ou par sa ligne de commande, et égal à la version épinglée par l'app : au changement de version d'`expo`, un override oublié fait échouer le test au lieu de forcer en silence une version que le SDK ne demande plus.
 
 ## Audit des dépendances : exceptions
 
