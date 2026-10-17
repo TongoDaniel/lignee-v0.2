@@ -40,7 +40,7 @@ Les droits refusés se vérifient par un bloc `DO` qui ne réussit que si Postgr
 
 ## Audit des dépendances : exceptions
 
-Le job `audit-dependances` (`pnpm audit --audit-level high`) échoue sur toute faille haute ou critique. Deux identifiants sont ignorés (`pnpm.auditConfig.ignoreGhsas` dans le `package.json` racine), parce qu'aucune version corrigée n'existe et que les paquets ne servent qu'aux outils du poste, jamais dans l'app publiée ni sur le serveur ([ADR 0008](../../docs/adr/0008-failles-sans-correctif-outils-mobile.md)) :
+Le job `audit-dependances` (`pnpm audit --audit-level high`) échoue sur toute faille haute ou critique. Deux identifiants sont ignorés (`pnpm.auditConfig.ignoreGhsas` dans le `package.json` racine), parce qu'aucune version corrigée n'existe et que les paquets ne servent qu'aux outils du poste, jamais dans l'app publiée ni sur le serveur ([ADR 0014](../../docs/adr/0014-failles-sans-correctif-outils-mobile.md)) :
 
 | Identifiant | Paquet et chemin | Pourquoi l'app publiée n'est pas touchée | Revue |
 | --- | --- | --- | --- |

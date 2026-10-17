@@ -1,4 +1,4 @@
-# 0008 — Deux failles sans correctif dans les outils de l'app mobile
+# 0014 — Deux failles sans correctif dans les outils de l'app mobile
 
 Date : 17 octobre 2026 · Statut : proposée (T-011)
 
