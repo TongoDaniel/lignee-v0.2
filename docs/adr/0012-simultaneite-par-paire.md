@@ -45,6 +45,10 @@ Le cahier ne dit pas non plus ce que vaut une union sans date de fin.
 
 - `unionSchema` n'a plus de champ `simultaneity` ; `spouseSchema` reste celui de T-004. `modelSchemas` reçoit `SimultaneityAnswer`.
 - `TreeData` (outils de test) reçoit `simultaneityAnswers` ; `treeDataIssues` vérifie la paire (unions existantes, conjoint commun, une réponse par paire). Le générateur écrit une réponse par paire d'après le chevauchement réel des années, quand la question a été posée pour les deux unions.
-- T-042 crée la table `simultaneites_unions` ; T-060 et T-063 synchronisent cette entité (mutations, filtrage : les deux unions visibles) ; T-052 l'ajoute aux objets dérivés.
+- T-042 crée la table `simultaneites_unions` ; T-052 l'ajoute aux objets dérivés.
+- T-060 et T-063 synchronisent cette entité, envoyée seulement à un lecteur qui voit les deux unions :
+  - une mutation qui vise une union invisible pour son auteur reçoit la même erreur que les autres refus de droits, sans rien dire de l'union ;
+  - quand une union masquée pour un lecteur est supprimée, ses réponses disparaissent en cascade sans qu'aucune trace de suppression ne lui parvienne ;
+  - les réponses entrent dans les tests de non-fuite (CL-SEC-01).
 - T-008 (foyers) lit `resolveSimultaneity(arbre, a, b)`. L'arbre fournit `unions`, `facts` et `simultaneityAnswers`. Il n'y a plus de paramètre « personne ».
 - T-032 et T-065 posent la question avec `simultaneityQuestionFor` et gardent la réponse avec `answerSimultaneity`.

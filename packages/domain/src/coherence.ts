@@ -12,9 +12,9 @@
 // dates « vers » et « calculée » comprise ; une date en texte libre ou d'un autre calendrier ne
 // déclenche rien.
 //
-// Confidentialité : les objets en cause d'un constat peuvent être masqués pour celui qui le
-// reçoit. Calculé sur le téléphone, le constat ne voit que la copie du lecteur ; envoyé par le
-// serveur (refus d'une mutation, T-060), il doit être filtré par le module de droits (T-052).
+// Confidentialité (ADR 0011, point 11) : les alertes se calculent sur le téléphone, sur la copie
+// du lecteur ; le serveur n'en renvoie jamais. Un refus du serveur (T-060) peut confirmer un lien
+// masqué même avec des objets filtrés : il ne sort pas tel quel (refus générique, T-052, T-060).
 import { z } from 'zod';
 
 import type { Fact } from './fact';
