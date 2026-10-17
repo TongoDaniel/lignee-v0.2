@@ -20,6 +20,159 @@
   "common:app.name": {
     "status": "to-review"
   },
+  "common:catalog.backHint": {
+    "status": "to-review"
+  },
+  "common:catalog.display.night": {
+    "status": "to-review"
+  },
+  "common:catalog.display.reduceMotion": {
+    "status": "to-review"
+  },
+  "common:catalog.display.seniorMode": {
+    "status": "to-review"
+  },
+  "common:catalog.open": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.addMother": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.addMotherHint": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.addSomeone": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.albumText": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.albumTitle": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.celebrate": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.cousins": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.cousinsHelp": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.dad": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.deed": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.delete": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.dictateFirstName": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.enabled": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.firstName": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.firstNameError": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.firstNamePlaceholder": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.invite": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.language": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.notifications": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.openSheet": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.phone": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.security": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.sendInvite": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.sheetSubtitle": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.showToast": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.sisterOf": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.story": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.storyText": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.storyTitle": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.toConfirm": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.you": {
+    "status": "to-review"
+  },
+  "common:catalog.sections.buttons": {
+    "status": "to-review"
+  },
+  "common:catalog.sections.cards": {
+    "status": "to-review"
+  },
+  "common:catalog.sections.chips": {
+    "status": "to-review"
+  },
+  "common:catalog.sections.display": {
+    "status": "to-review"
+  },
+  "common:catalog.sections.feedback": {
+    "status": "to-review"
+  },
+  "common:catalog.sections.fields": {
+    "status": "to-review"
+  },
+  "common:catalog.sections.icons": {
+    "status": "to-review"
+  },
+  "common:catalog.sections.logo": {
+    "status": "to-review"
+  },
+  "common:catalog.sections.settings": {
+    "status": "to-review"
+  },
+  "common:catalog.sections.switches": {
+    "status": "to-review"
+  },
+  "common:catalog.subtitle": {
+    "status": "to-review"
+  },
+  "common:catalog.title": {
+    "status": "to-review"
+  },
+  "common:controls.back": {
+    "status": "to-review"
+  },
+  "common:controls.close": {
+    "status": "to-review"
+  },
+  "common:controls.dictate": {
+    "status": "to-review"
+  },
   "common:familyScreen.empty": {
     "status": "to-review"
   },
