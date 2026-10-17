@@ -102,6 +102,22 @@ describe('UNI-16 : présumée vivante', () => {
     ).toEqual({ presumedLiving: false, reason: 'death_recorded' });
   });
 
+  it('une cause de décès seule ne lève pas la protection : donnée de santé de son seul auteur', () => {
+    const { data, id } = person({ birth: { qualificatif: 'exacte', date: '1990' } });
+    const cause = {
+      id: '0190a000-0000-7000-8000-0000000000c1',
+      treeId: data.tree.id,
+      subject: { kind: 'person' as const, personId: id },
+      type: 'death_cause' as const,
+      value: 'Cause générée pour les tests',
+      authorAccountId: data.tree.ownerAccountId,
+    };
+    expect(assessVitalStatus({ ...data, facts: [...data.facts, cause] }, id, today)).toEqual({
+      presumedLiving: true,
+      reason: 'born_less_than_100_years_ago',
+    });
+  });
+
   it('le statut saisi prime : vivante, puis décédée', () => {
     expect(assess({ status: 'living', birth: { qualificatif: 'exacte', date: '1900' } })).toEqual({
       presumedLiving: true,

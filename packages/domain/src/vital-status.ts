@@ -5,6 +5,9 @@
 //
 // Fonction pure : le jour de référence est un paramètre, aucune horloge n'est lue ici. La même
 // règle s'applique aux fiches saisies, dictées ou importées (V2).
+//
+// Seul le booléen `presumedLiving` peut quitter le serveur ; la raison (`reason`) sert aux tests
+// et aux journaux internes, jamais envoyée au client (T-052).
 import { z } from 'zod';
 
 import { createLifeEvents, type CoherenceTree, type LifeEvents } from './coherence';
@@ -21,7 +24,11 @@ export const vitalReasonSchema = z.enum([
   'declared_living',
   /** Statut saisi « décédée ». */
   'declared_deceased',
-  /** Un décès est enregistré (fait de décès ou cause de décès), daté ou non. */
+  /**
+   * Un fait de décès est enregistré, daté ou non. Une cause de décès seule ne compte pas : donnée
+   * de santé visible de son seul auteur, elle ne doit rien lever (proposer d'ajouter le décès à
+   * la saisie : T-031).
+   */
   'death_recorded',
   /** Née il y a moins de 100 ans, ou peut-être : présumée vivante. */
   'born_less_than_100_years_ago',
@@ -64,7 +71,8 @@ function assess(
 function recordedDeaths(facts: CoherenceTree['facts']): Set<Id> {
   const deaths = new Set<Id>();
   for (const fact of facts) {
-    if (fact.subject.kind === 'person' && (fact.type === 'death' || fact.type === 'death_cause')) {
+    // Le fait `death` seul : une cause de décès (`death_cause`) ne lève pas la protection.
+    if (fact.subject.kind === 'person' && fact.type === 'death') {
       deaths.add(fact.subject.personId);
     }
   }
@@ -73,7 +81,7 @@ function recordedDeaths(facts: CoherenceTree['facts']): Set<Id> {
 
 /**
  * Présumée vivante ou non, avec la raison, au jour `today`. Ordre : statut saisi (vivante, puis
- * décédée), décès enregistré, puis naissance : présumée vivante sauf si elle est certainement née
+ * décédée), fait de décès enregistré (jamais une cause de décès seule), puis naissance : présumée vivante sauf si elle est certainement née
  * il y a 100 ans ou plus (marge des dates approximatives comprise, ADR 0011).
  */
 export function assessVitalStatus(
