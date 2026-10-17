@@ -41,3 +41,41 @@ updates:
     groups:
       actions-github:
         patterns: ["*"]
+
+  # Images de base des Dockerfiles (Node) et images de compose.yaml (PostgreSQL, MinIO), épinglées
+  # par version et par empreinte : Dependabot met à jour les deux.
+  - package-ecosystem: docker
+    directories: [/apps/api, /apps/worker]
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Africa/Douala
+    cooldown:
+      default-days: 14
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore(exploitation)
+    labels: [exploitation]
+    groups:
+      images-node:
+        patterns: ["*"]
+
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Africa/Douala
+    cooldown:
+      default-days: 14
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore(exploitation)
+    labels: [exploitation]
+    ignore:
+      # Une nouvelle version majeure de PostgreSQL demande une migration des données
+      # (pg_upgrade ou sauvegarde et restauration) : décision à part, pas une mise à jour.
+      - dependency-name: postgres
+        update-types: [version-update:semver-major]

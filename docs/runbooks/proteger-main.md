@@ -65,7 +65,8 @@ Règles à cocher :
 | `cas-limites` | Scénario `test/scenarios/*.yaml` ou `*.yml` qui n'est joué par aucun test | T-006. D'ici là, aucun scénario n'est joué : le job tolère, avec un avertissement, la seule liste fermée `PENDING_T006` du workflow (aujourd'hui `CL-POL-03`) et échoue sur tout autre scénario |
 | `integration-postgresql` | Tests `*.integration.test.ts` sur PostgreSQL réel (Testcontainers) | T-042, T-043 (pour l'instant : vert s'il n'y a aucun test d'intégration, rouge s'il y en a un et que le job n'est pas branché) |
 | `taille-synchro` | Dépassement du budget de données sur les arbres de 100, 1 000 et 5 000 personnes | T-064 (même règle) |
-| `images-docker` | Image de l'API ou du worker qui ne se construit pas (`Dockerfile`, `Containerfile`, toute casse) | T-003, T-068 (même règle) |
+| `images-docker` | Dockerfile refusé par hadolint, image de l'API ou du worker qui ne se construit pas ou tourne sous root, Dockerfile (`Dockerfile`, `Containerfile`, toute casse) construit par aucun service de `compose.yaml` | T-003 ; publication sur GitHub Container Registry en T-068 |
+| `environnement-local` | `compose.yaml` qui ne démarre plus ; extension pg_trgm, unaccent ou fuzzystrmatch absente ; utilisateur applicatif qui peut créer une table ; compartiment MinIO lisible sans clé | T-003 |
 
   - **Ne cochez pas `codeql`** tant que l'étape 5 n'est pas faite : sur un dépôt privé sans Code Security, le job est ignoré (*skipped*), et GitHub compte un job ignoré comme **réussi** pour une vérification obligatoire. La cocher donnerait un faux vert.
 

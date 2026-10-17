@@ -1,0 +1,9 @@
+# Fins de ligne LF dans le dépôt et dans la copie de travail pour tout ce qui s'exécute dans un
+# conteneur Linux : un script shell en CRLF (core.autocrlf sous Windows) casse l'initialisation de
+# PostgreSQL (`bad interpreter`).
+*.sh            text eol=lf
+Dockerfile      text eol=lf
+*.Dockerfile    text eol=lf
+.dockerignore   text eol=lf
+.env.example    text eol=lf
+compose.yaml    text eol=lf

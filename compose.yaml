@@ -1,0 +1,194 @@
+# Environnement local de Lignée (TRD, « Environnements, CI/CD et livraison » : « Docker Compose :
+# PostgreSQL, API, worker, MinIO à la place de R2, faux fournisseurs de voix et de messages »).
+# Mode d'emploi : docs/runbooks/environnement-local.md.
+#
+#   cp .env.example .env
+#   docker compose up -d                  # PostgreSQL et MinIO (compartiment créé au démarrage)
+#   docker compose --profile app up -d    # plus l'API et le worker
+#
+# Local seulement : mots de passe factices (.env.example), ports ouverts sur 127.0.0.1 seulement.
+# La préproduction et la production ont leur propre fichier (T-068), derrière Caddy, avec des
+# secrets chiffrés par SOPS.
+#
+# Images épinglées par version et par empreinte ; Dependabot propose les mises à jour
+# (.github/dependabot.yml).
+
+name: lignee
+
+x-minio-image: &minio-image
+  # MinIO ne publie plus d'image officielle (minio/minio n'est plus téléchargeable sans compte) :
+  # build communautaire pgsty/minio, voir docs/adr/0007-image-minio-locale.md.
+  image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z@sha256:b6bfe7239bfc83fb90d31612d9704d86039dd714f7904b3f1ad68f211e602372
+
+# Variables lues par l'API et le worker quand ils existeront (T-043, T-075). Les faux
+# fournisseurs sont des implémentations locales des interfaces internes du TRD (« Choix
+# techniques ») : messages avec T-044, transcription et compréhension avec T-075. Aucun service
+# séparé tant qu'une interface n'en demande pas.
+x-app-environment: &app-environment
+  DATABASE_URL: postgresql://lignee_app:${LIGNEE_DB_APP_PASSWORD:?copiez .env.example en .env}@postgres:5432/lignee
+  S3_ENDPOINT: http://minio:9000
+  S3_REGION: auto
+  S3_FORCE_PATH_STYLE: "true"
+  S3_BUCKET: ${LIGNEE_S3_BUCKET:?copiez .env.example en .env}
+  S3_ACCESS_KEY_ID: ${LIGNEE_S3_ACCESS_KEY_ID:?copiez .env.example en .env}
+  S3_SECRET_ACCESS_KEY: ${LIGNEE_S3_SECRET_ACCESS_KEY:?copiez .env.example en .env}
+  MESSAGES_PROVIDER: fake
+  TRANSCRIPTION_PROVIDER: fake
+  UNDERSTANDING_PROVIDER: fake
+
+services:
+  postgres:
+    image: postgres:18.6-trixie@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336
+    environment:
+      POSTGRES_DB: lignee
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${LIGNEE_PG_SUPERUSER_PASSWORD:?copiez .env.example en .env}
+      # Mot de passe exigé aussi en TCP depuis le conteneur lui-même (l'image fait confiance à
+      # 127.0.0.1 par défaut) ; le socket local reste ouvert au superutilisateur.
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256 --auth-local=trust
+      LIGNEE_DB_APP_PASSWORD: ${LIGNEE_DB_APP_PASSWORD:?copiez .env.example en .env}
+      LIGNEE_DB_MIGRATION_PASSWORD: ${LIGNEE_DB_MIGRATION_PASSWORD:?copiez .env.example en .env}
+    volumes:
+      # PostgreSQL 18 : les données vont dans /var/lib/postgresql/18/docker.
+      - postgres-data:/var/lib/postgresql
+      - ./packages/db/initdb:/docker-entrypoint-initdb.d:ro
+    ports:
+      - 127.0.0.1:${LIGNEE_PG_PORT:-5432}:5432
+    healthcheck:
+      # Par TCP : pendant l'initialisation, le serveur provisoire n'écoute que sur le socket,
+      # la base n'est donc pas annoncée prête avant la fin des scripts d'initialisation.
+      test: [CMD, pg_isready, --host=127.0.0.1, --username=postgres, --dbname=lignee]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    networks: [poste, interne]
+
+  # Stockage compatible S3, à la place de Cloudflare R2.
+  minio:
+    <<: *minio-image
+    command: [server, /data, --console-address, ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${LIGNEE_MINIO_ROOT_USER:?copiez .env.example en .env}
+      MINIO_ROOT_PASSWORD: ${LIGNEE_MINIO_ROOT_PASSWORD:?copiez .env.example en .env}
+      # Pas d'appel sortant de MinIO lui-même (recherche de mise à jour, télémétrie). Le réseau
+      # `poste` coupe de toute façon la sortie vers Internet (ADR 0007).
+      MINIO_UPDATE: "off"
+      MINIO_CALLHOME_ENABLE: "off"
+    volumes:
+      - minio-data:/data
+    ports:
+      - 127.0.0.1:${LIGNEE_MINIO_PORT:-9000}:9000 # API S3
+      - 127.0.0.1:${LIGNEE_MINIO_CONSOLE_PORT:-9001}:9001 # console web
+    healthcheck:
+      test: [CMD, curl, --fail, --silent, http://127.0.0.1:9000/minio/health/live]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    networks: [poste, interne]
+
+  # Crée au démarrage le compartiment privé des médias et la clé de l'application, limitée à ce
+  # compartiment (comme un jeton R2). Sans effet s'ils existent déjà ; s'arrête ensuite.
+  minio-init:
+    <<: *minio-image
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      # Identifiants passés à `mc alias set` plutôt que dans une URL (MC_HOST_…) : aucun
+      # caractère à encoder.
+      ROOT_USER: ${LIGNEE_MINIO_ROOT_USER:?copiez .env.example en .env}
+      ROOT_PASSWORD: ${LIGNEE_MINIO_ROOT_PASSWORD:?copiez .env.example en .env}
+      BUCKET: ${LIGNEE_S3_BUCKET:?copiez .env.example en .env}
+      APP_ACCESS_KEY: ${LIGNEE_S3_ACCESS_KEY_ID:?copiez .env.example en .env}
+      APP_SECRET_KEY: ${LIGNEE_S3_SECRET_ACCESS_KEY:?copiez .env.example en .env}
+    entrypoint: [/bin/sh, -c]
+    command:
+      - |
+        set -eu
+        mc alias set local http://minio:9000 "$$ROOT_USER" "$$ROOT_PASSWORD" > /dev/null
+        mc mb --ignore-existing "local/$$BUCKET"
+        mc anonymous set none "local/$$BUCKET"
+        cat > /tmp/policy.json <<EOF
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": ["s3:GetBucketLocation", "s3:ListBucket", "s3:ListBucketMultipartUploads"],
+              "Resource": ["arn:aws:s3:::$$BUCKET"]
+            },
+            {
+              "Effect": "Allow",
+              "Action": ["s3:GetObject", "s3:PutObject", "s3:DeleteObject",
+                         "s3:AbortMultipartUpload", "s3:ListMultipartUploadParts"],
+              "Resource": ["arn:aws:s3:::$$BUCKET/*"]
+            }
+          ]
+        }
+        EOF
+        mc admin policy create local lignee-medias-rw /tmp/policy.json
+        mc admin user add local "$$APP_ACCESS_KEY" "$$APP_SECRET_KEY"
+        # L'image n'a pas grep ; `attach` échoue si la règle est déjà attachée.
+        case "$$(mc admin user info local "$$APP_ACCESS_KEY")" in
+          *lignee-medias-rw*) ;;
+          *) mc admin policy attach local lignee-medias-rw --user "$$APP_ACCESS_KEY" ;;
+        esac
+        echo "Compartiment privé $$BUCKET prêt."
+    restart: "no"
+    networks: [interne]
+
+  # L'API et le worker n'ont pas encore de programme (T-043, T-075) : derrière le profil `app`
+  # pour que `docker compose up` ne démarre que ce qui sert déjà.
+  api:
+    profiles: [app]
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    image: lignee/api:local
+    environment:
+      <<: *app-environment
+      PORT: "3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    ports:
+      - 127.0.0.1:${LIGNEE_API_PORT:-3000}:3000
+    networks: [poste, interne]
+
+  worker:
+    profiles: [app]
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    image: lignee/worker:local
+    environment:
+      <<: *app-environment
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    # Réseau interne seulement : le worker ne peut pas joindre un vrai fournisseur (voix,
+    # messages) depuis le poste, même par erreur de configuration.
+    networks: [interne]
+
+networks:
+  # Réseau des services dont un port est publié sur le poste. Docker ne publie pas les ports
+  # d'un conteneur relié seulement à un réseau `internal` ; ici, la publication marche, mais la
+  # traduction d'adresses vers l'extérieur est coupée : aucun conteneur ne sort sur Internet
+  # (vérifié sur Linux par le job environnement-local ; à confirmer sous Docker Desktop).
+  poste:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.enable_ip_masquerade: "false"
+  # Réseau sans aucune sortie, pour les services sans port publié.
+  interne:
+    internal: true
+
+volumes:
+  postgres-data:
+  minio-data:

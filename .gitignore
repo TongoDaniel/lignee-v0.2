@@ -31,5 +31,8 @@ Thumbs.db
 # Copie brute récupérée depuis claude.ai (films HTML lourds) ; le contenu utile est dans docs/
 recup_claude_ai/
 
+# Fichiers Compose propres à un poste (docs/runbooks/environnement-local.md)
+*.local.yaml
+
 # Réglages Claude Code personnels
 .claude/settings.local.json
