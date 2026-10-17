@@ -28,7 +28,10 @@
         "$TURBO_ROOT$/.dockerignore",
         "$TURBO_ROOT$/pnpm-workspace.yaml",
         "$TURBO_ROOT$/packages/db/initdb/**",
-        "$TURBO_ROOT$/apps/*/Dockerfile"
+        "$TURBO_ROOT$/apps/*/Dockerfile",
+        "$TURBO_ROOT$/apps/*/app.config.*",
+        "$TURBO_ROOT$/apps/*/app.json",
+        "$TURBO_ROOT$/apps/*/plugins/**"
       ],
       "outputs": []
     },

@@ -13,9 +13,11 @@ Les scripts sont en TypeScript et tournent directement sous Node 24 (suppression
 
 Le script lit `pnpm-lock.yaml` (dépendances directes et transitives, de tous les paquets) et échoue si l'une d'elles est une bibliothèque de reconnaissance ou de détection de visages. La liste est dans `src/forbidden-dependencies.ts` : des noms exacts (`facetec`, `faceio`, `facepp`, `@react-native-firebase/ml-vision`…), des portées entières (`@facetec`, `@faceio`, `@luxand`) et des motifs (`face-api`, `face.detect`, `face-recog…`, `face-id`, `faces-api`, `facial`, `rekognition`…). Les motifs sont bornés : `interface-*`, `surface-*`, `typeface-*`, `facet-api`, `@clerk/facets` ou `react-facebook-login` passent. Le contrôle échoue aussi si le format du lockfile change (version autre que 9) : mieux vaut un échec à corriger qu'un contrôle qui ne voit plus rien.
 
-### Limite : seul npm est contrôlé
+### Côté natif : Gradle, CocoaPods, plugins Expo
 
-Le contrôle ne voit que les paquets npm de `pnpm-lock.yaml`. Une bibliothèque native ajoutée hors de npm lui échappe : pod CocoaPods (`Podfile`, `Podfile.lock`) ou dépendance Gradle (`build.gradle`), par exemple ML Kit Face Detection, y compris quand un plugin de configuration Expo l'injecte au moment du `prebuild`. À compléter au ticket qui crée `apps/mobile` (T-011) : contrôler aussi les fichiers natifs générés par `expo prebuild`, ou la liste des plugins de `app.config.ts`.
+Une bibliothèque native peut entrer sans paquet npm à son nom : dépendance Gradle ou pod CocoaPods ajoutés par un plugin de configuration Expo, par exemple ML Kit Face Detection. Le même script lit donc aussi, pour chaque app de `apps/` (`src/forbidden-native.ts`) : `app.config.*` et `app.json`, tout le dossier `plugins/` de l'app, et les fichiers Gradle (`*.gradle`, `*.gradle.kts`, `libs.versions.toml`) et CocoaPods (`Podfile`, `Podfile.lock`, `*.podspec`) de `android/` et `ios/` quand `expo prebuild` les a générés sur le poste. Il y cherche les coordonnées connues (`com.google.mlkit:face-…`, `GoogleMLKit/Face…`, `MLKitFace…`, `VNDetectFace…` de Vision) et les motifs de visages (`face-detection`, `FaceDetector`, `FACE_RECOGNITION`…, jamais à l'intérieur d'un mot comme `SurfaceDetection`), en plus des motifs npm. Il donne le fichier et la ligne.
+
+Limite : en CI, `android/` et `ios/` ne sont pas générés (ils ne sont pas commités) : ce qu'un plugin npm injecte au `prebuild` sans le nommer dans `app.config.ts` n'est vu que sur un poste après `prebuild`. Le paquet du plugin, lui, passe par le contrôle du lockfile.
 
 ### Hors du périmètre, volontairement
 
