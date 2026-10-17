@@ -1,4 +1,4 @@
-// Polyfills Intl pour Hermes, chargés avant le premier texte (importés en tête de app/_layout.tsx).
+// Polyfills Intl pour Hermes, chargés avant tout autre module par le point d'entrée (index.ts).
 //
 // @lignee/i18n s'appuie sur Intl : PluralRules (pluriels ICU : « 1 personne », « 2 personnes »),
 // NumberFormat (« 1 234,5 »), DateTimeFormat avec formatToParts (« 1er mars 1968 »), dateStyle
@@ -10,21 +10,27 @@
 //
 // Les `require` sont conditionnels : Metro embarque les modules, mais ne les exécute que si
 // le moteur en a besoin (démarrage à froid plus court quand Intl est complet).
-import { languages } from '@lignee/i18n';
+import type { Language } from '@lignee/i18n';
 import { shouldPolyfill as shouldPolyfillDateTimeFormat } from '@formatjs/intl-datetimeformat/should-polyfill.js';
 import { shouldPolyfill as shouldPolyfillCanonicalLocales } from '@formatjs/intl-getcanonicallocales/should-polyfill.js';
-import { shouldPolyfill as shouldPolyfillLocale } from '@formatjs/intl-locale/should-polyfill.js';
 import { shouldPolyfill as shouldPolyfillNumberFormat } from '@formatjs/intl-numberformat/should-polyfill.js';
 import { shouldPolyfill as shouldPolyfillPluralRules } from '@formatjs/intl-pluralrules/should-polyfill.js';
 
 declare const require: (path: string) => unknown;
+
+/**
+ * Langues de l'interface. Recopiées plutôt qu'importées : importer @lignee/i18n chargerait
+ * i18next et intl-messageformat avant les polyfills. Un test vérifie qu'elles restent celles
+ * de @lignee/i18n.
+ */
+export const POLYFILL_LANGUAGES = ['fr', 'en'] as const satisfies readonly Language[];
 
 /** Polyfills installés, pour le journal de démarrage et les tests. */
 export type IntlPolyfill =
   'getCanonicalLocales' | 'Locale' | 'PluralRules' | 'NumberFormat' | 'DateTimeFormat';
 
 function anyLanguage(test: (language: string) => string | undefined): boolean {
-  return languages.some((language) => test(language) !== undefined);
+  return POLYFILL_LANGUAGES.some((language) => test(language) !== undefined);
 }
 
 /** Installe les polyfills Intl qui manquent pour le français et l'anglais. */
@@ -34,7 +40,10 @@ export function installIntlPolyfills(): readonly IntlPolyfill[] {
     require('@formatjs/intl-getcanonicallocales/polyfill-force.js');
     installed.push('getCanonicalLocales');
   }
-  if (shouldPolyfillLocale()) {
+  // Intl.Locale ne sert qu'aux autres polyfills de FormatJS, qui se contentent de son socle.
+  // Son test complet (`shouldPolyfill`) réclame les ajouts les plus récents de la norme
+  // (variants, getWeekInfo…) et remplacerait sans besoin un Intl.Locale natif, même celui de Node.
+  if (!('Locale' in Intl)) {
     require('@formatjs/intl-locale/polyfill-force.js');
     installed.push('Locale');
   }
@@ -61,4 +70,5 @@ export function installIntlPolyfills(): readonly IntlPolyfill[] {
   return installed;
 }
 
-installIntlPolyfills();
+/** Polyfills installés au démarrage de l'app. */
+export const installedIntlPolyfills = installIntlPolyfills();

@@ -1,6 +1,5 @@
-// Racine de l'app : polyfills Intl, polices de la charte, thème, langue, puis les onglets.
-import '../intl/polyfills';
-
+// Racine de l'app : polices de la charte, thème, langue, puis les onglets. Les polyfills Intl
+// sont installés avant, par le point d'entrée (index.ts).
 import { fontFiles } from '@lignee/ui/fontFiles';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';

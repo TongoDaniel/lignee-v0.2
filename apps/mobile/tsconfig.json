@@ -15,5 +15,12 @@
     "noEmit": true,
     "declaration": false
   },
-  "include": ["src", "app.config.ts", "jest.setup.ts", ".expo/types/**/*.ts", "expo-env.d.ts"]
+  "include": [
+    "index.ts",
+    "src",
+    "app.config.ts",
+    "jest.setup.ts",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ]
 }

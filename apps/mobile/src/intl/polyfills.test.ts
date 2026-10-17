@@ -20,10 +20,11 @@ import {
   formatCalendarDate,
   formatDateTime,
   formatNumber,
+  languages,
   pluralCategory,
 } from '@lignee/i18n';
 
-import { installIntlPolyfills } from './polyfills';
+import { installIntlPolyfills, POLYFILL_LANGUAGES } from './polyfills';
 
 // Espace fine insécable (U+202F) : séparateur des milliers et espace avant « : » en français.
 const NNBSP = ' ';
@@ -34,6 +35,10 @@ describe('Intl remplacé par les polyfills de FormatJS', () => {
     expect(polyfilled(Intl.PluralRules)).toBe(true);
     expect(polyfilled(Intl.NumberFormat)).toBe(true);
     expect(polyfilled(Intl.DateTimeFormat)).toBe(true);
+  });
+
+  it('couvre les langues de l’interface de @lignee/i18n', () => {
+    expect([...POLYFILL_LANGUAGES]).toEqual([...languages]);
   });
 
   it('n’installe plus rien une fois Intl complet', () => {
