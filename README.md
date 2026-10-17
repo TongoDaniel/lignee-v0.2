@@ -54,7 +54,7 @@ corepack pnpm typecheck      # tsc --noEmit dans chaque paquet
 corepack pnpm test           # Vitest dans chaque paquet
 corepack pnpm format:check   # vérifie la mise en forme (Prettier)
 corepack pnpm format         # corrige la mise en forme
-corepack pnpm check:forbidden-dependencies  # CON-12 : aucune bibliothèque de reconnaissance faciale
+corepack pnpm check:forbidden-dependencies  # CON-12 : aucune bibliothèque de reconnaissance faciale (npm et natif)
 ```
 
 Pour un seul paquet : `corepack pnpm --filter @lignee/kinship test`.
@@ -74,7 +74,7 @@ docker compose down             # arrête (ajouter --volumes pour tout effacer)
 
 Les messages de commit suivent les conventions (`feat(kinship): …`) ; les portées admises sont dans `commitlint.config.mjs`. Pour vérifier un message : `echo "feat(kinship): …" | corepack pnpm commitlint`. Le hook `commit-msg` est facultatif : `git config core.hooksPath .githooks` l'active.
 
-Prettier ne reformate pas les fichiers Markdown. `apps/mobile`, `apps/web` et `apps/admin` n'ont pas encore de `package.json` : ils entrent dans les tâches quand leur app est créée. Turborepo collecte une télémétrie anonyme ; `corepack pnpm exec turbo telemetry disable` la coupe sur votre poste. La CI la coupe avec `TURBO_TELEMETRY_DISABLED=1`.
+Prettier ne reformate pas les fichiers Markdown. `apps/web` et `apps/admin` n'ont pas encore de `package.json` : ils entrent dans les tâches quand leur app est créée. L'app mobile (`apps/mobile`, Expo) se teste avec Jest (jest-expo) et non Vitest ; pour la lancer sur un téléphone : [docs/runbooks/lancer-app-mobile.md](docs/runbooks/lancer-app-mobile.md). Turborepo collecte une télémétrie anonyme ; `corepack pnpm exec turbo telemetry disable` la coupe sur votre poste. La CI la coupe avec `TURBO_TELEMETRY_DISABLED=1`.
 
 ## Intégration continue
 
@@ -82,7 +82,8 @@ GitHub Actions, à chaque pull request et à chaque push sur `main` :
 
 | Workflow | Job | Contenu |
 | --- | --- | --- |
-| `.github/workflows/ci.yml` | `verifications` | CON-12, Prettier, ESLint, tsc, Vitest (unitaires et propriétés), commitlint sur les commits et sur le titre de la pull request |
+| `.github/workflows/ci.yml` | `verifications` | CON-12, Prettier, ESLint, tsc, Vitest (unitaires et propriétés) et Jest (app mobile), commitlint sur les commits et sur le titre de la pull request |
+| | `bundle-mobile` | App mobile : versions conformes au SDK Expo (`expo install --check`), bundle Hermes Android et iOS (`expo export`), taille relevée dans le résumé |
 | | `audit-dependances` | `pnpm audit --audit-level high` : échoue sur une faille haute ou critique |
 | | `cas-limites` | Scénarios `test/scenarios/*.yaml` : aucun n'est joué avant T-006 ; le job tolère avec un avertissement la liste fermée `PENDING_T006` (`CL-POL-03`) et échoue sur tout autre scénario |
 | | `integration-postgresql` | Tests `*.integration.test.ts` sur PostgreSQL réel ; à brancher avec T-042 et T-043 |
