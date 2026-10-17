@@ -432,3 +432,39 @@ describe('les dates lues sont celles des faits datés de la personne', () => {
     ).toEqual(['parent_younger_than_child']);
   });
 });
+
+describe('cas réduit trouvé par la CI (graine -2146553169, run 38989116762)', () => {
+  it('fille née le 15 septembre 2016, mère morte le 13 juillet 2016 : l’alerte est juste', () => {
+    // Le générateur faisait naître un enfant l'année de la mort de sa mère, jours tirés au
+    // hasard ; il s'arrête désormais l'année d'avant (tree-generator.ts).
+    const tree = family({
+      parentGender: 'F',
+      parentBirth: exact('1995'),
+      parentDeath: exact('2016-07-13'),
+      childBirth: exact('2016-09-15'),
+    });
+    expect(codes(tree)).toEqual(['born_after_mother_death']);
+    // Même année, jours inconnus : peut-être avant la mort, rien.
+    const sameYear = family({
+      parentGender: 'F',
+      parentBirth: exact('1995'),
+      parentDeath: exact('2016'),
+      childBirth: exact('2016'),
+    });
+    expect(codes(sameYear)).toEqual([]);
+  });
+});
+
+describe('limite de 120 ans : la même pour un âge calculé et un âge dit (ADR 0011)', () => {
+  it('120 ans révolus passent, 121 ans révolus déclenchent l’alerte, dans les deux cas', () => {
+    const lived = (death: string) =>
+      codes(family({ parentBirth: exact('1800-06-15'), parentDeath: exact(death) }));
+    // Mort la veille de ses 121 ans : 120 ans révolus.
+    expect(lived('1921-06-14')).toEqual([]);
+    expect(checkStatedAge(120)).toEqual([]);
+    expect(checkStatedAge(120.9)).toEqual([]);
+    // Mort le jour de ses 121 ans.
+    expect(lived('1921-06-15')).toEqual(['implausible_age']);
+    expect(checkStatedAge(121).map((found) => found.code)).toEqual(['implausible_age']);
+  });
+});

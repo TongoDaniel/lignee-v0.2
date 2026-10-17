@@ -36,7 +36,11 @@ import type { Union } from './union';
 export const MIN_PARENT_AGE_YEARS = 12;
 /** Délai maximal entre la mort du père et la naissance de l'enfant (UNI-18). */
 export const POSTHUMOUS_BIRTH_MAX_MONTHS = 10;
-/** Âge au-delà duquel une durée de vie est signalée (ADR 0011). */
+/**
+ * Âge révolu au-delà duquel une durée de vie est signalée (ADR 0011). La même règle partout :
+ * 120 ans révolus passent, 121 ans révolus déclenchent l'alerte, que l'âge soit calculé entre la
+ * naissance et le décès (ou le jour donné) ou dit (`checkStatedAge`).
+ */
 export const MAX_PLAUSIBLE_AGE_YEARS = 120;
 /**
  * Marge, en années, de chaque côté d'une date approximative (ADR 0011) : « vers » à la décennie,
@@ -367,9 +371,10 @@ function personIssues(
   if (before(death?.latest, birth?.earliest)) {
     return [issue('death_before_birth', objects(birth, death))];
   }
+  // Jour du 121e anniversaire au plus tôt : à partir de lui, l'âge révolu dépasse 120 ans.
   const oldest = birth?.latest && addMonthsToDay(birth.latest, 12 * (MAX_PLAUSIBLE_AGE_YEARS + 1));
   if (oldest === undefined) return [];
-  // Morte à plus de 120 ans, ou dite vivante et âgée de plus de 120 ans aujourd'hui.
+  // Morte à 121 ans révolus ou plus, ou dite vivante et âgée de 121 ans révolus au jour donné.
   if (death?.earliest !== undefined) {
     return compareCalendarDays(death.earliest, oldest) >= 0
       ? [issue('implausible_age', objects(birth, death))]
@@ -386,11 +391,13 @@ function personIssues(
 }
 
 /**
- * Âge dit (« mort à 150 ans ») : une alerte s'il n'est pas plausible, négatif ou au-delà de
- * `MAX_PLAUSIBLE_AGE_YEARS` (complète `birthDateFromAge`, qui calcule sans juger).
+ * Âge dit (« mort à 150 ans ») : une alerte s'il est négatif ou si l'âge révolu dépasse
+ * `MAX_PLAUSIBLE_AGE_YEARS`, la même limite que pour un âge calculé depuis les dates (complète
+ * `birthDateFromAge`, qui calcule sans juger).
  */
 export function checkStatedAge(age: number): CoherenceIssue[] {
-  return Number.isFinite(age) && age >= 0 && age <= MAX_PLAUSIBLE_AGE_YEARS
+  // Âge révolu : « 120 ans et demi » vaut 120 ans, comme dans le calcul depuis les dates.
+  return Number.isFinite(age) && age >= 0 && Math.floor(age) <= MAX_PLAUSIBLE_AGE_YEARS
     ? []
     : [issue('implausible_age', [])];
 }
