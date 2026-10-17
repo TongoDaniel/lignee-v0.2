@@ -8,6 +8,7 @@ import { describe, expect, it } from 'vitest';
 
 import { createKinshipGraph } from './graph';
 import { findRelationships } from './kinship';
+import { siblingsOf } from './siblings';
 
 const PAR_01_BUDGET_MS = 200;
 const TREE_OPENING_BUDGET_MS = 1000;
@@ -148,6 +149,23 @@ describe('PAR-01 : temps de réponse du moteur', () => {
     const segment =
       halfSiblings.status === 'related' ? halfSiblings.relationships[0]?.segments[0] : undefined;
     expect(segment?.kind === 'blood' && segment.sharing).toBe('half');
+
+    // Fratrie de chaque enfant (T-020) : 4 frères et sœurs par la même mère, 35 demi par le père.
+    let siblings: ReturnType<typeof siblingsOf> = [];
+    const siblingTimes = children.map((childPerson) =>
+      measure(() => {
+        siblings = siblingsOf(graph, childPerson.id);
+      }),
+    );
+    const siblingMax = Math.max(...siblingTimes);
+    console.info(`T-020, fratrie de chacun des 40 enfants : max ${siblingMax.toFixed(2)} ms`);
+    expect(siblingMax).toBeLessThan(PAR_01_BUDGET_MS);
+    const kinds = siblings.map((link) =>
+      link.kind === 'sibling' ? `${link.sharing}/${link.side ?? '-'}` : 'step',
+    );
+    expect(kinds).toHaveLength(39);
+    expect(kinds.filter((entry) => entry === 'full/-')).toHaveLength(4);
+    expect(kinds.filter((entry) => entry === 'half/father')).toHaveLength(35);
   });
 
   it('cas profond : deux lignées de 150 générations depuis un même couple', () => {

@@ -1,0 +1,33 @@
+# « Mon frère de même père », puis « même père même mère » (VOX-10 ; TRD, grammaire des
+# chemins : P[M].C[M], sans mère commune). La première dictée donne à Bruno une mère à
+# compléter, distincte de la mère connue de Carine : « demi-frère, même père ». La seconde
+# précise que cette mère est Irène : « frère ». Partie lien (T-020) : la structure de la fratrie
+# après chaque étape. Reste : les mots (T-026, T-027), l'expression de chemin (T-035) et la
+# correction dictée (voix, T-066).
+id: CL-VOI-08
+titre: « Mon frère de même père », puis « même père même mère »
+couverture:
+  teste: [lien]
+  reste: [T-026, T-027, T-035, T-066]
+arbre:
+  personnes: [carine/F, jules/M, irene/F]
+  unions:
+    - { conjoints: [jules, irene] }
+  filiations:
+    - { parents: [jules, irene], enfant: carine }
+action:
+  etapes:
+    - { locuteur: carine, dictee: "Bruno est mon frère de même père" }
+    - { locuteur: carine, dictee: "En fait, Bruno et moi sommes de même père même mère" }
+attendu:
+  etapes:
+    - plan:
+        - creer: bruno/M
+        - a_completer: mere_de_bruno/F
+        - filiation: { parent: jules, enfant: bruno, type: naissance }
+        - filiation: { parent: mere_de_bruno, enfant: bruno, type: naissance }
+      lien:
+        { de: carine, vers: bruno, fr: "demi-frère, même père", en: "half-brother, same father" }
+    - plan:
+        - preciser: { place: mere_de_bruno, personne: irene }
+      lien: { de: carine, vers: bruno, fr: "frère", en: "brother" }

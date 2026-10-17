@@ -8,5 +8,10 @@ describe('@lignee/kinship', () => {
     expect(typeof kinship.findRelationships).toBe('function');
     expect(typeof kinship.commonAncestorsOfPaths).toBe('function');
     expect(typeof kinship.invertRelationship).toBe('function');
+    expect(typeof kinship.siblingLink).toBe('function');
+    expect(typeof kinship.siblingsOf).toBe('function');
+    expect(typeof kinship.invertSiblingLink).toBe('function');
+    expect(typeof kinship.parentSide).toBe('function');
+    expect(typeof kinship.ascentSide).toBe('function');
   });
 });

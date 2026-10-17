@@ -33,3 +33,19 @@ export {
   type UnionLink,
   type UnionRank,
 } from './relationship';
+export {
+  ascentSide,
+  invertSiblingLink,
+  parentSide,
+  siblingLink,
+  siblingsOf,
+  type OtherParentState,
+  type ParentSide,
+  type SharedParent,
+  type SiblingBasis,
+  type SiblingLink,
+  type SiblingResult,
+  type SiblingSharing,
+  type StepSiblingLink,
+  type StepSiblingVia,
+} from './siblings';
