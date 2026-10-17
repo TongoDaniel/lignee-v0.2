@@ -1,12 +1,15 @@
 // Cas limites de polygamie cités par T-008, joués pour la disposition (étapes 1 et 2) : chaque
 // scénario est lu dans test/scenarios/<ID>.yaml (schéma strict), son arbre construit en objets
-// du modèle, puis la structure calculée est comparée à l'attendu. Placement, repli et revue
-// visuelle restent à T-012 et T-017 (champ `couverture` de chaque YAML).
+// du modèle, puis la structure calculée est comparée à l'attendu ; l'ordre, le placement et le
+// repli par défaut (T-012) le sont à `attendu.disposition`. La revue visuelle reste à T-017
+// (champ `couverture` de chaque YAML).
 import { checkUnion, findCoherenceIssues } from '@lignee/domain';
 import { loadScenario } from '@lignee/domain/test-support';
 import { describe, expect, it } from 'vitest';
 
 import { buildTreeStructure } from '../structure';
+import { expectDisposition, expectLayoutInvariants } from '../test-support/layout-checks';
+import { layoutTree } from '../tree-layout';
 import {
   applyLayoutSteps,
   buildLayoutScenarioTree,
@@ -49,9 +52,17 @@ describe.each(SCENARIOS)('%s — disposition', (id, title) => {
       for (const union of tree.data.unions) expect(checkUnion(union)).toEqual([]);
     }
 
+    const layout = layoutTree(tree.data, centerId);
+    expectLayoutInvariants(layout);
+    if (attendu.disposition === undefined) throw new Error(`${id} attend une disposition (T-012)`);
+    expectDisposition(layout, tree, attendu.disposition);
+
     if (attendu.sans_regle_de_genre === true) {
       const swapped = buildTreeStructure(swapGenders(tree.data), centerId);
       expect(comparableStructure(swapped)).toEqual(comparableStructure(structure));
+      // Même placement, genres inversés.
+      const swappedLayout = layoutTree(swapGenders(tree.data), centerId);
+      expect([...swappedLayout.people.values()]).toEqual([...layout.people.values()]);
     }
 
     for (const [centre, expected] of Object.entries(attendu.vers_centre_depuis ?? {})) {

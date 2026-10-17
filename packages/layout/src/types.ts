@@ -4,6 +4,7 @@
 import type {
   Filiation,
   Id,
+  MultipleBirth,
   ParentCandidate,
   Person,
   SimultaneityTree,
@@ -28,6 +29,9 @@ export type LayoutFiliation = Pick<
   'id' | 'parentId' | 'childId' | 'type' | 'originUnionId'
 >;
 
+/** Ce que la disposition lit d'une naissance multiple : l'ordre des enfants (T-012). */
+export type LayoutMultipleBirth = Pick<MultipleBirth, 'members'>;
+
 /** Ce que la disposition lit d'un parent candidat (UNI-11). */
 export type LayoutParentCandidate = Pick<ParentCandidate, 'childId' | 'candidateId'>;
 
@@ -41,10 +45,15 @@ export interface LayoutGraph {
   readonly unions: readonly LayoutUnion[];
   readonly filiations: readonly LayoutFiliation[];
   readonly parentCandidates?: readonly LayoutParentCandidate[];
-  /** Faits visibles ; seuls les décès servent, à dire si deux unions sont simultanées. */
+  /**
+   * Faits visibles : les décès disent si deux unions sont simultanées, les naissances ordonnent
+   * les frères et sœurs (T-012).
+   */
   readonly facts?: readonly LayoutFact[];
   /** Réponses de simultanéité, par paire d'unions. */
   readonly simultaneityAnswers?: readonly LayoutSimultaneityAnswer[];
+  /** Naissances multiples visibles : l'ordre des jumeaux nés le même jour (T-012). */
+  readonly multipleBirths?: readonly LayoutMultipleBirth[];
 }
 
 /**

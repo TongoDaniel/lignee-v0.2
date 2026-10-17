@@ -1,12 +1,13 @@
 # Noms générés. Partie disposition (T-008, packages/layout) : générations et foyers calculés
 # depuis Oumar, puis comparés à l'attendu. Les unions sont saisies dans le désordre : seul le rang
-# de Moussa compte. Reste : ordre des frères et sœurs, placement et repli (T-012), revue visuelle
-# (T-017).
+# de Moussa compte. Ordre, placement et repli (T-012) : les épouses sur la demi-rangée dans
+# l'ordre des rangs, seul le foyer de Fatou ouvert, les autres repliés avec leur compteur. Reste :
+# revue visuelle (T-017).
 id: CL-POL-01
 titre: Un homme a trois épouses en même temps
 couverture:
   teste: [disposition]
-  reste: [T-012, T-017]
+  reste: [T-017]
 arbre:
   personnes: [moussa/M, awa/F, fatou/F, mariam/F, ali/M, binta/F, oumar/M, kadi/F, issa/M]
   unions:
@@ -34,3 +35,12 @@ attendu:
         - { conjoint: awa, enfants: [ali, binta], en_cours: true, vers_centre: false }
         - { conjoint: fatou, enfants: [oumar], en_cours: true, vers_centre: true }
         - { conjoint: mariam, enfants: [kadi, issa], en_cours: true, vers_centre: false }
+  disposition:
+    lignes:
+      "-1": [moussa]
+      "-0.5": [awa, fatou, mariam]
+      "0": [oumar]
+    replis:
+      - { famille: [moussa, awa], replie: true, enfants: 2 }
+      - { famille: [moussa, fatou], replie: false, enfants: 1 }
+      - { famille: [moussa, mariam], replie: true, enfants: 2 }

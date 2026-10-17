@@ -15,6 +15,9 @@ import { z } from 'zod';
 import type { FamilyUnitKind, MissingParent, TreeStructure } from '../types';
 
 const pairSchema = z.tuple([z.string(), z.string()]);
+/** Une famille : un foyer, par ses deux parents, ou la colonne « non précisé » d'un parent. */
+const familySchema = z.union([pairSchema, z.tuple([z.string()])]);
+export type ScenarioFamily = z.infer<typeof familySchema>;
 
 /** Modification faite après le premier calcul, avant un second. */
 export const layoutStepSchema = z.union([
@@ -33,6 +36,13 @@ export const layoutActionSchema = z.strictObject({
   /** Autres personnes centrales, pour `vers_centre_depuis`. */
   autres_centres: z.array(z.string()).min(1).optional(),
   puis: z.array(layoutStepSchema).min(1).optional(),
+  /**
+   * Personnes masquées pour le lecteur : retirées du graphe reçu, avec tout ce qui les cite,
+   * comme le fait le filtrage de packages/domain (T-052).
+   */
+  masques: z.array(z.string()).min(1).optional(),
+  /** Familles que le lecteur déplie, pour `attendu.apres_deplier` (T-012). */
+  deplier: z.array(familySchema).min(1).optional(),
 });
 export type LayoutAction = z.infer<typeof layoutActionSchema>;
 
@@ -73,6 +83,24 @@ const unitExpectationSchema = z.strictObject({
 export const unitsExpectationSchema = z.record(z.string(), unitExpectationSchema);
 export type UnitsExpectation = z.infer<typeof unitsExpectationSchema>;
 
+/** Ordre, placement et repli attendus (T-012). */
+export const dispositionExpectedSchema = z.strictObject({
+  /**
+   * Personnes dessinées de gauche à droite, par hauteur (`"-1"`, `"-0.5"` pour la demi-rangée) ;
+   * seules les hauteurs citées sont vérifiées, chacune en entier.
+   */
+  lignes: z.record(z.string().regex(/^-?\d+(\.5)?$/), z.array(z.string())).optional(),
+  /** Liste complète des personnes dessinées, sans ordre. */
+  visibles: z.array(z.string()).optional(),
+  /** Liste complète des familles touchées : repliée ou non, et nombre d'enfants du compteur. */
+  replis: z
+    .array(z.strictObject({ famille: familySchema, replie: z.boolean(), enfants: z.int().min(0) }))
+    .optional(),
+  /** Largeur du dessin, en fiches, au plus. */
+  largeur_max: z.int().min(1).optional(),
+});
+export type DispositionExpected = z.infer<typeof dispositionExpectedSchema>;
+
 export const layoutExpectedSchema = z.strictObject({
   /** Rangée de chaque personne nommée (0 pour la personne centrale). */
   generations: z.record(z.string(), z.int()).optional(),
@@ -85,6 +113,10 @@ export const layoutExpectedSchema = z.strictObject({
   apres: z.strictObject({ unites: unitsExpectationSchema }).optional(),
   /** Pour chaque autre personne centrale, les foyers (centre, conjoint) qui mènent à elle. */
   vers_centre_depuis: z.record(z.string(), z.array(pairSchema)).optional(),
+  /** Ordre, placement et repli par défaut (T-012). */
+  disposition: dispositionExpectedSchema.optional(),
+  /** Après avoir déplié les familles de `action.deplier`. */
+  apres_deplier: dispositionExpectedSchema.optional(),
 });
 export type LayoutExpected = z.infer<typeof layoutExpectedSchema>;
 
@@ -114,9 +146,49 @@ function replaceUnion(tree: ScenarioTree, index: number, union: Record<string, u
   tree.data.unions[index] = unionSchema.parse(union);
 }
 
-/** Construit l'arbre de départ d'un scénario de disposition. */
+/**
+ * Construit l'arbre de départ d'un scénario de disposition, tel que le lecteur le reçoit : les
+ * personnes de `action.masques` en sont retirées avec tout ce qui les cite.
+ */
 export function buildLayoutScenarioTree(scenario: LayoutScenario): ScenarioTree {
-  return buildScenarioTree(scenario.arbre);
+  const tree = buildScenarioTree(scenario.arbre);
+  const masked = new Set((scenario.action.masques ?? []).map((key) => tree.id(key)));
+  if (masked.size > 0) tree.data = withoutPeople(tree.data, masked);
+  return tree;
+}
+
+/**
+ * Le graphe vu par un lecteur pour qui `masked` est masqué : comme le filtrage de packages/domain
+ * (T-052), sans ces personnes ni rien qui les cite. Réservé aux tests.
+ */
+export function withoutPeople(data: TreeData, masked: ReadonlySet<Id>): TreeData {
+  const keep = (id: Id) => !masked.has(id);
+  const result: TreeData = {
+    ...data,
+    people: data.people.filter((person) => keep(person.id)),
+    names: data.names.filter((name) => keep(name.personId)),
+    unions: data.unions.filter((union) => union.spouses.every((spouse) => keep(spouse.personId))),
+    filiations: data.filiations.filter(
+      (filiation) => keep(filiation.parentId) && keep(filiation.childId),
+    ),
+    parentCandidates: data.parentCandidates.filter(
+      (candidate) => keep(candidate.childId) && keep(candidate.candidateId),
+    ),
+    facts: data.facts.filter(
+      (fact) => fact.subject.kind !== 'person' || keep(fact.subject.personId),
+    ),
+    multipleBirths: data.multipleBirths.filter((birth) =>
+      birth.members.every((member) => keep(member.personId)),
+    ),
+    titleRoles: data.titleRoles.filter((title) => keep(title.personId)),
+  };
+  const unions = new Set(result.unions.map((union) => union.id));
+  return {
+    ...result,
+    simultaneityAnswers: result.simultaneityAnswers.filter((answer) =>
+      answer.unionIds.every((id) => unions.has(id)),
+    ),
+  };
 }
 
 /** Applique les modifications de `action.puis` à l'arbre, en objets valides du modèle. */
