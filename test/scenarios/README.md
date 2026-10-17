@@ -45,7 +45,7 @@ couverture:
   reste: [T-024, T-031]    # tickets du plan qui doivent compléter le scénario
 ```
 
-Parties reconnues dans `teste` : `lecture` (le scénario est lu, son arbre construit en objets valides du modèle et son plan attendu applicable, sans que le comportement attendu soit vérifié) `modele` (l'attendu porte sur le modèle et il est vérifié) et `disposition` (générations et foyers calculés par `packages/layout` et comparés à l'attendu, T-008). Un ticket qui joue une autre partie l'ajoute à l'énumération de `coverageSchema` (`packages/domain/src/test-support/scenario.ts`) et à cette liste. Un ticket de `reste` qui joue sa partie l'ajoute à `teste` et se retire de `reste`. Quand `reste` est vide, le champ peut disparaître.
+Parties reconnues dans `teste` : `lecture` (le scénario est lu, son arbre construit en objets valides du modèle et son plan attendu applicable, sans que le comportement attendu soit vérifié) `modele` (l'attendu porte sur le modèle et il est vérifié) et `disposition` (générations et foyers, puis ordre, placement et repli, calculés par `packages/layout` et comparés à l'attendu, T-008 et T-012). Un ticket qui joue une autre partie l'ajoute à l'énumération de `coverageSchema` (`packages/domain/src/test-support/scenario.ts`) et à cette liste. Un ticket de `reste` qui joue sa partie l'ajoute à `teste` et se retire de `reste`. Quand `reste` est vide, le champ peut disparaître.
 
 ## Scénario joué
 
@@ -84,9 +84,9 @@ it('CL-POL-03 — lien : frère ou demi-frère', () => {
 
 Pour les tests de propriétés, `treeArbitrary()` (fast-check) et `referenceTree(100 | 1000 | 5000)` donnent des arbres générés valides (`packages/domain/README.md`).
 
-## Disposition (packages/layout, T-008)
+## Disposition (packages/layout, T-008, T-012)
 
-Les scénarios de disposition (CL-POL-01, 04, 06, 13, 14, 18) déclarent `teste: [disposition]`. Leur arbre suit le format commun, avec les dates, la fin et la simultanéité des unions et les candidats (sections ci-dessus) ; leur action et leur attendu sont lus en schéma strict par `packages/layout/src/test-support/layout-scenario.ts` :
+Les scénarios de disposition (CL-POL-01, 04, 06, 12, 13, 14, 18, CL-SEC-03) déclarent `teste: [disposition]`. Leur arbre suit le format commun, avec les dates, la fin et la simultanéité des unions et les candidats (sections ci-dessus) ; leur action et leur attendu sont lus en schéma strict par `packages/layout/src/test-support/layout-scenario.ts` :
 
 | Clé | Contenu |
 | --- | --- |
@@ -95,3 +95,6 @@ Les scénarios de disposition (CL-POL-01, 04, 06, 13, 14, 18) déclarent `teste:
 | `action.puis` | Facultatif : modifications avant un second calcul : `{ rang: { conjoints, de, rang } }` (UNI-07), `{ preciser_parent: { enfant, parent } }` (ARB-05) |
 | `attendu.unites` | Liste complète des unités, par personne au centre : `forme` (`seul`, `couple`, `successives`, `simultanees`), `foyers` dans l'ordre (`conjoint`, `enfants` sans ordre, `en_cours?`, `vers_centre?`), `non_precise?` (`manque` : `mere`, `pere`, `parent` ; `enfants` ; `candidates` dans l'ordre) |
 | `attendu.generations`, `attendu.apres`, `attendu.vers_centre_depuis`, `attendu.sans_regle_de_genre` | Facultatifs : rangées attendues ; unités après `action.puis` ; foyers `[centre, conjoint]` qui mènent à chaque autre personne centrale ; même disposition genres inversés |
+| `action.masques` | Facultatif (T-012) : personnes masquées pour le lecteur, retirées du graphe reçu avec tout ce qui les cite, comme le filtrage de packages/domain (CL-SEC-03) |
+| `action.deplier` | Facultatif (T-012) : familles dépliées par le lecteur, pour `attendu.apres_deplier` ; une famille s'écrit `[a, b]` (foyer de deux parents) ou `[a]` (colonne « non précisé » de `a`) |
+| `attendu.disposition`, `attendu.apres_deplier` | Ordre, placement et repli (T-012) : `lignes` (personnes de gauche à droite par hauteur, `"-1"`, `"-0.5"` pour la demi-rangée ; seules les hauteurs citées sont vérifiées), `visibles` (liste complète, sans ordre), `replis` (liste complète des familles touchées : `{ famille, replie, enfants }`), `largeur_max` (en fiches). Le test vérifie en plus, sur chaque scénario, qu'aucune fiche n'en chevauche une autre et qu'aucun foyer ni fratrie n'est coupé |
