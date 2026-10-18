@@ -1,6 +1,6 @@
 # 0005 — Claude développe, Daniel décide
 
-Date : 15 octobre 2026 · Statut : acceptée (décision de Daniel)
+Date : 15 octobre 2026 · Statut : acceptée (décision de Daniel), remplacée en partie par l'ADR 0019 (Claude relit et fusionne)
 
 ## Contexte
 
