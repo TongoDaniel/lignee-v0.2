@@ -36,5 +36,66 @@
   "familyScreen": {
     "title": "Family",
     "empty": "Your family members will appear here, along with their invitations."
+  },
+  "controls": {
+    "back": "Go back",
+    "close": "Close",
+    "dictate": "Dictate the text"
+  },
+  "catalog": {
+    "open": "See the components",
+    "title": "Design components",
+    "subtitle": "Review page, only shown in development.",
+    "sections": {
+      "display": "Display",
+      "buttons": "Buttons",
+      "chips": "Chips",
+      "cards": "Cards",
+      "fields": "Fields",
+      "switches": "Switches",
+      "settings": "Settings rows",
+      "feedback": "Confirmation and sheet",
+      "icons": "Icons",
+      "logo": "Logo"
+    },
+    "display": {
+      "seniorMode": "Senior mode",
+      "night": "Night theme",
+      "reduceMotion": "Reduce motion"
+    },
+    "samples": {
+      "addSomeone": "Add someone",
+      "addMother": "Add your mother",
+      "invite": "Invite your relatives",
+      "celebrate": "Wish a happy birthday",
+      "delete": "Delete the profile",
+      "dad": "Dad",
+      "sisterOf": "Odette’s sister",
+      "story": "Story",
+      "deed": "Record",
+      "toConfirm": "To confirm",
+      "you": "You",
+      "albumTitle": "Family album",
+      "albumText": "{count, plural, one {# photo} other {# photos}}",
+      "storyTitle": "The 1994 wedding",
+      "storyText": "Told by Lucienne, 4 minutes",
+      "firstName": "First name",
+      "firstNamePlaceholder": "For example: Lucienne",
+      "firstNameError": "Enter a first name to save the profile.",
+      "dictateFirstName": "Dictate the first name",
+      "phone": "Phone number",
+      "cousins": "Cousins option",
+      "cousinsHelp": "Shows second cousins in the tree.",
+      "language": "Language",
+      "notifications": "Notifications",
+      "security": "Security",
+      "enabled": "On",
+      "showToast": "Show the confirmation",
+      "openSheet": "Open the sheet",
+      "sheetSubtitle": "They will receive a link to join the tree.",
+      "sendInvite": "Send the invitation",
+      "addMotherHint": "Opens a profile to fill in."
+    },
+    "backHint": "Returns to the previous screen."
   }
 }

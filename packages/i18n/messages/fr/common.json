@@ -36,5 +36,66 @@
   "familyScreen": {
     "title": "Famille",
     "empty": "Les membres de votre famille apparaîtront ici, avec leurs invitations."
+  },
+  "controls": {
+    "back": "Revenir en arrière",
+    "close": "Fermer",
+    "dictate": "Dicter le texte"
+  },
+  "catalog": {
+    "open": "Voir les composants",
+    "title": "Composants de la charte",
+    "subtitle": "Page de revue, visible en développement seulement.",
+    "sections": {
+      "display": "Affichage",
+      "buttons": "Boutons",
+      "chips": "Puces",
+      "cards": "Cartes",
+      "fields": "Champs",
+      "switches": "Interrupteurs",
+      "settings": "Lignes de réglage",
+      "feedback": "Confirmation et feuille",
+      "icons": "Icônes",
+      "logo": "Logo"
+    },
+    "display": {
+      "seniorMode": "Mode Aînés",
+      "night": "Thème Nuit",
+      "reduceMotion": "Réduire les animations"
+    },
+    "samples": {
+      "addSomeone": "Ajouter quelqu’un",
+      "addMother": "Ajouter votre mère",
+      "invite": "Inviter vos proches",
+      "celebrate": "Souhaiter son anniversaire",
+      "delete": "Supprimer la fiche",
+      "dad": "Papa",
+      "sisterOf": "Sœur d’Odette",
+      "story": "Récit",
+      "deed": "Acte",
+      "toConfirm": "À valider",
+      "you": "Vous",
+      "albumTitle": "Album de famille",
+      "albumText": "{count, plural, one {# photo} other {# photos}}",
+      "storyTitle": "Le mariage de 1994",
+      "storyText": "Raconté par Lucienne, 4 minutes",
+      "firstName": "Prénom",
+      "firstNamePlaceholder": "Par exemple : Lucienne",
+      "firstNameError": "Indiquez un prénom pour enregistrer la fiche.",
+      "dictateFirstName": "Dicter le prénom",
+      "phone": "Numéro de téléphone",
+      "cousins": "Option Cousins",
+      "cousinsHelp": "Montre les cousins issus de germain dans l’arbre.",
+      "language": "Langue",
+      "notifications": "Notifications",
+      "security": "Sécurité",
+      "enabled": "Activé",
+      "showToast": "Afficher la confirmation",
+      "openSheet": "Ouvrir la feuille",
+      "sheetSubtitle": "Ils recevront un lien pour rejoindre l’arbre.",
+      "sendInvite": "Envoyer l’invitation",
+      "addMotherHint": "Ouvre une fiche à remplir."
+    },
+    "backHint": "Revient à l’écran précédent."
   }
 }

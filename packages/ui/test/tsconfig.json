@@ -1,0 +1,9 @@
+{
+  // Tests de rendu (Jest) : types de Jest en plus, le code de src/ reste vérifié sans eux
+  // (../tsconfig.json).
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": ["jest"]
+  },
+  "include": ["../src", "."]
+}

@@ -6,13 +6,47 @@ Composants de la charte et `tokens.ts`, générés depuis `docs/charte/tokens.js
 
 - `src/fontFiles.ts` : **généré, ne pas modifier.** Les sept TTF par `require()`, sous les noms de la charte, pour `useFonts(fontFiles)` d'expo-font (11-react-native.md). Résolu par Metro seulement : il n'est ni dans l'index du paquet ni importé par un test Node. Dans l'app : `import { fontFiles } from '@lignee/ui/fontFiles'`.
 - `src/tokens.ts` : **généré, ne pas modifier.** Palette, thèmes Jour et Nuit (`themes`), ombres par thème, polices (`fontFaces`), typographie (`typography`, en dp, `fontFamily` seul), espacements (`space`), rayons (`radius`), tailles et zones touchables (`size`), traits (`stroke`), opacités (`opacity`), mouvement (`motion`), mode Aînés (`aines`).
-- `src/theme.ts` : `getTheme({ scheme, seniorMode })`, fonction pure qui renvoie couleurs, ombres, typographie (× 1,3 en mode Aînés) et zone touchable (48, ou 56 en mode Aînés) ; `schemeFromSystem()` traduit `useColorScheme()`. Le fournisseur React arrive avec T-014.
+- `src/theme.ts` : `getTheme({ scheme, seniorMode })`, fonction pure qui renvoie couleurs, ombres, typographie (× 1,3 en mode Aînés) et zone touchable (48, ou 56 en mode Aînés) ; `schemeFromSystem()` traduit `useColorScheme()`.
+- `src/theme/ThemeProvider.tsx` : `ThemeProvider` (Jour ou Nuit selon le téléphone, mode Aînés, réglage « Réduire les animations » suivi à chaud ; chacun peut être imposé) et `useTheme()`. L'app l'enveloppe pour peindre le fond de la fenêtre native (`apps/mobile/src/theme/ThemeProvider.tsx`).
+- `src/components/` : les composants de base de la charte (T-014), voir plus bas. `metrics.ts` y rassemble les mesures propres à une fiche de composant que `tokens.json` ne nomme pas (piste de l'interrupteur, hauteur d'une puce…), chacune avec sa source.
+- `src/icons/` : `Icon` et `icons.generated.ts` (**généré**), les 37 icônes de `docs/charte/assets/Icones`.
+- `src/logo/` : `Logo` et `logo.generated.ts` (**généré**), depuis `docs/charte/assets/Logos`.
 - `src/contrast.ts` : rapport de contraste WCAG 2.
 - `assets/fonts/` : les sept polices en TTF, décompressées des WOFF2 de `docs/charte/fonts`, avec `OFL.txt` (licence et mentions de copyright) et `empreintes.json` (SHA-256 des TTF et des WOFF2).
 
 `src/` se vérifie sans les types de Node (`tsconfig.json`, `types: []`) : `process`, `Buffer` ou `node:fs` y échouent au typecheck. Les scripts ont leur `scripts/tsconfig.json`, avec les types de Node ; `typecheck` lance les deux.
 
 Dans un écran, n'écrivez jamais une couleur, une taille ou un rayon : importez-les de `@lignee/ui`.
+
+## Composants de base (T-014)
+
+Noms et props en anglais (ADR 0018, `docs/adr/0018-noms-des-composants-en-anglais.md`) :
+
+| Charte | Composant |
+| --- | --- |
+| Bouton | `Button` |
+| Puce | `Chip` |
+| Carte | `Card` |
+| Champ | `Field` |
+| Interrupteur | `Switch` |
+| EnTete | `Header` |
+| Feuille | `Sheet` |
+| Toast | `Toast` |
+| LigneReglage | `SettingsRow`, `SettingsGroup` |
+| Icones | `Icon` |
+| Logo | `Logo` |
+
+Règles communes, vérifiées par les tests (`test/*.test.tsx`) :
+
+- Les composants prennent tout du thème (`useTheme()`) et des tokens. Aucun texte en dur : chaque texte, y compris les libellés pour le lecteur d'écran (« Revenir en arrière », « Fermer », « Dicter le prénom »), arrive en props, déjà traduit par l'écran (`common:controls.*`).
+- Chaque élément touchable a un rôle, un libellé, son état (`disabled`, `checked`) et, au besoin, une indication ; sa zone touchable fait 48, ou 56 en mode Aînés (`hitSlop` pour un bouton compact de 44 ou une puce de 32).
+- Le texte suit la taille du téléphone sans limite (`maxFontSizeMultiplier` n'est posé nulle part : la charte ne le réserve qu'à la barre d'onglets, T-015) ; aucune hauteur fixe autour d'un texte, seulement des hauteurs minimales.
+- Mouvement (07-mouvement.md) : appui à 97 % en 120 ms, interrupteur en 240 ms, feuille en 360 ms, toast 300 ms / 2,5 s / 300 ms ; aucun rebond. Quand le téléphone demande de réduire les animations, plus d'appui animé ni de glissement : fondus de 150 ms.
+- Anneau de focus clavier : contour `focus` de 2, décalé de 2.
+
+Tests : Vitest pour les scripts et les fonctions pures (`scripts/`, `src/*.test.ts`), Jest (jest-expo et Testing Library, comme l'app) pour le rendu des composants (`test/`). `corepack pnpm --filter @lignee/ui test` lance les deux. Sous Jest, les animations du fil natif ne se jouent pas : les tests vérifient ce qui est demandé à `Animated` (durée, valeur), pas l'image.
+
+Une page de revue montre tous les composants dans l'app de développement : onglet Arbre, « Voir les composants » (`apps/mobile/src/app/catalog.tsx`), avec le mode Aînés, le thème Nuit et les animations réduites à basculer.
 
 ## Régénérer
 
@@ -21,6 +55,7 @@ Une modification se fait dans la charte (`docs/charte/tokens.json`), puis :
 ```sh
 corepack pnpm --filter @lignee/ui tokens   # src/tokens.ts et src/fontFiles.ts
 corepack pnpm --filter @lignee/ui fonts    # assets/fonts/ (après un changement de docs/charte/fonts)
+corepack pnpm --filter @lignee/ui assets   # icônes et logo (après un changement de docs/charte/assets)
 ```
 
 Commitez le fichier régénéré avec la charte. Les tests (`corepack pnpm --filter @lignee/ui test`) échouent si `tokens.ts` ou un TTF ne correspond plus à la charte, s'il a été modifié à la main, ou si une paire de couleurs déclarée par la charte (`03-couleurs.md`, « Contrastes mesurés ») passe sous 4,5:1 (texte) ou 3:1 (élément graphique) dans un des deux thèmes.

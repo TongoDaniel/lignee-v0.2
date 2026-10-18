@@ -6,8 +6,7 @@ import type { BottomTabBarProps } from 'expo-router/js-tabs';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useTranslator } from '../i18n/I18nProvider';
-import { useTheme } from '../theme/ThemeProvider';
-import { motion, size, space, type FontName } from '@lignee/ui';
+import { motion, size, space, useTheme, type FontName } from '@lignee/ui';
 import { mainTabs } from './tabs';
 
 /** Au-delà, le libellé ne tiendrait plus sur une ligne (09-accessibilite.md, « Mise en œuvre »). */
