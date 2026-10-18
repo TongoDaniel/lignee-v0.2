@@ -19,8 +19,7 @@ import type { AndroidConfig as AndroidConfigTypes, ConfigPlugin } from 'expo/con
 import * as configPluginsModule from 'expo/config-plugins.js';
 
 const configPlugins =
-  (configPluginsModule as { default?: typeof configPluginsModule }).default ??
-  configPluginsModule;
+  (configPluginsModule as { default?: typeof configPluginsModule }).default ?? configPluginsModule;
 const { AndroidConfig, withAndroidManifest, withDangerousMod } = configPlugins;
 
 export const BACKUP_RULES_RESOURCE = 'lignee_backup_rules';
