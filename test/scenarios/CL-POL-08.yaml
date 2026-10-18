@@ -1,0 +1,34 @@
+# Famille polygame (noms générés). Moussa a deux épouses en même temps, Mariam et Fatou (réponse
+# gardée : unions simultanées). Aïcha, fille de Mariam, appelle Fatou « Maman Fatou ». « La
+# co-épouse de ma mère » désigne Fatou : pour Aïcha, c'est « épouse de votre père », jamais
+# « belle-mère », qui dirait aussi « mère de votre conjoint » (PAR-04) ; entre Mariam et Fatou,
+# « co-épouse ».
+# Partie lien (T-021) : chaque lien attendu est ramené à sa structure (conjoint d'un parent,
+# co-épouse, enfant du conjoint) et comparé au lien le plus proche calculé ; « co-épouse »
+# seulement parce que la simultanéité est établie. Le test rejoue l'arbre avec les unions
+# successives, puis sans réponse : « autre épouse de votre mari », jamais « co-épouse ».
+# Reste : les mots (T-026, T-027), le nom d'usage « Maman Fatou » affiché et trouvé (T-041).
+id: CL-POL-08
+titre: « La co-épouse de ma mère »
+couverture:
+  teste: [lien]
+  reste: [T-026, T-027, T-041]
+arbre:
+  personnes: [moussa/M, mariam/F, fatou/F, aicha/F, ali/M]
+  noms:
+    - { personne: fatou, type: usage, forme: "Maman Fatou" }
+  unions:
+    - { conjoints: [moussa, mariam] }
+    - { conjoints: [moussa, fatou] }
+  filiations:
+    - { parents: [moussa, mariam], enfant: aicha }
+    - { parents: [moussa, fatou], enfant: ali }
+  simultaneites:
+    - unions: [[moussa, mariam], [moussa, fatou]]
+      reponse: simultanees
+attendu:
+  liens:
+    - { de: aicha, vers: fatou, fr: "épouse de votre père", en: "your father's wife" }
+    - { de: mariam, vers: fatou, fr: "co-épouse", en: "co-wife" }
+    - { de: fatou, vers: mariam, fr: "co-épouse", en: "co-wife" }
+    - { de: fatou, vers: aicha, fr: "fille de votre mari", en: "your husband's daughter" }
