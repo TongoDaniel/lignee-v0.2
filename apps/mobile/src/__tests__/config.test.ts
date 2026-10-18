@@ -6,6 +6,13 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 import createConfig from '../../app.config';
+import {
+  BACKUP_RULES_RESOURCE,
+  DATA_EXTRACTION_RULES_RESOURCE,
+  applyBackupRules,
+  backupRulesXml,
+  dataExtractionRulesXml,
+} from '../../plugins/withLocalDataBackupRules';
 
 const appRoot = join(__dirname, '..', '..');
 const config: ExpoConfig = createConfig({
@@ -66,11 +73,44 @@ describe('app.config.ts', () => {
 
   it('chiffre la base locale avec SQLCipher, clé dans le trousseau (CL-SEC-14)', () => {
     expect(plugin('expo-sqlite')).toEqual({ useSQLCipher: true });
-    expect(config.plugins).toContain('expo-secure-store');
+    // Ses règles de sauvegarde sont reprises par withLocalDataBackupRules.
+    expect(plugin('expo-secure-store')).toEqual({ configureAndroidBackup: false });
   });
 
-  it('exclut l’app des sauvegardes automatiques Android (base chiffrée, clé sur l’appareil)', () => {
+  it('exclut la base et la clé des sauvegardes et des transferts d’appareil Android', () => {
     expect(config.android?.allowBackup).toBe(false);
+    // Greffon appliqué : il a posé ses modifications du manifeste et des ressources Android.
+    const { mods } = config as ExpoConfig & {
+      mods?: { android?: { manifest?: unknown; dangerous?: unknown } };
+    };
+    expect(mods?.android?.manifest).toBeDefined();
+    expect(mods?.android?.dangerous).toBeDefined();
+
+    const manifest = applyBackupRules({
+      manifest: { $: {}, application: [{ $: { 'android:name': '.MainApplication' } }] },
+    } as unknown as Parameters<typeof applyBackupRules>[0]);
+    expect(manifest.manifest.application?.[0]?.$).toMatchObject({
+      'android:allowBackup': 'false',
+      'android:fullBackupContent': `@xml/${BACKUP_RULES_RESOURCE}`,
+      'android:dataExtractionRules': `@xml/${DATA_EXTRACTION_RULES_RESOURCE}`,
+    });
+
+    const exclusions = [
+      '<exclude domain="file" path="SQLite"/>',
+      '<exclude domain="sharedpref" path="SecureStore"/>',
+    ];
+    const extraction = dataExtractionRulesXml();
+    for (const section of ['cloud-backup', 'device-transfer']) {
+      const start = extraction.indexOf(`<${section}>`);
+      const end = extraction.indexOf(`</${section}>`);
+      expect(start).toBeGreaterThanOrEqual(0);
+      const body = extraction.slice(start, end);
+      for (const exclusion of exclusions) expect(body).toContain(exclusion);
+      expect(body).not.toContain('<include');
+    }
+    const legacy = backupRulesXml();
+    for (const exclusion of exclusions) expect(legacy).toContain(exclusion);
+    expect(legacy).not.toContain('<include');
   });
 });
 

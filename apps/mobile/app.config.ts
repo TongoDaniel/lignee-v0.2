@@ -6,6 +6,7 @@
 import type { ConfigContext, ExpoConfig } from 'expo/config';
 
 import { palette } from '../../packages/ui/src/tokens.ts';
+import { withLocalDataBackupRules } from './plugins/withLocalDataBackupRules.ts';
 
 /** Fichiers de marque de la charte (icône d'app, icône adaptative, écran de lancement). */
 const brandAssets = '../../docs/charte/assets/Applications';
@@ -16,7 +17,7 @@ const brandAssets = '../../docs/charte/assets/Applications';
  */
 const applicationId = 'com.lignee.app';
 
-export default ({ config }: ConfigContext): ExpoConfig => ({
+const createConfig = ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: 'Lignée',
   slug: 'lignee',
@@ -33,9 +34,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   android: {
     package: applicationId,
-    // Pas de sauvegarde automatique Android (Google Drive, transfert d'appareil) : la base est
-    // chiffrée par une clé qui ne quitte pas le trousseau de ce téléphone ; restaurée ailleurs,
-    // elle serait illisible et ne ferait que copier des données chiffrées (CL-SEC-14, ADR 0023).
+    // Pas de sauvegarde Android dans le cloud : la base est chiffrée par une clé qui ne quitte
+    // pas le trousseau de ce téléphone ; restaurée ailleurs, elle serait illisible. Le transfert
+    // d'appareil (Android 12+) est réglé par withLocalDataBackupRules (CL-SEC-14, ADR 0023).
     allowBackup: false,
     adaptiveIcon: {
       foregroundImage: `${brandAssets}/android-adaptive-avant-plan-1024.png`,
@@ -60,8 +61,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-font',
     // Base locale chiffrée par SQLCipher (TRD, « Hors-ligne et synchronisation » ; T-016).
     ['expo-sqlite', { useSQLCipher: true }],
-    // Clé de la base dans le trousseau du système.
-    'expo-secure-store',
+    // Clé de la base dans le trousseau du système. Ses règles de sauvegarde Android sont
+    // reprises, avec l'exclusion de la base, par withLocalDataBackupRules.
+    ['expo-secure-store', { configureAndroidBackup: false }],
   ],
   experiments: {
     typedRoutes: true,
@@ -72,3 +74,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ...config.extra,
   },
 });
+
+// Base et clé exclues des sauvegardes et des transferts d'appareil Android (greffon local,
+// appliqué ici : le champ `plugins` n'admet que des noms de paquets). Sur iOS, la base
+// (Documents/SQLite) part dans la sauvegarde iCloud, chiffrée et sans sa clé, qui ne quitte
+// pas l'appareil : voir ADR 0023, point 6.
+export default (context: ConfigContext): ExpoConfig =>
+  withLocalDataBackupRules(createConfig(context));
