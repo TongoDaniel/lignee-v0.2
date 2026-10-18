@@ -1,7 +1,7 @@
-// Disposition complète (TRD, « Disposition de l'arbre », étapes 1 à 5) : la structure de T-008,
-// puis l'ordre, le placement et le repli (T-012). Fonctions pures : le graphe et les choix reçus
+// Disposition complète (TRD, « Disposition de l'arbre », étapes 1 à 6) : la structure de T-008,
+// puis l'ordre, le placement et le repli (T-012), puis les liens hors des foyers (T-019). Fonctions pures : le graphe et les choix reçus
 // ne sont pas modifiés. Le cache réutilise les étapes 1 et 2 quand seul un repli change, et part
-// de l'ordre précédent pour que le dessin reste stable. Règles retenues : ADR 0016.
+// de l'ordre précédent pour que le dessin reste stable. Règles retenues : ADR 0016, ADR 0024.
 import type { Id } from '@lignee/domain';
 
 import { arrange, type Arrangement } from './arrange';
@@ -16,6 +16,7 @@ import type {
   PlacedPerson,
   TreeLayout,
 } from './layout-types';
+import { computeLinks } from './links';
 import { createSiblingSorter } from './sibling-order';
 import { buildTreeStructure } from './structure';
 import type { LayoutGraph, TreeStructure } from './types';
@@ -33,7 +34,7 @@ export function prepareTree(graph: LayoutGraph, centerId: Id): PreparedTree {
   return { structure, families: indexFamilies(structure, createSiblingSorter(graph)) };
 }
 
-/** Étapes 3 à 5 sur une structure déjà calculée. */
+/** Étapes 3 à 6 sur une structure déjà calculée. */
 export function layoutPrepared(
   prepared: PreparedTree,
   options: LayoutOptions = {},
@@ -127,6 +128,14 @@ export function layoutPrepared(
       return left.x - right.x || left.y - right.y;
     });
   }
+  const links = computeLinks(
+    structure,
+    visibility,
+    built,
+    arrangement.familyOfBlock,
+    people,
+    families,
+  );
   const xs = placedBlocks.flatMap((block) => [block.left, block.right]);
   const ys = [...people.values()].map((person) => person.y);
   const headerYs = [...families.values()].flatMap((family) =>
@@ -146,6 +155,7 @@ export function layoutPrepared(
       maxY: Math.max(...ys, ...headerYs),
     },
     crossings: arrangement.crossings,
+    links,
     folds,
   };
   previousOrders.set(layout, arrangement.orderOf);
@@ -156,7 +166,7 @@ export function layoutPrepared(
 const previousOrders = new WeakMap<TreeLayout, ReadonlyMap<number, readonly string[]>>();
 
 /**
- * Disposition de l'arbre vu depuis `centerId` : étapes 1 à 5. Le graphe est déjà limité à ce que
+ * Disposition de l'arbre vu depuis `centerId` : étapes 1 à 6. Le graphe est déjà limité à ce que
  * le lecteur peut voir (packages/domain) ; rien de masqué n'est compté ni dessiné.
  */
 export function layoutTree(

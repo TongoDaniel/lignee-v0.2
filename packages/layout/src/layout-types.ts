@@ -1,7 +1,7 @@
-// Résultat des étapes 3 à 5 de la disposition (TRD, « Disposition de l'arbre ») : ordre, placement
-// et repli. Coordonnées abstraites, en unités de grille : une unité en largeur par fiche (espace
-// compris), une unité en hauteur par rangée. Les tailles réelles viennent des tokens de la charte
-// au dessin (T-017). Règles retenues : ADR 0016.
+// Résultat des étapes 3 à 6 de la disposition (TRD, « Disposition de l'arbre ») : ordre,
+// placement, repli, puis liens hors des foyers (implexe). Coordonnées abstraites, en unités de
+// grille : une unité en largeur par fiche (espace compris), une unité en hauteur par rangée. Les tailles réelles viennent des tokens de la charte
+// au dessin (T-017). Règles retenues : ADR 0016, ADR 0024 (étape 6).
 import type { Id } from '@lignee/domain';
 
 import type { TreeStructure } from './types';
@@ -82,7 +82,45 @@ export interface CrossingCount {
   readonly final: number;
 }
 
-/** Résultat des étapes 1 à 5. */
+/**
+ * Nature d'un lien dessiné hors des foyers (étape 6, T-019, ADR 0024) :
+ * - `elsewhere` : une famille et un enfant dessiné sur la rangée suivante, mais dans la fratrie
+ *   d'une autre famille (son conjoint y est rangé : mariage entre cousins, ARB-06) ;
+ * - `long` : une famille et un enfant dessiné sur une rangée non voisine (implexe, union entre
+ *   générations, CL-FAM-10) ;
+ * - `couple` : les deux parents d'un foyer dessinés sur deux rangées différentes ;
+ * - `secondary` : une filiation qui ne range pas l'enfant (adoption à côté de la naissance,
+ *   « a élevé », confié…) entre deux personnes dessinées.
+ */
+export type LinkNature = 'elsewhere' | 'long' | 'couple' | 'secondary';
+
+/**
+ * Tracé d'un lien : un trait, ou un renvoi « voir aussi » vers la fiche déjà dessinée quand le
+ * trait traverserait plus de deux rangées ou croiserait trop d'autres traits (TRD, étape 6).
+ */
+export type LinkDrawing = 'line' | 'seeAlso';
+
+/** Un lien entre deux fiches dessinées qui ne suit pas un foyer et sa fratrie (étape 6). */
+export interface PlacedLink {
+  readonly nature: LinkNature;
+  /** Clé de la famille (`elsewhere`, `long`, `couple`), ou identifiant de la filiation (`secondary`). */
+  readonly key: string;
+  /** Premier parent de la famille, parent de la filiation, ou conjoint au centre du foyer. */
+  readonly fromId: Id;
+  /** Enfant, ou autre conjoint. */
+  readonly toId: Id;
+  /** Point d'attache de la famille (ou fiche du parent, du conjoint au centre). */
+  readonly from: GridPoint;
+  /** Fiche de l'enfant ou de l'autre conjoint. */
+  readonly to: GridPoint;
+  /** Rangée de `toId` moins rangée du point de départ. */
+  readonly rowSpan: number;
+  /** Traits parent-enfant des foyers que ce lien croiserait, tiré en droite ligne. */
+  readonly crossings: number;
+  readonly drawing: LinkDrawing;
+}
+
+/** Résultat des étapes 1 à 6. */
 export interface TreeLayout {
   readonly centerId: Id;
   /** Étapes 1 et 2, réutilisées telles quelles. */
@@ -101,6 +139,12 @@ export interface TreeLayout {
     readonly maxY: number;
   };
   readonly crossings: CrossingCount;
+  /**
+   * Liens hors des foyers (étape 6) : chaque personne n'a qu'une fiche, et ce qui la relie
+   * ailleurs passe par un trait ou un renvoi « voir aussi » (ARB-06), dans l'ordre du dessin
+   * (rangée, puis position du départ et de l'arrivée).
+   */
+  readonly links: readonly PlacedLink[];
   /** Choix du lecteur appliqués : clé de famille, repliée ou non. */
   readonly folds: ReadonlyMap<string, boolean>;
 }
