@@ -20,6 +20,33 @@ updates:
     commit-message:
       prefix: chore(exploitation)
     labels: [exploitation]
+    # App mobile : React, React Native et les modules natifs suivent le SDK Expo
+    # (bundledNativeModules). Monter l'un d'eux seul casse le build natif : ils changent ensemble,
+    # au changement de SDK (`npx expo install --fix`, docs/runbooks/lancer-app-mobile.md).
+    ignore:
+      - dependency-name: expo
+        update-types: [version-update:semver-major]
+      - dependency-name: "expo-*"
+        update-types: [version-update:semver-major]
+      - dependency-name: "@expo/*"
+        update-types: [version-update:semver-major]
+      - dependency-name: jest-expo
+        update-types: [version-update:semver-major]
+      - dependency-name: react
+      - dependency-name: react-test-renderer
+      - dependency-name: react-native
+      - dependency-name: "@react-native/*"
+      - dependency-name: "@types/react"
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: "react-native-*"
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      # jest-expo 57 s'appuie sur Jest 29 ; expo-router 57 sur React Native Testing Library 13.
+      - dependency-name: jest
+        update-types: [version-update:semver-major]
+      - dependency-name: "@types/jest"
+        update-types: [version-update:semver-major]
+      - dependency-name: "@testing-library/react-native"
+        update-types: [version-update:semver-major]
     groups:
       # Une seule pull request par semaine pour les versions mineures et correctives.
       mineures-et-correctifs:

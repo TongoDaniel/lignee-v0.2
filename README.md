@@ -54,10 +54,20 @@ corepack pnpm typecheck      # tsc --noEmit dans chaque paquet
 corepack pnpm test           # Vitest dans chaque paquet
 corepack pnpm format:check   # vérifie la mise en forme (Prettier)
 corepack pnpm format         # corrige la mise en forme
-corepack pnpm check:forbidden-dependencies  # CON-12 : aucune bibliothèque de reconnaissance faciale
+corepack pnpm check:forbidden-dependencies  # CON-12 : aucune bibliothèque de reconnaissance faciale (npm et natif)
 ```
 
 Pour un seul paquet : `corepack pnpm --filter @lignee/kinship test`.
+
+### Tests de performance
+
+Les budgets de temps du cahier des charges (TRD, « Performance et appareils cibles » ; par exemple 100 ms de disposition pour 500 personnes visibles, PAR-01) visent l'Android de référence et y sont vérifiés (T-028, T-105). Dans Vitest, sur un poste ou un runner partagé, un test de temps n'est qu'un garde-fou contre une régression grossière. Règle commune, outillée par `@lignee/domain/test-support` (`medianTime`, `reportBudget`) :
+
+- chauffe d'abord, puis médiane de plusieurs exécutions, jamais une mesure unique ;
+- plafond = budget × facteur : 3 en CI (variable `CI`), 1,5 sur un poste ; `LIGNEE_PERF_FACTOR` le remplace (par exemple `LIGNEE_PERF_FACTOR=1 corepack pnpm test` pour comparer au budget brut) ;
+- chaque mesure est écrite dans la sortie du test avec le budget et le plafond (lignes `[perf]`), pour suivre la tendance d'un build à l'autre.
+
+Les budgets eux-mêmes ne changent pas pour faire passer la CI ; seul le facteur absorbe la lenteur des runners.
 
 Textes d'interface : jamais en dur (ACC-04). ESLint refuse le texte dans le JSX de `apps/mobile`, `apps/web`, `apps/admin` et `packages/ui` (règle `i18next/no-literal-string`) ; pour ajouter un texte, voir [packages/i18n/README.md](packages/i18n/README.md).
 
@@ -74,7 +84,7 @@ docker compose down             # arrête (ajouter --volumes pour tout effacer)
 
 Les messages de commit suivent les conventions (`feat(kinship): …`) ; les portées admises sont dans `commitlint.config.mjs`. Pour vérifier un message : `echo "feat(kinship): …" | corepack pnpm commitlint`. Le hook `commit-msg` est facultatif : `git config core.hooksPath .githooks` l'active.
 
-Prettier ne reformate pas les fichiers Markdown. `apps/mobile`, `apps/web` et `apps/admin` n'ont pas encore de `package.json` : ils entrent dans les tâches quand leur app est créée. Turborepo collecte une télémétrie anonyme ; `corepack pnpm exec turbo telemetry disable` la coupe sur votre poste. La CI la coupe avec `TURBO_TELEMETRY_DISABLED=1`.
+Prettier ne reformate pas les fichiers Markdown. `apps/web` et `apps/admin` n'ont pas encore de `package.json` : ils entrent dans les tâches quand leur app est créée. L'app mobile (`apps/mobile`, Expo) se teste avec Jest (jest-expo) et non Vitest ; pour la lancer sur un téléphone : [docs/runbooks/lancer-app-mobile.md](docs/runbooks/lancer-app-mobile.md). Turborepo collecte une télémétrie anonyme ; `corepack pnpm exec turbo telemetry disable` la coupe sur votre poste. La CI la coupe avec `TURBO_TELEMETRY_DISABLED=1`.
 
 ## Intégration continue
 
@@ -82,7 +92,8 @@ GitHub Actions, à chaque pull request et à chaque push sur `main` :
 
 | Workflow | Job | Contenu |
 | --- | --- | --- |
-| `.github/workflows/ci.yml` | `verifications` | CON-12, Prettier, ESLint, tsc, Vitest (unitaires et propriétés), commitlint sur les commits et sur le titre de la pull request |
+| `.github/workflows/ci.yml` | `verifications` | CON-12, Prettier, ESLint, tsc, Vitest (unitaires et propriétés) et Jest (app mobile), commitlint sur les commits et sur le titre de la pull request |
+| | `bundle-mobile` | App mobile : versions conformes au SDK Expo (`expo install --check`), bundle Hermes Android et iOS (`expo export`), taille relevée dans le résumé |
 | | `audit-dependances` | `pnpm audit --audit-level high` : échoue sur une faille haute ou critique |
 | | `cas-limites` | Scénarios `test/scenarios/*.yaml` : les tests tournent avec `LIGNEE_SCENARIOS_PLAYED_DIR` ; un scénario est joué si un test l'a réellement chargé (`loadScenario`, voir `test/scenarios/README.md`) ; le job échoue sur tout scénario non joué, sans liste d'exception. Ce qu'un test ne vérifie pas encore est déclaré dans le champ `couverture` du scénario |
 | | `integration-postgresql` | Tests `*.integration.test.ts` sur PostgreSQL réel ; à brancher avec T-042 et T-043 |

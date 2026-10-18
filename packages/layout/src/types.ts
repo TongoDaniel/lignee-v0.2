@@ -4,6 +4,7 @@
 import type {
   Filiation,
   Id,
+  MultipleBirth,
   ParentCandidate,
   Person,
   SimultaneityTree,
@@ -28,6 +29,9 @@ export type LayoutFiliation = Pick<
   'id' | 'parentId' | 'childId' | 'type' | 'originUnionId'
 >;
 
+/** Ce que la disposition lit d'une naissance multiple : l'ordre des enfants (T-012). */
+export type LayoutMultipleBirth = Pick<MultipleBirth, 'members'>;
+
 /** Ce que la disposition lit d'un parent candidat (UNI-11). */
 export type LayoutParentCandidate = Pick<ParentCandidate, 'childId' | 'candidateId'>;
 
@@ -41,10 +45,15 @@ export interface LayoutGraph {
   readonly unions: readonly LayoutUnion[];
   readonly filiations: readonly LayoutFiliation[];
   readonly parentCandidates?: readonly LayoutParentCandidate[];
-  /** Faits visibles ; seuls les décès servent, à dire si deux unions sont simultanées. */
+  /**
+   * Faits visibles : les décès disent si deux unions sont simultanées, les naissances ordonnent
+   * les frères et sœurs (T-012).
+   */
   readonly facts?: readonly LayoutFact[];
   /** Réponses de simultanéité, par paire d'unions. */
   readonly simultaneityAnswers?: readonly LayoutSimultaneityAnswer[];
+  /** Naissances multiples visibles : l'ordre des jumeaux nés le même jour (T-012). */
+  readonly multipleBirths?: readonly LayoutMultipleBirth[];
 }
 
 /**
@@ -177,4 +186,15 @@ export interface TreeStructure extends Generations {
   readonly crossLinks: readonly CrossLink[];
   /** Personnes dessinées dont la question d'UNI-08 reste ouverte, par rangée (ADR 0013). */
   readonly simultaneityPending: readonly Id[];
+  /**
+   * Personnes dont au moins deux unions sont simultanées (dates, réponse gardée, ou repli
+   * d'affichage de l'ADR 0013), qu'elles portent ces foyers ou non : le placement les dessine au
+   * centre de leurs conjoints (T-012, ADR 0016).
+   */
+  readonly simultaneousSpouses: ReadonlySet<Id>;
+  /**
+   * Unions de chaque personne qui en a au moins deux, de la plus ancienne à la plus récente
+   * (`orderUnions`, ADR 0013, règle 2), qu'elle les porte ou non.
+   */
+  readonly unionOrderOf: ReadonlyMap<Id, readonly Id[]>;
 }

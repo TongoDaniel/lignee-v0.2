@@ -1,9 +1,13 @@
 {
   // Code de l'app (src/) : aucun type de Node. React Native n'a ni `process`, ni `Buffer`, ni
   // `node:fs` : les utiliser ici doit échouer au typecheck. Les scripts ont leur propre
-  // configuration (scripts/tsconfig.json).
+  // configuration (scripts/tsconfig.json), les tests de rendu aussi (test/tsconfig.json).
+  // JSX et condition « react-native » : les composants sont résolus comme dans l'app (Metro).
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "lib": ["ES2022"],
+    "jsx": "react-jsx",
+    "customConditions": ["react-native"],
     "types": [],
     "noEmit": true,
     "declaration": false

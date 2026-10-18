@@ -1,0 +1,44 @@
+# Noms générés. Partie disposition (T-012, packages/layout) : Paul et Mireille ont quatre enfants ;
+# Dora est masquée pour le lecteur. Le graphe reçu par la disposition est déjà filtré
+# (packages/domain) : il ne contient ni Dora ni ses liens (`action.masques` retire la personne et
+# tout ce qui la cite). Vu depuis Jacques, frère de Paul, le foyer de Paul est replié, et son
+# compteur dit 3 (« + 3 »), pas 4. Le test vérifie aussi qu'un lien resté vers Dora ne la fait pas
+# compter. Reste : le filtrage lui-même (T-052, T-057) et l'affichage du compteur (T-017).
+id: CL-SEC-03
+titre: Foyer replié contenant un enfant masqué
+couverture:
+  teste: [disposition]
+  reste: [T-017, T-052, T-057]
+arbre:
+  personnes:
+    [andre/M, josephine/F, jacques/M, paul/M, mireille/F, abel/M, berthe/F, cyril/M, dora/F]
+  unions:
+    - { conjoints: [andre, josephine] }
+    - { conjoints: [paul, mireille] }
+  filiations:
+    - { parents: [andre, josephine], enfant: jacques }
+    - { parents: [andre, josephine], enfant: paul }
+    - { parents: [paul, mireille], enfant: abel }
+    - { parents: [paul, mireille], enfant: berthe }
+    - { parents: [paul, mireille], enfant: cyril }
+    - { parents: [paul, mireille], enfant: dora }
+action:
+  centre: jacques
+  masques: [dora]
+attendu:
+  unites:
+    andre:
+      forme: couple
+      foyers:
+        - { conjoint: josephine, enfants: [jacques, paul], vers_centre: true }
+    paul:
+      forme: couple
+      foyers:
+        - { conjoint: mireille, enfants: [abel, berthe, cyril], vers_centre: false }
+  disposition:
+    visibles: [andre, josephine, jacques, paul, mireille]
+    lignes:
+      "0": [jacques, paul, mireille]
+    replis:
+      - { famille: [andre, josephine], replie: false, enfants: 2 }
+      - { famille: [paul, mireille], replie: true, enfants: 3 }

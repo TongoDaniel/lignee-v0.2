@@ -142,12 +142,27 @@ export function findMultipleBirth(
 /**
  * Naissance multiple telle qu'un lecteur la voit : les enfants qu'il ne voit pas en sont retirés,
  * et elle disparaît s'il en reste moins de deux (sinon « Jumeaux » trahirait un enfant masqué).
- * `isVisible` vient du module de droits (T-052) ; cette fonction ne décide rien d'autre.
+ * Les rangs de naissance restants sont renumérotés à la suite (1, 2…) dans leur ordre d'origine :
+ * des triplés dont le deuxième est masqué arrivent avec les rangs 1 et 2, pas 1 et 3, dont la
+ * lacune trahirait l'enfant masqué. `isVisible` vient du module de droits (T-052) ; cette fonction
+ * ne décide rien d'autre.
  */
 export function projectMultipleBirth(
   birth: MultipleBirth,
   isVisible: (personId: string) => boolean,
 ): MultipleBirth | undefined {
   const members = birth.members.filter((member) => isVisible(member.personId));
-  return members.length < 2 ? undefined : { ...birth, members };
+  if (members.length < 2) return undefined;
+  const ordered = members
+    .flatMap((member) => (member.birthOrder === undefined ? [] : [member.birthOrder]))
+    .sort((a, b) => a - b);
+  const renumbered = new Map(ordered.map((order, at) => [order, at + 1]));
+  return {
+    ...birth,
+    members: members.map((member) =>
+      member.birthOrder === undefined
+        ? member
+        : { ...member, birthOrder: renumbered.get(member.birthOrder) ?? member.birthOrder },
+    ),
+  };
 }

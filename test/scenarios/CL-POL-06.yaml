@@ -1,12 +1,12 @@
 # Noms générés. Partie disposition (T-008, packages/layout) : l'union 1 est terminée par décès
 # avant le début de l'union 2 ; les deux foyers se suivent, du plus ancien au plus récent, et
-# l'union en cours est marquée pour être dessinée au plus près de Jean (ARB-04). Reste :
-# placement (T-012), revue visuelle (T-017).
+# l'union en cours est dessinée au plus près de Jean (ARB-04, placement de T-012 : Hélène,
+# Berthe, puis Jean). Reste : revue visuelle (T-017).
 id: CL-POL-06
 titre: Première épouse décédée, puis nouvelle épouse
 couverture:
   teste: [disposition]
-  reste: [T-012, T-017]
+  reste: [T-017]
 arbre:
   personnes: [jean/M, helene/F, berthe/F, luc/M, anne/F, paul/M]
   unions:
@@ -31,3 +31,10 @@ attendu:
       foyers:
         - { conjoint: helene, enfants: [luc, anne], en_cours: false, vers_centre: false }
         - { conjoint: berthe, enfants: [paul], en_cours: true, vers_centre: true }
+  disposition:
+    lignes:
+      "-1": [helene, berthe, jean]
+      "0": [paul]
+    replis:
+      - { famille: [jean, helene], replie: true, enfants: 2 }
+      - { famille: [jean, berthe], replie: false, enfants: 1 }
