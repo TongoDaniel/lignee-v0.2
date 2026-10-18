@@ -1,0 +1,44 @@
+# Noms générés. Kevin, fils de Pierre et Marthe, est confié à son oncle Olivier, au village
+# (confiage).
+# Partie lien (T-022) : pour Olivier, Kevin « lui est confié », et aussi son neveu ; pour Kevin,
+# Olivier est la personne à qui il est confié, et aussi son oncle par son père ; Pierre reste son
+# père (PAR-06), et il est aussi son oncle par la personne à qui il est confié, jamais « par votre
+# père ». Le test vérifie aussi que Marthe reste sa mère, le lien principal. Chaque lien attendu
+# est ramené à sa structure et comparé à la présentation calculée. Reste : les mots (T-026,
+# T-027).
+id: CL-FAM-04
+titre: Confiage, enfant élevé par un oncle au village
+couverture:
+  teste: [lien]
+  reste: [T-026, T-027]
+arbre:
+  personnes: [gp/M, gm/F, pierre/M, marthe/F, olivier/M, kevin/M]
+  unions:
+    - { conjoints: [gp, gm] }
+    - { conjoints: [pierre, marthe] }
+  filiations:
+    - { parents: [gp, gm], enfant: pierre }
+    - { parents: [gp, gm], enfant: olivier }
+    - { parents: [pierre, marthe], enfant: kevin }
+    - { parents: [olivier], enfant: kevin, type: confie }
+attendu:
+  liens:
+    - de: olivier
+      vers: kevin
+      fr: "lui est confié"
+      en: "entrusted to them"
+      aussi:
+        - { fr: "neveu", en: "nephew" }
+    - de: kevin
+      vers: pierre
+      fr: "père"
+      en: "father"
+      aussi:
+        - fr: "oncle par la personne à qui vous êtes confié"
+          en: "uncle through the person you are entrusted to"
+    - de: kevin
+      vers: olivier
+      fr: "personne à qui vous êtes confié"
+      en: "person you are entrusted to"
+      aussi:
+        - { fr: "oncle par votre père", en: "uncle through your father" }

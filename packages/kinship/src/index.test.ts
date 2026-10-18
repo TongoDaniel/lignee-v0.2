@@ -12,5 +12,8 @@ describe('@lignee/kinship', () => {
     expect(typeof kinship.siblingsOf).toBe('function');
     expect(typeof kinship.invertSiblingLink).toBe('function');
     expect(typeof kinship.parentSide).toBe('function');
+    expect(typeof kinship.presentRelationships).toBe('function');
+    expect(typeof kinship.invertPresentedLink).toBe('function');
+    expect(typeof kinship.ascentSide).toBe('function');
   });
 });

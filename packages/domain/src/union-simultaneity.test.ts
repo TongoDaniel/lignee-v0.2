@@ -20,6 +20,7 @@ import {
   simultaneityFromDates,
   simultaneityQuestionFor,
   simultaneityQuestions,
+  simultaneityResolver,
   uniformPairAnswers,
   unionPair,
   type PairAnswer,
@@ -136,6 +137,28 @@ describe('UNI-08 : déduit des dates', () => {
       { unionIds: unionPair(a.id, b.id), simultaneity: 'simultaneous' },
     ]);
     expect(value(answered, a, b)).toEqual({ source: 'dates', value: 'successive' });
+  });
+
+  it('le résolveur réutilisable répond comme resolveSimultaneity, paire par paire', () => {
+    const { tree, data, unions } = household(4, [
+      { start: year(1950), end: year(1965) },
+      { start: year(1960), end: year(1980) },
+      {},
+      {},
+    ]);
+    const [u1, u2, u3, u4] = unions as [Union, Union, Union, Union];
+    const answered = answer(data, tree, [
+      { unionIds: unionPair(u3.id, u4.id), simultaneity: 'simultaneous' },
+    ]);
+    const resolver = simultaneityResolver(answered);
+    for (const a of unions) {
+      for (const b of unions) {
+        if (a !== b) expect(resolver(a, b)).toEqual(resolveSimultaneity(answered, a, b));
+      }
+    }
+    expect(resolver(u1, u2)).toEqual({ source: 'dates', value: 'simultaneous' });
+    expect(resolver(u4, u3)).toEqual({ source: 'answer', value: 'simultaneous' });
+    expect(resolver(u1, u3)).toEqual({ source: 'unknown' });
   });
 });
 

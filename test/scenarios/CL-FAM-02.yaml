@@ -1,0 +1,40 @@
+# Noms générés. Ana et Bob, parents de Léo, ont divorcé ; Ana a épousé Carl, qui a élevé Léo, et
+# ils ont eu Tom.
+# Partie lien (T-022) : Carl « l'a élevé », en plus des parents de naissance, et aussi « mari de
+# votre mère » ; Bob reste le père de Léo ; Tom est le demi-frère de Léo par leur mère, jamais
+# « frère » bien que Carl les ait élevés tous les deux (PAR-06). Chaque lien attendu est ramené à
+# sa structure et comparé à la présentation calculée. Reste : les mots (T-026, T-027).
+id: CL-FAM-02
+titre: Beau-parent qui a élevé l'enfant
+couverture:
+  teste: [lien]
+  reste: [T-026, T-027]
+arbre:
+  personnes: [ana/F, bob/M, carl/M, leo/M, tom/M]
+  unions:
+    - conjoints: [ana, bob]
+      debut: { qualificatif: exacte, date: "1995" }
+      fin: { qualificatif: exacte, date: "2000" }
+      motif: divorce
+    - conjoints: [ana, carl]
+      debut: { qualificatif: exacte, date: "2002" }
+  filiations:
+    - { parents: [ana, bob], enfant: leo }
+    - { parents: [ana, carl], enfant: tom }
+    - { parents: [carl], enfant: leo, type: a_eleve }
+attendu:
+  liens:
+    - de: leo
+      vers: carl
+      fr: "l'a élevé"
+      en: "raised him"
+      aussi:
+        - { fr: "mari de votre mère", en: "your mother's husband" }
+    - { de: leo, vers: bob, fr: "père", en: "father", aussi: [] }
+    - {
+        de: leo,
+        vers: tom,
+        fr: "demi-frère, même mère",
+        en: "half-brother, same mother",
+        aussi: [],
+      }

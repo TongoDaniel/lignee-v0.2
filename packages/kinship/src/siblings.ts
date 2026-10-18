@@ -2,7 +2,7 @@
 // question 1) : frère, demi-frère par le père ou par la mère, « frère ou demi-frère » tant qu'un
 // parent n'est pas précisé, enfant du conjoint d'un parent. Structure sans mots : les mots
 // français et anglais sont T-026 et T-027, l'alliance nommée T-021, les liens non biologiques et
-// la certitude affichée T-022. Règles : ADR 0017.
+// la certitude affichée T-022 (`presentation.ts`). Règles : ADR 0017.
 //
 // Le calcul lit les parents de A et de B dans le graphe du lecteur, déjà filtré : un parent
 // masqué est un parent jamais saisi, et ne laisse aucun indice (PAR-09).
