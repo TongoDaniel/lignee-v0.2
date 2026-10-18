@@ -65,8 +65,14 @@ function observeStructures(data: TreeData) {
       });
     }
   }
-  const polygamous = [...unionsOf.values()].filter(
-    (own) => own.filter((union) => union.simultaneity === 'simultaneous').length >= 2,
+  // Polygamie : une personne dont deux unions sont dites simultanées (ADR 0012).
+  const unionsWith = (id: Id) => new Set((unionsOf.get(id) ?? []).map((union) => union.id));
+  const polygamous = [...unionsOf.keys()].filter((personId) =>
+    data.simultaneityAnswers.some(
+      (answer) =>
+        answer.simultaneity === 'simultaneous' &&
+        answer.unionIds.every((unionId) => unionsWith(personId).has(unionId)),
+    ),
   ).length;
   const unknownParent = new Set(
     data.parentCandidates
@@ -118,7 +124,9 @@ describe('générateur d’arbres', () => {
       }),
       { numRuns: 200 },
     );
-  });
+    // 0,5 s seul ; le délai par défaut (5 s) ne suffit pas quand les autres propriétés tournent
+    // en parallèle.
+  }, 60_000);
 
   it('un arbre type est une copie : le modifier ne change pas celui des tests suivants', () => {
     const first = referenceTree(100);

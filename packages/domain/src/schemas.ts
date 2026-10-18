@@ -8,7 +8,7 @@ import { fuzzyDateSchema } from './fuzzy-date';
 import { nameSchema, personRecordSchema, personSchema } from './person';
 import { placeSchema, toPlaceSchema, usageNameSchema } from './place';
 import { treeSchema } from './tree';
-import { unionSchema } from './union';
+import { simultaneityAnswerSchema, unionSchema } from './union';
 import { visibilityRuleSchema } from './visibility';
 
 export const modelSchemas = {
@@ -17,6 +17,7 @@ export const modelSchemas = {
   Name: nameSchema,
   PersonRecord: personRecordSchema,
   Union: unionSchema,
+  SimultaneityAnswer: simultaneityAnswerSchema,
   Filiation: filiationSchema,
   ParentCandidate: parentCandidateSchema,
   Fact: factSchema,

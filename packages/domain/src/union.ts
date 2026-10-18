@@ -26,8 +26,8 @@ export const declaredOptionSchema = z.enum(['monogamy', 'polygamy']);
 export type DeclaredOption = z.infer<typeof declaredOptionSchema>;
 
 /**
- * Simultanéité saisie (UNI-08). Elle se déduit des dates ; sans dates, la réponse donnée à la
- * question unique est gardée ici, modifiable.
+ * Deux unions d'une même personne, simultanées ou successives (UNI-08). Se déduit des dates ;
+ * sinon, la réponse à la question est gardée par paire d'unions (`simultaneityAnswerSchema`).
  */
 export const unionSimultaneitySchema = z.enum(['simultaneous', 'successive']);
 export type UnionSimultaneity = z.infer<typeof unionSimultaneitySchema>;
@@ -56,7 +56,6 @@ export const unionSchema = z
     declaredOption: declaredOptionSchema.optional(),
     placeId: idSchema.optional(),
     notes: textSchema.optional(),
-    simultaneity: unionSimultaneitySchema.optional(),
   })
   .refine((union) => union.spouses[0].personId !== union.spouses[1].personId, {
     message: 'A union links two different people',
@@ -64,3 +63,23 @@ export const unionSchema = z
   });
 export type Union = z.infer<typeof unionSchema>;
 export type UnionInput = z.input<typeof unionSchema>;
+
+/**
+ * Réponse gardée pour une paire d'unions qui ont un conjoint en commun (UNI-08, ADR 0012) :
+ * simultanées ou successives. La paire est rangée (plus petit identifiant d'abord), si bien
+ * qu'il n'y a qu'une réponse par paire ; elle se modifie en remplaçant `simultaneity`. Que les
+ * deux unions aient ou non un conjoint en commun se vérifie sur l'arbre (`treeDataIssues`,
+ * synchronisation). Sans règle de visibilité propre : visible de qui voit les deux unions.
+ */
+export const simultaneityAnswerSchema = z
+  .strictObject({
+    id: idSchema,
+    treeId: idSchema,
+    unionIds: z.tuple([idSchema, idSchema]),
+    simultaneity: unionSimultaneitySchema,
+  })
+  .refine((answer) => answer.unionIds[0] < answer.unionIds[1], {
+    message: 'A pair holds two different unions, smallest id first',
+    path: ['unionIds'],
+  });
+export type SimultaneityAnswer = z.infer<typeof simultaneityAnswerSchema>;
