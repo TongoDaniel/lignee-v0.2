@@ -1,12 +1,13 @@
 # Noms générés. Partie disposition (T-008, packages/layout) : Amina est au centre de ses deux
 # unions simultanées, ses maris en tête de la colonne de leurs enfants, dans l'ordre de ses rangs ;
-# aucun contrôle de cohérence ne signale rien (T-007), et la même famille genres inversés donne la même disposition. Reste :
-# placement (T-012), revue visuelle (T-017).
+# aucun contrôle de cohérence ne signale rien (T-007), et la même famille genres inversés donne
+# la même disposition. Placement (T-012) : ses maris sur la demi-rangée, chacun au-dessus de son
+# enfant. Reste : revue visuelle (T-017).
 id: CL-POL-14
 titre: Femme avec plusieurs maris en même temps (polyandrie)
 couverture:
   teste: [disposition]
-  reste: [T-012, T-017]
+  reste: [T-017]
 arbre:
   personnes: [amina/F, karim/M, yves/M, sali/F, tom/M]
   unions:
@@ -29,3 +30,11 @@ attendu:
       foyers:
         - { conjoint: karim, enfants: [sali], en_cours: true, vers_centre: true }
         - { conjoint: yves, enfants: [tom], en_cours: true, vers_centre: true }
+  disposition:
+    lignes:
+      "0": [amina]
+      "0.5": [karim, yves]
+      "1": [sali, tom]
+    replis:
+      - { famille: [amina, karim], replie: false, enfants: 1 }
+      - { famille: [amina, yves], replie: false, enfants: 1 }

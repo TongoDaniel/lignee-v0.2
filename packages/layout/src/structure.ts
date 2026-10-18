@@ -456,6 +456,24 @@ class StructureBuilder {
       ),
     );
 
+    // Pour le placement (T-012) : simultanéité et ordre des unions de chaque personne, sur toutes
+    // ses unions, quel que soit le conjoint qui porte chaque foyer.
+    const simultaneousSpouses = new Set<Id>();
+    const unionOrderOf = new Map<Id, readonly Id[]>();
+    for (const row of rowNumbers) {
+      for (const id of generations.rows.get(row) ?? []) {
+        const unions = index.unionsOf.get(id) ?? [];
+        if (unions.length < 2) continue;
+        unionOrderOf.set(
+          id,
+          orderUnions(id, unions).map((union) => union.id),
+        );
+        if (this.relations(id, unions).some((relation) => relation.simultaneous)) {
+          simultaneousSpouses.add(id);
+        }
+      }
+    }
+
     return {
       ...generations,
       units,
@@ -464,6 +482,8 @@ class StructureBuilder {
       placementOf,
       crossLinks,
       simultaneityPending,
+      simultaneousSpouses,
+      unionOrderOf,
     };
   }
 }

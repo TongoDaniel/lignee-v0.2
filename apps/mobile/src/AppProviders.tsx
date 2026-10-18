@@ -1,10 +1,11 @@
 // Fournisseurs communs à toute l'app : zones sûres, thème, langue, thème de navigation.
 import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from 'expo-router';
 import type { ReactNode } from 'react';
+import { useTheme } from '@lignee/ui';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { I18nProvider, type I18nProviderProps } from './i18n/I18nProvider';
-import { ThemeProvider, useTheme, type ThemeProviderProps } from './theme/ThemeProvider';
+import { ThemeProvider, type ThemeProviderProps } from './theme/ThemeProvider';
 
 export interface AppProvidersProps {
   readonly children: ReactNode;
