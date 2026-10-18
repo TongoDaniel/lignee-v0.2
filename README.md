@@ -59,6 +59,8 @@ corepack pnpm check:forbidden-dependencies  # CON-12 : aucune bibliothèque de r
 
 Pour un seul paquet : `corepack pnpm --filter @lignee/kinship test`.
 
+Textes d'interface : jamais en dur (ACC-04). ESLint refuse le texte dans le JSX de `apps/mobile`, `apps/web`, `apps/admin` et `packages/ui` (règle `i18next/no-literal-string`) ; pour ajouter un texte, voir [packages/i18n/README.md](packages/i18n/README.md).
+
 ### Environnement local
 
 PostgreSQL 18 (avec pg_trgm, unaccent et fuzzystrmatch) et MinIO à la place de Cloudflare R2 tournent dans Docker Compose (`compose.yaml`) ; l'API et le worker s'y ajoutent avec le profil `app`. Mode d'emploi, ports et remise à zéro : [docs/runbooks/environnement-local.md](docs/runbooks/environnement-local.md).
