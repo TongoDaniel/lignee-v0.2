@@ -3,10 +3,10 @@
 // Jour et Nuit, texte agrandi.
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
-import { AccessibilityInfo, Animated, Text } from 'react-native';
+import { AccessibilityInfo, Animated, Platform, Text } from 'react-native';
 
 import { Chip } from '../src/components/Chip';
-import { Sheet } from '../src/components/Sheet';
+import { Sheet, sheetPanHandlers } from '../src/components/Sheet';
 import { Toast } from '../src/components/Toast';
 import { ThemeProvider } from '../src/theme/ThemeProvider';
 import { motion, radius, themes } from '../src/tokens';
@@ -15,6 +15,7 @@ import {
   expectScalableTexts,
   flat,
   isHost,
+  numeric,
   renderThemed,
   THEME_CASES,
   touchTargetFor,
@@ -100,6 +101,33 @@ describe.each(THEME_CASES)('Toast ($scheme, mode Aînés : $seniorMode)', (theme
       );
     },
   );
+});
+
+describe('Toast : annonce selon le système', () => {
+  it('Android : pas d’annonce explicite, la région vivante suffit (pas de double lecture)', () => {
+    jest.replaceProperty(Platform, 'OS', 'android');
+    // Le préréglage de React Native en fait déjà un faux : on efface ses appels précédents.
+    const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility');
+    announce.mockClear();
+    renderThemed(
+      <Toast message="Invitation envoyée." visible onHide={noop} closeLabel="Fermer" testID="t" />,
+      { scheme: 'jour', seniorMode: false },
+    );
+    expect(announce).not.toHaveBeenCalled();
+    expect(screen.getByTestId('t').props.accessibilityLiveRegion).toBe('polite');
+  });
+
+  it('iOS : annonce explicite du message', () => {
+    jest.replaceProperty(Platform, 'OS', 'ios');
+    // Le préréglage de React Native en fait déjà un faux : on efface ses appels précédents.
+    const announce = jest.spyOn(AccessibilityInfo, 'announceForAccessibility');
+    announce.mockClear();
+    renderThemed(
+      <Toast message="Invitation envoyée." visible onHide={noop} closeLabel="Fermer" />,
+      { scheme: 'jour', seniorMode: false },
+    );
+    expect(announce).toHaveBeenCalledWith('Invitation envoyée.');
+  });
 });
 
 describe('Toast : persistance et animations réduites', () => {
@@ -246,6 +274,62 @@ describe('Feuille : mouvement', () => {
     expect(open(true)).toEqual([
       expect.objectContaining({ toValue: 1, duration: motion.duration.fonduReduit }),
     ]);
+  });
+
+  describe('geste de la poignée', () => {
+    function gesture(dy: number) {
+      return { dy, dx: 0 } as never;
+    }
+    function setup(stillVisible: boolean) {
+      jest.useFakeTimers();
+      const drag = new Animated.Value(0);
+      const onClose = jest.fn();
+      const handlers = sheetPanHandlers({
+        drag,
+        getHeight: () => 400,
+        isVisible: () => stillVisible,
+        onClose,
+      });
+      const timing = jest.spyOn(Animated, 'timing');
+      return { drag, onClose, handlers, timing };
+    }
+
+    it('suit le doigt vers le bas, jamais vers le haut', () => {
+      const { drag, handlers } = setup(true);
+      handlers.onPanResponderMove(null, gesture(80));
+      expect(numeric(drag)).toBe(80);
+      handlers.onPanResponderMove(null, gesture(-30));
+      expect(numeric(drag)).toBe(0);
+    });
+
+    it('relâchée avant le quart, elle se repose sans se fermer', () => {
+      const { handlers, onClose, timing } = setup(true);
+      handlers.onPanResponderRelease(null, gesture(90));
+      expect(onClose).not.toHaveBeenCalled();
+      expect(timing).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ toValue: 0 }),
+      );
+    });
+
+    it('relâchée au-delà du quart, elle demande sa fermeture', () => {
+      const { handlers, onClose, timing } = setup(false);
+      handlers.onPanResponderRelease(null, gesture(150));
+      jest.runAllTimers();
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(timing).not.toHaveBeenCalled();
+    });
+
+    it('si l’écran ne la ferme pas, elle se repose au lieu de rester à mi-course', () => {
+      const { handlers, onClose, timing } = setup(true);
+      handlers.onPanResponderRelease(null, gesture(150));
+      expect(onClose).toHaveBeenCalledTimes(1);
+      jest.runAllTimers();
+      expect(timing).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ toValue: 0 }),
+      );
+    });
   });
 
   it('fermée, elle ne rend rien', () => {

@@ -14,21 +14,39 @@ import { usePressScale } from './motion';
 /** Teinte douce de la vignette, selon le type de contenu. */
 export type CardThumbnailTone = 'celebrate' | 'memory' | 'documents' | 'kinship';
 
-export interface CardProps {
+interface CardContent {
   /** Titre de la carte (`titre-carte`), déjà traduit. */
   readonly title?: string;
   /** Texte secondaire (`secondaire`, en `texte-secondaire`). */
   readonly text?: string;
   /** Vignette de 52 à gauche : une icône sur la teinte douce du type de contenu. */
   readonly thumbnail?: { readonly icon: IconName; readonly tone: CardThumbnailTone };
-  /** Toute la carte s'ouvre : elle devient un bouton. */
-  readonly onPress?: () => void;
-  /** Libellé pour le lecteur d'écran si la carte se touche ; par défaut titre et texte. */
-  readonly accessibilityLabel?: string;
-  readonly accessibilityHint?: string;
-  readonly children?: ReactNode;
   readonly testID?: string;
 }
+
+/** Carte posée : son contenu peut avoir ses propres boutons, champs ou interrupteurs. */
+interface StaticCardProps extends CardContent {
+  readonly onPress?: undefined;
+  readonly accessibilityLabel?: undefined;
+  readonly accessibilityHint?: undefined;
+  readonly children?: ReactNode;
+}
+
+/**
+ * Carte qui s'ouvre : toute la carte est un seul bouton, lu d'un bloc par le lecteur d'écran.
+ * Elle n'a donc pas d'enfants : un bouton placé dedans serait inaccessible (le lecteur d'écran
+ * ne lit que le bouton englobant) et deux zones touchables se chevaucheraient. Pour une carte
+ * avec ses propres actions, gardez-la posée et mettez un Bouton dedans.
+ */
+interface PressableCardProps extends CardContent {
+  readonly onPress: () => void;
+  /** Libellé pour le lecteur d'écran ; par défaut titre et texte. */
+  readonly accessibilityLabel?: string;
+  readonly accessibilityHint?: string;
+  readonly children?: never;
+}
+
+export type CardProps = StaticCardProps | PressableCardProps;
 
 function thumbnailColors(tone: CardThumbnailTone, { colors }: UiTheme) {
   switch (tone) {
@@ -100,7 +118,7 @@ export function Card({
           </View>
         </View>
       )}
-      {children}
+      {onPress === undefined ? children : null}
     </Animated.View>
   );
 

@@ -85,6 +85,10 @@ describe.each(THEME_CASES)('Champ ($scheme, mode Aînés : $seniorMode)', (theme
     );
     expect(flat(box().props.style).borderColor).toBe(colors.erreur);
     const alert = screen.getByRole('alert');
+    // Message en 14, graisse 400 (.lg-champ__aide), pas en graisse du libellé.
+    expect(
+      flat(screen.getByText('Indiquez un prénom pour enregistrer la fiche.').props.style),
+    ).toMatchObject({ fontFamily: typography.corps.fontFamily });
     expect(alert).toHaveTextContent('Indiquez un prénom pour enregistrer la fiche.');
     expect(alert.findAll((n) => n.props.viewBox === '0 0 24 24').length).toBe(1);
     expect(screen.getByLabelText('Prénom').props.accessibilityHint).toBe(

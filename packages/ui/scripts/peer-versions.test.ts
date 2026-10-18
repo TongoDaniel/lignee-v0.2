@@ -19,6 +19,21 @@ function readPackage(path: string): PackageJson {
   return JSON.parse(readFileSync(path, 'utf8')) as PackageJson;
 }
 
+/**
+ * Version exacte dans une plage « ^x.y.z » (règle de npm : même majeure, ou même mineure quand la
+ * majeure est 0, et au moins la version de la plage).
+ */
+export function satisfiesCaret(version: string, range: string): boolean {
+  const parse = (v: string) => v.replace(/^\^/, '').split('.').map(Number);
+  if (!range.startsWith('^')) return false;
+  const [major = 0, minor = 0, patch = 0] = parse(version);
+  const [rMajor = 0, rMinor = 0, rPatch = 0] = parse(range);
+  if (major !== rMajor) return false;
+  if (rMajor === 0 && minor !== rMinor) return false;
+  if (minor !== rMinor) return minor > rMinor;
+  return patch >= rPatch;
+}
+
 const ui = readPackage(join(packageRoot, 'package.json'));
 const mobile = readPackage(join(repoRoot, 'apps', 'mobile', 'package.json'));
 
@@ -33,6 +48,21 @@ describe('dépendances partagées avec l’app', () => {
       'react-native-svg',
     ]);
     expect(ui.dependencies ?? {}).toEqual({});
+  });
+
+  it.each(peers)('%s : plage étroite « ^ », que la version de l’app respecte', (name) => {
+    const range = ui.peerDependencies?.[name] ?? '';
+    expect(range).toMatch(/^\^\d+\.\d+\.\d+$/);
+    expect(satisfiesCaret(mobile.dependencies?.[name] ?? '', range)).toBe(true);
+  });
+
+  it('lit les plages « ^ » comme npm', () => {
+    expect(satisfiesCaret('0.86.3', '^0.86.0')).toBe(true);
+    expect(satisfiesCaret('0.87.0', '^0.86.0')).toBe(false);
+    expect(satisfiesCaret('19.3.0', '^19.2.0')).toBe(true);
+    expect(satisfiesCaret('19.1.9', '^19.2.0')).toBe(false);
+    expect(satisfiesCaret('20.0.0', '^19.2.0')).toBe(false);
+    expect(satisfiesCaret('19.2.0', '*')).toBe(false);
   });
 
   it.each(peers)('%s : même version pour les tests de @lignee/ui que dans l’app', (name) => {

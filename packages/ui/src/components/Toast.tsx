@@ -2,11 +2,20 @@
 // dorée. Apparition 300 ms (courbe de sortie), présence 2,5 s, disparition 300 ms. En mode Aînés,
 // ou si `persistent`, il reste jusqu'à ce que la personne le ferme (09-accessibilite.md). Le
 // message dit le résultat (« Lucienne a rejoint l'arbre »). Pas de toast pour une erreur.
-// Annoncé au lecteur d'écran (rôle « status », région vivante polie). Quand le téléphone demande de
+// Annoncé au lecteur d'écran : rôle « status » et région vivante polie (Android), annonce
+// explicite sur iOS. Quand le téléphone demande de
 // réduire les animations, il apparaît et disparaît en fondu de 150 ms, sans glisser.
 // Le composant dessine la pilule ; l'écran la place (en bas, au-dessus de la barre d'onglets).
 import { useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  AccessibilityInfo,
+  Animated,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import { Icon } from '../icons/Icon';
 import { motion, space } from '../tokens';
@@ -60,7 +69,9 @@ export function Toast({
   useEffect(() => {
     if (!wanted) return;
     setShown(true);
-    AccessibilityInfo.announceForAccessibility(message);
+    // Android annonce déjà le toast par sa région vivante (accessibilityLiveRegion) : l'annonce
+    // explicite ne sert qu'à iOS, sinon TalkBack le lirait deux fois.
+    if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(message);
     const enter = timing(motion.duration.toastApparition, 'sortie', reduceMotion);
     const appear = Animated.timing(progress, {
       toValue: 1,

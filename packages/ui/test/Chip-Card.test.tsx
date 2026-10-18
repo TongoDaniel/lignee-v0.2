@@ -2,6 +2,7 @@
 // texte agrandi sans troncature, ombre et rayon de la carte.
 import { fireEvent, screen } from '@testing-library/react-native';
 
+import { Button } from '../src/components/Button';
 import { Card, type CardThumbnailTone } from '../src/components/Card';
 import { Chip, type ChipTone } from '../src/components/Chip';
 import { metrics } from '../src/components/metrics';
@@ -25,6 +26,7 @@ const TONES: readonly ChipTone[] = [
   'documents',
   'neutral',
 ];
+const noop = () => undefined;
 const THUMBNAILS: readonly CardThumbnailTone[] = ['celebrate', 'memory', 'documents', 'kinship'];
 
 describe.each(THEME_CASES)('Puce ($scheme, mode Aînés : $seniorMode)', (theme) => {
@@ -100,6 +102,29 @@ describe.each(THEME_CASES)('Carte ($scheme, mode Aînés : $seniorMode)', (theme
     expect(touchHeight(button)).toBeGreaterThanOrEqual(touchTargetFor(theme));
     fireEvent.press(button);
     expect(onPress).toHaveBeenCalledTimes(1);
+  });
+
+  it('qui s’ouvre : pas de contenu touchable dedans (refusé au typage, ignoré au rendu)', () => {
+    renderThemed(
+      // @ts-expect-error -- une carte qui s'ouvre n'a pas d'enfants : un bouton dedans serait
+      // inaccessible au lecteur d'écran, qui ne lit que le bouton englobant.
+      <Card title="Album de famille" onPress={noop}>
+        <Button label="Partager" onPress={noop} />
+      </Card>,
+      theme,
+    );
+    expect(screen.getAllByRole('button')).toHaveLength(1);
+    expect(screen.queryByText('Partager')).toBeNull();
+  });
+
+  it('posée : son contenu garde ses propres boutons', () => {
+    renderThemed(
+      <Card title="Album de famille">
+        <Button label="Partager" onPress={noop} />
+      </Card>,
+      theme,
+    );
+    expect(screen.getByRole('button', { name: 'Partager' })).toBeOnTheScreen();
   });
 
   it('sans onPress : pas de bouton', () => {

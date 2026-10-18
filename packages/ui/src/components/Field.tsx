@@ -80,6 +80,8 @@ export function Field({
   const showMic = voiceInput !== undefined && (voiceInput.enabled ?? seniorMode) && !disabled;
   // Saisie en Instrument Sans 17, graisse 500.
   const inputStyle = { ...typography.corps, fontFamily: typography.etiquette.fontFamily };
+  // Message sous le champ : 14 comme le libellé, mais en graisse 400 (.lg-champ__aide).
+  const messageStyle = { ...typography.etiquette, fontFamily: typography.corps.fontFamily };
 
   return (
     <View testID={testID} style={[styles.container, { gap: space[2] }]}>
@@ -161,9 +163,7 @@ export function Field({
           accessible
         >
           <Icon name="alerte" size={size.iconeS} color={colors.erreur} />
-          <Text style={[typography.etiquette, styles.messageText, { color: colors.erreur }]}>
-            {error}
-          </Text>
+          <Text style={[messageStyle, styles.messageText, { color: colors.erreur }]}>{error}</Text>
         </View>
       )}
     </View>

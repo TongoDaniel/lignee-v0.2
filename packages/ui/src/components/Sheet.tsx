@@ -3,7 +3,9 @@
 // Elle monte en 360 ms, courbe de sortie, et suit le doigt quand on la tire par la poignée ;
 // relâchée, elle se pose avec la courbe de sortie, ou se ferme si on l'a assez tirée. Elle se ferme
 // aussi en touchant le voile, avec le bouton retour d'Android et avec le geste « échappement » du
-// lecteur d'écran (la feuille est modale : le voile n'est pas proposé au lecteur d'écran).
+// lecteur d'écran. Sur iOS, la feuille est modale (accessibilityViewIsModal) : VoiceOver ne propose
+// pas le voile, d'où le geste « échappement ». Sur Android, TalkBack atteint le voile, un bouton
+// nommé par `closeLabel` (« Fermer »).
 // Quand le téléphone demande de réduire les animations, elle apparaît et disparaît en fondu de
 // 150 ms, sans glisser.
 // Le contenu défile : à 200 % de texte, rien n'est coupé.
@@ -12,6 +14,7 @@ import {
   Animated,
   Modal,
   PanResponder,
+  type PanResponderGestureState,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -41,6 +44,49 @@ export interface SheetProps {
   /** Contenu : champs, choix, et une action principale (Bouton). */
   readonly children: ReactNode;
   readonly testID?: string;
+}
+
+/** Ce dont le geste de la poignée a besoin ; séparé du composant pour être testé seul. */
+export interface SheetPanOptions {
+  /** Déplacement du doigt vers le bas, en dp. */
+  readonly drag: Animated.Value;
+  readonly getHeight: () => number;
+  readonly isVisible: () => boolean;
+  readonly onClose: () => void;
+}
+
+/**
+ * Geste de la poignée : la feuille suit le doigt vers le bas ; relâchée au-delà d'un quart de sa
+ * hauteur, elle demande sa fermeture, sinon elle se repose. Si l'écran ne la ferme pas (il garde
+ * `visible` à vrai après `onClose`), elle se repose aussi, au lieu de rester à mi-course.
+ */
+export function sheetPanHandlers({ drag, getHeight, isVisible, onClose }: SheetPanOptions) {
+  const settle = (): void => {
+    Animated.timing(drag, {
+      toValue: 0,
+      duration: motion.duration.transition,
+      easing: curve('sortie'),
+      useNativeDriver: true,
+    }).start();
+  };
+  return {
+    onMoveShouldSetPanResponder: (_event: unknown, gesture: PanResponderGestureState) =>
+      gesture.dy > Math.abs(gesture.dx),
+    onPanResponderMove: (_event: unknown, gesture: PanResponderGestureState) => {
+      drag.setValue(Math.max(0, gesture.dy));
+    },
+    onPanResponderRelease: (_event: unknown, gesture: PanResponderGestureState) => {
+      if (gesture.dy <= getHeight() * metrics.sheet.dismissRatio) {
+        settle();
+        return;
+      }
+      onClose();
+      // L'écran met à jour `visible` au rendu suivant : on regarde après.
+      setTimeout(() => {
+        if (isVisible()) settle();
+      }, 0);
+    },
+  };
 }
 
 export function Sheet({
@@ -87,25 +133,22 @@ export function Sheet({
     };
   }, [visible, reduceMotion, progress, drag]);
 
+  const visibleRef = useRef(visible);
+  useEffect(() => {
+    visibleRef.current = visible;
+  }, [visible]);
+
   const pan = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: (_event, gesture) => gesture.dy > Math.abs(gesture.dx),
-      onPanResponderMove: (_event, gesture) => {
-        drag.setValue(Math.max(0, gesture.dy));
-      },
-      onPanResponderRelease: (_event, gesture) => {
-        if (gesture.dy > sheetHeight.current * metrics.sheet.dismissRatio) {
+    PanResponder.create(
+      sheetPanHandlers({
+        drag,
+        getHeight: () => sheetHeight.current,
+        isVisible: () => visibleRef.current,
+        onClose: () => {
           onCloseRef.current();
-          return;
-        }
-        Animated.timing(drag, {
-          toValue: 0,
-          duration: motion.duration.transition,
-          easing: curve('sortie'),
-          useNativeDriver: true,
-        }).start();
-      },
-    }),
+        },
+      }),
+    ),
   ).current;
 
   if (!mounted) return null;
