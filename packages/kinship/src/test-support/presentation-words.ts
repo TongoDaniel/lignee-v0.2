@@ -33,6 +33,12 @@ export type PresentedWordsMeaning =
       kind: AllianceKind;
       gender: Gendered;
       via: Gendered[];
+      /**
+       * Filiations non biologiques du chemin (PAR-06) : vide pour tous les mots connus, qui
+       * nomment des parents de naissance (« mari de votre mère ») ; « mari de votre mère
+       * adoptive » n'a pas encore de mots (T-026, T-027).
+       */
+      nonBirthTypes: FiliationType[];
       certainty: Certainty;
     }
   | {
@@ -239,17 +245,19 @@ export function presentedMeaningOfWords(frWords: string, enWords: string): Prese
   if (otherAlliance !== undefined) {
     check(fr, en, otherAlliance.en);
     const { gender, via } = otherAlliance;
-    return { category: 'alliance', kind: 'other', gender, via, certainty };
+    return { category: 'alliance', kind: 'other', gender, via, nonBirthTypes: [], certainty };
   }
   const spouse = SPOUSES[fr];
   if (spouse !== undefined) {
     check(fr, en, spouse.en);
-    return { category: 'alliance', kind: 'spouse', gender: spouse.gender, via: [], certainty };
+    const { gender } = spouse;
+    return { category: 'alliance', kind: 'spouse', gender, via: [], nonBirthTypes: [], certainty };
   }
   try {
     return { category: 'sibling', kind: 'birth', ...siblingMeaningOfWords(fr, en), certainty };
   } catch {
-    return { category: 'alliance', ...allianceMeaningOfWords(fr, en), certainty };
+    const meaning = allianceMeaningOfWords(fr, en);
+    return { category: 'alliance', ...meaning, nonBirthTypes: [], certainty };
   }
 }
 
@@ -289,7 +297,14 @@ export function presentedMeaningOfLink(
     });
     return meaning === undefined
       ? { category: 'unnamed', link }
-      : { category: 'alliance', ...meaning, certainty: link.certainty };
+      : {
+          category: 'alliance',
+          ...meaning,
+          // Comparé aux mots : une alliance par une mère adoptive n'est pas celle par la mère de
+          // naissance (PAR-06).
+          nonBirthTypes: link.nonBirthTypes,
+          certainty: link.certainty,
+        };
   }
   const [segment] = first.segments;
   if (segment?.kind !== 'blood') return { category: 'unnamed', link };
