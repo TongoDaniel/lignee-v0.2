@@ -43,6 +43,7 @@ function comparable(layout: TreeLayout) {
     families: [...layout.families.values()],
     blocks: layout.blocks,
     crossings: layout.crossings,
+    links: layout.links,
   };
 }
 

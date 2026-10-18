@@ -4,6 +4,7 @@
 export * from './arbitraries';
 export * from './fixtures';
 export * from './generated-names';
+export * from './probability';
 export * from './random';
 export * from './scenario';
 export * from './scenario-format';

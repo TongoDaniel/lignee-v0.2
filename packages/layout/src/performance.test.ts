@@ -1,4 +1,4 @@
-// Mesure des étapes 1 et 2, puis 1 à 5 (TRD, « Disposition de l'arbre », Budget : moins de 100 ms de calcul
+// Mesure des étapes 1 et 2, puis 1 à 6 (TRD, « Disposition de l'arbre », Budget : moins de 100 ms de calcul
 // pour 500 personnes visibles sur l'Android de référence). Ici, sur la machine qui lance les
 // tests : la médiane de plusieurs calculs, après un calcul de chauffe, comparée au garde-fou
 // budget × facteur (README racine, « Tests de performance »). La mesure sur l'Android de
@@ -7,6 +7,7 @@
 import { generateTree, medianTime, referenceTree, reportBudget } from '@lignee/domain/test-support';
 import { describe, expect, it } from 'vitest';
 
+import { findDescendants, layoutDescendants } from './descendants';
 import { buildTreeStructure } from './structure';
 import { largestFamily } from './test-support/view-arbitrary';
 import { createTreeLayoutCache, layoutPrepared, layoutTree, prepareTree } from './tree-layout';
@@ -22,7 +23,7 @@ const VISIBLE_500_BUDGET_MS = 100;
 const REFERENCE_5000_BUDGET_MS = 300;
 /** Garde-fou du ticket T-012 : arbre de 5 000 personnes tout déplié (aucun budget du cahier). */
 const UNFOLDED_5000_BUDGET_MS = 1000;
-/** Déplier un foyer : étapes 3 à 5 seules, dans le budget du TRD pour 500 visibles. */
+/** Déplier un foyer : étapes 3 à 6 seules, dans le budget du TRD pour 500 visibles. */
 const UNFOLD_STEP_BUDGET_MS = 100;
 
 /** Médiane d'un calcul quelconque, après chauffe. */
@@ -100,15 +101,16 @@ describe('budget de calcul des générations et des foyers', { timeout: 60_000 }
   });
 });
 
-// Étapes 1 à 5 (T-012) : générations, foyers, ordre, placement et repli, mêmes règles de mesure.
-describe('budget de calcul de la disposition complète (étapes 1 à 5)', { timeout: 120_000 }, () => {
+// Étapes 1 à 6 (T-012, T-019) : générations, foyers, ordre, placement, repli et liens, mêmes
+// règles de mesure.
+describe('budget de calcul de la disposition complète (étapes 1 à 6)', { timeout: 120_000 }, () => {
   it('500 personnes dessinées ou plus, tout déplié : moins de 100 ms (garde-fou × facteur)', () => {
     const { tree, centerId, visible } = connectedTree(600, 500);
     const folds = unfoldAll(tree, centerId);
     expect(layoutTree(tree, centerId, { folds }).people.size).toBe(visible);
     expect(visible).toBeGreaterThanOrEqual(500);
     const report = reportBudget(
-      `disposition étapes 1 à 5, ${String(visible)} personnes dessinées (médiane)`,
+      `disposition étapes 1 à 6, ${String(visible)} personnes dessinées (médiane)`,
       medianOf(() => layoutTree(tree, centerId, { folds }), 7),
       VISIBLE_500_BUDGET_MS,
     );
@@ -118,7 +120,7 @@ describe('budget de calcul de la disposition complète (étapes 1 à 5)', { time
   it('arbre de 5 000 personnes : repli par défaut moins de 300 ms, tout déplié moins de 1 s (garde-fous × facteur)', () => {
     const dense = connectedTree(5000, 3000);
     const byDefault = reportBudget(
-      `disposition étapes 1 à 5, arbre dense 5 000, repli par défaut (médiane)`,
+      `disposition étapes 1 à 6, arbre dense 5 000, repli par défaut (médiane)`,
       medianOf(() => layoutTree(dense.tree, dense.centerId)),
       REFERENCE_5000_BUDGET_MS,
     );
@@ -126,7 +128,7 @@ describe('budget de calcul de la disposition complète (étapes 1 à 5)', { time
     const folds = unfoldAll(dense.tree, dense.centerId);
     expect(layoutTree(dense.tree, dense.centerId, { folds }).people.size).toBe(dense.visible);
     const unfolded = reportBudget(
-      `disposition étapes 1 à 5, arbre dense 5 000, tout déplié, ${String(dense.visible)} dessinées (médiane)`,
+      `disposition étapes 1 à 6, arbre dense 5 000, tout déplié, ${String(dense.visible)} dessinées (médiane)`,
       medianOf(() => layoutTree(dense.tree, dense.centerId, { folds }), 3),
       UNFOLDED_5000_BUDGET_MS,
     );
@@ -134,14 +136,14 @@ describe('budget de calcul de la disposition complète (étapes 1 à 5)', { time
     const reference = referenceTree(5000);
     const center = largestFamily(reference)[0] ?? '';
     const referenceReport = reportBudget(
-      'disposition étapes 1 à 5, arbre de référence 5 000, repli par défaut (médiane)',
+      'disposition étapes 1 à 6, arbre de référence 5 000, repli par défaut (médiane)',
       medianOf(() => layoutTree(reference, center)),
       REFERENCE_5000_BUDGET_MS,
     );
     expect(referenceReport.measuredMs).toBeLessThan(referenceReport.ceilingMs);
   });
 
-  it('cache : déplier un foyer d’un arbre de 5 000 personnes ne refait que les étapes 3 à 5', () => {
+  it('cache : déplier un foyer d’un arbre de 5 000 personnes ne refait que les étapes 3 à 6', () => {
     const dense = connectedTree(5000, 3000);
     const cache = createTreeLayoutCache();
     const first = cache.layout(dense.tree, dense.centerId);
@@ -154,11 +156,33 @@ describe('budget de calcul de la disposition complète (étapes 1 à 5)', { time
     cache.layout(dense.tree, dense.centerId, folds);
     expect(cache.lastRecompute).toBe('layout');
     const report = reportBudget(
-      'disposition, déplier un foyer (étapes 3 à 5, arbre dense 5 000, médiane)',
+      'disposition, déplier un foyer (étapes 3 à 6, arbre dense 5 000, médiane)',
       steps3to5,
       UNFOLD_STEP_BUDGET_MS,
     );
     expect(report.measuredMs).toBeLessThan(report.ceilingMs);
     expect(steps3to5).toBeLessThan(all);
+  });
+});
+
+// Vue « descendance » (T-019, ARB-14) : tout est déplié par défaut, liens et renvois compris.
+describe('budget de la vue « descendance »', { timeout: 120_000 }, () => {
+  it('arbre dense de 5 000 personnes, le fondateur qui a la plus grande descendance : moins de 1 s (garde-fou × facteur)', () => {
+    const dense = connectedTree(5000, 3000);
+    // Ancêtre : parmi les premières personnes générées (les fondateurs), celle dont la vue
+    // dessine le plus de personnes.
+    let best = { id: '', size: 0 };
+    for (const person of dense.tree.people.slice(0, 20)) {
+      const size = findDescendants(dense.tree, person.id).people.size;
+      if (size > best.size) best = { id: person.id, size };
+    }
+    expect(best.size).toBeGreaterThan(500);
+    expect(layoutDescendants(dense.tree, best.id).people.size).toBe(best.size);
+    const report = reportBudget(
+      `vue descendance, arbre dense 5 000, ${String(best.size)} dessinées (médiane)`,
+      medianOf(() => layoutDescendants(dense.tree, best.id), 3),
+      UNFOLDED_5000_BUDGET_MS,
+    );
+    expect(report.measuredMs).toBeLessThan(report.ceilingMs);
   });
 });

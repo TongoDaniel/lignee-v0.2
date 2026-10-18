@@ -1,7 +1,6 @@
 // Arbitraire des propriétés de la disposition : un arbre généré et une personne centrale.
-// `treeArbitrary({ rates: 'varied' })` tire chaque probabilité entre 0 et un plafond, et
-// fast-check y favorise les bornes : beaucoup d'arbres sortent sans union ni filiation. Ici, les
-// probabilités qui font les cas de T-008 (mariage, polygamie, enfant de mère non précisée,
+// `treeArbitrary({ rates: 'varied' })` tire chaque probabilité uniformément entre 0 et un
+// plafond : certains arbres sortent avec peu d'unions ou de filiations. Ici, les probabilités qui font les cas de T-008 (mariage, polygamie, enfant de mère non précisée,
 // remariage, lévirat, sororat, implexe, adoption) restent hautes, et la personne centrale est
 // prise dans la plus grande famille reliée de l'arbre. Une part des tirages garde l'arbitraire
 // de packages/domain, pour les formes extrêmes. Réservé aux tests.
@@ -10,13 +9,13 @@ import {
   DEFAULT_TREE_GENERATOR_RATES,
   deterministicIds,
   generateTree,
+  probabilityArbitrary,
   treeArbitrary,
   type GeneratedTree,
 } from '@lignee/domain/test-support';
 import fc from 'fast-check';
 
-const rate = (min: number, max: number) =>
-  fc.double({ min, max, noNaN: true, noDefaultInfinity: true });
+const rate = (min: number, max: number) => probabilityArbitrary(min, max);
 
 /** Arbres riches en polygamie, unions successives et parents non précisés. */
 export function familyTreeArbitrary(maxSize = 150): fc.Arbitrary<GeneratedTree> {

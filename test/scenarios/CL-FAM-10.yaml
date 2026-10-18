@@ -1,0 +1,68 @@
+# Noms générés. Partie disposition (T-019, packages/layout) : Gaston, grand-père paternel de Luc,
+# veuf de Berthe, épouse Nadia, sœur cadette de Mireille, la mère de Luc ; ils ont un fils, Eric.
+# Vu depuis Luc, Nadia est atteinte par deux chemins de même longueur : comme fille de Gérard et
+# Jeanne (rangée -1, celle de sa sœur) et comme épouse de Gaston (rangée -2). Elle garde la rangée
+# la plus proche de Luc (-1, ADR 0013, règle 1) et son union avec Gaston devient un trait long
+# entre les rangées -2 et -1. Le foyer de Gaston et Nadia ne mène pas à Luc : replié par défaut
+# avec son compteur ; déplié, Eric est dessiné sous Gaston, à la rangée de son demi-frère Paul. Le
+# couple de Paul et Mireille est rangé dans la fratrie de Paul : Mireille est reliée à ses parents
+# par un trait vers cette autre place, comme dans toute alliance (ADR 0016, règle 7). Reste : la revue visuelle du trait long (T-017).
+id: CL-FAM-10
+titre: Union entre deux générations
+couverture:
+  teste: [disposition]
+  reste: [T-017]
+arbre:
+  personnes: [gaston/M, berthe/F, gerard/M, jeanne/F, paul/M, mireille/F, nadia/F, eric/M, luc/M]
+  unions:
+    - { conjoints: [gaston, berthe], motif: deces }
+    - { conjoints: [gaston, nadia] }
+    - { conjoints: [gerard, jeanne] }
+    - { conjoints: [paul, mireille] }
+  filiations:
+    - { parents: [gaston, berthe], enfant: paul }
+    - { parents: [gerard, jeanne], enfant: mireille }
+    - { parents: [gerard, jeanne], enfant: nadia }
+    - { parents: [paul, mireille], enfant: luc }
+    - { parents: [gaston, nadia], enfant: eric }
+action:
+  centre: luc
+  deplier:
+    - [gaston, nadia]
+attendu:
+  generations:
+    { luc: 0, paul: -1, mireille: -1, nadia: -1, gaston: -2, berthe: -2, gerard: -2, eric: -1 }
+  unites:
+    gaston:
+      forme: successives
+      foyers:
+        - { conjoint: berthe, enfants: [paul], en_cours: false, vers_centre: true }
+        - { conjoint: nadia, enfants: [eric], en_cours: true, vers_centre: false }
+    gerard:
+      forme: couple
+      foyers:
+        - { conjoint: jeanne, enfants: [mireille, nadia], vers_centre: true }
+    paul:
+      forme: couple
+      foyers:
+        - { conjoint: mireille, enfants: [luc], vers_centre: true }
+  disposition:
+    visibles: [gaston, berthe, gerard, jeanne, paul, mireille, nadia, luc]
+    replis:
+      - { famille: [gaston, berthe], replie: false, enfants: 1 }
+      - { famille: [gaston, nadia], replie: true, enfants: 1 }
+      - { famille: [gerard, jeanne], replie: false, enfants: 2 }
+      - { famille: [paul, mireille], replie: false, enfants: 1 }
+    liens_hors_foyers:
+      - { nature: couple, de: [gaston], vers: nadia, trace: trait }
+      - { nature: ailleurs, de: [gerard, jeanne], vers: mireille, trace: trait }
+  apres_deplier:
+    visibles: [gaston, berthe, gerard, jeanne, paul, mireille, nadia, eric, luc]
+    replis:
+      - { famille: [gaston, berthe], replie: false, enfants: 1 }
+      - { famille: [gaston, nadia], replie: false, enfants: 1 }
+      - { famille: [gerard, jeanne], replie: false, enfants: 2 }
+      - { famille: [paul, mireille], replie: false, enfants: 1 }
+    liens_hors_foyers:
+      - { nature: couple, de: [gaston], vers: nadia, trace: trait }
+      - { nature: ailleurs, de: [gerard, jeanne], vers: mireille, trace: trait }

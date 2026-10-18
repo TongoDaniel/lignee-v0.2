@@ -21,6 +21,7 @@ import {
 import { expect } from 'vitest';
 import { z } from 'zod';
 
+import type { LinkDrawing, LinkNature } from '../layout-types';
 import type { FamilyUnitKind, MissingParent, TreeStructure } from '../types';
 
 const pairSchema = z.tuple([z.string(), z.string()]);
@@ -52,6 +53,8 @@ export const layoutActionSchema = z.strictObject({
   masques: z.array(z.string()).min(1).optional(),
   /** Familles que le lecteur déplie, pour `attendu.apres_deplier` (T-012). */
   deplier: z.array(familySchema).min(1).optional(),
+  /** Ancêtre dont on calcule aussi la vue « descendance », pour `attendu.descendance` (T-019). */
+  descendance_de: z.string().optional(),
 });
 export type LayoutAction = z.infer<typeof layoutActionSchema>;
 
@@ -92,7 +95,30 @@ const unitExpectationSchema = z.strictObject({
 export const unitsExpectationSchema = z.record(z.string(), unitExpectationSchema);
 export type UnitsExpectation = z.infer<typeof unitsExpectationSchema>;
 
-/** Ordre, placement et repli attendus (T-012). */
+export const linkNatures = {
+  ailleurs: 'elsewhere',
+  long: 'long',
+  couple: 'couple',
+  secondaire: 'secondary',
+} as const satisfies Record<string, LinkNature>;
+export const linkDrawings = {
+  trait: 'line',
+  renvoi: 'seeAlso',
+} as const satisfies Record<string, LinkDrawing>;
+
+/**
+ * Un lien hors des foyers (étape 6, T-019) : `de` est la famille (`ailleurs`, `long`), le
+ * conjoint au centre (`couple`) ou le parent (`secondaire`) ; `vers` l'enfant ou l'autre conjoint.
+ */
+const linkExpectationSchema = z.strictObject({
+  nature: z.enum(Object.keys(linkNatures) as [keyof typeof linkNatures]),
+  de: familySchema,
+  vers: z.string(),
+  trace: z.enum(Object.keys(linkDrawings) as [keyof typeof linkDrawings]),
+});
+export type LinkExpectation = z.infer<typeof linkExpectationSchema>;
+
+/** Ordre, placement et repli attendus (T-012), liens hors des foyers (T-019). */
 export const dispositionExpectedSchema = z.strictObject({
   /**
    * Personnes dessinées de gauche à droite, par hauteur (`"-1"`, `"-0.5"` pour la demi-rangée) ;
@@ -107,6 +133,8 @@ export const dispositionExpectedSchema = z.strictObject({
     .optional(),
   /** Largeur du dessin, en fiches, au plus. */
   largeur_max: z.int().min(1).optional(),
+  /** Liste complète des liens hors des foyers, sans ordre (T-019). */
+  liens_hors_foyers: z.array(linkExpectationSchema).optional(),
 });
 export type DispositionExpected = z.infer<typeof dispositionExpectedSchema>;
 
@@ -126,6 +154,8 @@ export const layoutExpectedSchema = z.strictObject({
   disposition: dispositionExpectedSchema.optional(),
   /** Après avoir déplié les familles de `action.deplier`. */
   apres_deplier: dispositionExpectedSchema.optional(),
+  /** Vue « descendance » de `action.descendance_de`, tout déplié par défaut (ARB-14, T-019). */
+  descendance: dispositionExpectedSchema.optional(),
   /**
    * Partie lien du même scénario, vérifiée par packages/kinship (T-022) : déclarée sans être lue,
    * admise seulement si `couverture.teste` contient `lien` (`requireScenarioParts`).

@@ -104,13 +104,13 @@ describe('PAR-05, UNI-21 — plusieurs chemins : le plus proche d’abord, les a
   it('CL-FAM-09 — mariage entre cousins : chaque ancêtre une fois, tous les liens', () => {
     const { tree } = playLinks('CL-FAM-09');
     const graph = createKinshipGraph(tree.data);
-    const gaston = tree.id('gaston');
-    const katia = tree.id('katia');
-    // Implexe : Gaston une seule fois parmi les ancêtres de Katia, à 3 générations.
-    const ancestors = graph.ancestors(katia).filter((entry) => entry.personId === gaston);
-    expect(ancestors).toEqual([{ personId: gaston, generations: 3 }]);
+    const gaspard = tree.id('gaspard');
+    const luc = tree.id('luc');
+    // Implexe : Gaspard une seule fois parmi les ancêtres de Luc, à 3 générations.
+    const ancestors = graph.ancestors(luc).filter((entry) => entry.personId === gaspard);
+    expect(ancestors).toEqual([{ personId: gaspard, generations: 3 }]);
     // Deux chemins vers lui, l'un par son père, l'autre par sa mère, tous deux affichés.
-    const result = present(tree.data, katia, gaston);
+    const result = present(tree.data, luc, gaspard);
     if (result.status !== 'related') throw new Error('Expected a link');
     expect(result.links.map((link) => [link.rank, link.fromSide?.side]).sort()).toEqual([
       ['also', 'mother'],

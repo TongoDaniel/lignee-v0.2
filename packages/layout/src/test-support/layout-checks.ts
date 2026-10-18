@@ -8,8 +8,14 @@ import { expect } from 'vitest';
 import { CARD_HEIGHT_LIMIT } from '../blocks';
 import { unspecifiedKey } from '../folding';
 import type { TreeLayout } from '../layout-types';
+import { MAX_LINE_CROSSINGS, MAX_LINE_ROW_SPAN } from '../links';
 import type { TreeStructure } from '../types';
-import type { DispositionExpected, ScenarioFamily } from './layout-scenario';
+import {
+  linkDrawings,
+  linkNatures,
+  type DispositionExpected,
+  type ScenarioFamily,
+} from './layout-scenario';
 
 const EPSILON = 1e-9;
 
@@ -137,6 +143,8 @@ export function expectLayoutInvariants(layout: TreeLayout): void {
       }
     }
   }
+  // Étape 6 (T-019) : une fiche par personne, chaque lien hors des foyers présent et bien tracé.
+  expectLinkInvariants(layout, MAX_LINE_ROW_SPAN, MAX_LINE_CROSSINGS);
 }
 
 function sameMembers(a: readonly Id[], b: readonly Id[]) {
@@ -190,7 +198,113 @@ export function expectDisposition(
     const byKey = (a: { key: string }, b: { key: string }) => (a.key < b.key ? -1 : 1);
     expect(actual.sort(byKey)).toEqual(wanted.sort(byKey));
   }
+  if (expected.liens_hors_foyers !== undefined) {
+    const wanted = expected.liens_hors_foyers
+      .map((line) => {
+        const nature = linkNatures[line.nature];
+        const from =
+          nature === 'elsewhere' || nature === 'long'
+            ? familyKeyOf(layout.structure, tree, line.de)
+            : line.de.join('+');
+        return `${nature} ${from} -> ${line.vers} : ${linkDrawings[line.trace]}`;
+      })
+      .sort();
+    const actual = layout.links
+      .map((link) => {
+        const from =
+          link.nature === 'elsewhere' || link.nature === 'long' ? link.key : key(link.fromId);
+        return `${link.nature} ${from} -> ${key(link.toId)} : ${link.drawing}`;
+      })
+      .sort();
+    expect(actual, 'liens hors des foyers').toEqual(wanted);
+  }
   if (expected.largeur_max !== undefined) {
     expect(layout.bounds.maxX - layout.bounds.minX + 1).toBeLessThanOrEqual(expected.largeur_max);
+  }
+}
+
+/** Vrai si les segments [p1, p2] et [q1, q2] se coupent en un point intérieur aux deux. */
+function properlyCross(
+  p1: { x: number; y: number },
+  p2: { x: number; y: number },
+  q1: { x: number; y: number },
+  q2: { x: number; y: number },
+): boolean {
+  const side = (a: typeof p1, b: typeof p1, c: typeof p1) => {
+    const value = (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+    return Math.abs(value) < EPSILON ? 0 : Math.sign(value);
+  };
+  return side(p1, p2, q1) * side(p1, p2, q2) < 0 && side(q1, q2, p1) * side(q1, q2, p2) < 0;
+}
+
+/**
+ * Étape 6 (T-019), vérifiée sans se fier au code : chaque personne n'a qu'une fiche ; chaque
+ * enfant dessiné d'une famille dépliée y est relié, sous elle dans sa fratrie ou par un seul lien
+ * (`elsewhere` à la rangée suivante, `long` ailleurs) ; deux parents d'un foyer sur deux rangées
+ * sont reliés (`couple`) ; chaque filiation secondaire entre deux fiches dessinées a son lien ;
+ * aucun autre lien, aucun lien vers une personne non dessinée ; le tracé suit la règle (plus de
+ * `maxRowSpan` rangées ou plus de `maxCrossings` croisements : renvoi) et les croisements sont
+ * recomptés ici, segment contre segment ; les liens sont dans l'ordre du dessin.
+ */
+export function expectLinkInvariants(
+  layout: TreeLayout,
+  maxRowSpan: number,
+  maxCrossings: number,
+): void {
+  const all = [...layout.rows.values()].flat();
+  expect(new Set(all).size, 'une seule fiche par personne').toBe(all.length);
+  expect(all.length).toBe(layout.people.size);
+
+  const expected: string[] = [];
+  const regular: { from: { x: number; y: number }; to: { x: number; y: number } }[] = [];
+  for (const family of layout.families.values()) {
+    const placed = family.parentIds.map((id) => layout.people.get(id));
+    const [a, b] = placed;
+    if (family.kind === 'foyer' && a !== undefined && b !== undefined && a.row !== b.row) {
+      expected.push(`couple ${family.key} ${b.personId}`);
+    }
+    if (family.folded || family.anchor === undefined) continue;
+    const anchorRow = Math.floor(family.anchor.y + EPSILON);
+    for (const child of family.shownChildren) {
+      const person = layout.people.get(child);
+      if (person === undefined) throw new Error(`Enfant ${child} non dessiné`);
+      const block = layout.blocks[person.block];
+      if (person.row === anchorRow + 1 && block?.familyKey === family.key) {
+        regular.push({ from: family.anchor, to: person });
+      } else {
+        const nature = person.row === anchorRow + 1 ? 'elsewhere' : 'long';
+        expected.push(`${nature} ${family.key} ${child}`);
+      }
+    }
+  }
+  for (const link of layout.structure.crossLinks) {
+    if (link.role !== 'secondary') continue;
+    if (layout.people.has(link.fromId) && layout.people.has(link.toId)) {
+      expected.push(`secondary ${link.id} ${link.toId}`);
+    }
+  }
+  expect(
+    layout.links.map((link) => `${link.nature} ${link.key} ${link.toId}`).sort(),
+    'liens hors des foyers',
+  ).toEqual(expected.sort());
+
+  for (const link of layout.links) {
+    const to = layout.people.get(link.toId);
+    expect(layout.people.has(link.fromId)).toBe(true);
+    expect(to).toBeDefined();
+    expect(link.to).toEqual({ x: to?.x, y: to?.y });
+    const crossings = regular.filter((edge) =>
+      properlyCross(link.from, link.to, edge.from, edge.to),
+    ).length;
+    expect(link.crossings, `croisements du lien ${link.key}`).toBe(crossings);
+    const seeAlso = Math.abs(link.rowSpan) > maxRowSpan || link.crossings > maxCrossings;
+    expect(link.drawing).toBe(seeAlso ? 'seeAlso' : 'line');
+  }
+  const order = layout.links.map((link) => [link.from.y, link.from.x, link.to.y, link.to.x]);
+  for (let i = 1; i < order.length; i += 1) {
+    const previous = order[i - 1] as number[];
+    const current = order[i] as number[];
+    const at = previous.findIndex((value, k) => value !== current[k]);
+    if (at >= 0) expect(previous[at], 'ordre des liens').toBeLessThan(current[at] as number);
   }
 }

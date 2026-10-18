@@ -11,6 +11,7 @@ import {
   type TreeGeneratorOptions,
   type TreeGeneratorRates,
 } from './tree-generator';
+import { probabilityArbitrary } from './probability';
 
 export interface TreeArbitraryOptions {
   minSize?: number;
@@ -40,15 +41,12 @@ const RATE_CEILINGS: Record<keyof TreeGeneratorRates, number> = {
   distinctFrom: 1,
 };
 
-/** Probabilités tirées au hasard, chacune entre 0 et son plafond. */
+/** Probabilités tirées uniformément, chacune entre 0 et son plafond. */
 export function treeRatesArbitrary(): fc.Arbitrary<TreeGeneratorRates> {
   const entries = Object.entries(RATE_CEILINGS) as [keyof TreeGeneratorRates, number][];
   return fc.record(
     Object.fromEntries(
-      entries.map(([key, ceiling]) => [
-        key,
-        fc.double({ min: 0, max: ceiling, noNaN: true, noDefaultInfinity: true }),
-      ]),
+      entries.map(([key, ceiling]) => [key, probabilityArbitrary(0, ceiling)]),
     ) as Record<keyof TreeGeneratorRates, fc.Arbitrary<number>>,
   );
 }
