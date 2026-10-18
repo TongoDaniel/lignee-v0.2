@@ -1,0 +1,11 @@
+{
+  // Code embarqué dans l'app et le serveur : aucun type Node, donc ni `process` ni `node:fs`.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": [],
+    "noEmit": true,
+    "declaration": false
+  },
+  "include": ["src"],
+  "exclude": ["src/tooling", "src/**/*.test.ts"]
+}
