@@ -39,7 +39,7 @@ Une migration publiée ne se modifie plus : on en ajoute une. Toute colonne autr
 corepack pnpm --filter @lignee/sync test
 ```
 
-Clé (format, refus d'une injection), migrations (ordre, transaction, base trop récente), schéma (drizzle-kit d'accord, colonnes et index), ouverture (création, réouverture, clé absente ou fausse, rotation et ses interruptions, effacement), instantané (aller-retour sur des arbres générés, remplacement, effacement d'un arbre, seconde barrière), projection de développement (propriété : aucun objet sous règle restreinte), chargement de 500 personnes, et CL-SEC-14 (partie base locale : `src/scenarios/CL-SEC-14.test.ts`).
+Clé (format, refus d'une injection), migrations (ordre, transaction, base trop récente, table recréée sans effacement en cascade, clé étrangère rompue refusée), schéma (drizzle-kit d'accord, colonnes et index), ouverture (création, réouverture, clé absente ou fausse, rotation et ses interruptions, effacement), instantané (aller-retour sur des arbres générés, remplacement, effacement d'un arbre, seconde barrière), projection de développement (propriété : aucun objet sous règle restreinte), chargement de 500 personnes, et CL-SEC-14 (partie base locale : `src/scenarios/CL-SEC-14.test.ts`).
 
 ## À vérifier sur téléphone
 
@@ -53,3 +53,9 @@ Ce que les tests sur le poste ne prouvent pas, pour le ticket « À vérifier su
 6. Temps d'ouverture de la base et du chargement de 500 personnes sur l'Android de référence.
 7. FTS5 disponible avec SQLCipher (`SELECT sqlite_compileoption_used('ENABLE_FTS5')`), pour la recherche locale.
 8. La clé reste lisible quand l'app tourne en arrière-plan écran verrouillé (après le premier déverrouillage), en vue de expo-background-task.
+9. Arrêt brutal (app tuée, batterie retirée) pendant `PRAGMA rekey` : à l'ouverture suivante, la base s'ouvre avec l'une des deux clés du trousseau, sans remise à zéro.
+10. Keystore Android qui renvoie `null` de façon passagère (redémarrage, mise à jour du système) : aujourd'hui, une clé absente avec un fichier présent provoque une remise à zéro silencieuse (`reset_key_missing`) ; observer si cela arrive, et sinon le noter.
+11. iOS avant le premier déverrouillage depuis le démarrage (tâche d'arrière-plan) : `getItemAsync` doit lever une erreur et non renvoyer `null` ; un `null` provoquerait une remise à zéro de la base.
+12. Les messages d'erreur d'expo-sqlite pour une mauvaise clé sont bien reconnus (`isNotADatabaseError` : code `SQLITE_NOTADB` ou « file is not a database ») sur Android et sur iOS ; sinon l'ouverture échoue au lieu de se remettre à zéro.
+13. Effacement (`destroyLocalDatabase`, remise à zéro) : `lignee.db-wal` et `lignee.db-shm` disparaissent aussi du dossier `SQLite`.
+14. Transfert d'appareil Android 12+ (assistant de migration) : la base et la clé ne passent pas sur le nouveau téléphone.

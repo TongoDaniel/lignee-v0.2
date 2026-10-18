@@ -1,7 +1,7 @@
 // Migrations de la base du téléphone : drizzle-kit écrit le SQL dans src/local-db/migrations
 // (un fichier par version, et meta/_journal.json). Le téléphone ne lit pas de fichiers : ce
 // module en fait un module TypeScript (src/local-db/generated/migrations.ts), embarqué par Metro
-// comme le reste du code. `migration-bundle.test.ts` vérifie que le module suit le SQL.
+// comme le reste du code. `local-db/schema.test.ts` vérifie que le module suit le SQL.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 

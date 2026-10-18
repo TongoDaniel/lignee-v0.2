@@ -685,6 +685,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - ARB-10 : « « Ngo Biyong », « ngo biyon » et « Biyong » trouvent la même personne ; moins de 300 ms hors-ligne pour 5 000 personnes »
   - PAR-10 : « Choisir deux fiches dans la recherche suffit »
   - Index FTS5, Jaro-Winkler, classement (exact, début de mot, phonétique, approché ; puis proximité de « Vous »).
+- Obligations reçues des relectures (T-016, ADR 0023, point 1) : l'index FTS5 ne contient jamais la valeur d'un fait `death_cause` ni l'ancien prénom d'un autre auteur ; il se construit sur les noms autorisés, depuis le corps JSON ; aucune colonne de valeur saisie dans les tables du modèle, et la table FTS5 est déclarée comme seule exception dans `packages/sync/src/local-db/schema.test.ts`, avec un test qu'elle ne contient ni cause de décès ni ancien prénom d'un autre auteur.
 - Cas limites : CL-DON-03, CL-DON-04, CL-SEC-04 (partie locale).
 - Dépend de : T-016, T-029, T-034.
 - Agent : ecrans-lignee, avec sync-hors-ligne (FTS5).
@@ -863,6 +864,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
     - ADR 0017, Conséquences, dernier point : la mention « distincte de » sur la mère à compléter d'un enfant peut trahir une paternité ou maternité tenue secrète. À trancher en T-052.
     - ADR 0021, point 8 : le modèle garde le type antérieur de la filiation (champ de la filiation, ou entrée d'historique UNI-19 rattachée au test ADN). À trancher en T-052 ; c'est la condition de l'obligation CL-FAM-14.
     - ADR 0017, synchronisation montante : une mention reçue vers une personne que le rédacteur ne voit pas est refusée comme inexistante (appliquée côté serveur par T-060).
+    - Base locale (ADR 0023, Conséquences ; relectures de T-016) : si une règle explicite peut ouvrir une cause de décès ou un ancien prénom à d'autres lecteurs, la seconde barrière de `packages/sync/src/local-db/snapshot.ts` (refus d'une cause de décès ou d'un ancien prénom d'un autre auteur) suit la règle. Un nom d'usage « moi seul » n'entre jamais dans l'instantané d'un autre lecteur. Un chemin « À placer » qui traverse une personne masquée est traité par le filtre (entrée retirée ou chemin coupé).
 - Cas limites : CL-SEC-01, CL-SEC-07, CL-SEC-11 (visibilité), CL-POL-17, CL-FAM-03, CL-FAM-06, CL-FAM-07, CL-FAM-12 (visibilité), CL-FAM-14, CL-FAM-15.
 - Dépend de : T-004, T-007.
 - Agent : modele-domaine, avec api-serveur ; relecture gardien-confidentialite.
@@ -887,6 +889,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - CPT-08 : « Une proposition dans sa branche lui est envoyée, et à lui seul avec le propriétaire »
   - CPT-09 : « Confirmation par l'ancien et le nouveau propriétaire »
   - CPT-13 : « Accès retiré à la synchronisation suivante ; ses ajouts restent dans l'arbre »
+- Obligations reçues des relectures (T-016, ADR 0023) : vérifier que `trees.reader_account_id` de la base locale est le compte connecté avant toute lecture ; à l'exclusion, `eraseLocalTree` ou `destroyLocalDatabase`.
 - Cas limites : CL-SEC-08 (partie exclusion).
 - Dépend de : T-049, T-050.
 - Agent : ecrans-lignee ; relecture gardien-confidentialite.
@@ -898,6 +901,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
 - Exigences :
   - CPT-03 : « L'app s'ouvre sans réseau sur une session existante ; Lignée ne stocke aucune donnée biométrique »
   - CON-10 (partie sélecteur d'apps ; les notifications dans T-088) : « Aucun nom visible sur l'écran verrouillé »
+- Obligations reçues des relectures (T-016, ADR 0023, Conséquences) : brancher `rotateDatabaseKey` et `destroyLocalDatabase` de `@lignee/sync` (appareil retrouvé, déconnexion, appareil déconnecté à distance) ; avant toute lecture, vérifier que `trees.reader_account_id` est le compte connecté (aussi T-054 et T-063) ; jamais l'arbre généré de développement avec un compte réel.
 - Cas limites : CL-SEC-14.
 - Dépend de : T-047.
 - Agent : ecrans-lignee, avec api-serveur ; relecture gardien-confidentialite.
@@ -909,6 +913,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
 - Exigences :
   - CON-05 (partie projection ; le test dans T-057) : « Test automatique de non-fuite sur chaque écran et chaque réponse de l'API »
   - PAR-09 : « Avec une fiche masquée sur le seul chemin : « Lien non disponible », sans autre indice »
+  - Obligations reçues des relectures (T-016, ADR 0023, Conséquences) : les instantanés produits passent `parseLocalTreeSnapshot` de `@lignee/sync` sans compter sur son refus (la seconde barrière n'est pas le filtre) ; les tests de non-fuite couvrent aussi la base locale (aller-retour `replaceTreeSnapshot` puis `readTreeSnapshot`) ; `packages/sync/src/dev-seed/projection.ts` n'est pas un modèle du filtrage.
 - Cas limites : CL-SEC-01, CL-SEC-02, CL-POL-17.
 - Dépend de : T-042, T-049, T-052.
 - Agent : api-serveur ; relecture gardien-confidentialite.
@@ -958,7 +963,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - HOL-01 (partie serveur) : « En mode avion, les parcours de la V1 passent ; seuls les invitations et l'analyse de la voix attendent le réseau »
   - VOX-23 (partie conversion en proposition) : « Le responsable de la branche reçoit la proposition »
   - TRD : par lots de 100 ; droits, visibilité et invariants vérifiés ; réponse par mutation (appliquée, convertie en proposition, refusée avec la raison) ; identifiant de mutation idempotent.
-  - Obligations reçues des relectures : ADR 0017 (c), synchronisation montante : une mention `distinctFrom` vers une personne que le rédacteur ne voit pas est refusée comme inexistante.
+  - Obligations reçues des relectures : ADR 0017, Conséquences (`distinctFrom`), synchronisation montante : une mention `distinctFrom` vers une personne que le rédacteur ne voit pas est refusée comme inexistante.
 - Cas limites : CL-DON-10, CL-DON-11 (refus serveur), CL-VOI-28 (conversion), CL-SEC-08 (refus).
 - Dépend de : T-030, T-049, T-056.
 - Agent : sync-hors-ligne, avec api-serveur ; relecture gardien-confidentialite.
@@ -994,6 +999,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
 - Exigences :
   - HOL-05 (partie instantané) : « Mesuré à chaque build en intégration continue » ; « première synchronisation d'un arbre de 1 000 personnes en moins de 2 Mo ».
   - TRD : changements filtrés pour ce lecteur ; suppression locale quand une donnée devient invisible.
+  - Obligations reçues des relectures (T-016, ADR 0023) : vérifier que `trees.reader_account_id` est le compte connecté avant d'écrire ou de lire un tirage ; instantanés écrits par `replaceTreeSnapshot` (seconde barrière).
 - Cas limites : CL-SEC-08 (effacement).
 - Dépend de : T-056, T-060.
 - Agent : sync-hors-ligne, avec api-serveur ; relecture gardien-confidentialite.

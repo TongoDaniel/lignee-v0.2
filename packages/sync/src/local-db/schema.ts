@@ -5,7 +5,7 @@
 // Une table par objet du modèle. Chaque ligne garde l'objet entier, validé par son schéma Zod de
 // @lignee/domain, dans `body` (JSON) ; les seules autres colonnes sont l'identifiant, l'arbre et
 // les identifiants des objets reliés, pour les index et les requêtes. Aucune valeur saisie (nom,
-// cause de décès, notes, lieu) n'est donc dans une colonne indexée : `local-db-schema.test.ts`
+// cause de décès, notes, lieu) n'est donc dans une colonne indexée : `schema.test.ts`
 // le vérifie sur la base migrée.
 //
 // Ce fichier n'importe que drizzle-orm : drizzle-kit le lit pour écrire les migrations

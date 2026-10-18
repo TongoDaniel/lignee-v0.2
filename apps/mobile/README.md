@@ -40,4 +40,4 @@ Chaque dépendance directe est épinglée sur une version publiée depuis au moi
 
 Base locale : `expo-sqlite` avec `useSQLCipher: true` et `expo-secure-store` sont des modules natifs ; après leur ajout (T-016), le build de développement doit être refait (`eas build --profile development`). `android.allowBackup` vaut `false` : la base chiffrée ne part pas dans les sauvegardes Android.
 
-Taille : le bundle Hermes fait environ 5,5 Mo sur Android. `expo-router` embarque `expo-symbols` et sa police Material Symbols (971 Ko) : à réexaminer pour HOL-06 (moins de 40 Mo installé).
+Taille : le bundle Hermes fait environ 6,8 Mo sur Android et 6,5 Mo sur iOS, dont environ 1,2 Mo ajoutés par la base locale (T-016 : Drizzle, @lignee/sync, schémas de @lignee/domain), à suivre pour HOL-06. `expo-router` embarque `expo-symbols` et sa police Material Symbols (971 Ko) : à réexaminer pour HOL-06 (moins de 40 Mo installé).
