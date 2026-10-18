@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { Id } from '../ids';
 import { treeArbitrary } from './arbitraries';
+import { medianTime, reportBudget } from './timing';
 import { treeDataIssues, type TreeData } from './tree-data';
 import {
   generateTree,
@@ -170,19 +171,23 @@ describe('générateur d’arbres', () => {
 });
 
 describe('arbres types de 100, 1 000 et 5 000 personnes', () => {
-  // Mesure faite sur le poste de développement : voir le rapport du ticket. Le budget de 3 s
-  // garde une marge large pour la CI ; le TRD demande « moins de quelques secondes ».
+  // Le TRD demande « moins de quelques secondes » ; budget du test 3 s, garde-fou budget × facteur
+  // et mesure écrite dans la sortie (README racine, « Tests de performance »).
   const BUDGET_MS = 3000;
 
   for (const size of REFERENCE_TREE_SIZES) {
-    it(`${String(size)} personnes : générées en moins de ${String(BUDGET_MS)} ms, valides, avec polygamie, lévirat, sororat et implexe`, () => {
-      const started = performance.now();
+    it(`${String(size)} personnes : générées en moins de ${String(BUDGET_MS)} ms (garde-fou × facteur), valides, avec polygamie, lévirat, sororat et implexe`, () => {
       const tree = generateTree({ seed: 20_260_000 + size, size });
-      const elapsed = performance.now() - started;
+      // La première génération ci-dessus sert de chauffe ; médiane de trois générations.
+      const { medianMs } = medianTime(() => generateTree({ seed: 20_260_000 + size, size }), {
+        warmup: 0,
+        runs: 3,
+      });
       console.info(
-        `arbre type ${String(size)} : généré en ${elapsed.toFixed(0)} ms ; ${String(tree.unions.length)} unions, ${String(tree.filiations.length)} filiations ; ${JSON.stringify(tree.features)}`,
+        `arbre type ${String(size)} : ${String(tree.unions.length)} unions, ${String(tree.filiations.length)} filiations ; ${JSON.stringify(tree.features)}`,
       );
-      expect(elapsed).toBeLessThan(BUDGET_MS);
+      const report = reportBudget(`arbre type ${String(size)}, génération`, medianMs, BUDGET_MS);
+      expect(report.measuredMs).toBeLessThan(report.ceilingMs);
       expect(tree).toEqual(referenceTree(size));
       expect(tree.people).toHaveLength(size);
       expect(treeDataIssues(tree)).toEqual([]);
@@ -200,6 +205,6 @@ describe('arbres types de 100, 1 000 et 5 000 personnes', () => {
         expect(features.nonBirthFiliations).toBeGreaterThan(0);
         expect(features.multipleBirths).toBeGreaterThan(0);
       }
-    }, 30_000);
+    }, 60_000);
   }
 });

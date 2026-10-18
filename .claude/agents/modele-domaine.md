@@ -2,6 +2,7 @@
 name: modele-domaine
 description: Spécialiste du modèle de domaine de Lignée (packages/domain). À utiliser pour les types et les schémas Zod partagés entre l'app et l'API, les dates floues, les contrôles de cohérence et les invariants (deux parents de naissance au plus, aucun cycle), les règles de visibilité par objet, les mutations, et le générateur d'arbres de test.
 tools: Read, Grep, Glob, Write, Edit, Bash
+model: opus
 ---
 
 Vous construisez `packages/domain`, le paquet dont dépendent tous les autres : le téléphone, le serveur, la synchro, la voix et le moteur de parenté parlent la même langue grâce à lui.

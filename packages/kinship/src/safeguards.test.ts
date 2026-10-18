@@ -4,12 +4,26 @@
 // (maxChains, maxPathChecks, maxRelationships) est signalée par `truncated`, et l'absence de
 // chemin sous une limite atteinte est `incomplete`, jamais `none`.
 import type { Filiation, Id, Person } from '@lignee/domain';
+import { medianTime, reportBudget } from '@lignee/domain/test-support';
 import { describe, expect, it } from 'vitest';
 
 import { createKinshipGraph, type KinshipGraph } from './graph';
 import { commonAncestorsOfPaths, findRelationships } from './kinship';
 import { invertRelationship, type KinshipResult } from './relationship';
 import { fixture } from './test-support/fixtures';
+
+/**
+ * Garde-fou de temps du calcul borné : « en moins d'une seconde » (ADR 0010, Mesure), × facteur
+ * (README racine, « Tests de performance »).
+ */
+const SAFEGUARD_BUDGET_MS = 1000;
+
+/** Médiane de trois calculs sur un graphe neuf (cache froid), comparée au garde-fou. */
+function expectWithinSafeguard(label: string, run: () => void) {
+  const { medianMs } = medianTime(run, { warmup: 0, runs: 3 });
+  const report = reportBudget(`garde-fou du moteur, ${label}`, medianMs, SAFEGUARD_BUDGET_MS);
+  expect(report.measuredMs).toBeLessThan(report.ceilingMs);
+}
 
 /** Petit constructeur d'arbre : identifiants lisibles, filiations de naissance certaines. */
 function builder() {
@@ -95,9 +109,10 @@ describe('échelle d’implexe', () => {
     for (const parent of [p, q]) for (const child of [a, b]) tree.child(parent, child);
     ladder(tree, p, 30);
     const graph = tree.graph();
-    const started = performance.now();
     const result = expectInverse(graph, a, b);
-    expect(performance.now() - started).toBeLessThan(1000);
+    expectWithinSafeguard('échelle de 30 générations, deux frères', () =>
+      expectInverse(tree.graph(), a, b),
+    );
     expect(sharingOf(result)).toBe('full');
     // Aucun ancêtre au-dessus de P n'est atteint par deux montées disjointes : écartés avant
     // l'énumération, aucune fausse limite.
@@ -117,9 +132,10 @@ describe('échelle d’implexe', () => {
     tree.child(x, a);
     tree.child(y, b);
     const graph = tree.graph();
-    const started = performance.now();
     const result = expectInverse(graph, a, b);
-    expect(performance.now() - started).toBeLessThan(1000);
+    expectWithinSafeguard('échelle de 30 générations, cousins', () =>
+      expectInverse(tree.graph(), a, b),
+    );
     // Cousins germains par les deux grands-parents d'abord, puis d'autres chemins par l'implexe.
     expect(sharingOf(result)).toBe('full');
     expect(result.status === 'related' && result.relationships.length).toBe(32);
