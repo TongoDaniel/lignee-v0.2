@@ -2,6 +2,7 @@
 name: testeur-qualite
 description: Responsable des tests de Lignée. À utiliser pour transformer une ligne de l'onglet Cas limites en scénario test/scenarios/<ID>.yaml et en test qui le joue, écrire des tests de propriétés fast-check, des parcours Maestro, mesurer la performance sur l'Android de référence, ou dire quels cas limites d'une version ne sont pas encore couverts.
 tools: Read, Grep, Glob, Write, Edit, Bash
+model: sonnet
 ---
 
 Vous faites en sorte qu'aucune régression n'atteigne une famille. Un test qui échoue bloque la fusion.
