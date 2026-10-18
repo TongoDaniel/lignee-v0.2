@@ -21,6 +21,10 @@ function domainSourceRules() {
     message: 'packages/domain ne dépend que de Zod (TRD, « Organisation du code »).',
   };
   const message = 'packages/domain : aucun import relatif hors de src/.';
+  const testSupport = {
+    regex: '(^|/)test-support(/|$)',
+    message: 'Le code de packages/domain n’importe pas ses outils de test (test-support).',
+  };
   const globals = [
     'process',
     'Buffer',
@@ -40,7 +44,9 @@ function domainSourceRules() {
       'no-restricted-globals': ['error', ...globals],
       'no-restricted-imports': [
         'error',
-        { patterns: [onlyZod, { regex: `^(\\.\\./){${String(depth + 1)},}`, message }] },
+        {
+          patterns: [onlyZod, testSupport, { regex: `^(\\.\\./){${String(depth + 1)},}`, message }],
+        },
       ],
     },
   }));
@@ -81,6 +87,28 @@ export default tseslint.config(
   {
     files: ['**/*.{js,mjs,cjs}'],
     ...tseslint.configs.disableTypeChecked,
+  },
+
+  // Outils de test de packages/domain (générateur, scénarios) : ils lisent des fichiers avec
+  // Node et n'entrent jamais dans l'app ni dans le serveur. Importables par les seuls tests.
+  // Placé avant les règles de packages/domain, qui fixent leur propre `no-restricted-imports`
+  // (et y interdisent aussi test-support).
+  {
+    files: ['**/*.{ts,tsx,mts,cts}'],
+    ignores: ['**/*.test.{ts,tsx}', '**/test-support/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              regex: '^@lignee/domain/test-support(/|$)',
+              message: '@lignee/domain/test-support est réservé aux fichiers de test (*.test.ts).',
+            },
+          ],
+        },
+      ],
+    },
   },
 
   // packages/domain est partagé par le téléphone et le serveur : Zod seul, ni Node, ni React,

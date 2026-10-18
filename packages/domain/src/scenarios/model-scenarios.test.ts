@@ -4,79 +4,24 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
-import { findMultipleBirth, multipleBirthSchema, titleRoleSchema } from '../fact';
-import { filiationSchema } from '../filiation';
+import { findMultipleBirth, multipleBirthSchema } from '../fact';
 import { fuzzyDateFromText } from '../fuzzy-date';
-import { formatName, nameSchema, personRecordSchema, personSchema, type Name } from '../person';
-import { unionSchema } from '../union';
-import { nameFromScenario, testTree, type TestTree } from '../test-support/fixtures';
+import { formatName, personRecordSchema } from '../person';
+import { loadScenario, scenarioSchema } from '../test-support/scenario';
 import {
-  loadScenario,
-  scenarioFiliationSchema,
-  scenarioNameSchema,
-  scenarioPersonSchema,
-  scenarioSchema,
-  scenarioUnionSchema,
-} from '../test-support/scenario';
+  buildScenarioTree,
+  multipleBirthInput,
+  scenarioMultipleBirthSchema,
+  scenarioTitleSchema,
+  scenarioTreeSchema,
+  type ScenarioTree,
+} from '../test-support/scenario-tree';
 
-const treeShape = {
-  personnes: z.array(scenarioPersonSchema),
-  noms: z.array(scenarioNameSchema).optional(),
-  unions: z.array(scenarioUnionSchema).optional(),
-  filiations: z.array(scenarioFiliationSchema).optional(),
-};
-const treeSection = z.strictObject(treeShape);
-type TreeSection = z.infer<typeof treeSection>;
-
-/** Personnes, noms, unions et filiations d'un scénario, validés par les schémas du modèle. */
-function buildTree(tree: TestTree, section: TreeSection) {
-  const people = new Map(
-    section.personnes.map(({ key, gender }) => [
-      key,
-      personSchema.parse({ id: tree.personId(key), treeId: tree.treeId, nature: 'known', gender }),
-    ]),
-  );
-  const known = (key: string) => {
-    if (!people.has(key)) throw new Error(`Unknown person in scenario: ${key}`);
-    return tree.personId(key);
-  };
-  const names = (section.noms ?? []).map((line) => {
-    known(line.personne);
-    return nameSchema.parse(nameFromScenario(tree, line));
-  });
-  const unions = (section.unions ?? []).map((line) =>
-    unionSchema.parse({
-      id: tree.nextId(),
-      treeId: tree.treeId,
-      spouses: [
-        { personId: known(line.spouses[0]), rank: line.ranks[0] },
-        { personId: known(line.spouses[1]), rank: line.ranks[1] },
-      ],
-    }),
-  );
-  const filiations = (section.filiations ?? []).flatMap((line) =>
-    line.parents.map((parent) =>
-      filiationSchema.parse({
-        id: tree.nextId(),
-        treeId: tree.treeId,
-        parentId: known(parent),
-        childId: known(line.enfant),
-        type: 'birth',
-        certainty: 'certain',
-      }),
-    ),
-  );
-  return { people, names, unions, filiations, known };
-}
-
-function namesOf(tree: TestTree, key: string, names: readonly Name[]): Name[] {
-  return names.filter((name) => name.personId === tree.personId(key));
-}
-
-function recordOf(tree: TestTree, built: ReturnType<typeof buildTree>, key: string) {
+/** La fiche d'une personne du scénario : la personne et ses noms, validés ensemble. */
+function recordOf(built: ScenarioTree, key: string) {
   return personRecordSchema.parse({
-    person: built.people.get(key),
-    names: namesOf(tree, key, built.names),
+    person: built.data.people.find((person) => person.id === built.id(key)),
+    names: built.data.names.filter((name) => name.personId === built.id(key)),
   });
 }
 
@@ -85,19 +30,18 @@ describe('CL-POL-15 — épouses qui gardent leur nom, enfants sans le nom du p�
     const scenario = loadScenario(
       'CL-POL-15',
       scenarioSchema('CL-POL-15', {
-        arbre: treeSection,
+        arbre: scenarioTreeSchema,
         attendu: z.strictObject({
           valide: z.literal(true),
           noms_de_famille: z.record(z.string(), z.array(z.string())),
         }),
       }),
     );
-    const tree = testTree();
-    const built = buildTree(tree, scenario.arbre);
-    expect(built.unions).toHaveLength(2);
-    expect(built.filiations).toHaveLength(4);
+    const built = buildScenarioTree(scenario.arbre);
+    expect(built.data.unions).toHaveLength(2);
+    expect(built.data.filiations).toHaveLength(4);
     for (const [key, surnames] of Object.entries(scenario.attendu.noms_de_famille)) {
-      expect(recordOf(tree, built, key).names.map((name) => name.surname)).toEqual(surnames);
+      expect(recordOf(built, key).names.map((name) => name.surname)).toEqual(surnames);
     }
   });
 });
@@ -107,7 +51,7 @@ describe('CL-DON-01 — nom donné dans l’ordre NOM Prénom', () => {
     const scenario = loadScenario(
       'CL-DON-01',
       scenarioSchema('CL-DON-01', {
-        arbre: treeSection,
+        arbre: scenarioTreeSchema,
         attendu: z.strictObject({
           champs: z.strictObject({ prenoms: z.string(), nom: z.string() }),
           affichage: z.strictObject({
@@ -117,8 +61,7 @@ describe('CL-DON-01 — nom donné dans l’ordre NOM Prénom', () => {
         }),
       }),
     );
-    const tree = testTree();
-    const [name] = buildTree(tree, scenario.arbre).names;
+    const [name] = buildScenarioTree(scenario.arbre).data.names;
     if (name === undefined) throw new Error('missing name');
     expect(name.givenNames).toBe(scenario.attendu.champs.prenoms);
     expect(name.surname).toBe(scenario.attendu.champs.nom);
@@ -132,17 +75,16 @@ describe('CL-DON-02 — une seule forme de nom, sans nom de famille', () => {
     const scenario = loadScenario(
       'CL-DON-02',
       scenarioSchema('CL-DON-02', {
-        arbre: treeSection,
+        arbre: scenarioTreeSchema,
         attendu: z.strictObject({
           valide: z.literal(true),
           affichage: z.record(z.string(), z.string()),
         }),
       }),
     );
-    const tree = testTree();
-    const built = buildTree(tree, scenario.arbre);
+    const built = buildScenarioTree(scenario.arbre);
     for (const [key, expected] of Object.entries(scenario.attendu.affichage)) {
-      const [name] = recordOf(tree, built, key).names;
+      const [name] = recordOf(built, key).names;
       if (name === undefined) throw new Error(`missing name for ${key}`);
       expect(name.surname).toBeUndefined();
       expect(formatName(name, 'given_first')).toBe(expected);
@@ -152,47 +94,27 @@ describe('CL-DON-02 — une seule forme de nom, sans nom de famille', () => {
 });
 
 describe('CL-FAM-11 — jumeaux', () => {
-  const groupSchema = z.strictObject({
-    enfants: z.array(z.string()),
-    ordre: z.array(z.int()).optional(),
-  });
   const schema = scenarioSchema('CL-FAM-11', {
-    arbre: z.strictObject({ ...treeShape, naissances_multiples: z.array(groupSchema) }),
+    arbre: scenarioTreeSchema,
     attendu: z.strictObject({
       valide: z.literal(true),
       meme_naissance: z.record(z.string(), z.array(z.string())),
-      refuse: z.array(groupSchema),
+      refuse: z.array(scenarioMultipleBirthSchema),
     }),
   });
 
-  function toInput(tree: TestTree, group: z.infer<typeof groupSchema>) {
-    return {
-      id: tree.nextId(),
-      treeId: tree.treeId,
-      members: group.enfants.map((key, index) => {
-        const birthOrder = group.ordre?.[index];
-        return {
-          personId: tree.personId(key),
-          ...(birthOrder === undefined ? {} : { birthOrder }),
-        };
-      }),
-    };
-  }
-
   it('modèle : une même naissance, ordre facultatif, retrouvée depuis chaque fiche ; les naissances impossibles sont refusées', () => {
     const scenario = loadScenario('CL-FAM-11', schema);
-    const tree = testTree();
-    const { known } = buildTree(tree, scenario.arbre);
-    const births = scenario.arbre.naissances_multiples.map((group) => {
-      group.enfants.forEach(known);
-      return multipleBirthSchema.parse(toInput(tree, group));
-    });
+    const built = buildScenarioTree(scenario.arbre);
+    const births = built.data.multipleBirths;
+    expect(births).toHaveLength(scenario.arbre.naissances_multiples?.length ?? 0);
     for (const [key, expected] of Object.entries(scenario.attendu.meme_naissance)) {
-      const birth = findMultipleBirth(known(key), births);
-      expect(birth?.members.map((member) => member.personId)).toEqual(expected.map(known));
+      const birth = findMultipleBirth(built.id(key), births);
+      expect(birth?.members.map((member) => member.personId)).toEqual(expected.map(built.id));
     }
     for (const group of scenario.attendu.refuse) {
-      expect(multipleBirthSchema.safeParse(toInput(tree, group)).success).toBe(false);
+      const input = multipleBirthInput(built.context, group, built.id);
+      expect(multipleBirthSchema.safeParse(input).success).toBe(false);
     }
   });
 });
@@ -202,7 +124,7 @@ describe('CL-FAM-17 — personne connue seulement par un surnom', () => {
     const scenario = loadScenario(
       'CL-FAM-17',
       scenarioSchema('CL-FAM-17', {
-        arbre: treeSection,
+        arbre: scenarioTreeSchema,
         attendu: z.strictObject({
           valide: z.literal(true),
           nature: z.literal('connue'),
@@ -211,11 +133,10 @@ describe('CL-FAM-17 — personne connue seulement par un surnom', () => {
         }),
       }),
     );
-    const tree = testTree();
-    const built = buildTree(tree, scenario.arbre);
-    const [key] = built.people.keys();
-    if (key === undefined) throw new Error('missing person');
-    const record = recordOf(tree, built, key);
+    const built = buildScenarioTree(scenario.arbre);
+    const [line] = scenario.arbre.personnes;
+    if (line === undefined) throw new Error('missing person');
+    const record = recordOf(built, line.key);
     expect(record.person.nature).toBe('known');
     expect(record.names.some((name) => name.type === 'birth')).toBe(false);
     const [nickname] = record.names;
@@ -236,17 +157,16 @@ describe('CL-FAM-18 — changement de nom', () => {
     const scenario = loadScenario(
       'CL-FAM-18',
       scenarioSchema('CL-FAM-18', {
-        arbre: treeSection,
+        arbre: scenarioTreeSchema,
         attendu: z.strictObject({
           valide: z.literal(true),
           noms_dates: z.record(z.string(), z.array(datedName)),
         }),
       }),
     );
-    const tree = testTree();
-    const built = buildTree(tree, scenario.arbre);
+    const built = buildScenarioTree(scenario.arbre);
     for (const [key, expected] of Object.entries(scenario.attendu.noms_dates)) {
-      const own = recordOf(tree, built, key).names;
+      const own = recordOf(built, key).names;
       expect(
         own.map((name) => ({
           nom: name.surname,
@@ -268,39 +188,22 @@ describe('CL-FAM-18 — changement de nom', () => {
 
 describe('CL-FAM-19 — titre traditionnel', () => {
   it('modèle : des titres datés, rattachés à leur personne', () => {
-    const titleLine = z.strictObject({
-      libelle: z.string(),
-      debut: z.string().optional(),
-      fin: z.string().optional(),
-    });
+    const titleLine = scenarioTitleSchema.omit({ personne: true });
     const scenario = loadScenario(
       'CL-FAM-19',
       scenarioSchema('CL-FAM-19', {
-        arbre: z.strictObject({
-          ...treeShape,
-          titres: z.array(titleLine.extend({ personne: z.string() })),
-        }),
+        arbre: scenarioTreeSchema,
         attendu: z.strictObject({
           valide: z.literal(true),
           titres_par_personne: z.record(z.string(), z.array(titleLine)),
         }),
       }),
     );
-    const tree = testTree();
-    const { known } = buildTree(tree, scenario.arbre);
-    const titles = scenario.arbre.titres.map((line) =>
-      titleRoleSchema.parse({
-        id: tree.nextId(),
-        treeId: tree.treeId,
-        personId: known(line.personne),
-        label: line.libelle,
-        authorAccountId: tree.authorAccountId,
-        ...(line.debut === undefined ? {} : { start: fuzzyDateFromText(line.debut) }),
-        ...(line.fin === undefined ? {} : { end: fuzzyDateFromText(line.fin) }),
-      }),
-    );
+    const built = buildScenarioTree(scenario.arbre);
+    const titles = built.data.titleRoles;
+    expect(titles).toHaveLength(scenario.arbre.titres?.length ?? 0);
     for (const [key, expected] of Object.entries(scenario.attendu.titres_par_personne)) {
-      const own = titles.filter((title) => title.personId === known(key));
+      const own = titles.filter((title) => title.personId === built.id(key));
       expect(
         own.map((title) => ({
           libelle: title.label,

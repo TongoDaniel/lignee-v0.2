@@ -317,17 +317,17 @@ jobs:
   # ---------------------------------------------------------------------------------------------
   # Étapes prévues par le TRD qui n'ont pas encore de matière. Chacune vérifie qu'il n'y a
   # rien à tester, le dit dans le résumé, et échoue dès que la matière apparaît sans que le job
-  # soit branché. Seule exception, listée nommément : les scénarios en attente de T-006.
+  # soit branché.
   # ---------------------------------------------------------------------------------------------
 
   # Cas limites : un fichier test/scenarios/<ID>.yaml par cas, joué par un test.
   # Un scénario est joué quand un test l'a réellement chargé pendant l'exécution : les tests
   # tournent avec LIGNEE_SCENARIOS_PLAYED_DIR, et `loadScenario` (packages/domain/src/
-  # test-support/scenario.ts, en attendant le lecteur de T-006) y laisse un fichier par scénario
-  # chargé et validé. Un test ignoré, un commentaire ou un paquet dont les tests ne tournent pas
-  # ne comptent pas. Les scénarios non joués de PENDING_T006 sont tolérés (vert avec
-  # avertissement) ; tout autre scénario non joué fait échouer le job. N'allongez pas cette liste
-  # pour faire passer un scénario : écrivez son test.
+  # test-support/scenario.ts) y laisse un fichier par scénario chargé et validé. Un test ignoré,
+  # un commentaire, un paquet dont les tests ne tournent pas, ou la seule lecture de contrôle du
+  # format (`readScenarioFile`, qui ne laisse pas de trace) ne comptent pas. Tout scénario non
+  # joué fait échouer le job, sans exception. Ce qu'un test ne vérifie pas encore d'un scénario
+  # est déclaré dans son champ `couverture` (test/scenarios/README.md).
   cas-limites:
     name: cas-limites
     runs-on: ubuntu-24.04
@@ -358,23 +358,17 @@ jobs:
       - name: Scénarios non joués
         env:
           PLAYED_DIR: ${{ runner.temp }}/scenarios-joues
-          # Scénarios écrits avant le lecteur de T-006, non joués : liste fermée.
-          PENDING_T006: test/scenarios/CL-POL-03.yaml
         run: |
           played=""
-          pending=""
-          unexpected=""
+          missing=""
           for file in $(git ls-files 'test/scenarios/*.yaml' 'test/scenarios/*.yml'); do
             id="$(basename "$file")"
             id="${id%.*}"
             if [ -f "$PLAYED_DIR/$id" ]; then
               played="$played $file"
-              continue
+            else
+              missing="$missing $file"
             fi
-            case " $PENDING_T006 " in
-              *" $file "*) pending="$pending $file" ;;
-              *) unexpected="$unexpected $file" ;;
-            esac
           done
           {
             echo "### Cas limites"
@@ -382,24 +376,18 @@ jobs:
             if [ -n "$played" ]; then
               echo "Joués par un test :$played"
             fi
-            if [ -n "$pending" ]; then
-              echo "Non joués, en attente du lecteur de scénarios (T-006) :$pending"
+            if [ -n "$missing" ]; then
+              echo "Non joués :$missing"
             fi
-            if [ -n "$unexpected" ]; then
-              echo "Non joués et hors de la liste d'attente :$unexpected"
-            fi
-            if [ -z "$played$pending$unexpected" ]; then
+            if [ -z "$played$missing" ]; then
               echo "Aucun scénario de cas limite pour l'instant."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
-          if [ -n "$pending" ]; then
-            echo "::warning title=Cas limites non joués (T-006)::Scénarios présents mais joués par aucun test, en attente de T-006 :$pending"
-          fi
-          if [ -n "$unexpected" ]; then
-            echo "::error title=Cas limites non joués::Scénarios chargés par aucun test pendant l'exécution :$unexpected. Écrivez leur test (loadScenario dans le corps d'un it) ; seuls ceux de PENDING_T006 sont tolérés jusqu'à T-006."
+          if [ -n "$missing" ]; then
+            echo "::error title=Cas limites non joués::Scénarios chargés par aucun test pendant l'exécution :$missing. Écrivez leur test (loadScenario dans le corps d'un it) et déclarez dans « couverture » ce qu'il ne vérifie pas encore."
             exit 1
           fi
-          echo "Scénarios en attente de T-006 :${pending:- aucun}"
+          echo "Tous les scénarios sont joués."
 
   # Intégration avec PostgreSQL réel (Vitest et Testcontainers) : droits, synchro, propositions.
   # Convention : fichiers `*.integration.test.ts`. À remplir avec le schéma Prisma (T-042) et

@@ -58,17 +58,26 @@ describe('lecture simple des scénarios', () => {
     }
   });
 
-  it('une union exige exactement ses deux rangs', () => {
-    expect(
-      scenarioUnionSchema.safeParse({ conjoints: ['a', 'b'], rang_a: 1, rang_b: 2 }).success,
-    ).toBe(true);
-    expect(scenarioUnionSchema.safeParse({ conjoints: ['a', 'b'], rang_a: 1 }).success).toBe(false);
+  it('une union a des rangs facultatifs, entiers positifs, et aucune autre clé', () => {
+    expect(scenarioUnionSchema.parse({ conjoints: ['a', 'b'], rang_a: 1, rang_b: 2 })).toEqual({
+      spouses: ['a', 'b'],
+      ranks: [1, 2],
+    });
+    // Format du TRD (CL-POL-03) : seul le rang du mari est écrit.
+    expect(scenarioUnionSchema.parse({ conjoints: ['a', 'b'], rang_a: 2 })).toEqual({
+      spouses: ['a', 'b'],
+      ranks: [2, undefined],
+    });
     expect(
       scenarioUnionSchema.safeParse({ conjoints: ['a', 'b'], rang_a: 1, rang_b: 1, lieu: 'x' })
         .success,
     ).toBe(false);
+    expect(scenarioUnionSchema.safeParse({ conjoints: ['a', 'b'], rang_c: 1 }).success).toBe(false);
     expect(
       scenarioUnionSchema.safeParse({ conjoints: ['a', 'b'], rang_a: 0, rang_b: 1 }).success,
     ).toBe(false);
+    expect(scenarioUnionSchema.safeParse({ conjoints: ['a', 'b'], rang_a: 1.5 }).success).toBe(
+      false,
+    );
   });
 });
