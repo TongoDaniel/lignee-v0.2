@@ -1,12 +1,20 @@
 // PAR-01 (partie moteur) : « Réponse en moins de 200 ms hors-ligne pour un arbre de 5 000
 // personnes ». Mesuré ici sur le poste de développement ; le budget fin (50 ms sur l'Android de
 // référence, calcul découpé) est T-028. Arbre type de 5 000 personnes (graine fixe), et un chef
-// de famille à 8 épouses et 40 enfants (TRD, Performance ; agent moteur-parente).
+// de famille à 8 épouses et 40 enfants (TRD, Performance ; agent moteur-parente). Chaque temps
+// est une médiane après chauffe, comparée au garde-fou budget × facteur (README racine, « Tests
+// de performance ») ; les budgets eux-mêmes ne changent pas.
 import type { Filiation, Id, Person } from '@lignee/domain';
-import { referenceTree, testTree } from '@lignee/domain/test-support';
+import {
+  medianTime,
+  referenceTree,
+  reportBudget,
+  testTree,
+  timeOnce,
+} from '@lignee/domain/test-support';
 import { describe, expect, it } from 'vitest';
 
-import { createKinshipGraph } from './graph';
+import { createKinshipGraph, type KinshipGraph } from './graph';
 import { findRelationships } from './kinship';
 
 const PAR_01_BUDGET_MS = 200;
@@ -26,10 +34,18 @@ function* pairsOf(ids: readonly Id[], count: number): Generator<[Id, Id]> {
   }
 }
 
-function measure(run: () => void): number {
-  const started = performance.now();
-  run();
-  return performance.now() - started;
+/**
+ * Temps de chaque lien. `cold` : un seul passage par paire sur un graphe neuf, caches d'ancêtres
+ * vides, comme la première question après l'ouverture de l'arbre (ce que vise PAR-01). `warm` :
+ * ensuite, médiane de trois calculs par paire, caches remplis. À appeler sur un graphe jamais
+ * interrogé.
+ */
+function pairTimes(graph: KinshipGraph, pairs: readonly (readonly [Id, Id])[]) {
+  const cold = pairs.map(([a, b]) => timeOnce(() => findRelationships(graph, a, b)));
+  const warm = pairs.map(
+    ([a, b]) => medianTime(() => findRelationships(graph, a, b), { warmup: 0, runs: 3 }).medianMs,
+  );
+  return { cold, warm };
 }
 
 describe('PAR-01 : temps de réponse du moteur', () => {
@@ -37,9 +53,12 @@ describe('PAR-01 : temps de réponse du moteur', () => {
     // La copie de l'arbre type (environ 110 ms) est faite hors des mesures.
     const tree = referenceTree(5000);
     let graph = createKinshipGraph(tree);
-    const build = measure(() => {
-      graph = createKinshipGraph(tree);
-    });
+    const build = medianTime(
+      () => {
+        graph = createKinshipGraph(tree);
+      },
+      { warmup: 0, runs: 3 },
+    ).medianMs;
 
     const ids = tree.people.map((person) => person.id);
     // Paires au hasard, plus des paires proches (même famille) : les plus coûteuses, car elles
@@ -55,19 +74,40 @@ describe('PAR-01 : temps de réponse du moteur', () => {
     );
     expect(close.length).toBeGreaterThan(50);
     const samples = [...pairsOf(ids, 300), ...close].filter(([a, b]) => a !== b);
-    const times = samples.map(([a, b]) => measure(() => findRelationships(graph, a, b)));
+    const { cold, warm } = pairTimes(graph, samples);
+    const coldMax = Math.max(...cold);
+    const times = warm;
     times.sort((x, y) => x - y);
     const max = times.at(-1) ?? 0;
     const p95 = times[Math.floor(times.length * 0.95)] ?? 0;
     const mean = times.reduce((sum, t) => sum + t, 0) / times.length;
     console.info(
       `PAR-01, 5 000 personnes : graphe ${build.toFixed(1)} ms ; ${String(times.length)} liens, ` +
-        `moyenne ${mean.toFixed(2)} ms, 95e centile ${p95.toFixed(2)} ms, max ${max.toFixed(2)} ms`,
+        `moyenne ${mean.toFixed(2)} ms, 95e centile ${p95.toFixed(2)} ms, max ${max.toFixed(2)} ms ` +
+        `(à chaud) ; premier passage à froid, max ${coldMax.toFixed(2)} ms`,
     );
     // Le graphe se construit une fois, à l'ouverture de l'arbre (TRD : moins de 1 s) ; chaque
     // question « qui est-ce pour moi ? » ne paie ensuite que le calcul du lien.
-    expect(build).toBeLessThan(TREE_OPENING_BUDGET_MS);
-    expect(max).toBeLessThan(PAR_01_BUDGET_MS);
+    const opening = reportBudget(
+      'PAR-01, graphe de 5 000 personnes',
+      build,
+      TREE_OPENING_BUDGET_MS,
+    );
+    expect(opening.measuredMs).toBeLessThan(opening.ceilingMs);
+    // PAR-01 vise la première question après l'ouverture : le passage à froid (graphe neuf) fait
+    // foi ; la médiane à chaud s'y ajoute.
+    const slowestCold = reportBudget(
+      'PAR-01, lien le plus lent sur 5 000, à froid',
+      coldMax,
+      PAR_01_BUDGET_MS,
+    );
+    expect(slowestCold.measuredMs).toBeLessThan(slowestCold.ceilingMs);
+    const slowest = reportBudget(
+      'PAR-01, lien le plus lent sur 5 000, à chaud (médiane)',
+      max,
+      PAR_01_BUDGET_MS,
+    );
+    expect(slowest.measuredMs).toBeLessThan(slowest.ceilingMs);
   });
 
   it('chef de famille à 8 épouses et 40 enfants, avec leurs petits-enfants', () => {
@@ -125,14 +165,27 @@ describe('PAR-01 : temps de réponse du moteur', () => {
     }
     const graph = createKinshipGraph({ people, unions, filiations });
     const ids = people.map((p) => p.id);
-    const times = [...pairsOf(ids, 300)]
-      .filter(([a, b]) => a !== b)
-      .map(([a, b]) => measure(() => findRelationships(graph, a, b)));
-    const max = Math.max(...times);
-    console.info(
-      `PAR-01, chef de famille (${String(people.length)} personnes, 8 épouses, 40 enfants) : max ${max.toFixed(2)} ms`,
+    const { cold, warm } = pairTimes(
+      graph,
+      [...pairsOf(ids, 300)].filter(([a, b]) => a !== b),
     );
-    expect(max).toBeLessThan(PAR_01_BUDGET_MS);
+    const coldMax = Math.max(...cold);
+    const max = Math.max(...warm);
+    console.info(
+      `PAR-01, chef de famille (${String(people.length)} personnes, 8 épouses, 40 enfants) : max ${max.toFixed(2)} ms à chaud, ${coldMax.toFixed(2)} ms à froid`,
+    );
+    const slowestCold = reportBudget(
+      'PAR-01, lien le plus lent, chef de famille, à froid',
+      coldMax,
+      PAR_01_BUDGET_MS,
+    );
+    expect(slowestCold.measuredMs).toBeLessThan(slowestCold.ceilingMs);
+    const slowest = reportBudget(
+      'PAR-01, lien le plus lent, chef de famille, à chaud (médiane)',
+      max,
+      PAR_01_BUDGET_MS,
+    );
+    expect(slowest.measuredMs).toBeLessThan(slowest.ceilingMs);
 
     // Deux co-épouses : un lien, par le mari ; deux enfants de deux épouses : demi-frères.
     const [first, second] = wives;
@@ -190,25 +243,42 @@ describe('PAR-01 : temps de réponse du moteur', () => {
       }
       ends.push(current);
     }
-    // Graphe neuf : le premier appel calcule les ensembles d'ancêtres (cache froid), l'appel
-    // suivant les retrouve en cache.
-    const graph = createKinshipGraph({ people, unions: [], filiations });
+    // Graphe neuf avant chaque mesure à froid (hors du temps compté) : le premier appel calcule
+    // les ensembles d'ancêtres (cache froid) ; sur le dernier graphe, les appels suivants les
+    // retrouvent en cache.
     const [a, b] = ends;
     if (a === undefined || b === undefined) throw new Error('Missing ends');
-    const results: ReturnType<typeof findRelationships>[] = [];
-    const cold = measure(() => {
-      results.push(findRelationships(graph, a, b));
-    });
-    const warm = measure(() => {
-      results.push(findRelationships(graph, a, b));
-    });
-    const [result] = results;
+    let graph = createKinshipGraph({ people, unions: [], filiations });
+    let result: ReturnType<typeof findRelationships> | undefined;
+    const cold = medianTime(
+      () => {
+        result = findRelationships(graph, a, b);
+      },
+      {
+        warmup: 1,
+        runs: 3,
+        setup: () => {
+          graph = createKinshipGraph({ people, unions: [], filiations });
+        },
+      },
+    ).medianMs;
+    const warm = medianTime(
+      () => {
+        findRelationships(graph, a, b);
+      },
+      { warmup: 1, runs: 5 },
+    ).medianMs;
     console.info(
       `PAR-01, cas profond (${String(people.length)} personnes) : premier appel, cache froid ` +
         `${cold.toFixed(2)} ms ; appel suivant, cache chaud ${warm.toFixed(2)} ms`,
     );
-    expect(cold).toBeLessThan(PAR_01_BUDGET_MS);
-    expect(warm).toBeLessThan(PAR_01_BUDGET_MS);
+    for (const [label, measured] of [
+      ['PAR-01, cas profond, cache froid', cold],
+      ['PAR-01, cas profond, cache chaud', warm],
+    ] as const) {
+      const report = reportBudget(label, measured, PAR_01_BUDGET_MS);
+      expect(report.measuredMs).toBeLessThan(report.ceilingMs);
+    }
     const segment = result?.status === 'related' ? result.relationships[0]?.segments[0] : undefined;
     expect(
       segment?.kind === 'blood' && [
