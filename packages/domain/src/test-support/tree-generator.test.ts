@@ -4,6 +4,8 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
+import { findCoherenceIssues } from '../coherence';
+import type { FuzzyDate } from '../fuzzy-date';
 import type { Id } from '../ids';
 import { treeArbitrary } from './arbitraries';
 import { medianTime, reportBudget } from './timing';
@@ -111,6 +113,14 @@ function expectAnnouncedStructures(data: TreeData, features: TreeFeatures) {
   expect(seen.polygamous).toBeGreaterThanOrEqual(features.polygamousPeople);
 }
 
+/**
+ * Année écrite par le générateur pour un fait : celle de la date, ou la borne basse de
+ * « entre ». Un texte seul n'en donne pas.
+ */
+function yearOf(date: FuzzyDate): number | undefined {
+  return 'date' in date ? date.date.year : 'from' in date ? date.from.year : undefined;
+}
+
 describe('générateur d’arbres', () => {
   it('donne le même arbre pour la même graine, et un autre pour une autre graine', () => {
     const first = generateTree({ seed: 42, size: 300 });
@@ -151,6 +161,79 @@ describe('générateur d’arbres', () => {
       }),
       { numRuns: 300 },
     );
+  });
+
+  it('un adulte qui adopte, élève, accueille ou a la tutelle est né au moins 15 ans avant l’enfant (300 arbres)', () => {
+    let checked = 0;
+    fc.assert(
+      fc.property(treeArbitrary({ maxSize: 200 }), (tree) => {
+        const births = new Map<Id, number>();
+        for (const fact of tree.facts) {
+          if (fact.type !== 'birth' || fact.subject.kind !== 'person' || !fact.date) continue;
+          const year = yearOf(fact.date);
+          if (year !== undefined) births.set(fact.subject.personId, year);
+        }
+        for (const filiation of tree.filiations) {
+          if (filiation.type === 'birth') continue;
+          const adult = births.get(filiation.parentId);
+          const child = births.get(filiation.childId);
+          if (adult === undefined || child === undefined) continue;
+          checked += 1;
+          expect(adult).toBeLessThanOrEqual(child - 15);
+        }
+      }),
+      { numRuns: 300 },
+    );
+    expect(checked).toBeGreaterThan(0);
+  });
+
+  it('une personne meurt au plus tôt l’année qui suit sa naissance (300 arbres)', () => {
+    // Les jours sont tirés au hasard dans l'année : un décès la même année pourrait tomber avant
+    // la naissance (death_before_birth).
+    let checked = 0;
+    fc.assert(
+      fc.property(treeArbitrary({ maxSize: 200 }), (tree) => {
+        const years = new Map<string, number>();
+        for (const fact of tree.facts) {
+          if (fact.subject.kind !== 'person' || !fact.date) continue;
+          if (fact.type !== 'birth' && fact.type !== 'death') continue;
+          const year = yearOf(fact.date);
+          if (year !== undefined) years.set(`${fact.type}|${fact.subject.personId}`, year);
+        }
+        for (const person of tree.people) {
+          const birth = years.get(`birth|${person.id}`);
+          const death = years.get(`death|${person.id}`);
+          if (birth === undefined || death === undefined) continue;
+          checked += 1;
+          expect(death).toBeGreaterThan(birth);
+        }
+      }),
+      { numRuns: 300 },
+    );
+    expect(checked).toBeGreaterThan(0);
+  });
+
+  it('cas réduit : une personne née l’année qui précède l’année de référence ne meurt pas la même année', () => {
+    const tree = generateTree({
+      seed: 98_423_808,
+      size: 73,
+      rates: {
+        marriage: 0.3133406089618802,
+        polygamy: 0.6555849842727185,
+        sororate: 0.4438391955569387,
+        implex: 0.15861922614276408,
+        withinTree: 0.04341028407216072,
+        levirate: 0.7601718613877892,
+        remarriage: 0.6274802377447486,
+        unknownParent: 0.03459266386926174,
+        placeholder: 0.544641699269414,
+        adoption: 0.32124260952696204,
+        twins: 0.186702723428607,
+        hidden: 0.26740870624780655,
+        toPlace: 0.02989154076203704,
+      },
+    });
+    expect(findCoherenceIssues(tree)).toEqual([]);
   });
 
   it('noms générés : jamais « Inconnu », toujours une forme lisible', () => {
