@@ -375,58 +375,77 @@ jobs:
   # ---------------------------------------------------------------------------------------------
   # Étapes prévues par le TRD qui n'ont pas encore de matière. Chacune vérifie qu'il n'y a
   # rien à tester, le dit dans le résumé, et échoue dès que la matière apparaît sans que le job
-  # soit branché. Seule exception, listée nommément : les scénarios en attente de T-006.
+  # soit branché.
   # ---------------------------------------------------------------------------------------------
 
   # Cas limites : un fichier test/scenarios/<ID>.yaml par cas, joué par un test.
-  # Aucun scénario n'est encore joué : le lecteur arrive avec T-006, qui remplacera ce job par
-  # « échec si un scénario n'est lu par aucun test ». D'ici là, seuls les scénarios de
-  # PENDING_T006 sont tolérés (vert avec avertissement) ; tout autre fichier fait échouer le job.
-  # N'allongez pas cette liste pour faire passer un scénario : écrivez son test.
+  # Un scénario est joué quand un test l'a réellement chargé pendant l'exécution : les tests
+  # tournent avec LIGNEE_SCENARIOS_PLAYED_DIR, et `loadScenario` (packages/domain/src/
+  # test-support/scenario.ts) y laisse un fichier par scénario chargé et validé. Un test ignoré,
+  # un commentaire, un paquet dont les tests ne tournent pas, ou la seule lecture de contrôle du
+  # format (`readScenarioFile`, qui ne laisse pas de trace) ne comptent pas. Tout scénario non
+  # joué fait échouer le job, sans exception. Ce qu'un test ne vérifie pas encore d'un scénario
+  # est déclaré dans son champ `couverture` (test/scenarios/README.md).
   cas-limites:
     name: cas-limites
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - name: Récupérer le code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
+      - name: Installer pnpm (version de packageManager)
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Installer Node (version de .nvmrc) et le cache pnpm
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Installer les dépendances
+        run: pnpm install --frozen-lockfile
+
+      - name: Jouer les tests en relevant les scénarios chargés
+        env:
+          LIGNEE_SCENARIOS_PLAYED_DIR: ${{ runner.temp }}/scenarios-joues
+        run: pnpm run test --force
+
       - name: Scénarios non joués
         env:
-          # Scénarios écrits avant le lecteur de T-006, non joués : liste fermée.
-          PENDING_T006: test/scenarios/CL-POL-03.yaml
+          PLAYED_DIR: ${{ runner.temp }}/scenarios-joues
         run: |
-          pending=""
-          unexpected=""
+          played=""
+          missing=""
           for file in $(git ls-files 'test/scenarios/*.yaml' 'test/scenarios/*.yml'); do
-            case " $PENDING_T006 " in
-              *" $file "*) pending="$pending $file" ;;
-              *) unexpected="$unexpected $file" ;;
-            esac
+            id="$(basename "$file")"
+            id="${id%.*}"
+            if [ -f "$PLAYED_DIR/$id" ]; then
+              played="$played $file"
+            else
+              missing="$missing $file"
+            fi
           done
           {
             echo "### Cas limites"
             echo
-            if [ -n "$pending" ]; then
-              echo "Non joués, en attente du lecteur de scénarios (T-006) :$pending"
+            if [ -n "$played" ]; then
+              echo "Joués par un test :$played"
             fi
-            if [ -n "$unexpected" ]; then
-              echo "Non joués et hors de la liste d'attente :$unexpected"
+            if [ -n "$missing" ]; then
+              echo "Non joués :$missing"
             fi
-            if [ -z "$pending$unexpected" ]; then
+            if [ -z "$played$missing" ]; then
               echo "Aucun scénario de cas limite pour l'instant."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
-          if [ -n "$pending" ]; then
-            echo "::warning title=Cas limites non joués (T-006)::Scénarios présents mais joués par aucun test, en attente de T-006 :$pending"
-          fi
-          if [ -n "$unexpected" ]; then
-            echo "::error title=Cas limites non joués::Scénarios joués par aucun test :$unexpected. Le lecteur de scénarios arrive avec T-006 ; seuls ceux de PENDING_T006 sont tolérés d'ici là."
+          if [ -n "$missing" ]; then
+            echo "::error title=Cas limites non joués::Scénarios chargés par aucun test pendant l'exécution :$missing. Écrivez leur test (loadScenario dans le corps d'un it) et déclarez dans « couverture » ce qu'il ne vérifie pas encore."
             exit 1
           fi
-          echo "Scénarios en attente de T-006 :${pending:- aucun}"
+          echo "Tous les scénarios sont joués."
 
   # Intégration avec PostgreSQL réel (Vitest et Testcontainers) : droits, synchro, propositions.
   # Convention : fichiers `*.integration.test.ts`. À remplir avec le schéma Prisma (T-042) et

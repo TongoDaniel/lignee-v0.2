@@ -1,0 +1,25 @@
+# Noms générés. Un enfant a déjà deux parents de naissance : un troisième est refusé, et Lignée
+# propose un autre type de lien, chacun accepté (UNI-09 : au plus deux parents « de naissance »,
+# les autres types sans limite). Le refus nomme l'enfant, ses deux parents de naissance et le
+# parent refusé.
+# Reste : la proposition à la saisie (T-033) et le refus par le serveur (T-060).
+id: CL-DON-11
+titre: Troisième parent « de naissance »
+couverture:
+  teste: [modele]
+  reste: [T-033, T-060]
+arbre:
+  personnes: [njoh/M, ewane/F, kotto/M, dibo/M, ekwe/F]
+  filiations:
+    - { parents: [njoh, ewane], enfant: dibo }
+    - { parents: [ekwe], enfant: dibo, type: a_eleve }
+action:
+  ajout_filiation: { parent: kotto, enfant: dibo, type: naissance }
+attendu:
+  refus:
+    code: third_birth_parent
+    severite: refus
+    personnes: [dibo, njoh, ewane, kotto]
+  propositions: [adoptive, a_eleve, confie, tuteur, donneur, gpa]
+  # Sans limite pour les autres types : un deuxième « a élevé » est accepté.
+  accepte: { parent: kotto, enfant: dibo, type: a_eleve }
