@@ -50,6 +50,9 @@
   "common:catalog.samples.albumTitle": {
     "status": "to-review"
   },
+  "common:catalog.samples.birthdayNodeLabel": {
+    "status": "to-review"
+  },
   "common:catalog.samples.celebrate": {
     "status": "to-review"
   },
@@ -60,6 +63,12 @@
     "status": "to-review"
   },
   "common:catalog.samples.dad": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.deceasedNodeLabel": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.deceasedYears": {
     "status": "to-review"
   },
   "common:catalog.samples.deed": {
@@ -74,6 +83,12 @@
   "common:catalog.samples.enabled": {
     "status": "to-review"
   },
+  "common:catalog.samples.fadedNodeLabel": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.father": {
+    "status": "to-review"
+  },
   "common:catalog.samples.firstName": {
     "status": "to-review"
   },
@@ -83,19 +98,52 @@
   "common:catalog.samples.firstNamePlaceholder": {
     "status": "to-review"
   },
+  "common:catalog.samples.healthNodeLabel": {
+    "status": "to-review"
+  },
   "common:catalog.samples.invite": {
     "status": "to-review"
   },
   "common:catalog.samples.language": {
     "status": "to-review"
   },
+  "common:catalog.samples.mom": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.motherNodeLabel": {
+    "status": "to-review"
+  },
   "common:catalog.samples.notifications": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.notificationText": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.notificationTime": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.notificationTitle": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.openProfileHint": {
     "status": "to-review"
   },
   "common:catalog.samples.openSheet": {
     "status": "to-review"
   },
   "common:catalog.samples.phone": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.privacyFamily": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.privacyHealth": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.probableNodeLabel": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.probableRelation": {
     "status": "to-review"
   },
   "common:catalog.samples.security": {
@@ -107,7 +155,13 @@
   "common:catalog.samples.sheetSubtitle": {
     "status": "to-review"
   },
+  "common:catalog.samples.showPathAction": {
+    "status": "to-review"
+  },
   "common:catalog.samples.showToast": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.sister": {
     "status": "to-review"
   },
   "common:catalog.samples.sisterOf": {
@@ -122,10 +176,28 @@
   "common:catalog.samples.storyTitle": {
     "status": "to-review"
   },
+  "common:catalog.samples.tabDocuments": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.tabMemories": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.tabsHint": {
+    "status": "to-review"
+  },
   "common:catalog.samples.toConfirm": {
     "status": "to-review"
   },
+  "common:catalog.samples.unknownNodeLabel": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.unknownPlace": {
+    "status": "to-review"
+  },
   "common:catalog.samples.you": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.youNodeLabel": {
     "status": "to-review"
   },
   "common:catalog.sections.buttons": {
@@ -152,10 +224,25 @@
   "common:catalog.sections.logo": {
     "status": "to-review"
   },
+  "common:catalog.sections.notification": {
+    "status": "to-review"
+  },
+  "common:catalog.sections.people": {
+    "status": "to-review"
+  },
+  "common:catalog.sections.privacy": {
+    "status": "to-review"
+  },
+  "common:catalog.sections.profileTabs": {
+    "status": "to-review"
+  },
   "common:catalog.sections.settings": {
     "status": "to-review"
   },
   "common:catalog.sections.switches": {
+    "status": "to-review"
+  },
+  "common:catalog.sections.tabBar": {
     "status": "to-review"
   },
   "common:catalog.subtitle": {

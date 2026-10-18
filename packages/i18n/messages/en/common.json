@@ -56,7 +56,12 @@
       "settings": "Settings rows",
       "feedback": "Confirmation and sheet",
       "icons": "Icons",
-      "logo": "Logo"
+      "logo": "Logo",
+      "people": "Avatars and tree nodes",
+      "privacy": "Privacy notes",
+      "profileTabs": "Profile tabs",
+      "tabBar": "Tab bar",
+      "notification": "Notification"
     },
     "display": {
       "seniorMode": "Senior mode",
@@ -94,7 +99,31 @@
       "openSheet": "Open the sheet",
       "sheetSubtitle": "They will receive a link to join the tree.",
       "sendInvite": "Send the invitation",
-      "addMotherHint": "Opens a profile to fill in."
+      "addMotherHint": "Opens a profile to fill in.",
+      "mom": "Mom",
+      "father": "Dad",
+      "sister": "Sister",
+      "motherNodeLabel": "Claire Martin, your mother, born in 1968",
+      "deceasedYears": "1931 – 2019",
+      "deceasedNodeLabel": "Odette Diallo, your grandmother, 1931 to 2019",
+      "youNodeLabel": "You",
+      "probableRelation": "Maybe his brother",
+      "probableNodeLabel": "Samuel Bah, maybe his brother, to be confirmed",
+      "birthdayNodeLabel": "Lucienne Martin, your sister, birthday today",
+      "healthNodeLabel": "Moussa Bah, your father, a history is noted",
+      "fadedNodeLabel": "Jean Bah, off the family path",
+      "unknownPlace": "Mother",
+      "unknownNodeLabel": "Your mother’s place to complete",
+      "openProfileHint": "Opens the person’s profile.",
+      "showPathAction": "Show the family link",
+      "privacyFamily": "Visible to the Martin family",
+      "privacyHealth": "Visible to you only",
+      "tabMemories": "Memories",
+      "tabDocuments": "Documents",
+      "tabsHint": "Shows this section of the profile.",
+      "notificationTitle": "Odette added a photo",
+      "notificationText": "Open Lignée to see it.",
+      "notificationTime": "Now"
     },
     "backHint": "Returns to the previous screen."
   }
