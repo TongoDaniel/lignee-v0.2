@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest';
 import { findDescendants, layoutDescendants, prepareDescendants } from '../descendants';
 import type { TreeLayout } from '../layout-types';
 import { expectLayoutInvariants } from '../test-support/layout-checks';
-import { withoutPeople } from '../test-support/layout-scenario';
+import { neverEntered, withoutObjects, withoutPeople } from '../test-support/layout-scenario';
 import { treeViewArbitrary } from '../test-support/view-arbitrary';
 import { layoutPrepared, layoutTree, prepareTree } from '../tree-layout';
 import type { LayoutGraph } from '../types';
@@ -132,6 +132,40 @@ describe('propriétés de l’implexe et de la descendance (T-019)', { timeout: 
             expectLayoutInvariants(layout);
             const text = serialized(layout);
             for (const id of masked) expect(text).not.toContain(id);
+          }
+        },
+      ),
+      { numRuns: 80 },
+    );
+  });
+
+  it('unions ou filiations masquées seules : même vue tout dépliée et même descendance que si elles n’avaient jamais été saisies', () => {
+    fc.assert(
+      fc.property(
+        viewArbitrary,
+        fc.array(fc.nat(), { maxLength: 4 }),
+        fc.array(fc.nat(), { maxLength: 6 }),
+        ({ tree, centerId }, unionPicks, filiationPicks) => {
+          const pick = (list: readonly { id: Id }[], picks: readonly number[]) =>
+            new Set(
+              list.length === 0 ? [] : picks.map((at) => (list[at % list.length] as { id: Id }).id),
+            );
+          const masked = {
+            unions: pick(tree.unions, unionPicks),
+            filiations: pick(tree.filiations, filiationPicks),
+            facts: new Set<Id>(),
+          };
+          const reader = withoutObjects(tree, masked);
+          const clean = neverEntered(tree, masked);
+          const views = [
+            [unfoldedLayout(reader, centerId), unfoldedLayout(clean, centerId)],
+            [layoutDescendants(reader, centerId), layoutDescendants(clean, centerId)],
+          ] as const;
+          for (const [seen, never] of views) {
+            expect(serialized(seen)).toBe(serialized(never));
+            for (const id of [...masked.unions, ...masked.filiations]) {
+              expect(serialized(seen)).not.toContain(id);
+            }
           }
         },
       ),

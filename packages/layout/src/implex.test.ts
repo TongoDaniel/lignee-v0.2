@@ -16,7 +16,7 @@ import {
   expectLayoutInvariants,
   familyKeyOf,
 } from './test-support/layout-checks';
-import { withoutPeople } from './test-support/layout-scenario';
+import { neverEntered, withoutObjects, withoutPeople } from './test-support/layout-scenario';
 import { layoutTree, prepareTree } from './tree-layout';
 
 function tree(section: unknown): ScenarioTree {
@@ -291,5 +291,156 @@ describe('vue « descendance » (ARB-14)', () => {
     layoutDescendants(scenario.data, scenario.id('pierre'));
     expect(JSON.stringify(scenario.data)).toBe(before);
     expect(() => layoutDescendants(scenario.data, 'absent')).toThrow(RangeError);
+  });
+});
+
+describe('étape 6 : seuils du renvoi et trait long', () => {
+  it('un lien d’exactement deux rangées reste un trait : la grand-mère qui a élevé son petit-fils', () => {
+    // Vu depuis Luc : Mireille, mère de son épouse Anne, est une rangée au-dessus ; Théo, fils
+    // d'Anne, une rangée en dessous. Mireille a élevé Théo : deux rangées, un trait.
+    const scenario = tree({
+      personnes: ['mireille/F', 'luc/M', 'anne/F', 'theo/M'],
+      unions: [{ conjoints: ['luc', 'anne'] }],
+      filiations: [
+        { parents: ['mireille'], enfant: 'anne' },
+        { parents: ['anne'], enfant: 'theo' },
+        { parents: ['mireille'], enfant: 'theo', type: 'a_eleve' },
+      ],
+    });
+    const layout = unfoldedLayout(scenario, 'luc');
+    expectLayoutInvariants(layout);
+    expectDisposition(layout, scenario, {
+      liens_hors_foyers: [{ nature: 'secondaire', de: ['mireille'], vers: 'theo', trace: 'trait' }],
+    });
+    expect(layout.links[0]?.rowSpan).toBe(MAX_LINE_ROW_SPAN);
+  });
+
+  it('un lien qui croise exactement quatre traits reste un trait, un de plus en fait un renvoi', () => {
+    // Même famille que plus haut : huit enfants de Gaston et Berthe, chacun avec un enfant. Luc a
+    // été élevé par chacun de ses oncles tour à tour ; on garde les tracés à 4 et 5 croisements.
+    const siblings = ['paul', 's1', 's2', 's3', 's4', 's5', 's6', 's7'];
+    const section = {
+      personnes: [
+        'gaston/M',
+        'berthe/F',
+        ...siblings.map((key) => `${key}/M`),
+        ...siblings.map((key) => `${key}_w/F`),
+        ...siblings.map((key) => `${key}_c/M`),
+      ],
+      unions: [
+        { conjoints: ['gaston', 'berthe'] },
+        ...siblings.map((key) => ({ conjoints: [key, `${key}_w`] })),
+      ],
+      filiations: [
+        ...siblings.map((key) => ({ parents: ['gaston', 'berthe'], enfant: key })),
+        ...siblings.map((key) => ({ parents: [key, `${key}_w`], enfant: `${key}_c` })),
+      ],
+    };
+    const drawings = new Map<number, string>();
+    for (const uncle of siblings.slice(1)) {
+      const raised = tree({
+        ...section,
+        filiations: [
+          ...section.filiations,
+          { parents: [uncle], enfant: 'paul_c', type: 'a_eleve' },
+        ],
+      });
+      const layout = unfoldedLayout(raised, 'paul_c');
+      expectLayoutInvariants(layout);
+      const link = layout.links.find((candidate) => candidate.nature === 'secondary');
+      if (link !== undefined) drawings.set(link.crossings, link.drawing);
+    }
+    expect(drawings.get(MAX_LINE_CROSSINGS)).toBe('line');
+    expect(drawings.get(MAX_LINE_CROSSINGS + 1)).toBe('seeAlso');
+  });
+
+  it('un enfant dessiné sur une rangée non voisine de sa famille est relié par un trait long', () => {
+    // Nadia, fille d'Hervé (frère de Mireille), a épousé Paul, le père de Luc. Vu depuis Luc,
+    // Nadia est à la rangée de Paul (par l'union), comme son père Hervé (par Mireille) : le lien
+    // d'Hervé à Nadia ne descend d'aucune rangée, c'est un trait long.
+    const scenario = tree({
+      personnes: ['gerard/M', 'jeanne/F', 'paul/M', 'mireille/F', 'herve/M', 'nadia/F', 'luc/M'],
+      unions: [
+        { conjoints: ['gerard', 'jeanne'] },
+        { conjoints: ['paul', 'mireille'], motif: 'deces' },
+        { conjoints: ['paul', 'nadia'] },
+      ],
+      filiations: [
+        { parents: ['gerard', 'jeanne'], enfant: 'mireille' },
+        { parents: ['gerard', 'jeanne'], enfant: 'herve' },
+        { parents: ['herve'], enfant: 'nadia' },
+        { parents: ['paul', 'mireille'], enfant: 'luc' },
+      ],
+    });
+    const layout = unfoldedLayout(scenario, 'luc');
+    expectLayoutInvariants(layout);
+    expect(layout.people.get(scenario.id('nadia'))?.row).toBe(-1);
+    expect(layout.people.get(scenario.id('herve'))?.row).toBe(-1);
+    const long = layout.links.filter((link) => link.nature === 'long');
+    expect(long.map((link) => [scenario.keyOf(link.fromId), scenario.keyOf(link.toId)])).toEqual([
+      ['herve', 'nadia'],
+    ]);
+    expect(long[0]?.rowSpan).toBe(0);
+    expect(long[0]?.drawing).toBe('line');
+  });
+});
+
+describe('étape 6 : filiation secondaire masquée (gardien-confidentialite)', () => {
+  // Théa a ses deux parents de naissance, Paul et Rose ; Odile, seconde épouse de Paul, l'a
+  // adoptée (enfant du conjoint adopté par un beau-parent).
+  const section = {
+    personnes: ['paul/M', 'rose/F', 'odile/F', 'thea/F'],
+    unions: [{ conjoints: ['paul', 'rose'], motif: 'divorce' }, { conjoints: ['paul', 'odile'] }],
+    filiations: [
+      { parents: ['paul', 'rose'], enfant: 'thea' },
+      { parents: ['odile'], enfant: 'thea', type: 'adoptive' },
+    ],
+  };
+  const comparable = (layout: TreeLayout) => ({
+    people: [...layout.people.values()],
+    families: [...layout.families.values()],
+    links: layout.links,
+  });
+
+  it('adoption visible : un lien secondaire, qui disparaît quand l’adoption est masquée', () => {
+    const scenario = tree(section);
+    const thea = scenario.id('thea');
+    const visible = layoutTree(scenario.data, thea);
+    expect(visible.links.map((link) => link.nature)).toEqual(['secondary']);
+
+    const adoption = scenario.data.filiations.find((filiation) => filiation.type === 'adoptive');
+    if (adoption === undefined) throw new Error('Adoption absente');
+    const masked = {
+      unions: new Set<Id>(),
+      filiations: new Set([adoption.id]),
+      facts: new Set<Id>(),
+    };
+    const reader = layoutTree(withoutObjects(scenario.data, masked), thea);
+    expect(reader.links.filter((link) => link.nature === 'secondary')).toEqual([]);
+    expect(comparable(reader)).toEqual(
+      comparable(layoutTree(neverEntered(scenario.data, masked), thea)),
+    );
+    expect(serialized(reader)).not.toContain(adoption.id);
+  });
+
+  it('naissances masquées, adoption visible : l’enfant est rangé chez Odile, sans lien secondaire', () => {
+    const scenario = tree(section);
+    const thea = scenario.id('thea');
+    const births = scenario.data.filiations.filter((filiation) => filiation.type === 'birth');
+    const masked = {
+      unions: new Set<Id>(),
+      filiations: new Set(births.map((filiation) => filiation.id)),
+      facts: new Set<Id>(),
+    };
+    const reader = layoutTree(withoutObjects(scenario.data, masked), thea);
+    expect(reader.links).toEqual([]);
+    expect(reader.structure.placementOf.get(thea)).toMatchObject({
+      kind: 'unspecified',
+      parentId: scenario.id('odile'),
+    });
+    expect(comparable(reader)).toEqual(
+      comparable(layoutTree(neverEntered(scenario.data, masked), thea)),
+    );
+    for (const filiation of births) expect(serialized(reader)).not.toContain(filiation.id);
   });
 });
