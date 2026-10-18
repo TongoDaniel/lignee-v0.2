@@ -1,0 +1,25 @@
+# Noms générés. Amina, fille de Paul et Mireille, est confiée par kafala à Karim, marié à Esther et
+# père de Fodé. La kafala ne crée pas de filiation : un lien « confié à », ni naissance, ni
+# adoption.
+# Partie lien (T-022) : pour Karim, Amina « lui est confiée » ; ses parents de naissance restent ;
+# Fodé n'est jamais son frère, ni par la naissance, ni par adoption (PAR-06). Le test vérifie aussi
+# que Karim n'est jamais un parent d'Amina sur les seuls liens de naissance. Reste : les mots
+# (T-026, T-027).
+id: CL-FAM-05
+titre: Kafala
+couverture:
+  teste: [lien]
+  reste: [T-026, T-027]
+arbre:
+  personnes: [paul/M, mireille/F, karim/M, esther/F, fode/M, amina/F]
+  unions:
+    - { conjoints: [paul, mireille] }
+    - { conjoints: [karim, esther] }
+  filiations:
+    - { parents: [paul, mireille], enfant: amina }
+    - { parents: [karim, esther], enfant: fode }
+    - { parents: [karim], enfant: amina, type: confie }
+attendu:
+  liens:
+    - { de: karim, vers: amina, fr: "lui est confiée", en: "entrusted to them", aussi: [] }
+    - { de: amina, vers: paul, fr: "père", en: "father", aussi: [] }

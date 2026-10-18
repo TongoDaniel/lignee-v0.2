@@ -42,6 +42,98 @@ export function scenarioSchema<Shape extends z.ZodRawShape>(id: string, sections
   });
 }
 
+export type ScenarioPart = z.infer<typeof coverageSchema>['teste'][number];
+
+/**
+ * Clés propres à chaque partie d'un scénario à plusieurs parties (test/scenarios/README.md,
+ * « Scénarios à plusieurs parties ») : à la racine et dans `attendu`. Le test d'une partie
+ * déclare les clés des autres sans les lire (`otherPartsShape`) ; elles ne sont admises que si
+ * `couverture.teste` nomme leur partie (`requireScenarioParts`). Les clés de `disposition` sont
+ * celles du schéma de packages/layout, qu'un test de layout compare à cette liste.
+ */
+export const scenarioPartKeys = {
+  disposition: {
+    racine: ['action'],
+    attendu: [
+      'generations',
+      'sans_avertissement',
+      'sans_regle_de_genre',
+      'unites',
+      'apres',
+      'vers_centre_depuis',
+      'disposition',
+      'apres_deplier',
+      'descendance',
+    ],
+  },
+  lien: { racine: [], attendu: ['liens'] },
+} as const satisfies Partial<
+  Record<ScenarioPart, { racine: readonly string[]; attendu: readonly string[] }>
+>;
+export type MultiPart = keyof typeof scenarioPartKeys;
+type PartPlace = 'racine' | 'attendu';
+type PartKey<
+  Part extends MultiPart,
+  Place extends PartPlace,
+> = (typeof scenarioPartKeys)[Part][Place][number];
+
+/**
+ * Clés des autres parties, déclarées sans être lues, à étaler à la racine ou dans `attendu` du
+ * schéma strict d'une partie. Toujours avec `requireScenarioParts`.
+ */
+export function otherPartsShape<Part extends MultiPart, Place extends PartPlace>(
+  parts: readonly Part[],
+  place: Place,
+): Record<PartKey<Part, Place>, z.ZodOptional<z.ZodUnknown>> {
+  const keys = parts.flatMap((part): readonly string[] => scenarioPartKeys[part][place]);
+  return Object.fromEntries(keys.map((key) => [key, z.unknown().optional()])) as Record<
+    PartKey<Part, Place>,
+    z.ZodOptional<z.ZodUnknown>
+  >;
+}
+
+/**
+ * Contrôle d'un scénario à plusieurs parties, à passer à `.superRefine` : `couverture.teste`
+ * nomme la partie jouée (`own`), et chaque clé propre à une autre partie (`others`) présente dans
+ * le fichier exige que `teste` nomme aussi cette partie. Sans ce contrôle, une partie écrite mais
+ * jouée par aucun test passerait inaperçue.
+ */
+export function requireScenarioParts(own: ScenarioPart, others: readonly MultiPart[]) {
+  return (
+    scenario: { couverture?: { teste: readonly ScenarioPart[] } | undefined },
+    context: z.RefinementCtx,
+  ): void => {
+    const tested = scenario.couverture?.teste ?? [];
+    if (!tested.includes(own)) {
+      context.addIssue({
+        code: 'custom',
+        path: ['couverture', 'teste'],
+        message: `Expected couverture.teste to contain ${own}`,
+      });
+    }
+    const root = scenario as Record<string, unknown>;
+    const expected = (root.attendu ?? {}) as Record<string, unknown>;
+    for (const part of others) {
+      if (tested.includes(part)) continue;
+      const present = [
+        ...scenarioPartKeys[part].racine
+          .filter((key) => root[key] !== undefined)
+          .map((key) => [key]),
+        ...scenarioPartKeys[part].attendu
+          .filter((key) => expected[key] !== undefined)
+          .map((key) => ['attendu', key]),
+      ];
+      for (const path of present) {
+        context.addIssue({
+          code: 'custom',
+          path,
+          message: `${path.join('.')} belongs to part ${part}, absent from couverture.teste`,
+        });
+      }
+    }
+  };
+}
+
 /**
  * Lit `test/scenarios/<id>.yaml` et le valide avec `schema`. À appeler dans le corps d'un test
  * (`it`), pas au chargement du fichier : un test ignoré ne compte pas comme joué.

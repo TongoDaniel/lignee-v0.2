@@ -1,15 +1,22 @@
-# Noms générés. Partie disposition (T-012, packages/layout) : André meurt ; sa veuve Wanda épouse
-# son frère Benoît, déjà marié à Claire et qui le reste. Vu depuis W2, enfant du lévirat : Benoît
-# a deux unions simultanées, même si le foyer de Wanda et Benoît est porté par Wanda (ADR 0013,
-# règle 5) ; il est dessiné au-dessus de Claire et Wanda, dans l'ordre de ses unions, et André,
-# premier mari de Wanda, reste sur la rangée à l'extérieur du groupe, sans s'intercaler entre les
-# épouses (ADR 0016). Reste : les liens « demi-frères (même mère) » et « cousins (par les pères) »
-# (T-022, T-026).
+# Noms générés. André meurt ; sa veuve Wanda épouse son frère Benoît, déjà marié à Claire et qui le
+# reste (lévirat). W1 est né d'André et de Wanda, W2 de Benoît et de Wanda, C1 de Benoît et de
+# Claire.
+# Partie disposition (T-012, packages/layout) : vu depuis W2, enfant du lévirat, Benoît a deux
+# unions simultanées, même si le foyer de Wanda et Benoît est porté par Wanda (ADR 0013, règle 5) ;
+# il est dessiné au-dessus de Claire et Wanda, dans l'ordre de ses unions, et André, premier mari
+# de Wanda, reste sur la rangée à l'extérieur du groupe, sans s'intercaler entre les épouses
+# (ADR 0016).
+# Partie lien (T-022) : chaque lien attendu (le principal, puis « aussi », dans l'ordre) est
+# ramené à sa structure et comparé à la présentation calculée (`presentRelationships`). W1 et W2
+# sont demi-frères par leur mère et cousins par leurs pères (UNI-21, PAR-05) ; pour C1, W2 est
+# son demi-frère par leur père, et aussi le fils de l'épouse de son oncle André ; W1 est sa
+# cousine, et aussi la fille de l'épouse de son père. Les deux sens sont vérifiés.
+# Reste : les mots en français et en anglais (T-026, T-027).
 id: CL-POL-09
 titre: Lévirat, la veuve épouse le frère du défunt, déjà marié
 couverture:
-  teste: [disposition]
-  reste: [T-022, T-026]
+  teste: [disposition, lien]
+  reste: [T-026, T-027]
 arbre:
   personnes: [pa/M, andre/M, wanda/F, benoit/M, claire/F, w1/F, w2/M, c1/F]
   unions:
@@ -59,3 +66,28 @@ attendu:
       - { famille: [benoit, claire], replie: true, enfants: 1 }
       - { famille: [wanda, benoit], replie: false, enfants: 1 }
       - { famille: [andre, wanda], replie: true, enfants: 1 }
+  liens:
+    - de: w2
+      vers: w1
+      fr: "demi-sœur, même mère"
+      en: "half-sister, same mother"
+      aussi:
+        - { fr: "cousine par votre père", en: "cousin through your father" }
+    - de: w1
+      vers: w2
+      fr: "demi-frère, même mère"
+      en: "half-brother, same mother"
+      aussi:
+        - { fr: "cousin par votre père", en: "cousin through your father" }
+    - de: c1
+      vers: w2
+      fr: "demi-frère, même père"
+      en: "half-brother, same father"
+      aussi:
+        - { fr: "fils de l'épouse de votre oncle", en: "son of your uncle's wife" }
+    - de: c1
+      vers: w1
+      fr: "cousine par votre père"
+      en: "cousin through your father"
+      aussi:
+        - { fr: "fille de l'épouse de votre père", en: "daughter of your father's wife" }

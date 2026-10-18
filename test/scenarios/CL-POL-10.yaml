@@ -1,0 +1,46 @@
+# Noms générés. Sororat : Modeste épouse Sabine, puis sa sœur Solange, en même temps (réponse
+# gardée). Kévin est né de Modeste et Sabine, Karine de Modeste et Solange.
+# Partie lien (T-022) : Kévin et Karine sont demi-frère et sœur par leur père, et cousins par
+# leurs mères, les deux liens affichés, le plus proche d'abord (PAR-05) ; pour Kévin, Solange est
+# sa tante par sa mère et aussi l'épouse de son père (le sang avant l'alliance). Chaque lien
+# attendu est ramené à sa structure et comparé à la présentation calculée, dans les deux sens.
+# Reste : les mots en français et en anglais (T-026, T-027).
+id: CL-POL-10
+titre: Sororat, deux sœurs épouses du même homme
+couverture:
+  teste: [lien]
+  reste: [T-026, T-027]
+arbre:
+  personnes: [gp/M, gm/F, sabine/F, solange/F, modeste/M, kevin/M, karine/F]
+  unions:
+    - { conjoints: [gp, gm] }
+    - { conjoints: [modeste, sabine], rang_modeste: 1 }
+    - { conjoints: [modeste, solange], rang_modeste: 2 }
+  filiations:
+    - { parents: [gp, gm], enfant: sabine }
+    - { parents: [gp, gm], enfant: solange }
+    - { parents: [modeste, sabine], enfant: kevin }
+    - { parents: [modeste, solange], enfant: karine }
+  simultaneites:
+    - unions: [[modeste, sabine], [modeste, solange]]
+      reponse: simultanees
+attendu:
+  liens:
+    - de: kevin
+      vers: karine
+      fr: "demi-sœur, même père"
+      en: "half-sister, same father"
+      aussi:
+        - { fr: "cousine par votre mère", en: "cousin through your mother" }
+    - de: karine
+      vers: kevin
+      fr: "demi-frère, même père"
+      en: "half-brother, same father"
+      aussi:
+        - { fr: "cousin par votre mère", en: "cousin through your mother" }
+    - de: kevin
+      vers: solange
+      fr: "tante par votre mère"
+      en: "aunt through your mother"
+      aussi:
+        - { fr: "épouse de votre père", en: "your father's wife" }

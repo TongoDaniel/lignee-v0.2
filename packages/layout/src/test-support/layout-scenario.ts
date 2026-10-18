@@ -11,6 +11,8 @@ import {
 } from '@lignee/domain';
 import {
   buildScenarioTree,
+  otherPartsShape,
+  requireScenarioParts,
   scenarioSchema,
   scenarioTreeSchema,
   type ScenarioTree,
@@ -154,16 +156,24 @@ export const layoutExpectedSchema = z.strictObject({
   apres_deplier: dispositionExpectedSchema.optional(),
   /** Vue « descendance » de `action.descendance_de`, tout déplié par défaut (ARB-14, T-019). */
   descendance: dispositionExpectedSchema.optional(),
+  /**
+   * Partie lien du même scénario, vérifiée par packages/kinship (T-022) : déclarée sans être lue,
+   * admise seulement si `couverture.teste` contient `lien` (`requireScenarioParts`).
+   */
+  ...otherPartsShape(['lien'], 'attendu'),
 });
 export type LayoutExpected = z.infer<typeof layoutExpectedSchema>;
 
-/** Schéma strict d'un scénario de disposition. */
+/**
+ * Schéma strict d'un scénario de disposition : `couverture.teste` contient `disposition`, et
+ * `lien` si le scénario a aussi une partie lien (test/scenarios/README.md).
+ */
 export function layoutScenarioSchema(id: string) {
   return scenarioSchema(id, {
     arbre: scenarioTreeSchema,
     action: layoutActionSchema,
     attendu: layoutExpectedSchema,
-  });
+  }).superRefine(requireScenarioParts('disposition', ['lien']));
 }
 export type LayoutScenario = z.infer<ReturnType<typeof layoutScenarioSchema>>;
 

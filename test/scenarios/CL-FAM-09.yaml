@@ -1,15 +1,19 @@
-# Noms générés. Partie disposition (T-019, packages/layout) : Paul et Marie sont cousins germains
-# (leurs parents Bernard et Colette sont frère et sœur, enfants de Gaspard et Honorine) ; ils ont
-# un fils, Luc. Vu depuis Luc, Gaspard et Honorine sont ses arrière-grands-parents par les deux
-# branches : chacun n'a qu'une fiche (ARB-06, « aucune fiche en double »), et le couple de Paul et
-# Marie, rangé dans la fratrie de la famille de Paul, est relié à la famille de Marie par un trait
-# vers une autre place : tous les liens sont affichés. Même chose dans la vue « descendance » de
-# Gaspard (ARB-14) : Luc n'y figure qu'une fois. Reste : la revue visuelle du trait (T-017).
+# Noms générés. Bernard et Colette sont frère et sœur, enfants de Gaspard et Honorine ; leur fils
+# Paul et leur fille Marie, cousins germains, se marient et ont Luc.
+# Partie disposition (T-019, packages/layout) : vu depuis Luc, Gaspard et Honorine sont ses
+# arrière-grands-parents par les deux branches : chacun n'a qu'une fiche (ARB-06, « aucune fiche en
+# double »), et le couple de Paul et Marie, rangé dans la fratrie de la famille de Paul, est relié à
+# la famille de Marie par un trait vers une autre place : tous les liens sont affichés. Même chose
+# dans la vue « descendance » de Gaspard (ARB-14) : Luc n'y figure qu'une fois.
+# Partie lien (T-022) : implexe. Gaspard n'est qu'une fois parmi les ancêtres de Luc, et les deux
+# chemins vers lui sont affichés (par son père et par sa mère). Bernard est son grand-père par son
+# père, et aussi son grand-oncle par sa mère ; pour Paul, Marie est sa cousine, et aussi son
+# épouse (le sang d'abord). Reste : la revue visuelle du trait (T-017), les mots (T-026, T-027).
 id: CL-FAM-09
 titre: Mariage entre cousins germains
 couverture:
-  teste: [disposition]
-  reste: [T-017]
+  teste: [disposition, lien]
+  reste: [T-017, T-026, T-027]
 arbre:
   personnes: [gaspard/M, honorine/F, bernard/M, alice/F, colette/F, denis/M, paul/M, marie/F, luc/M]
   unions:
@@ -69,3 +73,16 @@ attendu:
       "3": [luc]
     liens_hors_foyers:
       - { nature: ailleurs, de: [colette, denis], vers: marie, trace: trait }
+  liens:
+    - de: luc
+      vers: bernard
+      fr: "grand-père par votre père"
+      en: "grandfather through your father"
+      aussi:
+        - { fr: "grand-oncle par votre mère", en: "great-uncle through your mother" }
+    - de: paul
+      vers: marie
+      fr: "cousine par votre père"
+      en: "cousin through your father"
+      aussi:
+        - { fr: "épouse", en: "wife" }
