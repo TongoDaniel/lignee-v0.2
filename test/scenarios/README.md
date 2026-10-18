@@ -86,7 +86,7 @@ Pour les tests de propriétés, `treeArbitrary()` (fast-check) et `referenceTree
 
 ## Disposition (packages/layout, T-008, T-012)
 
-Les scénarios de disposition (CL-POL-01, 04, 06, 12, 13, 14, 18, CL-SEC-03) déclarent `teste: [disposition]`. Leur arbre suit le format commun, avec les dates, la fin et la simultanéité des unions et les candidats (sections ci-dessus) ; leur action et leur attendu sont lus en schéma strict par `packages/layout/src/test-support/layout-scenario.ts` :
+Les scénarios de disposition (CL-POL-01, 04, 06, 09, 12, 13, 14, 18, CL-SEC-03) déclarent `teste: [disposition]`. Leur arbre suit le format commun, avec les dates, la fin et la simultanéité des unions et les candidats (sections ci-dessus) ; leur action et leur attendu sont lus en schéma strict par `packages/layout/src/test-support/layout-scenario.ts` :
 
 | Clé | Contenu |
 | --- | --- |
