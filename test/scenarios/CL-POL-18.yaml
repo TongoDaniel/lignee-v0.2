@@ -1,13 +1,13 @@
 # Noms générés. Partie disposition (T-008, packages/layout) : deux groupes de foyers imbriqués,
 # celui du grand-père et celui du père, Samuel étant l'enfant d'un foyer du grand-père. Chaque
 # foyer sait s'il mène à la personne qui regarde : depuis Noémie, ceux de Sarah et de Judith ;
-# depuis Théo, ceux de Sarah et de Grace. Le repli lui-même est T-012 ; reste aussi la revue
-# visuelle (T-017).
+# depuis Théo, ceux de Sarah et de Grace. Repli (T-012) : depuis Noémie, ces deux foyers sont
+# ouverts et les autres repliés, chacun avec son compteur. Reste : la revue visuelle (T-017).
 id: CL-POL-18
 titre: Polygamie sur deux générations (grand-père et père)
 couverture:
   teste: [disposition]
-  reste: [T-012, T-017]
+  reste: [T-017]
 arbre:
   personnes:
     - emmanuel/M
@@ -68,3 +68,16 @@ attendu:
         - { conjoint: judith, enfants: [noemie], vers_centre: true }
   vers_centre_depuis:
     theo: [[emmanuel, sarah], [samuel, grace]]
+  disposition:
+    lignes:
+      "-2": [emmanuel]
+      "-1.5": [ruth, sarah, lydia]
+      "-1": [samuel]
+      "-0.5": [grace, judith]
+      "0": [noemie]
+    replis:
+      - { famille: [emmanuel, ruth], replie: true, enfants: 1 }
+      - { famille: [emmanuel, sarah], replie: false, enfants: 1 }
+      - { famille: [emmanuel, lydia], replie: true, enfants: 1 }
+      - { famille: [samuel, grace], replie: true, enfants: 1 }
+      - { famille: [samuel, judith], replie: false, enfants: 1 }

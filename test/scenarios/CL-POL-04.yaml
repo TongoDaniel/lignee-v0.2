@@ -1,12 +1,13 @@
 # Noms générés. Partie disposition (T-008, packages/layout) : sans date de mariage, les foyers
 # suivent le rang saisi ; une date en texte libre ne passe pas devant le rang. Puis le rang est
-# changé à la main : les foyers se réordonnent au calcul suivant (UNI-07). Reste : placement et
-# repli (T-012), saisie du rang (T-032), revue visuelle (T-017).
+# changé à la main : les foyers se réordonnent au calcul suivant (UNI-07). Placement et repli
+# (T-012) : épouses sur la demi-rangée dans l'ordre des rangs, foyer de Marthe seul ouvert. Reste :
+# saisie du rang (T-032), revue visuelle (T-017).
 id: CL-POL-04
 titre: Rang des épouses connu, dates de mariage inconnues
 couverture:
   teste: [disposition]
-  reste: [T-012, T-017, T-032]
+  reste: [T-017, T-032]
 arbre:
   personnes: [pierre/M, rose/F, odile/F, clarisse/F, jean/M, marthe/F, paul/M]
   unions:
@@ -43,3 +44,12 @@ attendu:
           - { conjoint: clarisse, enfants: [paul] }
           - { conjoint: odile, enfants: [marthe], vers_centre: true }
           - { conjoint: rose, enfants: [jean] }
+  disposition:
+    lignes:
+      "-1": [pierre]
+      "-0.5": [rose, odile, clarisse]
+      "0": [marthe]
+    replis:
+      - { famille: [pierre, rose], replie: true, enfants: 1 }
+      - { famille: [pierre, odile], replie: false, enfants: 1 }
+      - { famille: [pierre, clarisse], replie: true, enfants: 1 }
