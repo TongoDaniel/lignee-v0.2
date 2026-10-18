@@ -100,7 +100,7 @@ export type Segment = BloodSegment | UnionLink;
 
 /**
  * Nature d'un lien par alliance, lue dans la forme du chemin (générations de chaque segment de
- * sang) et, pour la co-épouse, dans la simultanéité des unions (ADR 0019). B est, pour A :
+ * sang) et, pour la co-épouse, dans la simultanéité des unions (ADR 0020). B est, pour A :
  * - `spouse` : son conjoint ;
  * - `parent_of_spouse` : un parent de son conjoint (inverse : `spouse_of_child`) ;
  * - `spouse_of_parent` : le conjoint d'un de ses parents qui n'est pas son autre parent
@@ -219,7 +219,7 @@ export interface SharedSpouse {
 }
 
 /**
- * Lien par alliance, sans mots (T-021, ADR 0019) : nature du lien, passages des unions avec leur
+ * Lien par alliance, sans mots (T-021, ADR 0020) : nature du lien, passages des unions avec leur
  * état, simultanéité quand elle compte. Ne contient que des objets du graphe du lecteur : une
  * union masquée n'y figure jamais, ni comme passage, ni comme union comparée.
  */

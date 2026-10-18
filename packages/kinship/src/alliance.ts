@@ -1,5 +1,5 @@
 // Liens par alliance nommés structurellement (TRD, « Moteur de parenté », question 1 : conjoint,
-// parents du conjoint, conjoint d'un parent, co-épouse ; PRD, PAR-02 et PAR-04). Règles : ADR 0019.
+// parents du conjoint, conjoint d'un parent, co-épouse ; PRD, PAR-02 et PAR-04). Règles : ADR 0020.
 //
 // Le chemin vient de `findRelationships` (ADR 0010) : on ne crée aucun chemin ici, on ne lit que
 // sa forme (générations de chaque segment de sang) et les unions qu'il traverse. Rien n'est

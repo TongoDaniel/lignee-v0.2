@@ -44,7 +44,7 @@ Règles : ADR 0017 (proposée). Sans mots (T-026, T-027).
 | --- | --- |
 | `alliance.ts` | `createAllianceContext({ facts, simultaneityAnswers, people })` : contexte construit une fois par arbre, à partir de l'arbre filtré du lecteur ; `classifyAlliance(graph, chemin, contexte)` : lien par alliance d'un chemin, sans mots |
 
-Règles : ADR 0019 (proposée). `findRelationships(graph, a, b, { allianceContext })` joint à chaque chemin par alliance son champ `alliance` (`AllianceLink`), sans changer les chemins ni leur ordre :
+Règles : ADR 0020 (proposée). `findRelationships(graph, a, b, { allianceContext })` joint à chaque chemin par alliance son champ `alliance` (`AllianceLink`), sans changer les chemins ni leur ordre :
 
 - `kind` : `spouse`, `parent_of_spouse`, `spouse_of_parent` (« épouse de votre père », jamais « belle-mère », PAR-04), `child_of_spouse`, `spouse_of_child` (gendre, bru), `sibling_of_spouse`, `spouse_of_sibling`, `step_sibling` (« fils de l'épouse de votre père », CL-FAM-01), `co_spouse` (seulement si une paire d'unions est établie simultanée, par les dates ou la réponse gardée), `spouse_of_spouse` (« autre épouse de votre mari »), `spouse_of_sibling_of_spouse`, `other` ;
 - `crossings` : chaque union traversée, sa fin (`no_end_known`, ou `ended` avec le motif) et le côté enfant (`fromChild`, `toChild` : union du parent simultanée, successive, inconnue avec celle de l'autre parent de l'enfant, ou `none`) ;

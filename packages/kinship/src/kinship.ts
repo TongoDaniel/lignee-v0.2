@@ -64,7 +64,7 @@ export interface KinshipOptions {
   /** Paires de chaînes examinées au plus pour le sang (garde-fou). Par défaut 65 536. */
   maxPathChecks?: number;
   /**
-   * Arbre filtré du lecteur pour nommer l'alliance (T-021, ADR 0019) : décès et réponses « unions
+   * Arbre filtré du lecteur pour nommer l'alliance (T-021, ADR 0020) : décès et réponses « unions
    * simultanées ou successives » (`createAllianceContext`). Sans lui, seules les dates des unions
    * comptent : jamais de co-épouse supposée. Ne change ni les chemins, ni leur ordre.
    */

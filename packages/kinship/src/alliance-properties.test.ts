@@ -1,4 +1,4 @@
-// Propriétés de l'alliance nommée (T-021, ADR 0019) sur des arbres générés : polygamie, lévirat,
+// Propriétés de l'alliance nommée (T-021, ADR 0020) sur des arbres générés : polygamie, lévirat,
 // sororat, implexe, unions datées ou non, réponses « simultanées ou successives » gardées.
 // - symétrie : le lien de B vers A est l'inverse exact (co-épouse ↔ co-épouse, conjoint d'un
 //   parent ↔ enfant du conjoint, parent du conjoint ↔ conjoint de l'enfant…), et classer le
@@ -120,7 +120,7 @@ function pairsOf(tree: TreeData, graph: KinshipGraph, chosen: readonly [number, 
 const shape = (segment: BloodSegment) =>
   `${String(segment.generationsUp)}/${String(segment.generationsDown)}`;
 
-/** Nature attendue d'après la forme, écrite ici sans se fier au moteur (ADR 0019). */
+/** Nature attendue d'après la forme, écrite ici sans se fier au moteur (ADR 0020). */
 function expectedKind(blood: readonly BloodSegment[], simultaneous: boolean): AllianceKind {
   const key = blood.map(shape).join(' ');
   const table: Record<string, AllianceKind> = {

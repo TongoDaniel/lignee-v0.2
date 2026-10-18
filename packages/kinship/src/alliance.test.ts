@@ -1,4 +1,4 @@
-// Liens par alliance nommés structurellement (T-021, ADR 0019 ; TRD, « Moteur de parenté »,
+// Liens par alliance nommés structurellement (T-021, ADR 0020 ; TRD, « Moteur de parenté »,
 // question 1 : conjoint, parents du conjoint, conjoint d'un parent, co-épouse ; PRD, PAR-04).
 // Petits arbres au format des scénarios ; la simultanéité vient des dates des unions, des décès
 // et des réponses gardées (ADR 0012), lus par `createAllianceContext`.

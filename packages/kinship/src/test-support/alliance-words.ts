@@ -2,7 +2,7 @@
 // désigne, en attendant les dictionnaires (T-026 en français, T-027 en anglais). Les mots viennent
 // du cahier (PAR-04 : « épouse de votre père », « mari de votre mère », « co-épouse » ; CL-FAM-01 :
 // « fils de l'épouse de votre père » ; TRD : « co-wife ») ; les autres formes et l'anglais sont
-// proposés dans l'ADR 0019. « belle-mère » et « beau-père » n'y figurent pas : ambigus (PAR-04).
+// proposés dans l'ADR 0020. « belle-mère » et « beau-père » n'y figurent pas : ambigus (PAR-04).
 // Quand T-026 et T-027 existeront, les scénarios compareront les mots calculés et ce tableau
 // disparaîtra. Réservé aux tests.
 import type { Gender, Id } from '@lignee/domain';
