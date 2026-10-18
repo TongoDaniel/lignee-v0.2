@@ -1,0 +1,10 @@
+{
+  // Code embarqué dans l'app : ni types de Node (pas de `process`, `Buffer`, `node:fs` sur le
+  // téléphone) ni types de Jest.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": []
+  },
+  "include": ["index.ts", "src", ".expo/types/**/*.ts", "expo-env.d.ts"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/__tests__"]
+}
