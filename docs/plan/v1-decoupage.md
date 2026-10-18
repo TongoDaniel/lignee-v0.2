@@ -419,6 +419,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
 - Exigences :
   - HOL-01 (partie fondation) : « En mode avion, les parcours de la V1 passent ; seuls les invitations et l'analyse de la voix attendent le réseau »
   - TRD : « base SQLite chiffrée avec SQLCipher, clé dans le trousseau du système (expo-secure-store) ; migrations Drizzle versionnées ». Chargement d'un arbre généré (T-006) en développement seulement.
+  - Obligations reçues des relectures : ADR 0017, Conséquences (`distinctFrom`).
 - Cas limites : CL-SEC-14 (partie base locale chiffrée).
 - Dépend de : T-004, T-006, T-011.
 - Agent : sync-hors-ligne ; relecture gardien-confidentialite.
@@ -571,6 +572,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - PAR-01 : « Réponse en moins de 200 ms hors-ligne pour un arbre de 5 000 personnes »
   - PAR-10 (partie : choix des deux fiches dans l'arbre ; la recherche arrive avec T-038) : « Choisir deux fiches dans la recherche suffit »
   - Chemin surligné en or (`chemin`).
+  - Obligations reçues des relectures : ADR 0020 (le contexte d'alliance vient de l'arbre filtré).
 - Cas limites : aucun en propre.
 - Dépend de : T-017, T-024, T-027, T-028.
 - Agent : ecrans-lignee.
@@ -596,6 +598,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - UNI-01 : « Seul un nom, ou « Inconnu », est obligatoire »
   - UNI-15 (partie saisie ; voir doute section 4) : « La cause n'apparaît ni dans l'arbre, ni dans une notification, ni dans un export partagé »
   - CAR-01 : « Aucune permission de localisation demandée »
+  - Obligations reçues des relectures : ADR 0020 (le contexte d'alliance vient de l'arbre filtré).
 - Cas limites : CL-POL-15, CL-DON-01, CL-DON-02, CL-DON-05, CL-DON-06, CL-FAM-12 (ajout), CL-FAM-17, CL-FAM-18, CL-FAM-19.
 - Dépend de : T-005, T-024, T-030.
 - Agent : ecrans-lignee ; relecture gardien-confidentialite (cause de décès).
@@ -848,7 +851,16 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - UNI-15 : « La cause n'apparaît ni dans l'arbre, ni dans une notification, ni dans un export partagé »
   - UNI-16 : « Règle appliquée aussi aux imports »
   - UNI-22 : « L'ancien prénom n'apparaît que pour qui y a droit, et jamais dans la recherche des autres »
-- Cas limites : CL-SEC-01, CL-SEC-07, CL-SEC-11 (visibilité), CL-POL-17, CL-FAM-06, CL-FAM-07, CL-FAM-12 (visibilité), CL-FAM-14, CL-FAM-15.
+  - Obligations reçues des relectures (T-020 à T-022) :
+    - Renvois : ADR 0017, Conséquences (`distinctFrom`) ; ADR 0020 (point 6 et Choix laissés à Daniel) ; ADR 0021, point 8.
+    - `distinctFrom` : retirer les identifiants de personnes non visibles (API, synchro, base locale, exports, contexte voix). Valider à l'écriture contre l'ensemble visible du rédacteur : même réponse pour « inexistant » et « masqué ».
+    - Alliance (ADR 0020) : le filtre retire toute réponse de simultanéité dont une union est masquée, et tout fait de décès masqué par sa propre règle ou par celle de sa personne. Si le motif ou la date de fin d'une union devient masquable à part, le filtre les retire de l'union. Le contexte d'alliance se construit depuis le même arbre filtré que le graphe.
+    - Question ouverte pour Daniel : masquer aussi le statut vital « décédé » quand le fait de décès est masqué ?
+    - CL-FAM-14 : la projection rend l'ancienne filiation avec son type d'avant le test ADN (« naissance ») pour un lecteur qui ne voit pas le nouveau lien. Test de non-fuite par canal : API, synchro, base locale, exports, notifications, recherche, contexte voix.
+    - Question de produit pour Daniel (CL-FAM-03) : une adoption tenue secrète se projette-t-elle en « naissance » pour l'enfant (comme CL-FAM-14) ou en « lien non disponible » ?
+    - Si la certitude ou le type non biologique d'une filiation visible deviennent masquables à part (CON-03), la projection les réécrit avant de construire le graphe.
+    - Exports, notifications et contexte voix construits depuis la présentation d'un auteur (« moi seul ») ne partent jamais vers un autre lecteur.
+- Cas limites : CL-SEC-01, CL-SEC-07, CL-SEC-11 (visibilité), CL-POL-17, CL-FAM-06, CL-FAM-07, CL-FAM-12 (visibilité), CL-FAM-03, CL-FAM-14, CL-FAM-15.
 - Dépend de : T-004, T-007.
 - Agent : modele-domaine, avec api-serveur ; relecture gardien-confidentialite.
 - Taille : L.
@@ -965,6 +977,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - VOX-06 : « Sur le téléphone de Comfort, Papa Emmanuel dit « ma sœur » : la sœur créée est la sienne »
   - VOX-07 : « « Ajoute ma grand-mère Odette » sans parents : une question, une place à compléter, puis Odette »
   - VOX-13 : « 95 % des doublons du jeu de test détectés »
+  - Obligations reçues des relectures : ADR 0017, Conséquences (`distinctFrom`).
 - Cas limites : CL-VOI-01, CL-VOI-02, CL-VOI-15, CL-VOI-18 (plan), CL-POL-03, CL-GEN-03, CL-GEN-06, CL-GEN-07.
 - Dépend de : T-036, T-040, T-058.
 - Agent : pipeline-vocal, avec moteur-parente.
@@ -1015,6 +1028,8 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - VOX-19 : « Aucune donnée de santé enregistrée par la voix en V1 et en V2 »
   - VOX-22 : « Aucune fiche créée sur le jeu de test « hors sujet » »
   - CON-04 (partie liens sensibles proposés « moi seul ») : « Le choix est affiché dans l'aperçu avant validation »
+  - Obligations reçues des relectures : ADR 0017, Conséquences (`distinctFrom`). « Frère de même père » ne construit `distinctFrom` qu'à partir du graphe visible du locuteur.
+  - Obligations reçues des relectures : le contexte d'alliance de la voix vient du même arbre filtré (ADR 0020).
 - Cas limites : CL-VOI-07, CL-VOI-08, CL-VOI-09, CL-VOI-10, CL-VOI-11, CL-VOI-16, CL-VOI-17, CL-VOI-19, CL-VOI-21, CL-VOI-23, CL-VOI-27.
 - Dépend de : T-062.
 - Agent : pipeline-vocal ; relecture gardien-confidentialite (santé, liens sensibles).
