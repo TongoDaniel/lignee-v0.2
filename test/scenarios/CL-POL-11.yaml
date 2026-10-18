@@ -1,0 +1,42 @@
+# Noms générés. Moussa a deux épouses en même temps, Mariam et Fatou (réponse gardée). Mariam
+# meurt ; sa fille Aïcha est élevée par Fatou, mère d'Ali.
+# Partie lien (T-022) : Fatou « l'a élevée », lien non biologique jamais confondu avec la
+# naissance (PAR-06), et aussi « épouse de votre père » ; Mariam reste sa mère ; Ali reste son
+# demi-frère par leur père, jamais « frère » bien que Fatou les ait élevés tous les deux. Le test
+# vérifie aussi que, sur les seuls liens de naissance (santé, PAR-12), Fatou n'est pas un parent
+# d'Aïcha et que Mariam l'est. Reste : les mots (T-026, T-027) ; la santé elle-même est V3.
+id: CL-POL-11
+titre: Enfant élevé par une co-épouse après la mort de sa mère
+couverture:
+  teste: [lien]
+  reste: [T-026, T-027]
+arbre:
+  personnes: [moussa/M, mariam/F, fatou/F, aicha/F, ali/M]
+  unions:
+    - { conjoints: [moussa, mariam], rang_moussa: 1, debut: { qualificatif: exacte, date: "1990" } }
+    - { conjoints: [moussa, fatou], rang_moussa: 2, debut: { qualificatif: exacte, date: "1994" } }
+  filiations:
+    - { parents: [moussa, mariam], enfant: aicha }
+    - { parents: [moussa, fatou], enfant: ali }
+    - { parents: [fatou], enfant: aicha, type: a_eleve }
+  simultaneites:
+    - unions: [[moussa, mariam], [moussa, fatou]]
+      reponse: simultanees
+  faits:
+    - { personne: mariam, type: deces, date: { qualificatif: exacte, date: "2001" } }
+attendu:
+  liens:
+    - de: aicha
+      vers: fatou
+      fr: "l'a élevée"
+      en: "raised her"
+      aussi:
+        - { fr: "épouse de votre père", en: "your father's wife" }
+    - { de: aicha, vers: mariam, fr: "mère", en: "mother", aussi: [] }
+    - {
+        de: aicha,
+        vers: ali,
+        fr: "demi-frère, même père",
+        en: "half-brother, same father",
+        aussi: [],
+      }

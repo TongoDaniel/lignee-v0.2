@@ -1,0 +1,38 @@
+# Noms générés. Simon et Suzanne sont frère et sœur ; leur fils Cyril et leur fille Céline, cousins
+# germains, se marient et ont Katia.
+# Partie lien (T-022) : implexe. Gaston, arrière-grand-père de Katia, n'est qu'une fois parmi ses
+# ancêtres, et les deux chemins vers lui sont affichés (par son père et par sa mère). Simon est son
+# grand-père par son père, et aussi son grand-oncle par sa mère ; pour Cyril, Céline est sa
+# cousine, et aussi son épouse (le sang d'abord). Reste : les mots (T-026, T-027).
+id: CL-FAM-09
+titre: Mariage entre cousins germains
+couverture:
+  teste: [lien]
+  reste: [T-026, T-027]
+arbre:
+  personnes: [gaston/M, gisele/F, simon/M, suzanne/F, wilma/F, hugo/M, cyril/M, celine/F, katia/F]
+  unions:
+    - { conjoints: [gaston, gisele] }
+    - { conjoints: [simon, wilma] }
+    - { conjoints: [hugo, suzanne] }
+    - { conjoints: [cyril, celine] }
+  filiations:
+    - { parents: [gaston, gisele], enfant: simon }
+    - { parents: [gaston, gisele], enfant: suzanne }
+    - { parents: [simon, wilma], enfant: cyril }
+    - { parents: [hugo, suzanne], enfant: celine }
+    - { parents: [cyril, celine], enfant: katia }
+attendu:
+  liens:
+    - de: katia
+      vers: simon
+      fr: "grand-père par votre père"
+      en: "grandfather through your father"
+      aussi:
+        - { fr: "grand-oncle par votre mère", en: "great-uncle through your mother" }
+    - de: cyril
+      vers: celine
+      fr: "cousine par votre père"
+      en: "cousin through your father"
+      aussi:
+        - { fr: "épouse", en: "wife" }
