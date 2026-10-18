@@ -60,11 +60,17 @@ function observeStructures(data: TreeData) {
           levirate += 1;
       }
     }
-    // Sororat : un homme uni à deux sœurs.
+    // Sororat : une union d'un homme avec une sœur (ou demi-sœur) d'une épouse précédente. Une
+    // union compte une fois, même si l'épouse est sœur de plusieurs épouses précédentes ; deux
+    // demi-sœurs d'une même épouse comptent deux fois, même si elles ne sont pas sœurs entre elles.
     if (gender.get(personId) === 'male') {
-      const wives = own.map((union) => other(union, personId));
+      const rankOf = (union: (typeof own)[number]) =>
+        union.spouses.find((spouse) => spouse.personId === personId)?.rank ?? 0;
+      const wives = [...own]
+        .sort((a, b) => rankOf(a) - rankOf(b))
+        .map((union) => other(union, personId));
       wives.forEach((wife, index) => {
-        if (wives.slice(index + 1).some((second) => siblings(wife, second))) sororate += 1;
+        if (wives.slice(0, index).some((earlier) => siblings(earlier, wife))) sororate += 1;
       });
     }
   }
@@ -163,6 +169,36 @@ describe('générateur d’arbres', () => {
       }),
       { numRuns: 300 },
     );
+  });
+
+  it('cas réduit : deux unions de sororat avec deux demi-sœurs de la première épouse, qui ne sont pas sœurs entre elles, comptent pour deux', () => {
+    // Trouvé avec des probabilités uniformes (graine 1840440687) : un homme épouse une femme,
+    // puis deux de ses demi-sœurs (l'une par la mère, l'autre par le père). Le générateur annonce
+    // deux sororats ; l'oracle n'en voyait qu'un, car il comptait les épouses ayant une sœur
+    // épousée après elles, et non les épouses sœurs d'une épouse précédente.
+    const tree = generateTree({
+      seed: 1_737_657_185,
+      size: 76,
+      rates: {
+        marriage: 0.8350542159751058,
+        polygamy: 0.6737241759896279,
+        sororate: 0.5860955284908415,
+        implex: 0.08308978658169508,
+        withinTree: 0.03222480565309525,
+        levirate: 0.6768374685198069,
+        remarriage: 0,
+        unknownParent: 0,
+        placeholder: 0.22309238389134406,
+        adoption: 0.03068766789510846,
+        twins: 0.3286441382020712,
+        hidden: 0,
+        toPlace: 0,
+        distinctFrom: 0,
+      },
+    });
+    expect(tree.features.sororate).toBe(4);
+    expect(observeStructures(tree).sororate).toBe(4);
+    expectAnnouncedStructures(tree, tree.features);
   });
 
   it('un adulte qui adopte, élève, accueille ou a la tutelle est né au moins 15 ans avant l’enfant (300 arbres)', () => {
