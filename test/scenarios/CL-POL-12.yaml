@@ -1,0 +1,224 @@
+# Noms générés. Partie disposition (T-012, packages/layout) : un chef de famille, 8 épouses en même
+# temps et 5 enfants par foyer, vu depuis Carine_2 (foyer de rang 3). Par défaut, seul le foyer
+# qui mène à elle est ouvert ; les 7 autres sont repliés avec le nombre de leurs enfants. Le dessin
+# tient en 15 fiches de large : une par épouse repliée, la largeur de ses enfants pour Carine, en
+# tête de leur colonne (ARB-03, « niveau branche »). Les frères et sœurs suivent leurs dates de
+# naissance, sans date l'ordre saisi. Déplier le foyer d'Amina montre ses enfants sous elle.
+# Vu depuis le chef (test), les 8 foyers sont ouverts sans chevauchement. Reste : revue visuelle
+# sur l'Android de référence (T-017) et fluidité mesurée sur le téléphone (T-105).
+id: CL-POL-12
+titre: Chef de famille avec 8 épouses et 40 enfants
+couverture:
+  teste: [disposition]
+  reste: [T-017, T-105]
+arbre:
+  personnes:
+    - bekono/M
+    - amina/F
+    - beatrice/F
+    - carine/F
+    - delphine/F
+    - edith/F
+    - florence/F
+    - gisele/F
+    - helene/F
+    - amina_1/M
+    - amina_2/F
+    - amina_3/M
+    - amina_4/F
+    - amina_5/M
+    - beatrice_1/M
+    - beatrice_2/F
+    - beatrice_3/M
+    - beatrice_4/F
+    - beatrice_5/M
+    - carine_1/M
+    - carine_2/F
+    - carine_3/M
+    - carine_4/F
+    - carine_5/M
+    - delphine_1/M
+    - delphine_2/F
+    - delphine_3/M
+    - delphine_4/F
+    - delphine_5/M
+    - edith_1/M
+    - edith_2/F
+    - edith_3/M
+    - edith_4/F
+    - edith_5/M
+    - florence_1/M
+    - florence_2/F
+    - florence_3/M
+    - florence_4/F
+    - florence_5/M
+    - gisele_1/M
+    - gisele_2/F
+    - gisele_3/M
+    - gisele_4/F
+    - gisele_5/M
+    - helene_1/M
+    - helene_2/F
+    - helene_3/M
+    - helene_4/F
+    - helene_5/M
+  unions:
+    - { conjoints: [bekono, amina], rang_bekono: 1 }
+    - { conjoints: [bekono, beatrice], rang_bekono: 2 }
+    - { conjoints: [bekono, carine], rang_bekono: 3 }
+    - { conjoints: [bekono, delphine], rang_bekono: 4 }
+    - { conjoints: [bekono, edith], rang_bekono: 5 }
+    - { conjoints: [bekono, florence], rang_bekono: 6 }
+    - { conjoints: [bekono, gisele], rang_bekono: 7 }
+    - { conjoints: [bekono, helene], rang_bekono: 8 }
+  filiations:
+    - { parents: [bekono, amina], enfant: amina_1 }
+    - { parents: [bekono, amina], enfant: amina_2 }
+    - { parents: [bekono, amina], enfant: amina_3 }
+    - { parents: [bekono, amina], enfant: amina_4 }
+    - { parents: [bekono, amina], enfant: amina_5 }
+    - { parents: [bekono, beatrice], enfant: beatrice_1 }
+    - { parents: [bekono, beatrice], enfant: beatrice_2 }
+    - { parents: [bekono, beatrice], enfant: beatrice_3 }
+    - { parents: [bekono, beatrice], enfant: beatrice_4 }
+    - { parents: [bekono, beatrice], enfant: beatrice_5 }
+    - { parents: [bekono, carine], enfant: carine_1 }
+    - { parents: [bekono, carine], enfant: carine_2 }
+    - { parents: [bekono, carine], enfant: carine_3 }
+    - { parents: [bekono, carine], enfant: carine_4 }
+    - { parents: [bekono, carine], enfant: carine_5 }
+    - { parents: [bekono, delphine], enfant: delphine_1 }
+    - { parents: [bekono, delphine], enfant: delphine_2 }
+    - { parents: [bekono, delphine], enfant: delphine_3 }
+    - { parents: [bekono, delphine], enfant: delphine_4 }
+    - { parents: [bekono, delphine], enfant: delphine_5 }
+    - { parents: [bekono, edith], enfant: edith_1 }
+    - { parents: [bekono, edith], enfant: edith_2 }
+    - { parents: [bekono, edith], enfant: edith_3 }
+    - { parents: [bekono, edith], enfant: edith_4 }
+    - { parents: [bekono, edith], enfant: edith_5 }
+    - { parents: [bekono, florence], enfant: florence_1 }
+    - { parents: [bekono, florence], enfant: florence_2 }
+    - { parents: [bekono, florence], enfant: florence_3 }
+    - { parents: [bekono, florence], enfant: florence_4 }
+    - { parents: [bekono, florence], enfant: florence_5 }
+    - { parents: [bekono, gisele], enfant: gisele_1 }
+    - { parents: [bekono, gisele], enfant: gisele_2 }
+    - { parents: [bekono, gisele], enfant: gisele_3 }
+    - { parents: [bekono, gisele], enfant: gisele_4 }
+    - { parents: [bekono, gisele], enfant: gisele_5 }
+    - { parents: [bekono, helene], enfant: helene_1 }
+    - { parents: [bekono, helene], enfant: helene_2 }
+    - { parents: [bekono, helene], enfant: helene_3 }
+    - { parents: [bekono, helene], enfant: helene_4 }
+    - { parents: [bekono, helene], enfant: helene_5 }
+  faits:
+    - { personne: carine_3, type: naissance, date: { qualificatif: exacte, date: "1980" } }
+    - { personne: carine_1, type: naissance, date: { qualificatif: exacte, date: "1984-05" } }
+    - { personne: carine_2, type: naissance, date: { qualificatif: exacte, date: "1986" } }
+  simultaneites:
+    - unions:
+        - [bekono, amina]
+        - [bekono, beatrice]
+        - [bekono, carine]
+        - [bekono, delphine]
+        - [bekono, edith]
+        - [bekono, florence]
+        - [bekono, gisele]
+        - [bekono, helene]
+      reponse: simultanees
+action:
+  centre: carine_2
+  deplier: [[bekono, amina]]
+attendu:
+  unites:
+    bekono:
+      forme: simultanees
+      foyers:
+        - {
+            conjoint: amina,
+            enfants: [amina_1, amina_2, amina_3, amina_4, amina_5],
+            en_cours: true,
+            vers_centre: false,
+          }
+        - {
+            conjoint: beatrice,
+            enfants: [beatrice_1, beatrice_2, beatrice_3, beatrice_4, beatrice_5],
+            en_cours: true,
+            vers_centre: false,
+          }
+        - {
+            conjoint: carine,
+            enfants: [carine_1, carine_2, carine_3, carine_4, carine_5],
+            en_cours: true,
+            vers_centre: true,
+          }
+        - {
+            conjoint: delphine,
+            enfants: [delphine_1, delphine_2, delphine_3, delphine_4, delphine_5],
+            en_cours: true,
+            vers_centre: false,
+          }
+        - {
+            conjoint: edith,
+            enfants: [edith_1, edith_2, edith_3, edith_4, edith_5],
+            en_cours: true,
+            vers_centre: false,
+          }
+        - {
+            conjoint: florence,
+            enfants: [florence_1, florence_2, florence_3, florence_4, florence_5],
+            en_cours: true,
+            vers_centre: false,
+          }
+        - {
+            conjoint: gisele,
+            enfants: [gisele_1, gisele_2, gisele_3, gisele_4, gisele_5],
+            en_cours: true,
+            vers_centre: false,
+          }
+        - {
+            conjoint: helene,
+            enfants: [helene_1, helene_2, helene_3, helene_4, helene_5],
+            en_cours: true,
+            vers_centre: false,
+          }
+  disposition:
+    lignes:
+      "-1": [bekono]
+      "-0.5": [amina, beatrice, carine, delphine, edith, florence, gisele, helene]
+      "0": [carine_3, carine_1, carine_2, carine_4, carine_5]
+    replis:
+      - { famille: [bekono, amina], replie: true, enfants: 5 }
+      - { famille: [bekono, beatrice], replie: true, enfants: 5 }
+      - { famille: [bekono, carine], replie: false, enfants: 5 }
+      - { famille: [bekono, delphine], replie: true, enfants: 5 }
+      - { famille: [bekono, edith], replie: true, enfants: 5 }
+      - { famille: [bekono, florence], replie: true, enfants: 5 }
+      - { famille: [bekono, gisele], replie: true, enfants: 5 }
+      - { famille: [bekono, helene], replie: true, enfants: 5 }
+    largeur_max: 15
+  apres_deplier:
+    lignes:
+      "0":
+        [
+          amina_1,
+          amina_2,
+          amina_3,
+          amina_4,
+          amina_5,
+          carine_3,
+          carine_1,
+          carine_2,
+          carine_4,
+          carine_5,
+        ]
+    replis:
+      - { famille: [bekono, amina], replie: false, enfants: 5 }
+      - { famille: [bekono, beatrice], replie: true, enfants: 5 }
+      - { famille: [bekono, carine], replie: false, enfants: 5 }
+      - { famille: [bekono, delphine], replie: true, enfants: 5 }
+      - { famille: [bekono, edith], replie: true, enfants: 5 }
+      - { famille: [bekono, florence], replie: true, enfants: 5 }
+      - { famille: [bekono, gisele], replie: true, enfants: 5 }
+      - { famille: [bekono, helene], replie: true, enfants: 5 }

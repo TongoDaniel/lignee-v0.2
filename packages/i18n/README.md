@@ -101,4 +101,4 @@ Le relecteur valide un message en remplaçant son entrée dans `review/<langue>.
 
 ## Pour l'app mobile
 
-Hermes ne fournit pas toujours `Intl.PluralRules` ni toutes les données de langue : l'app devra charger les polyfills `@formatjs/intl-pluralrules` (et `intl-numberformat`, `intl-datetimeformat` si besoin) pour `fr` et `en` avant le premier texte. À vérifier à la création de `apps/mobile`.
+Hermes ne fournit pas toujours tout Intl. L'app charge, avant le premier texte, les polyfills de FormatJS (`getCanonicalLocales`, `Locale`, `PluralRules`, `NumberFormat`, `DateTimeFormat` avec tous les fuseaux) pour `fr` et `en`, chacun seulement si le moteur en a besoin : `apps/mobile/src/intl/polyfills.ts`. Son test remplace tout Intl par FormatJS et vérifie les formats de ce paquet. Écart relevé : avec les données de FormatJS, `formatDateTime` donne « 1er mars 2026, 14:05 » au lieu de « 1er mars 2026 à 14:05 » (ICU de Node). Pour un texte identique partout, il faudra composer la date et l'heure par un message.

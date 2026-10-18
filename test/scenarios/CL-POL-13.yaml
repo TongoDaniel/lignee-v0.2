@@ -1,11 +1,12 @@
 # Noms générés. Partie disposition (T-008, packages/layout) : Rose est au centre de ses unions
 # successives comme un homme le serait ; la même famille, genres inversés, donne la même
-# disposition (aucune règle de genre). Reste : placement (T-012), revue visuelle (T-017).
+# disposition (aucune règle de genre), placement compris (T-012) : ses maris du plus ancien au
+# mari actuel, au plus près d'elle. Reste : revue visuelle (T-017).
 id: CL-POL-13
 titre: Femme avec plusieurs maris successifs
 couverture:
   teste: [disposition]
-  reste: [T-012, T-017]
+  reste: [T-017]
 arbre:
   personnes: [rose/F, henri/M, paul/M, jacques/M, lea/F, marc/M, nina/F]
   unions:
@@ -34,3 +35,11 @@ attendu:
         - { conjoint: henri, enfants: [lea], en_cours: false, vers_centre: false }
         - { conjoint: paul, enfants: [marc], en_cours: false, vers_centre: false }
         - { conjoint: jacques, enfants: [nina], en_cours: true, vers_centre: true }
+  disposition:
+    lignes:
+      "-1": [henri, paul, jacques, rose]
+      "0": [nina]
+    replis:
+      - { famille: [rose, henri], replie: true, enfants: 1 }
+      - { famille: [rose, paul], replie: true, enfants: 1 }
+      - { famille: [rose, jacques], replie: false, enfants: 1 }

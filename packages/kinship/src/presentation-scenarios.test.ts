@@ -41,7 +41,15 @@ type ExpectedPresented = z.infer<typeof expectedPresentedSchema>;
 function linksScenarioSchema(id: string) {
   return scenarioSchema(id, {
     arbre: scenarioTreeSchema,
-    attendu: z.strictObject({ liens: z.array(expectedPresentedSchema).min(1) }),
+    // Partie disposition du même scénario (action, générations, unités, disposition), vérifiée
+    // par packages/layout : ignorée ici.
+    action: z.unknown().optional(),
+    attendu: z.strictObject({
+      liens: z.array(expectedPresentedSchema).min(1),
+      generations: z.unknown().optional(),
+      unites: z.unknown().optional(),
+      disposition: z.unknown().optional(),
+    }),
   });
 }
 

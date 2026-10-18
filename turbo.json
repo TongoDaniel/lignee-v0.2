@@ -2,6 +2,8 @@
   "$schema": "https://turborepo.com/schema.json",
   "agentGuidance": false,
   "globalDependencies": ["tsconfig.base.json", "eslint.config.mjs"],
+  "globalEnv": ["LIGNEE_PERF_FACTOR"],
+  "globalPassThroughEnv": ["CI"],
   "tasks": {
     "transit": {
       "dependsOn": ["^transit"]
@@ -46,7 +48,12 @@
         "$TURBO_ROOT$/.dockerignore",
         "$TURBO_ROOT$/pnpm-workspace.yaml",
         "$TURBO_ROOT$/packages/db/initdb/**",
-        "$TURBO_ROOT$/apps/*/Dockerfile"
+        "$TURBO_ROOT$/apps/*/Dockerfile",
+        "$TURBO_ROOT$/apps/*/app.config.*",
+        "$TURBO_ROOT$/apps/*/app.json",
+        "$TURBO_ROOT$/apps/*/plugins/**",
+        "$TURBO_ROOT$/package.json",
+        "$TURBO_ROOT$/apps/mobile/package.json"
       ],
       "outputs": [],
       "passThroughEnv": ["LIGNEE_SCENARIOS_PLAYED_DIR"]

@@ -1,17 +1,21 @@
 # Noms générés. André meurt ; sa veuve Wanda épouse son frère Benoît, déjà marié à Claire et qui le
 # reste (lévirat). W1 est né d'André et de Wanda, W2 de Benoît et de Wanda, C1 de Benoît et de
-# Claire. Arbre identique à celui de la partie disposition (T-012, branche
-# feat/T-012-ordre-placement-repli) : à la fusion des deux branches, réunir `teste`, `action` et
-# `attendu` dans ce fichier.
+# Claire.
+# Partie disposition (T-012, packages/layout) : vu depuis W2, enfant du lévirat, Benoît a deux
+# unions simultanées, même si le foyer de Wanda et Benoît est porté par Wanda (ADR 0013, règle 5) ;
+# il est dessiné au-dessus de Claire et Wanda, dans l'ordre de ses unions, et André, premier mari
+# de Wanda, reste sur la rangée à l'extérieur du groupe, sans s'intercaler entre les épouses
+# (ADR 0016).
 # Partie lien (T-022) : chaque lien attendu (le principal, puis « aussi », dans l'ordre) est
 # ramené à sa structure et comparé à la présentation calculée (`presentRelationships`). W1 et W2
 # sont demi-frères par leur mère et cousins par leurs pères (UNI-21, PAR-05) ; pour C1, W2 est
 # son demi-frère par leur père, et aussi le fils de l'épouse de son oncle André ; W1 est sa
-# cousine, et aussi la fille de l'épouse de son père. Les deux sens sont vérifiés. Reste : les mots en français et en anglais (T-026, T-027).
+# cousine, et aussi la fille de l'épouse de son père. Les deux sens sont vérifiés.
+# Reste : les mots en français et en anglais (T-026, T-027).
 id: CL-POL-09
 titre: Lévirat, la veuve épouse le frère du défunt, déjà marié
 couverture:
-  teste: [lien]
+  teste: [disposition, lien]
   reste: [T-026, T-027]
 arbre:
   personnes: [pa/M, andre/M, wanda/F, benoit/M, claire/F, w1/F, w2/M, c1/F]
@@ -33,7 +37,35 @@ arbre:
       reponse: simultanees
   faits:
     - { personne: andre, type: deces, date: { qualificatif: exacte, date: "1995" } }
+action:
+  centre: w2
 attendu:
+  generations: { w2: 0, wanda: -1, benoit: -1, andre: -1, claire: -1, pa: -2 }
+  unites:
+    wanda:
+      forme: successives
+      foyers:
+        - { conjoint: andre, enfants: [w1], en_cours: false, vers_centre: false }
+        - { conjoint: benoit, enfants: [w2], en_cours: true, vers_centre: true }
+    benoit:
+      forme: couple
+      foyers:
+        - { conjoint: claire, enfants: [c1], en_cours: true, vers_centre: false }
+    pa:
+      forme: seul
+      foyers: []
+      non_precise: { manque: mere, enfants: [andre, benoit], candidates: [] }
+  disposition:
+    lignes:
+      "-2": [pa]
+      "-1": [benoit, andre]
+      "-0.5": [claire, wanda]
+      "0": [w2]
+    replis:
+      - { famille: [pa], replie: false, enfants: 2 }
+      - { famille: [benoit, claire], replie: true, enfants: 1 }
+      - { famille: [wanda, benoit], replie: false, enfants: 1 }
+      - { famille: [andre, wanda], replie: true, enfants: 1 }
   liens:
     - de: w2
       vers: w1
