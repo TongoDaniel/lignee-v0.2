@@ -2,7 +2,14 @@ import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { nodeDatabaseFile, temporaryDirectory } from '../test-support/node-database';
+import { generatedSnapshot } from '../test-support/generated-snapshot';
+import {
+  nodeDatabaseFile,
+  openTestDatabase,
+  temporaryDirectory,
+  type NodeConnection,
+} from '../test-support/node-database';
+import { localMigrations } from './generated/migrations';
 import {
   LOCAL_SCHEMA_VERSION,
   LocalDatabaseTooNewError,
@@ -10,6 +17,7 @@ import {
   readSchemaVersion,
   type LocalMigration,
 } from './migrate';
+import { replaceTreeSnapshot } from './snapshot';
 
 let cleanup: (() => void) | undefined;
 afterEach(() => {
@@ -102,6 +110,71 @@ describe('migrations de la base locale', () => {
     expect(() =>
       migrateLocalDatabase(connection, [{ version: 2, tag: '0001_x', sql: 'SELECT 1' }]),
     ).toThrow(/version/);
+    connection.close();
+  });
+});
+
+describe('migrations et clés étrangères', () => {
+  // Migration écrite comme drizzle-kit le fait pour changer une table SQLite : nouvelle table,
+  // copie, DROP TABLE de l'ancienne, renommage. Avec les clés étrangères actives, le DROP TABLE
+  // effacerait en cascade toutes les lignes qui citent l'arbre.
+  const recreateTrees: LocalMigration = {
+    version: LOCAL_SCHEMA_VERSION + 1,
+    tag: '9999_recreate_trees',
+    sql: [
+      'PRAGMA foreign_keys=OFF;',
+      'CREATE TABLE `__new_trees` (`id` text PRIMARY KEY NOT NULL, `reader_account_id` text NOT NULL, `loaded_at` integer NOT NULL, `body` text NOT NULL);',
+      'INSERT INTO `__new_trees`("id", "reader_account_id", "loaded_at", "body") SELECT "id", "reader_account_id", "loaded_at", "body" FROM `trees`;',
+      'DROP TABLE `trees`;',
+      'ALTER TABLE `__new_trees` RENAME TO `trees`;',
+      'PRAGMA foreign_keys=ON;',
+    ].join('--> statement-breakpoint\n'),
+  };
+
+  function counts(connection: NodeConnection): Record<string, number> {
+    return Object.fromEntries(
+      ['trees', 'people', 'names', 'unions', 'filiations', 'facts'].map((table) => [
+        table,
+        (connection.raw.prepare(`SELECT count(*) AS n FROM ${table}`).get() as { n: number }).n,
+      ]),
+    );
+  }
+
+  it('une migration qui recrée `trees` laisse intactes les lignes qui la citent', async () => {
+    const tmp = temporaryDirectory();
+    cleanup = tmp.cleanup;
+    const { db, connection } = await openTestDatabase(join(tmp.dir, 'fk.db'));
+    replaceTreeSnapshot(db, generatedSnapshot(43, 60).snapshot, { now: 1 });
+    expect(connection.get('PRAGMA foreign_keys')).toEqual({ foreign_keys: 1 });
+    const before = counts(connection);
+    expect(before['people']).toBeGreaterThan(0);
+
+    expect(migrateLocalDatabase(connection, [...localMigrations, recreateTrees])).toEqual([
+      LOCAL_SCHEMA_VERSION + 1,
+    ]);
+    expect(counts(connection)).toEqual(before);
+    // Les clés étrangères sont rétablies après la migration.
+    expect(connection.get('PRAGMA foreign_keys')).toEqual({ foreign_keys: 1 });
+    connection.close();
+  });
+
+  it('refuse, sans rien garder, une migration qui laisse une ligne orpheline', async () => {
+    const tmp = temporaryDirectory();
+    cleanup = tmp.cleanup;
+    const { db, connection } = await openTestDatabase(join(tmp.dir, 'orphan.db'));
+    replaceTreeSnapshot(db, generatedSnapshot(44, 20).snapshot, { now: 1 });
+    const before = counts(connection);
+    const orphan: LocalMigration = {
+      version: LOCAL_SCHEMA_VERSION + 1,
+      tag: '9999_orphan',
+      sql: 'DELETE FROM `trees`;',
+    };
+    expect(() => migrateLocalDatabase(connection, [...localMigrations, orphan])).toThrow(
+      /foreign key/i,
+    );
+    expect(readSchemaVersion(connection)).toBe(LOCAL_SCHEMA_VERSION);
+    expect(counts(connection)).toEqual(before);
+    expect(connection.get('PRAGMA foreign_keys')).toEqual({ foreign_keys: 1 });
     connection.close();
   });
 });

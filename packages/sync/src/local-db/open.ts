@@ -59,9 +59,11 @@ function tryOpen(file: DatabaseFile, key: DatabaseKey): SqlConnection | undefine
   }
 }
 
-/** Réglages appliqués à chaque ouverture, après la clé. */
+/**
+ * Réglages appliqués à chaque ouverture, après la clé. Les clés étrangères sont activées par
+ * `finish`, après les migrations (voir `migrateLocalDatabase`).
+ */
 function configure(connection: SqlConnection): void {
-  connection.exec('PRAGMA foreign_keys = ON');
   // Fichiers temporaires (tris, index provisoires) en mémoire : rien sur le disque hors de la
   // base et de son journal, tous deux chiffrés.
   connection.exec('PRAGMA temp_store = MEMORY');
@@ -71,7 +73,11 @@ function configure(connection: SqlConnection): void {
 function finish(connection: SqlConnection, outcome: OpenOutcome): OpenedLocalDatabase {
   try {
     configure(connection);
+    // Migrations d'abord, clés étrangères coupées : une table recréée ne doit rien effacer en
+    // cascade. Elles sont activées ensuite, pour toute la vie de la connexion.
+    connection.exec('PRAGMA foreign_keys = OFF');
     const migrated = migrateLocalDatabase(connection);
+    connection.exec('PRAGMA foreign_keys = ON');
     return { connection, outcome, migrated };
   } catch (error) {
     connection.close();

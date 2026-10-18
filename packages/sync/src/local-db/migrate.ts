@@ -43,10 +43,29 @@ function statements(sql: string): string[] {
     .filter((statement) => statement !== '');
 }
 
+/** Une migration laisserait des lignes qui citent un objet absent (clé étrangère rompue). */
+export class LocalMigrationForeignKeyError extends Error {
+  constructor(readonly tag: string) {
+    super(`Migration ${tag} breaks a foreign key`);
+    this.name = 'LocalMigrationForeignKeyError';
+  }
+}
+
+function foreignKeysEnabled(connection: SqlConnection): boolean {
+  return connection.get('PRAGMA foreign_keys')?.['foreign_keys'] === 1;
+}
+
 /**
  * Applique, dans l'ordre et chacune dans sa transaction, les migrations plus récentes que la
  * base. Renvoie les versions appliquées. Une base plus récente que le code est refusée (une
  * ancienne app ne doit pas écrire dans un schéma qu'elle ne connaît pas).
+ *
+ * Clés étrangères : drizzle-kit change une table SQLite en la recréant (copie, `DROP TABLE`,
+ * renommage). Avec les clés étrangères actives, `DROP TABLE trees` effacerait en cascade tout
+ * l'arbre ; et `PRAGMA foreign_keys` est sans effet dans une transaction. Elles sont donc
+ * coupées avant la transaction, vérifiées dans la transaction (`PRAGMA foreign_key_check` : la
+ * migration est annulée si une ligne cite un objet absent), puis rétablies telles qu'elles
+ * étaient, même en cas d'échec (procédure de la documentation de SQLite, « ALTER TABLE »).
  */
 export function migrateLocalDatabase(
   connection: SqlConnection,
@@ -61,18 +80,30 @@ export function migrateLocalDatabase(
   if (current > migrations.length) {
     throw new LocalDatabaseTooNewError(current, migrations.length);
   }
+  const pending = migrations.slice(current);
+  if (pending.length === 0) return [];
+
+  const restoreForeignKeys = foreignKeysEnabled(connection);
+  connection.exec('PRAGMA foreign_keys = OFF');
   const applied: number[] = [];
-  for (const migration of migrations.slice(current)) {
-    connection.exec('BEGIN IMMEDIATE');
-    try {
-      for (const statement of statements(migration.sql)) connection.exec(statement);
-      connection.exec(`PRAGMA user_version = ${String(migration.version)}`);
-      connection.exec('COMMIT');
-    } catch (error) {
-      connection.exec('ROLLBACK');
-      throw error;
+  try {
+    for (const migration of pending) {
+      connection.exec('BEGIN IMMEDIATE');
+      try {
+        for (const statement of statements(migration.sql)) connection.exec(statement);
+        if (connection.get('PRAGMA foreign_key_check') !== undefined) {
+          throw new LocalMigrationForeignKeyError(migration.tag);
+        }
+        connection.exec(`PRAGMA user_version = ${String(migration.version)}`);
+        connection.exec('COMMIT');
+      } catch (error) {
+        connection.exec('ROLLBACK');
+        throw error;
+      }
+      applied.push(migration.version);
     }
-    applied.push(migration.version);
+  } finally {
+    if (restoreForeignKeys) connection.exec('PRAGMA foreign_keys = ON');
   }
   return applied;
 }
