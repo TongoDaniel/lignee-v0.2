@@ -2,7 +2,8 @@
   "$schema": "https://turborepo.com/schema.json",
   "agentGuidance": false,
   "globalDependencies": ["tsconfig.base.json", "eslint.config.mjs"],
-  "globalPassThroughEnv": ["CI", "LIGNEE_PERF_FACTOR"],
+  "globalEnv": ["LIGNEE_PERF_FACTOR"],
+  "globalPassThroughEnv": ["CI"],
   "tasks": {
     "transit": {
       "dependsOn": ["^transit"]

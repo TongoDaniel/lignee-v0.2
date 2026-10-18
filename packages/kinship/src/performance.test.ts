@@ -5,7 +5,13 @@
 // est une médiane après chauffe, comparée au garde-fou budget × facteur (README racine, « Tests
 // de performance ») ; les budgets eux-mêmes ne changent pas.
 import type { Filiation, Id, Person } from '@lignee/domain';
-import { medianTime, referenceTree, reportBudget, testTree } from '@lignee/domain/test-support';
+import {
+  medianTime,
+  referenceTree,
+  reportBudget,
+  testTree,
+  timeOnce,
+} from '@lignee/domain/test-support';
 import { describe, expect, it } from 'vitest';
 
 import { createKinshipGraph, type KinshipGraph } from './graph';
@@ -29,14 +35,17 @@ function* pairsOf(ids: readonly Id[], count: number): Generator<[Id, Id]> {
 }
 
 /**
- * Temps de chaque lien : un premier passage sur toutes les paires chauffe le moteur, puis chaque
- * paire est mesurée par la médiane de trois calculs.
+ * Temps de chaque lien. `cold` : un seul passage par paire sur un graphe neuf, caches d'ancêtres
+ * vides, comme la première question après l'ouverture de l'arbre (ce que vise PAR-01). `warm` :
+ * ensuite, médiane de trois calculs par paire, caches remplis. À appeler sur un graphe jamais
+ * interrogé.
  */
-function pairTimes(graph: KinshipGraph, pairs: readonly (readonly [Id, Id])[]): number[] {
-  for (const [a, b] of pairs) findRelationships(graph, a, b);
-  return pairs.map(
+function pairTimes(graph: KinshipGraph, pairs: readonly (readonly [Id, Id])[]) {
+  const cold = pairs.map(([a, b]) => timeOnce(() => findRelationships(graph, a, b)));
+  const warm = pairs.map(
     ([a, b]) => medianTime(() => findRelationships(graph, a, b), { warmup: 0, runs: 3 }).medianMs,
   );
+  return { cold, warm };
 }
 
 describe('PAR-01 : temps de réponse du moteur', () => {
@@ -65,14 +74,17 @@ describe('PAR-01 : temps de réponse du moteur', () => {
     );
     expect(close.length).toBeGreaterThan(50);
     const samples = [...pairsOf(ids, 300), ...close].filter(([a, b]) => a !== b);
-    const times = pairTimes(graph, samples);
+    const { cold, warm } = pairTimes(graph, samples);
+    const coldMax = Math.max(...cold);
+    const times = warm;
     times.sort((x, y) => x - y);
     const max = times.at(-1) ?? 0;
     const p95 = times[Math.floor(times.length * 0.95)] ?? 0;
     const mean = times.reduce((sum, t) => sum + t, 0) / times.length;
     console.info(
       `PAR-01, 5 000 personnes : graphe ${build.toFixed(1)} ms ; ${String(times.length)} liens, ` +
-        `moyenne ${mean.toFixed(2)} ms, 95e centile ${p95.toFixed(2)} ms, max ${max.toFixed(2)} ms`,
+        `moyenne ${mean.toFixed(2)} ms, 95e centile ${p95.toFixed(2)} ms, max ${max.toFixed(2)} ms ` +
+        `(à chaud) ; premier passage à froid, max ${coldMax.toFixed(2)} ms`,
     );
     // Le graphe se construit une fois, à l'ouverture de l'arbre (TRD : moins de 1 s) ; chaque
     // question « qui est-ce pour moi ? » ne paie ensuite que le calcul du lien.
@@ -82,7 +94,19 @@ describe('PAR-01 : temps de réponse du moteur', () => {
       TREE_OPENING_BUDGET_MS,
     );
     expect(opening.measuredMs).toBeLessThan(opening.ceilingMs);
-    const slowest = reportBudget('PAR-01, lien le plus lent sur 5 000', max, PAR_01_BUDGET_MS);
+    // PAR-01 vise la première question après l'ouverture : le passage à froid (graphe neuf) fait
+    // foi ; la médiane à chaud s'y ajoute.
+    const slowestCold = reportBudget(
+      'PAR-01, lien le plus lent sur 5 000, à froid',
+      coldMax,
+      PAR_01_BUDGET_MS,
+    );
+    expect(slowestCold.measuredMs).toBeLessThan(slowestCold.ceilingMs);
+    const slowest = reportBudget(
+      'PAR-01, lien le plus lent sur 5 000, à chaud (médiane)',
+      max,
+      PAR_01_BUDGET_MS,
+    );
     expect(slowest.measuredMs).toBeLessThan(slowest.ceilingMs);
   });
 
@@ -141,16 +165,23 @@ describe('PAR-01 : temps de réponse du moteur', () => {
     }
     const graph = createKinshipGraph({ people, unions, filiations });
     const ids = people.map((p) => p.id);
-    const times = pairTimes(
+    const { cold, warm } = pairTimes(
       graph,
       [...pairsOf(ids, 300)].filter(([a, b]) => a !== b),
     );
-    const max = Math.max(...times);
+    const coldMax = Math.max(...cold);
+    const max = Math.max(...warm);
     console.info(
-      `PAR-01, chef de famille (${String(people.length)} personnes, 8 épouses, 40 enfants) : max ${max.toFixed(2)} ms`,
+      `PAR-01, chef de famille (${String(people.length)} personnes, 8 épouses, 40 enfants) : max ${max.toFixed(2)} ms à chaud, ${coldMax.toFixed(2)} ms à froid`,
     );
+    const slowestCold = reportBudget(
+      'PAR-01, lien le plus lent, chef de famille, à froid',
+      coldMax,
+      PAR_01_BUDGET_MS,
+    );
+    expect(slowestCold.measuredMs).toBeLessThan(slowestCold.ceilingMs);
     const slowest = reportBudget(
-      'PAR-01, lien le plus lent, chef de famille',
+      'PAR-01, lien le plus lent, chef de famille, à chaud (médiane)',
       max,
       PAR_01_BUDGET_MS,
     );
