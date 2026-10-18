@@ -2,6 +2,7 @@
 name: pipeline-vocal
 description: Spécialiste de la saisie vocale de Lignée (packages/voice et worker voix). À utiliser pour la chaîne enregistrer → transcrire (Voxtral) → comprendre (Claude Haiku, sorties structurées) → résoudre → aperçu, le glossaire de parenté, le jeu de test vocal, les quotas, et tout cas limite CL-VOI.
 tools: Read, Grep, Glob, Write, Edit, Bash
+model: opus
 ---
 
 Vous construisez la saisie vocale, le cœur de la V1 : une grand-mère dicte « ajoute ma sœur », et l'arbre se met à jour juste, après un aperçu.

@@ -10,11 +10,11 @@ Sources : `docs/cahier-des-charges/` (présentation, PRD, TRD, cas limites), `do
 - Les critères d'acceptation sont repris tels quels du PRD, entre guillemets. Quand une exigence est répartie sur plusieurs tickets, la mention « (partie …) » dit ce qui est fait ici.
 - Les tickets du socle n'ont pas d'exigence PRD. Leurs critères viennent du TRD ou de la charte.
 - Tailles : S = une à trois soirées ; M = environ une semaine à temps partiel ; L = environ deux semaines. Rien n'est plus gros que L.
-- Qui : le code est écrit par Claude et ses agents, relu et fusionné par Daniel (ADR 0005). Les repères disent seulement la nature du ticket : **Sv** = serveur et infrastructure ; **Mo** = app mobile ; **2** = cœur partagé.
+- Qui : le code est écrit par Claude et ses agents, relu et fusionné par Claude (ADR 0019). Les repères disent seulement la nature du ticket : **Sv** = serveur et infrastructure ; **Mo** = app mobile ; **2** = cœur partagé.
 - Étiquettes GitHub prévues : `V1` sur chaque ticket, plus une étiquette de module parmi `domain`, `kinship`, `layout`, `sync`, `voice`, `ui`, `i18n`, `db`, `api`, `worker`, `mobile`, `admin`, `exploitation`. J'ajoute `web` pour `apps/web` (pages d'invitation et formulaire de droits), absent de la liste de départ.
 - Relecture `gardien-confidentialite` : obligatoire dès qu'un ticket touche les droits, la visibilité, la synchronisation, l'authentification, les exports, les notifications ou le contexte envoyé à la voix (CLAUDE.md).
 
-En chiffres : **111 tickets** (13 S, 81 M, 17 L), **25 étapes**, environ **11 cycles** de 4 semaines (code écrit par Claude, relu par Daniel), 142 exigences V1, 114 cas limites V1.
+En chiffres : **111 tickets** (13 S, 81 M, 17 L), **25 étapes**, environ **11 cycles** de 4 semaines (code écrit, relu et fusionné par Claude), 142 exigences V1, 114 cas limites V1.
 
 ---
 
@@ -1556,7 +1556,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
 
 ## 3. Étapes et cycles de 4 semaines
 
-Le code est écrit par Claude et ses agents ; Daniel relit, teste sur téléphone et fusionne (ADR 0005). L'écriture n'est donc plus la limite : c'est le temps de relecture de Daniel. Hypothèse de départ : environ **12 « unités » par cycle de 4 semaines** (S = 0,5 ; M = 1 ; L = 2), soit environ trois pull requests relues par semaine. On la mesure à la fin du premier cycle et on corrige ce tableau.
+Le code est écrit, relu et fusionné par Claude et ses agents ; Daniel teste sur téléphone quand il veut (ADR 0019). La relecture humaine n'est donc plus la limite : ce sont l'usage et la CI. L'hypothèse ci-dessous date de l'ADR 0005 et sera remesurée. Hypothèse de départ : environ **12 « unités » par cycle de 4 semaines** (S = 0,5 ; M = 1 ; L = 2), soit environ trois pull requests relues par semaine. On la mesure à la fin du premier cycle et on corrige ce tableau.
 
 Le travail reste découpé en 25 **étapes**, dans l'ordre des dépendances, chacune avec son objectif et sa démo. Le total fait environ 121 unités, soit **environ 11 cycles**, un peu moins d'un an.
 

@@ -9,4 +9,5 @@ export * from './scenario';
 export * from './scenario-format';
 export * from './scenario-tree';
 export * from './tree-data';
+export * from './timing';
 export * from './tree-generator';

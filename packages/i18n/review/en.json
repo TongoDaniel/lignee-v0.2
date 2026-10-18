@@ -20,10 +20,28 @@
   "common:app.name": {
     "status": "to-review"
   },
+  "common:familyScreen.empty": {
+    "status": "to-review"
+  },
+  "common:familyScreen.title": {
+    "status": "to-review"
+  },
   "common:languages.en": {
     "status": "to-review"
   },
   "common:languages.fr": {
+    "status": "to-review"
+  },
+  "common:navigation.family": {
+    "status": "to-review"
+  },
+  "common:navigation.familyHint": {
+    "status": "to-review"
+  },
+  "common:navigation.tree": {
+    "status": "to-review"
+  },
+  "common:navigation.treeHint": {
     "status": "to-review"
   },
   "common:people.count": {
@@ -33,6 +51,12 @@
     "status": "to-review"
   },
   "common:tree.personJoined": {
+    "status": "to-review"
+  },
+  "common:treeScreen.empty": {
+    "status": "to-review"
+  },
+  "common:treeScreen.title": {
     "status": "to-review"
   }
 }

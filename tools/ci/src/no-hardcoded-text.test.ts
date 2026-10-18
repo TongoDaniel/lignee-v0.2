@@ -4,7 +4,7 @@
 import { join } from 'node:path';
 
 import { ESLint } from 'eslint';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 const repoRoot = join(import.meta.dirname, '..', '..', '..');
 // Les fichiers fictifs n'appartiennent à aucun tsconfig : le service de projet de typescript-eslint
@@ -23,7 +23,7 @@ const eslint = new ESLint({
         projectService: {
           allowDefaultProject: [
             '*.config.ts',
-            'apps/*/*.config.ts',
+            'apps/{admin,api,web,worker}/*.config.ts',
             'packages/*/*.config.ts',
             ...virtualFiles,
           ],
@@ -33,6 +33,11 @@ const eslint = new ESLint({
     },
   },
 });
+
+// apps/mobile a son tsconfig (Expo, React Native) : avant de ranger un fichier fictif de l'app
+// dans le projet par défaut, typescript-eslint charge ce programme, ce qui prend plusieurs
+// dizaines de secondes sur un poste chargé.
+vi.setConfig({ testTimeout: 120_000, hookTimeout: 120_000 });
 
 const TEXT_RULE = 'i18next/no-literal-string';
 const DIALOG_RULE = 'no-restricted-syntax';

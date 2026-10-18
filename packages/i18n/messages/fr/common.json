@@ -22,5 +22,19 @@
   "languages": {
     "fr": "Français",
     "en": "English"
+  },
+  "navigation": {
+    "tree": "Arbre",
+    "family": "Famille",
+    "treeHint": "Affiche votre arbre.",
+    "familyHint": "Affiche les membres de votre famille."
+  },
+  "treeScreen": {
+    "title": "Arbre",
+    "empty": "Votre arbre apparaîtra ici. Vous pourrez y ajouter vos proches, à la voix ou au clavier."
+  },
+  "familyScreen": {
+    "title": "Famille",
+    "empty": "Les membres de votre famille apparaîtront ici, avec leurs invitations."
   }
 }
