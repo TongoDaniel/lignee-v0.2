@@ -15,7 +15,7 @@ import {
   type KinshipFiliation,
   type KinshipGraph,
 } from './graph';
-import type { BloodSegment, FiliationLink } from './relationship';
+import type { FiliationLink } from './relationship';
 
 /**
  * Côté d'un parent pour un enfant : `father` (homme), `mother` (femme), `parent` quand le mot
@@ -74,7 +74,10 @@ export interface SiblingLink {
    * « même mère », ou « même parent » s'il ne convient à l'un des deux.
    */
   side?: ParentSide;
-  /** Autre parent de naissance de chacun (`half` et `full_or_half` sur la naissance). */
+  /**
+   * Autre parent de chacun (`half` et `full_or_half`) : de naissance pour une fratrie de
+   * naissance, du même type que le lien au parent commun sinon (adoptif…).
+   */
   fromOtherParent?: OtherParentState;
   toOtherParent?: OtherParentState;
   /**
@@ -163,6 +166,17 @@ function parentLinks(graph: KinshipGraph, childId: Id): Map<Id, KinshipFiliation
   return byParent;
 }
 
+function parentIdsOfType(
+  links: ReadonlyMap<Id, readonly KinshipFiliation[]>,
+  type: FiliationType,
+): Set<Id> {
+  const ids = new Set<Id>();
+  for (const [parentId, list] of links) {
+    if (list.some((filiation) => filiation.type === type)) ids.add(parentId);
+  }
+  return ids;
+}
+
 function birthParentIds(links: ReadonlyMap<Id, readonly KinshipFiliation[]>): Set<Id> {
   const ids = new Set<Id>();
   for (const [parentId, list] of links) {
@@ -192,35 +206,29 @@ export function parentSide(graph: KinshipGraph, childId: Id, parentId: Id): Pare
   return gender === 'male' ? 'father' : 'mother';
 }
 
-/**
- * Côté par lequel le début d'un segment de sang monte (« cousin par votre père », PAR-05) : le
- * côté, pour `fromId`, du parent par lequel passe le chemin. `undefined` si le segment ne monte
- * pas (descendant) ou s'il monte par deux parents à la fois (frères, `full`).
- */
-export function ascentSide(graph: KinshipGraph, segment: BloodSegment): ParentSide | undefined {
-  if (segment.generationsUp === 0) return undefined;
-  const first = segment.ascent[0]?.parentId;
-  const parentId =
-    first ??
-    (segment.commonAncestors.length === 1 ? segment.commonAncestors[0]?.personId : undefined);
-  return parentId === undefined ? undefined : parentSide(graph, segment.fromId, parentId);
-}
-
 function sameSide(a: ParentSide | undefined, b: ParentSide | undefined): ParentSide {
   return a !== undefined && a === b ? a : 'parent';
 }
 
+/**
+ * L'autre parent d'un enfant, parmi `parents` (ses parents du type de son lien au parent commun),
+ * hors du parent commun. Les candidats (« mère parmi ses épouses », UNI-11) ne valent que pour la
+ * naissance.
+ */
 function otherParentState(
   graph: KinshipGraph,
   childId: Id,
-  birthParents: ReadonlySet<Id>,
+  parents: ReadonlySet<Id>,
   common: Id,
+  withCandidates: boolean,
 ): OtherParentState {
-  const others = [...birthParents].filter((id) => id !== common).sort(compareIds);
+  const others = [...parents].filter((id) => id !== common).sort(compareIds);
   if (others.length === 0) {
     return {
       status: 'unspecified',
-      candidateIds: graph.parentCandidatesOf(childId).filter((id) => id !== common),
+      candidateIds: withCandidates
+        ? graph.parentCandidatesOf(childId).filter((id) => id !== common)
+        : [],
     };
   }
   const placeholder = others.find((id) => graph.person(id)?.nature === 'placeholder');
@@ -334,9 +342,15 @@ function siblingByParents(
     parentSide(graph, aId, only.personId),
     parentSide(graph, bId, only.personId),
   );
-  if (basis === 'other') return { ...base, sharing: 'half', side };
-  const fromOtherParent = otherParentState(graph, aId, fromBirth, only.personId);
-  const toOtherParent = otherParentState(graph, bId, toBirth, only.personId);
+  // L'autre parent de chacun, parmi ses parents du même type que son lien au parent commun : de
+  // naissance pour une fratrie de naissance ; adoptifs pour deux enfants adoptés par la même
+  // personne (adoptés par Anne seule : rien ne dit qu'ils n'ont pas le même autre parent).
+  const fromParents =
+    basis === 'birth' ? fromBirth : parentIdsOfType(fromLinks, only.fromLink.type);
+  const toParents = basis === 'birth' ? toBirth : parentIdsOfType(toLinks, only.toLink.type);
+  const withCandidates = basis === 'birth';
+  const fromOtherParent = otherParentState(graph, aId, fromParents, only.personId, withCandidates);
+  const toOtherParent = otherParentState(graph, bId, toParents, only.personId, withCandidates);
   return {
     ...base,
     sharing: sharingWithOne(graph, fromOtherParent, toOtherParent),

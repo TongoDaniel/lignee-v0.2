@@ -3,9 +3,8 @@
 // pas précisé, enfant du conjoint d'un parent. Règles : ADR 0017. Arbres inventés.
 import { describe, expect, it } from 'vitest';
 
-import { findRelationships } from './kinship';
+import { createKinshipGraph } from './graph';
 import {
-  ascentSide,
   invertSiblingLink,
   parentSide,
   siblingLink,
@@ -327,6 +326,27 @@ describe('types de filiation et certitude', () => {
     expect(link.filiationTypes).toEqual(['birth', 'adoptive']);
   });
 
+  it('adoptés par la même personne seule : frère ou demi-frère, rien n’est supposé', () => {
+    const f = fixture({
+      personnes: ['anne/F', 'marc/M', 'paul/M', 'lea/F', 'tom/M', 'zoe/F', 'max/M'],
+      filiations: [
+        { parents: ['anne'], enfant: 'lea', type: 'adoptive' },
+        { parents: ['anne'], enfant: 'tom', type: 'adoptive' },
+        { parents: ['anne', 'marc'], enfant: 'zoe', type: 'adoptive' },
+        { parents: ['anne', 'paul'], enfant: 'max', type: 'adoptive' },
+      ],
+    });
+    // Anne seule pour les deux, ou Anne et Marc pour l'une, Anne seule pour l'autre.
+    expect(summary(f, 'lea', 'tom')).toBe('full_or_half mother male');
+    expect(summary(f, 'zoe', 'tom')).toBe('full_or_half mother male');
+    const link = sibling(f, 'zoe', 'tom');
+    expect(link.basis).toBe('other');
+    expect(link.fromOtherParent).toEqual({ status: 'known', personId: f.id('marc') });
+    expect(link.toOtherParent).toEqual({ status: 'unspecified', candidateIds: [] });
+    // Anne et Marc, Anne et Paul : deux autres parents adoptifs connus, demi.
+    expect(summary(f, 'zoe', 'max')).toBe('half mother male');
+  });
+
   it('élevé par l’épouse de son père : demi-frère de naissance, le lien « a élevé » à part', () => {
     const f = fixture({
       personnes: ['paul/M', 'rose/F', 'jeanne/F', 'marc/M', 'luc/M'],
@@ -373,6 +393,58 @@ describe('visibilité : le calcul ne voit que le graphe du lecteur (PAR-09)', ()
     );
     expect(siblingLink(f.graph, f.id('lea'), f.id('tom'))).toBeUndefined();
     expect(siblingsOf(f.graph, f.id('lea'))).toEqual([]);
+  });
+
+  it('filiation masquée, père visible : aucun demi-frère, comme jamais saisie (CL-POL-17)', () => {
+    // Second foyer de Paul, connu de quelques personnes : son union avec Awa et sa filiation
+    // vers Tom sont masquées au lecteur ; Paul, Awa et Tom restent visibles.
+    const section = {
+      personnes: ['paul/M', 'rose/F', 'awa/F', 'lea/F', 'tom/M'],
+      unions: [{ conjoints: ['paul', 'rose'] }, { conjoints: ['paul', 'awa'] }],
+      filiations: [
+        { parents: ['paul', 'rose'], enfant: 'lea' },
+        { parents: ['paul', 'awa'], enfant: 'tom' },
+      ],
+    };
+    const full = fixture(section);
+    expect(summary(full, 'lea', 'tom')).toBe('half father male');
+    const hiddenFiliation = full.data.filiations.find(
+      (filiation) => filiation.parentId === full.id('paul') && filiation.childId === full.id('tom'),
+    );
+    const hiddenUnion = full.data.unions.find((union) =>
+      union.spouses.some((spouse) => spouse.personId === full.id('awa')),
+    );
+    const masked = createKinshipGraph({
+      people: full.data.people,
+      unions: full.data.unions.filter((union) => union !== hiddenUnion),
+      filiations: full.data.filiations.filter((filiation) => filiation !== hiddenFiliation),
+    });
+    const neverEntered = fixture({
+      personnes: section.personnes,
+      unions: [{ conjoints: ['paul', 'rose'] }],
+      filiations: [
+        { parents: ['paul', 'rose'], enfant: 'lea' },
+        { parents: ['awa'], enfant: 'tom' },
+      ],
+    });
+    expect(siblingLink(masked, full.id('lea'), full.id('tom'))).toBeUndefined();
+    expect(
+      siblingLink(neverEntered.graph, neverEntered.id('lea'), neverEntered.id('tom')),
+    ).toBeUndefined();
+    const keys = (graph: typeof masked, keyOf: (id: string) => string | undefined, id: string) =>
+      siblingsOf(graph, id).map((link) => [keyOf(link.toId), link.kind]);
+    for (const person of ['lea', 'tom', 'paul', 'awa']) {
+      expect(keys(masked, full.keyOf, full.id(person))).toEqual(
+        keys(neverEntered.graph, neverEntered.keyOf, neverEntered.id(person)),
+      );
+    }
+    // Union seule masquée, filiation visible : la filiation suffit, Tom reste demi-frère.
+    const unionOnly = createKinshipGraph({
+      people: full.data.people,
+      unions: full.data.unions.filter((union) => union !== hiddenUnion),
+      filiations: full.data.filiations,
+    });
+    expect(siblingLink(unionOnly, full.id('lea'), full.id('tom'))?.kind).toBe('sibling');
   });
 
   it('autre parent masqué : comme s’il n’avait jamais été saisi (frère ou demi-frère)', () => {
@@ -424,20 +496,6 @@ describe('côté d’un parent et d’une montée (CL-FAM-08)', () => {
   it('le côté d’un demi-frère est le même vu des deux : « parent » dès qu’un des deux a deux mères', () => {
     expect(summary(f, 'lea', 'tom')).toBe('half parent male');
     expect(summary(f, 'tom', 'lea')).toBe('half parent female');
-  });
-
-  it('côté de la montée d’un lien de sang : cousin par le père', () => {
-    const [first] = (() => {
-      const result = findRelationships(f.graph, f.id('tom'), f.id('cousin'));
-      return result.status === 'related' ? result.relationships : [];
-    })();
-    const segment = first?.segments[0];
-    if (segment?.kind !== 'blood') throw new Error('Expected blood');
-    expect(ascentSide(f.graph, segment)).toBe('father');
-    const back = findRelationships(f.graph, f.id('carl'), f.id('tom'));
-    const down = back.status === 'related' ? back.relationships[0]?.segments[0] : undefined;
-    if (down?.kind !== 'blood') throw new Error('Expected blood');
-    expect(ascentSide(f.graph, down)).toBeUndefined();
   });
 });
 

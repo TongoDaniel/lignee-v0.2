@@ -45,6 +45,16 @@ function birthParents(graph: KinshipGraph, id: Id): Set<Id> {
   );
 }
 
+/** Parents d'un type donné, par un parcours écrit ici. */
+function parentsOfType(graph: KinshipGraph, id: Id, type: Filiation['type']): Set<Id> {
+  return new Set(
+    graph
+      .parentsOf(id)
+      .filter((filiation) => filiation.type === type)
+      .map((filiation) => filiation.parentId),
+  );
+}
+
 /** Toutes les paires de personnes qui ont un parent (tout type) ou un conjoint de parent. */
 function closePairs(graph: KinshipGraph, tree: GeneratedTree): [Id, Id][] {
   const pairs: [Id, Id][] = [];
@@ -87,10 +97,25 @@ describe('propriétés de la fratrie sur des arbres générés', () => {
             } else {
               expect(forward.sharedParents).toHaveLength(1);
             }
-            if (forward.basis !== 'birth') continue;
+            // Parents de chacun du type de son lien au parent commun : de naissance pour une
+            // fratrie de naissance, du type du lien sinon (adoptif…). Les mêmes règles valent.
+            const [first] = forward.sharedParents;
+            if (first === undefined) throw new Error('A sibling has a shared parent');
+            const pa =
+              forward.basis === 'birth'
+                ? birthParents(graph, a)
+                : parentsOfType(graph, a, first.fromLink.type);
+            const pb =
+              forward.basis === 'birth'
+                ? birthParents(graph, b)
+                : parentsOfType(graph, b, first.toLink.type);
+            if (forward.sharing === 'half') {
+              // Demi seulement si chacun a un autre parent, et que l'on sait qu'ils diffèrent.
+              expect(forward.fromOtherParent?.status).not.toBe('unspecified');
+              expect(forward.toOtherParent?.status).not.toBe('unspecified');
+            }
+            if (forward.basis !== 'birth' && forward.sharedParents.length >= 2) continue;
             // Une place à compléter parent de A et pas de B (ou l'inverse) : jamais « frère ».
-            const pa = birthParents(graph, a);
-            const pb = birthParents(graph, b);
             const distinctPlaceholder = [...pa, ...pb].some(
               (p) => graph.person(p)?.nature === 'placeholder' && pa.has(p) !== pb.has(p),
             );

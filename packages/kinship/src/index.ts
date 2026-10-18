@@ -34,7 +34,6 @@ export {
   type UnionRank,
 } from './relationship';
 export {
-  ascentSide,
   invertSiblingLink,
   parentSide,
   siblingLink,

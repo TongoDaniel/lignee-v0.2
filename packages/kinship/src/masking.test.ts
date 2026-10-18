@@ -4,7 +4,9 @@
 // restent dans l'entrée). Le graphe obtenu doit répondre exactement comme celui d'un arbre où ces
 // objets n'ont jamais été saisis : rangs saisis 1, 2, 3… parmi les unions restantes, pas d'union
 // d'origine vers une union absente, pas de parent candidat sans union avec un parent restant.
-// Tous les accesseurs publics sont comparés, et les liens entre des paires tirées au hasard.
+// Tous les accesseurs publics sont comparés, la fratrie de chacun (T-020), et les liens et la
+// fratrie entre des paires tirées au hasard. Les mentions « distincte de » vers une personne
+// masquée disparaissent (ADR 0017).
 import type { Filiation, Id, Union } from '@lignee/domain';
 import { treeArbitrary, type GeneratedTree } from '@lignee/domain/test-support';
 import fc from 'fast-check';
@@ -12,6 +14,7 @@ import { describe, expect, it } from 'vitest';
 
 import { createKinshipGraph, type KinshipGraph } from './graph';
 import { findRelationships } from './kinship';
+import { siblingLink, siblingsOf } from './siblings';
 
 /** L'arbre tel qu'il aurait été saisi sans les objets retirés. */
 function neverEntered(
@@ -20,7 +23,16 @@ function neverEntered(
   hiddenUnions: ReadonlySet<Id>,
   hiddenFiliations: ReadonlySet<Id>,
 ) {
-  const people = tree.people.filter((person) => !hiddenPeople.has(person.id));
+  // Une mention « distincte de » vers une personne masquée n'aurait pas été saisie (ADR 0017).
+  const people = tree.people
+    .filter((person) => !hiddenPeople.has(person.id))
+    .map((person) => {
+      if (person.distinctFrom === undefined) return person;
+      const distinctFrom = person.distinctFrom.filter((id) => !hiddenPeople.has(id));
+      const copy = { ...person };
+      delete copy.distinctFrom;
+      return distinctFrom.length === 0 ? copy : { ...copy, distinctFrom };
+    });
   const kept = tree.unions.filter(
     (union) =>
       !hiddenUnions.has(union.id) &&
@@ -94,10 +106,12 @@ function snapshot(graph: KinshipGraph, tree: GeneratedTree, pairs: readonly [Id,
       children: graph.childrenOf(id),
       candidates: graph.parentCandidatesOf(id),
       ancestors: graph.ancestors(id),
+      siblings: siblingsOf(graph, id),
     })),
     unions: tree.unions.map((union) => graph.union(union.id)),
     filiations: tree.filiations.map((filiation) => graph.filiation(filiation.id)),
     links: pairs.map(([a, b]) => findRelationships(graph, a, b)),
+    siblingLinks: pairs.map(([a, b]) => siblingLink(graph, a, b)),
   };
 }
 
