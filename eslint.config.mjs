@@ -1,5 +1,7 @@
 // Configuration ESLint plate, commune à tout le monorepo.
 // Chaque paquet lance `eslint .` depuis son dossier ; ESLint remonte jusqu'à ce fichier.
+import path from 'node:path';
+
 import { fixupPluginRules } from '@eslint/compat';
 import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
@@ -96,6 +98,82 @@ function layoutSourceRules() {
   }));
 }
 
+// Règles du code de packages/kinship hors des tests : le moteur de parenté tourne à l'identique
+// sur le téléphone et sur le serveur (TRD, « Moteur de parenté ») : il n'importe que
+// @lignee/domain (sans ses outils de test) et ses propres fichiers, sans Node ni réseau.
+function kinshipSourceRules() {
+  const onlyDomain = {
+    regex: '^(?!@lignee/domain$|\\.{1,2}/)',
+    message: 'packages/kinship ne dépend que de @lignee/domain (TRD, « Moteur de parenté »).',
+  };
+  const testSupport = {
+    regex: '(^|/)test-support(/|$)',
+    message: 'Le code de packages/kinship n’importe pas ses outils de test (test-support).',
+  };
+  const globals = [
+    'process',
+    'Buffer',
+    'require',
+    'fetch',
+    'global',
+    '__dirname',
+    '__filename',
+  ].map((name) => ({
+    name,
+    message: `packages/kinship ne dépend ni de Node ni du réseau (${name}).`,
+  }));
+  // Une seule configuration, à toute profondeur sous src/ : les imports relatifs sont résolus
+  // depuis le fichier par la règle locale `lignee/no-relative-import-outside`.
+  return [
+    {
+      files: ['packages/kinship/src/**/*.ts'],
+      ignores: ['packages/kinship/src/**/*.test.ts', 'packages/kinship/src/test-support/**'],
+      plugins: { lignee: localPlugin },
+      rules: {
+        'no-restricted-globals': ['error', ...globals],
+        'no-restricted-imports': ['error', { patterns: [onlyDomain, testSupport] }],
+        'lignee/no-relative-import-outside': ['error', 'packages/kinship/src'],
+      },
+    },
+  ];
+}
+
+// Règle locale : un import relatif (import, export … from, import()) ne doit pas sortir du
+// dossier donné (chemin depuis la racine du dépôt), quelle que soit la profondeur du fichier.
+const localPlugin = {
+  rules: {
+    'no-relative-import-outside': {
+      meta: {
+        type: 'problem',
+        schema: [{ type: 'string' }],
+        messages: { outside: 'Import relatif hors de {{root}} : {{source}}.' },
+      },
+      create(context) {
+        const relativeRoot = String(context.options[0]);
+        const root = path.resolve(import.meta.dirname, relativeRoot);
+        const check = (source) => {
+          if (source?.type !== 'Literal' || typeof source.value !== 'string') return;
+          if (!source.value.startsWith('.')) return;
+          const target = path.resolve(path.dirname(context.filename), source.value);
+          if (target !== root && !target.startsWith(root + path.sep)) {
+            context.report({
+              node: source,
+              messageId: 'outside',
+              data: { root: relativeRoot, source: source.value },
+            });
+          }
+        };
+        return {
+          ImportDeclaration: (node) => check(node.source),
+          ExportNamedDeclaration: (node) => check(node.source),
+          ExportAllDeclaration: (node) => check(node.source),
+          ImportExpression: (node) => check(node.source),
+        };
+      },
+    },
+  },
+};
+
 export default tseslint.config(
   {
     ignores: [
@@ -162,6 +240,9 @@ export default tseslint.config(
 
   // packages/layout tourne sur le téléphone et sur le serveur : @lignee/domain seul.
   ...layoutSourceRules(),
+
+  // packages/kinship : @lignee/domain seul, ni Node, ni React, ni Prisma, ni réseau.
+  ...kinshipSourceRules(),
 
   // Accessibilité React Native : app mobile et composants de la charte (TRD, « Tests et qualité »).
   {
