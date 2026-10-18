@@ -28,6 +28,17 @@ export {
   type KinshipOptions,
 } from './kinship';
 export {
+  ascentSide,
+  invertPresentedLink,
+  presentRelationships,
+  type LineSide,
+  type PresentationOptions,
+  type PresentationResult,
+  type PresentedLink,
+  type PresentedSibling,
+  type PresentedSiblingKind,
+} from './presentation';
+export {
   INVERSE_ALLIANCE_KIND,
   invertAlliance,
   invertRelationship,

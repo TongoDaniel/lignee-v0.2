@@ -1,0 +1,47 @@
+# Noms générés. Charles, fils de Marie et de Louis (père légal), apprend par un test ADN que son
+# père de naissance est Bernard. Le lien de naissance avec Bernard est ajouté, celui avec Louis
+# devient « a élevé ».
+# Partie lien (T-022, calcul seulement) : avant, Louis est son père et Serge, fils de Louis et de
+# Marie, son frère ; après, Louis « l'a élevé » (jamais confondu avec la naissance), et aussi
+# « mari de votre mère », Bernard est son père, Serge son demi-frère par leur mère.
+# Confidentialité (ADR 0017, ADR 0021) : un lecteur qui ne voit pas le nouveau lien doit voir
+# exactement l'arbre d'avant (l'ancien lien « de naissance ») ; sinon le passage de Louis à « a
+# élevé » et de Serge à « demi-frère » révélerait la paternité masquée. Le test joue la projection
+# exigée de T-052 et montre ce que révélerait une projection naïve. Reste : les mots (T-026,
+# T-027) ; « moi seul » proposé, la projection par lecteur et ses tests de non-fuite (T-052).
+id: CL-FAM-14
+titre: Paternité révélée par un test ADN
+couverture:
+  teste: [lien]
+  reste: [T-026, T-027, T-052]
+arbre:
+  personnes: [marie/F, louis/M, bernard/M, charles/M, serge/M]
+  unions:
+    - { conjoints: [louis, marie] }
+  filiations:
+    - { parents: [louis, marie], enfant: charles }
+    - { parents: [louis, marie], enfant: serge }
+action:
+  test_adn: { enfant: charles, ancien: louis, nouveau: bernard }
+attendu:
+  avant:
+    - { de: charles, vers: louis, fr: "père", en: "father", aussi: [] }
+    - { de: charles, vers: serge, fr: "frère", en: "brother", aussi: [] }
+    - { de: charles, vers: bernard, fr: "Lien non disponible", en: "Link not available" }
+  apres:
+    - de: charles
+      vers: louis
+      fr: "l'a élevé"
+      en: "raised him"
+      aussi:
+        - { fr: "mari de votre mère", en: "your mother's husband" }
+    - { de: charles, vers: bernard, fr: "père", en: "father", aussi: [] }
+    - de: charles
+      vers: serge
+      fr: "demi-frère, même mère"
+      en: "half-brother, same mother"
+      aussi: []
+  lecteur_sans_le_nouveau_lien:
+    - { de: charles, vers: louis, fr: "père", en: "father", aussi: [] }
+    - { de: charles, vers: serge, fr: "frère", en: "brother", aussi: [] }
+    - { de: charles, vers: bernard, fr: "Lien non disponible", en: "Link not available" }

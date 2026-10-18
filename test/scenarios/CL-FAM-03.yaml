@@ -1,0 +1,27 @@
+# Noms générés. Zoé, née de Bruno et Brigitte, a été adoptée par Alain et Agnès, parents de Sam.
+# Partie lien (T-022) : deux paires de parents de types différents. Pour Alain, Zoé est « fille
+# adoptive » ; pour Zoé, Agnès est « mère adoptive » et Brigitte reste « mère » (naissance) ; Sam
+# est son « frère par adoption », jamais « frère » tout court (PAR-06). Le test vérifie aussi que
+# l'adoption masquée au lecteur ne laisse aucune trace (comme jamais saisie : « Lien non
+# disponible » entre Zoé et Sam). Reste : les mots (T-026, T-027) ; la visibilité au choix et
+# « moi seul » proposé à la création de l'adoption (T-052).
+id: CL-FAM-03
+titre: Adoption, parents de naissance connus
+couverture:
+  teste: [lien]
+  reste: [T-026, T-027, T-052]
+arbre:
+  personnes: [bruno/M, brigitte/F, alain/M, agnes/F, zoe/F, sam/M]
+  unions:
+    - { conjoints: [bruno, brigitte] }
+    - { conjoints: [alain, agnes] }
+  filiations:
+    - { parents: [bruno, brigitte], enfant: zoe }
+    - { parents: [alain, agnes], enfant: zoe, type: adoptive }
+    - { parents: [alain, agnes], enfant: sam }
+attendu:
+  liens:
+    - { de: alain, vers: zoe, fr: "fille adoptive", en: "adopted daughter", aussi: [] }
+    - { de: zoe, vers: agnes, fr: "mère adoptive", en: "adoptive mother", aussi: [] }
+    - { de: zoe, vers: brigitte, fr: "mère", en: "mother", aussi: [] }
+    - { de: zoe, vers: sam, fr: "frère par adoption", en: "brother by adoption", aussi: [] }

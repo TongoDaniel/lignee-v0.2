@@ -12,8 +12,11 @@
 // des limites de degré, et sans chemin redondant avec le sang (le conjoint d'un parent qui est
 // aussi l'autre parent de l'enfant est son parent, pas « l'épouse de votre père »). ADR 0010.
 //
-// Tous les chemins sont gardés, du plus proche au plus lointain, le sang avant l'alliance, avec
-// la certitude la plus faible du chemin. Chaque chemin par alliance porte son lien nommé
+// Tous les chemins sont gardés, du plus proche au plus lointain, le sang avant l'alliance, la
+// naissance avant un lien non biologique à égalité (ADR 0021), avec la certitude la plus faible
+// du chemin. Celui qui a élevé un enfant, ou l'a reçu en confiage, n'est pas son « autre parent » :
+// le chemin par l'union reste (« l'a élevé », et aussi « mari de votre mère », ADR 0021). Chaque
+// chemin par alliance porte son lien nommé
 // structurellement (conjoint, conjoint d'un parent, co-épouse… : `alliance.ts`, T-021). Aucun mot
 // ici : T-026 et T-027.
 //
@@ -429,10 +432,17 @@ function bloodPaths(
 }
 
 /**
+ * Rôles de parent pour la redondance de l'alliance : naissance et adoption (ADR 0021). Celui qui a
+ * élevé un enfant, l'a reçu en confiage ou en tutelle n'est pas son « autre parent » : il reste
+ * aussi « mari de votre mère » ou « épouse de votre père » (CL-FAM-02, CL-POL-11).
+ */
+const PARENT_ROLE_MASK: FiliationTypeMask = filiationTypeMask(['birth', 'adoptive']);
+
+/**
  * Passage d'une union X–Y entre deux segments, sans redondance avec le sang : si l'on arrive à X
- * en montant depuis son enfant, cet enfant ne doit pas être aussi enfant de Y (sinon Y est son
- * autre parent, et le chemin n'est que « parent ») ; de même pour l'enfant de Y où l'on descend
- * ensuite (ADR 0010).
+ * en montant depuis son enfant, cet enfant ne doit pas être aussi enfant de Y par la naissance ou
+ * l'adoption (sinon Y est son autre parent, et le chemin n'est que « parent ») ; de même pour
+ * l'enfant de Y où l'on descend ensuite (ADR 0010, point 4 ; ADR 0021).
  */
 function crossingIsUseful(
   graph: KinshipGraph,
@@ -441,10 +451,11 @@ function crossingIsUseful(
   right: RawBlood,
   mask: FiliationTypeMask,
 ): boolean {
+  const roles = mask & PARENT_ROLE_MASK;
   const before = left.down.length === 0 ? left.up.at(-1)?.child : undefined;
-  if (before !== undefined && graph.isChildOf(before, union.spouse, mask)) return false;
+  if (before !== undefined && graph.isChildOf(before, union.spouse, roles)) return false;
   const after = right.up.length === 0 ? right.down[0]?.child : undefined;
-  if (after !== undefined && graph.isChildOf(after, union.self, mask)) return false;
+  if (after !== undefined && graph.isChildOf(after, union.self, roles)) return false;
   return true;
 }
 
@@ -744,10 +755,16 @@ function imbalance(relationship: Relationship): number {
     : 0;
 }
 
+/** 0 si toutes les filiations du chemin sont de naissance, 1 sinon (PAR-06, ADR 0021). */
+function nonBirthRank(relationship: Relationship): number {
+  return relationship.filiationTypes.some((type) => type !== 'birth') ? 1 : 0;
+}
+
 /**
  * Ordre des chemins : le sang avant l'alliance, puis du plus court au plus long, le moins
- * d'unions, le plus équilibré, le plus certain ; à égalité, une clé identique pour un chemin et
- * son inverse.
+ * d'unions, le plus équilibré, la naissance avant un lien non biologique (ADR 0021 : le père de
+ * naissance avant « l'a élevé » quand il l'a aussi élevé), le plus certain ; à égalité, une clé
+ * identique pour un chemin et son inverse.
  */
 function sortRelationships(relationships: Relationship[]): Relationship[] {
   const keyed = relationships.map((relationship) => ({
@@ -762,6 +779,7 @@ function sortRelationships(relationships: Relationship[]): Relationship[] {
         (y.relationship.degree + y.relationship.unionCount) ||
       x.relationship.unionCount - y.relationship.unionCount ||
       imbalance(x.relationship) - imbalance(y.relationship) ||
+      nonBirthRank(x.relationship) - nonBirthRank(y.relationship) ||
       CERTAINTY_ORDER[x.relationship.certainty] - CERTAINTY_ORDER[y.relationship.certainty] ||
       compareIds(x.key, y.key),
   );
