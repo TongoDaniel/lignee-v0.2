@@ -108,3 +108,72 @@ export const scenarioFiliationSchema = z.strictObject({
   parents: z.array(z.string()).min(1).max(2),
   enfant: z.string(),
 });
+
+/** Qualificatifs de date, dans les mots du cahier. */
+export const scenarioQualifiers = {
+  exacte: 'exact',
+  vers: 'about',
+  avant: 'before',
+  apres: 'after',
+  entre: 'between',
+  calculee: 'calculated',
+  texte: 'text',
+} as const;
+
+/** Précisions de date, dans les mots du cahier. */
+export const scenarioPrecisions = {
+  jour: 'day',
+  mois: 'month',
+  annee: 'year',
+  decennie: 'decade',
+} as const;
+
+const scenarioDay = z.string().regex(/^\d{4}(-\d{2}(-\d{2})?)?$/);
+
+/**
+ * Date floue d'un scénario : `date` (une borne) ou `de` et `a` (deux bornes) en AAAA, AAAA-MM
+ * ou AAAA-MM-JJ ; la précision se déduit de la première borne, sauf « decennie » écrite à part.
+ */
+export const scenarioFuzzyDateSchema = z.strictObject({
+  qualificatif: z.enum(Object.keys(scenarioQualifiers) as [keyof typeof scenarioQualifiers]),
+  precision: z
+    .enum(Object.keys(scenarioPrecisions) as [keyof typeof scenarioPrecisions])
+    .optional(),
+  date: scenarioDay.optional(),
+  de: scenarioDay.optional(),
+  a: scenarioDay.optional(),
+  texte: z.string().optional(),
+  calendrier: z.enum(['gregorien', 'hegirien']).optional(),
+});
+export type ScenarioFuzzyDate = z.infer<typeof scenarioFuzzyDateSchema>;
+
+function scenarioBound(value: string) {
+  const [year = '', month, day] = value.split('-');
+  return {
+    year: Number(year),
+    ...(month === undefined ? {} : { month: Number(month) }),
+    ...(day === undefined ? {} : { day: Number(day) }),
+  };
+}
+
+/**
+ * Entrée brute du schéma `fuzzyDateSchema`, non validée : les scénarios décrivent aussi des
+ * dates refusées.
+ */
+export function fuzzyDateInputFromScenario(line: ScenarioFuzzyDate): Record<string, unknown> {
+  const qualifier = scenarioQualifiers[line.qualificatif];
+  if (qualifier === 'text') return { qualifier, originalText: line.texte };
+  const first = line.date ?? line.de ?? '';
+  const inferred = (['year', 'month', 'day'] as const)[first.split('-').length - 1];
+  return {
+    qualifier,
+    precision: line.precision === undefined ? inferred : scenarioPrecisions[line.precision],
+    ...(line.date === undefined ? {} : { date: scenarioBound(line.date) }),
+    ...(line.de === undefined ? {} : { from: scenarioBound(line.de) }),
+    ...(line.a === undefined ? {} : { to: scenarioBound(line.a) }),
+    ...(line.texte === undefined ? {} : { originalText: line.texte }),
+    ...(line.calendrier === undefined
+      ? {}
+      : { calendar: line.calendrier === 'hegirien' ? 'hijri' : 'gregorian' }),
+  };
+}

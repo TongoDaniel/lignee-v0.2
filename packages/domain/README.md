@@ -9,7 +9,7 @@ Zod est la seule dépendance du code du paquet. Hors des tests, ESLint (`eslint.
 | Fichier | Schémas | Source |
 | --- | --- | --- |
 | `ids.ts` | `idSchema`, `createId`, `createUuidV7Generator`, `isUuidV7`, `uuidV7Timestamp` | TRD, Hors-ligne (point 1) |
-| `fuzzy-date.ts` | `fuzzyDateSchema` (emplacement seulement, voir plus bas) | TRD, Modèle de données ; T-005 |
+| `fuzzy-date.ts` | `fuzzyDateSchema`, `fuzzyDateSortKey`, `compareFuzzyDates`, `fuzzyDateSpan`, `isApproximate`, `birthDateFromAge`, `describeFuzzyDate` (T-005, voir plus bas) | TRD, Modèle de données ; VOX-14 ; CL-DON-05, CL-DON-06, CL-VOI-16 |
 | `person.ts` | `personSchema`, `nameSchema`, `personRecordSchema`, `formatName` | UNI-01, UNI-02, UNI-22 ; CL-DON-01, CL-DON-02, CL-FAM-17, CL-FAM-18 |
 | `union.ts` | `unionSchema` (deux conjoints, chacun avec son rang) | UNI-05 à UNI-08 |
 | `filiation.ts` | `filiationSchema` (avec `recognitionStatus`), `parentCandidateSchema`, `proposesOnlyMeByDefault` | UNI-09 à UNI-11, CON-04 |
@@ -52,9 +52,16 @@ Les tables absentes du TRD (titres et rôles datés, naissances multiples) et le
 
 UUIDv7 sous forme canonique (minuscules), créés sur le téléphone par `createId()`. Le générateur est strictement croissant, même dans la même milliseconde ou si l'horloge recule (RFC 9562, compteur de 12 bits). Dans la même milliseconde, le compteur avance d'un pas aléatoire de 1 à 64 : un trou entre deux identifiants voisins ne trahit pas un objet masqué créé entre eux. Risque résiduel accepté (ADR 0008) : l'horodatage de création reste lisible dans l'identifiant ; les exports partagés ne doivent donc pas contenir d'identifiants internes. La source par défaut utilise `crypto.getRandomValues` : l'app doit installer le polyfill d'Expo avant le premier identifiant.
 
-### Date floue : branchement de T-005
+### Date floue (T-005)
 
-`fuzzy-date.ts` est le seul endroit où la date floue est définie ; faits, unions, noms et titres importent `fuzzyDateSchema` de là. T-004 n'y met que la forme « texte » (`{ qualifier: 'text', originalText }`) et `fuzzyDateFromText`. T-005 remplace le contenu du fichier par l'objet complet du TRD (qualificatif, précision, bornes, texte d'origine, calendrier, clé de tri déduite), en union discriminée sur `qualifier` dont `text` reste une branche : les données et les tests écrits avec `fuzzyDateFromText` restent valides, et aucun autre fichier n'a à changer.
+`fuzzy-date.ts` est le seul endroit où la date floue est définie ; faits, unions, noms et titres importent `fuzzyDateSchema` de là. Conventions que le cahier ne fixe pas : ADR 0009 (proposée).
+
+- **Forme** : union discriminée sur `qualifier`. `exact`, `about`, `before`, `after`, `calculated` ont une borne `date` ; `between` a `from` et `to`, ordonnées et distinctes ; tous ont `precision` (`day`, `month`, `year`, `decade`), `calendar` (`gregorian` par défaut, `hijri`) et un `originalText` facultatif. La forme `text` de T-004 (`{ qualifier: 'text', originalText }`, `fuzzyDateFromText`) est inchangée.
+- **Validation** : une précision par date ; mois et jour présents si et seulement si la précision les demande ; une décennie commence par une année en 0 ; le jour existe (grégorien réel, hégirien 30 au plus, sans conversion : CL-DON-07 est V2).
+- **Tri** : `fuzzyDateSortKey` donne la colonne de tri (chaîne, collation « C ») ; `compareFuzzyDates` compare par elle. Une date qui finit avant qu'une autre commence passe avant ; au même jour, « après » d'abord, puis du moins précis au plus précis, « avant » en dernier ; texte libre et autre calendrier en fin, date absente tout au bout.
+- **Approximation et calcul** : `isApproximate` est vrai pour tout sauf une date exacte ; `birthDateFromAge(80, <2010>)` donne une naissance `calculated` en 1930, approximative (VOX-14).
+- **Affichage** : `describeFuzzyDate` renvoie une structure sans mots ; le texte (« vers 1940 ») viendra de `packages/i18n`.
+- **Étendue** : `fuzzyDateSpan` donne le premier et le dernier jour possibles d'une date grégorienne, pour les contrôles de cohérence (T-007).
 
 ## Visibilité par défaut (relecture gardien-confidentialite)
 
@@ -94,5 +101,6 @@ corepack pnpm --filter @lignee/domain test
 ```
 
 - Les cas limites de T-004 (CL-POL-15, CL-DON-01, CL-DON-02, CL-FAM-11, CL-FAM-17, CL-FAM-18, CL-FAM-19) sont lus dans `test/scenarios/<ID>.yaml` par `src/scenarios/model-scenarios.test.ts`, avec la lecture simple de `src/test-support/scenario.ts` ; chaque YAML dit dans `couverture` la partie testée (le modèle) et les tickets qui le compléteront. Le job `cas-limites` de la CI les compte comme joués parce que `loadScenario` les a réellement chargés pendant les tests (`test/scenarios/README.md`). Le lecteur complet est T-006.
-- Tests de propriétés (fast-check) : croissance des identifiants, validité des unions. Ceux sur des arbres générés arrivent avec le générateur de T-006.
+- Les cas limites de T-005 (CL-DON-05, CL-DON-06, CL-VOI-16) sont joués par `src/scenarios/fuzzy-date-scenarios.test.ts`.
+- Tests de propriétés (fast-check) : croissance des identifiants, validité des unions ; dates floues générées par `src/test-support/fuzzy-date-arbitrary.ts` (tri total, indépendant de l'ordre d'arrivée et cohérent avec l'étendue, clé injective, aller-retour JSON). Ceux sur des arbres générés arrivent avec le générateur de T-006.
 - Noms générés seulement, jamais une vraie famille.
