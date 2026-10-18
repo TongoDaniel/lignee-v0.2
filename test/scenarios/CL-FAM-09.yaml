@@ -1,0 +1,71 @@
+# Noms générés. Partie disposition (T-019, packages/layout) : Paul et Marie sont cousins germains
+# (leurs parents Bernard et Colette sont frère et sœur, enfants de Gaspard et Honorine) ; ils ont
+# un fils, Luc. Vu depuis Luc, Gaspard et Honorine sont ses arrière-grands-parents par les deux
+# branches : chacun n'a qu'une fiche (ARB-06, « aucune fiche en double »), et le couple de Paul et
+# Marie, rangé dans la fratrie de la famille de Paul, est relié à la famille de Marie par un trait
+# vers une autre place : tous les liens sont affichés. Même chose dans la vue « descendance » de
+# Gaspard (ARB-14) : Luc n'y figure qu'une fois. Reste : la revue visuelle du trait (T-017).
+id: CL-FAM-09
+titre: Mariage entre cousins germains
+couverture:
+  teste: [disposition]
+  reste: [T-017]
+arbre:
+  personnes: [gaspard/M, honorine/F, bernard/M, alice/F, colette/F, denis/M, paul/M, marie/F, luc/M]
+  unions:
+    - { conjoints: [gaspard, honorine] }
+    - { conjoints: [bernard, alice] }
+    - { conjoints: [colette, denis] }
+    - { conjoints: [paul, marie] }
+  filiations:
+    - { parents: [gaspard, honorine], enfant: bernard }
+    - { parents: [gaspard, honorine], enfant: colette }
+    - { parents: [bernard, alice], enfant: paul }
+    - { parents: [colette, denis], enfant: marie }
+    - { parents: [paul, marie], enfant: luc }
+action:
+  centre: luc
+  descendance_de: gaspard
+attendu:
+  generations:
+    { luc: 0, paul: -1, marie: -1, bernard: -2, alice: -2, colette: -2, denis: -2, gaspard: -3 }
+  unites:
+    gaspard:
+      forme: couple
+      foyers:
+        - { conjoint: honorine, enfants: [bernard, colette], vers_centre: true }
+    bernard:
+      forme: couple
+      foyers:
+        - { conjoint: alice, enfants: [paul], vers_centre: true }
+    colette:
+      forme: couple
+      foyers:
+        - { conjoint: denis, enfants: [marie], vers_centre: true }
+    paul:
+      forme: couple
+      foyers:
+        - { conjoint: marie, enfants: [luc], vers_centre: true }
+  disposition:
+    visibles: [gaspard, honorine, bernard, alice, colette, denis, paul, marie, luc]
+    lignes:
+      "-3": [gaspard, honorine]
+      "-2": [bernard, alice, colette, denis]
+      "-1": [paul, marie]
+      "0": [luc]
+    replis:
+      - { famille: [gaspard, honorine], replie: false, enfants: 2 }
+      - { famille: [bernard, alice], replie: false, enfants: 1 }
+      - { famille: [colette, denis], replie: false, enfants: 1 }
+      - { famille: [paul, marie], replie: false, enfants: 1 }
+    liens:
+      - { nature: ailleurs, de: [colette, denis], vers: marie, trace: trait }
+  descendance:
+    visibles: [gaspard, honorine, bernard, alice, colette, denis, paul, marie, luc]
+    lignes:
+      "0": [gaspard, honorine]
+      "1": [bernard, alice, colette, denis]
+      "2": [paul, marie]
+      "3": [luc]
+    liens:
+      - { nature: ailleurs, de: [colette, denis], vers: marie, trace: trait }

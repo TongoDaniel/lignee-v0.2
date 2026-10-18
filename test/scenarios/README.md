@@ -87,9 +87,9 @@ it('CL-POL-03 — lien : frère ou demi-frère', () => {
 
 Pour les tests de propriétés, `treeArbitrary()` (fast-check) et `referenceTree(100 | 1000 | 5000)` donnent des arbres générés valides (`packages/domain/README.md`).
 
-## Disposition (packages/layout, T-008, T-012)
+## Disposition (packages/layout, T-008, T-012, T-019)
 
-Les scénarios de disposition (CL-POL-01, 04, 06, 09, 12, 13, 14, 18, CL-SEC-03) déclarent `teste: [disposition]`. Leur arbre suit le format commun, avec les dates, la fin et la simultanéité des unions et les candidats (sections ci-dessus) ; leur action et leur attendu sont lus en schéma strict par `packages/layout/src/test-support/layout-scenario.ts` :
+Les scénarios de disposition (CL-POL-01, 04, 06, 09, 12, 13, 14, 18, CL-SEC-03, CL-FAM-09, 10) déclarent `teste: [disposition]`. Leur arbre suit le format commun, avec les dates, la fin et la simultanéité des unions et les candidats (sections ci-dessus) ; leur action et leur attendu sont lus en schéma strict par `packages/layout/src/test-support/layout-scenario.ts` :
 
 | Clé | Contenu |
 | --- | --- |
@@ -100,4 +100,5 @@ Les scénarios de disposition (CL-POL-01, 04, 06, 09, 12, 13, 14, 18, CL-SEC-03)
 | `attendu.generations`, `attendu.apres`, `attendu.vers_centre_depuis`, `attendu.sans_regle_de_genre` | Facultatifs : rangées attendues ; unités après `action.puis` ; foyers `[centre, conjoint]` qui mènent à chaque autre personne centrale ; même disposition genres inversés |
 | `action.masques` | Facultatif (T-012) : personnes masquées pour le lecteur, retirées du graphe reçu avec tout ce qui les cite, comme le filtrage de packages/domain (CL-SEC-03) |
 | `action.deplier` | Facultatif (T-012) : familles dépliées par le lecteur, pour `attendu.apres_deplier` ; une famille s'écrit `[a, b]` (foyer de deux parents) ou `[a]` (colonne « non précisé » de `a`) |
-| `attendu.disposition`, `attendu.apres_deplier` | Ordre, placement et repli (T-012) : `lignes` (personnes de gauche à droite par hauteur, `"-1"`, `"-0.5"` pour la demi-rangée ; seules les hauteurs citées sont vérifiées), `visibles` (liste complète, sans ordre), `replis` (liste complète des familles touchées : `{ famille, replie, enfants }`), `largeur_max` (en fiches). Le test vérifie en plus, sur chaque scénario, qu'aucune fiche n'en chevauche une autre et qu'aucun foyer ni fratrie n'est coupé |
+| `action.descendance_de` | Facultatif (T-019) : ancêtre dont on calcule aussi la vue « descendance », pour `attendu.descendance` |
+| `attendu.disposition`, `attendu.apres_deplier`, `attendu.descendance` | Ordre, placement et repli (T-012) : `lignes` (personnes de gauche à droite par hauteur, `"-1"`, `"-0.5"` pour la demi-rangée ; seules les hauteurs citées sont vérifiées), `visibles` (liste complète, sans ordre), `replis` (liste complète des familles touchées : `{ famille, replie, enfants }`), `largeur_max` (en fiches), `liens` (T-019 : liste complète des liens hors des foyers, `{ nature, de, vers, trace }` ; `nature` : `ailleurs`, `long`, `couple`, `secondaire` ; `de` : la famille pour `ailleurs` et `long`, `[conjoint au centre]` pour `couple`, `[parent]` pour `secondaire` ; `trace` : `trait` ou `renvoi`). Le test vérifie en plus, sur chaque scénario, qu'aucune fiche n'en chevauche une autre et qu'aucun foyer ni fratrie n'est coupé |

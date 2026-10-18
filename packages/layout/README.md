@@ -37,12 +37,29 @@ Repli : `setFolded(folds, key, folded)` et `toggleFamily(layout, key)` rendent d
 
 Garanties vérifiées sur des arbres générés (`src/properties/layout.properties.test.ts`), replis par défaut, tirés au hasard et tout déplié : aucune fiche ne chevauche une autre, en deux dimensions (demi-rangée comprise) ; les conjoints d'un foyer dessiné sur une rangée sont dans le même groupe, les groupes ne se chevauchent pas, chaque fratrie est d'un seul tenant et dans l'ordre des frères et sœurs ; le compteur est celui du graphe reçu et aucune personne masquée n'apparaît ; une union, une filiation ou une naissance masquée donne la même disposition que si elle n'avait jamais été saisie ; inverser femmes et hommes ne change rien ; fonction pure ; le cache ne refait que les étapes 3 à 5 ; la méthode des barycentres n'augmente jamais les croisements (vrai par construction, documentaire : le test utile est la mesure ci-dessous). `src/crossings.test.ts` mesure la réduction : 22 089 croisements avant, 8 863 après sur 40 arbres générés de 300 personnes tout dépliés (relevé du 17 octobre 2026).
 
-Hors de T-012 : l'implexe dessiné en renvoi « voir aussi » (étape 6, T-019), le dessin et les libellés (T-017, via `packages/i18n`).
+Hors de T-012 : le dessin et les libellés (T-017, via `packages/i18n`).
+
+## Étape 6 et vue « descendance » (T-019)
+
+`layoutTree` rend aussi `links` : chaque personne n'a qu'une fiche (ARB-06), et ce qui la relie ailleurs que sous sa famille est un lien entre deux fiches dessinées, dans l'ordre du dessin (de haut en bas, de gauche à droite) :
+
+| Nature | Lien |
+| --- | --- |
+| `elsewhere` | Famille et enfant à la rangée suivante, rangé dans la fratrie d'une autre famille (le couple suit la famille de l'un, l'autre la rejoint : toute alliance, mariage entre cousins compris, CL-FAM-09) |
+| `long` | Famille et enfant sur une rangée non voisine (étape 1 : implexe, union entre générations) |
+| `couple` | Deux parents d'un foyer sur deux rangées (union entre générations, CL-FAM-10) |
+| `secondary` | Filiation qui ne range pas l'enfant (adoption à côté de la naissance, « a élevé »…) |
+
+Chaque lien porte ses deux fiches, ses points, son écart de rangées et ses croisements avec les traits des foyers ; `drawing` vaut `seeAlso` (renvoi « voir aussi » vers la fiche déjà dessinée) quand l'écart dépasse 2 rangées (`MAX_LINE_ROW_SPAN`) ou les croisements 4 (`MAX_LINE_CROSSINGS`), sinon `line`. Une famille repliée ne relie pas ses enfants ; deux conjoints dessinés sont toujours reliés.
+
+`layoutDescendants(graph, ancestorId, { folds })` est la vue « descendance » (ARB-14) : l'ancêtre en x = 0, ses foyers dans l'ordre des rangs, puis tous ses descendants foyer par foyer, tout déplié par défaut (les choix de repli marchent comme dans l'arbre). Les descendants sont les enfants que l'arbre range sous ses familles, puis sous celles de ses descendants (`findDescendants`) ; la vue garde l'autre parent de chaque famille et les conjoints des descendants, rien d'autre (`descendantsGraph`). Règles retenues : ADR 0024 (proposée).
+
+Garanties vérifiées sur des arbres générés (`src/properties/implex.properties.test.ts`, et `expectLinkInvariants` dans toutes les vérifications de disposition) : une seule fiche par personne, dans l'arbre tout déplié (ascendants compris) comme dans la descendance ; chaque enfant dessiné d'une famille dépliée y est relié, sous elle ou par un seul lien ; aucun lien en trop ; le tracé suit la règle, les croisements recomptés segment par segment ; les arbres générés produisent des liens de chaque nature et des renvois ; la descendance contient exactement les descendants recalculés depuis l'arbre, tout déplié ; ordre stable (même entrée, même résultat ; frères, sœurs et unions de l'ancêtre dans l'ordre de l'arbre) ; aucune personne masquée dans les liens ni dans la descendance.
 
 ## Mesure
 
-`src/performance.test.ts` (médiane de plusieurs calculs, sur la machine des tests) : moins de 100 ms exigés pour 500 personnes visibles (budget du TRD), moins de 300 ms pour 5 000. Étapes 1 à 5 : moins de 100 ms pour 500 personnes dessinées ou plus (tout déplié), moins de 300 ms pour un arbre de 5 000 personnes au repli par défaut, moins de 1 s tout déplié ; déplier un foyer (étapes 3 à 5 seules) moins de 100 ms. Relevé du 17 octobre 2026 : environ 15 ms pour 598 personnes dessinées, 180 ms pour 4 907. Relevé le 17 octobre 2026 sur le poste de développement, partagé avec d'autres calculs : environ 4 à 10 ms pour plus de 500 personnes visibles, 45 à 180 ms pour 5 000 selon la charge. La mesure sur l'Android de référence reste à faire (T-012, T-017).
+`src/performance.test.ts` (médiane de plusieurs calculs, sur la machine des tests) : moins de 100 ms exigés pour 500 personnes visibles (budget du TRD), moins de 300 ms pour 5 000. Étapes 1 à 5 : moins de 100 ms pour 500 personnes dessinées ou plus (tout déplié), moins de 300 ms pour un arbre de 5 000 personnes au repli par défaut, moins de 1 s tout déplié ; déplier un foyer (étapes 3 à 5 seules) moins de 100 ms. Relevé du 17 octobre 2026 : environ 15 ms pour 598 personnes dessinées, 180 ms pour 4 907. Depuis T-019, ces mesures comprennent l'étape 6 (liens) ; la vue « descendance » du fondateur le plus large d'un arbre dense de 5 000 personnes doit tenir en moins de 1 s (relevé du 18 octobre 2026 : 65 ms pour 602 personnes dessinées, dont la structure de l'arbre entier). Relevé le 17 octobre 2026 sur le poste de développement, partagé avec d'autres calculs : environ 4 à 10 ms pour plus de 500 personnes visibles, 45 à 180 ms pour 5 000 selon la charge. La mesure sur l'Android de référence reste à faire (T-012, T-017).
 
 ## Scénarios
 
-Les cas limites CL-POL-01, 04, 06, 09, 13, 14 et 18 sont joués par `src/scenarios/polygamy-scenarios.test.ts` (structure, puis ordre, placement et repli) ; CL-POL-12 et CL-SEC-03 par `src/scenarios/fold-scenarios.test.ts`. Format de disposition : `test/scenarios/README.md`.
+Les cas limites CL-POL-01, 04, 06, 09, 13, 14 et 18 sont joués par `src/scenarios/polygamy-scenarios.test.ts` (structure, puis ordre, placement et repli) ; CL-POL-12 et CL-SEC-03 par `src/scenarios/fold-scenarios.test.ts` ; CL-FAM-09 et CL-FAM-10 par `src/scenarios/implex-scenarios.test.ts` (T-019). Format de disposition : `test/scenarios/README.md`.
