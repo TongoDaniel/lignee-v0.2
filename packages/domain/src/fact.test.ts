@@ -122,6 +122,46 @@ describe('naissance multiple vue par un lecteur', () => {
     expect(projectMultipleBirth(birth, hidden('t3'))?.members).toEqual(birth.members.slice(0, 2));
   });
 
+  it('renumérote les rangs restants à la suite : aucune lacune ne trahit l’enfant masqué', () => {
+    const ordered = multipleBirthSchema.parse({
+      ...birth,
+      members: ['t1', 't2', 't3'].map((key, at) => ({
+        personId: tree.personId(key),
+        birthOrder: at + 1,
+      })),
+    });
+    const seen = projectMultipleBirth(ordered, hidden('t2'));
+    expect(seen?.members).toEqual([
+      { personId: tree.personId('t1'), birthOrder: 1 },
+      { personId: tree.personId('t3'), birthOrder: 2 },
+    ]);
+    // Même projection qu'une naissance de jumeaux saisie sans le troisième enfant.
+    const twins = multipleBirthSchema.parse({
+      ...birth,
+      members: ['t1', 't3'].map((key, at) => ({
+        personId: tree.personId(key),
+        birthOrder: at + 1,
+      })),
+    });
+    expect(seen).toEqual(projectMultipleBirth(twins, () => true));
+    // Rangs absents : rien à renuméroter ; rangs partiels : ceux qui restent, à la suite.
+    expect(projectMultipleBirth(birth, hidden('t1'))?.members).toEqual(birth.members.slice(1));
+    const partial = multipleBirthSchema.parse({
+      ...birth,
+      members: [
+        { personId: tree.personId('t1'), birthOrder: 3 },
+        { personId: tree.personId('t2') },
+        { personId: tree.personId('t3'), birthOrder: 1 },
+      ],
+    });
+    expect(projectMultipleBirth(partial, hidden('t3'))?.members).toEqual([
+      { personId: tree.personId('t1'), birthOrder: 1 },
+      { personId: tree.personId('t2') },
+    ]);
+    // L'objet reçu n'est pas modifié.
+    expect(ordered.members.map((member) => member.birthOrder)).toEqual([1, 2, 3]);
+  });
+
   it('disparaît s’il reste moins de deux enfants visibles : « Jumeaux » ne trahit personne', () => {
     expect(projectMultipleBirth(birth, hidden('t2', 't3'))).toBeUndefined();
     expect(projectMultipleBirth(birth, hidden('t1', 't2', 't3'))).toBeUndefined();
