@@ -36,11 +36,24 @@ Noms et props en anglais (ADR 0018, `docs/adr/0018-noms-des-composants-en-anglai
 | Icones | `Icon` |
 | Logo | `Logo` |
 
+Composants de personne et de navigation (T-015), mêmes règles :
+
+| Charte | Composant | Props principales |
+| --- | --- | --- |
+| Avatar | `Avatar` | `person` (`firstName`, `birthName`, `photoUri`), `you`, `size` (`s`, `m`, `l`, `xl`), `neutral`, `tint` |
+| NoeudArbre | `TreeNode` | `person`, `name`, `relation`, `years`, `probable`, `state` (`normal`, `path`, `faded`, `birthday`, `unknown`), `neutral`, `health`, `accessibilityLabel`, `onPress`, `onLongPress` |
+| MentionPrivee | `PrivacyNote` | `label`, `circle` (`you`, `family`, `managers`, `people`), `health` |
+| OngletsFiche | `ProfileTabs` | `tabs`, `active`, `onChange` |
+| BarreOnglets | `TabBar` | `items`, `activeKey`, `onSelect`, `bottomInset` |
+| Notification | `Notification` | `appName`, `title`, `text`, `time`, `onPress` |
+
+La teinte d'un avatar vient d'une seule fonction, `defaultAvatarTintRule` (`src/components/avatarTint.ts`) : la règle de la charte (nom de naissance), en attendant la décision de l'ADR 0022 sur ARB-12 (« par branche »). Un écran ne calcule jamais de teinte. `TreeNode` reçoit son libellé d'accessibilité complet déjà assemblé et traduit (« Claire Martin, votre mère, née en 1968 ») et ne calcule aucun lien. Le dessin de l'arbre (traits, mise en page) est celui de T-017.
+
 Règles communes, vérifiées par les tests (`test/*.test.tsx`) :
 
 - Les composants prennent tout du thème (`useTheme()`) et des tokens. Aucun texte en dur : chaque texte, y compris les libellés pour le lecteur d'écran (« Revenir en arrière », « Fermer », « Dicter le prénom »), arrive en props, déjà traduit par l'écran (`common:controls.*`).
 - Chaque élément touchable a un rôle, un libellé, son état (`disabled`, `checked`) et, au besoin, une indication ; sa zone touchable fait 48, ou 56 en mode Aînés (`hitSlop` pour un bouton compact de 44 ou une puce de 32).
-- Le texte suit la taille du téléphone sans limite (`maxFontSizeMultiplier` n'est posé nulle part : la charte ne le réserve qu'à la barre d'onglets, T-015) ; aucune hauteur fixe autour d'un texte, seulement des hauteurs minimales.
+- Le texte suit la taille du téléphone sans limite (`maxFontSizeMultiplier` n'est posé que sur les libellés de `TabBar`, plafonnés à 200 % comme le demande la charte ; l'initiale d'un avatar, dans un disque de taille fixe, ne grossit pas, son nom est lu et affiché à côté) ; aucune hauteur fixe autour d'un texte, seulement des hauteurs minimales.
 - Mouvement (07-mouvement.md) : appui à 97 % en 120 ms, interrupteur en 240 ms, feuille en 360 ms, toast 300 ms / 2,5 s / 300 ms ; aucun rebond. Quand le téléphone demande de réduire les animations, plus d'appui animé ni de glissement : fondus de 150 ms.
 - Anneau de focus clavier : contour `focus` de 2, décalé de 2.
 
