@@ -1,0 +1,38 @@
+{
+  "common:actions.cancel": {
+    "status": "to-review"
+  },
+  "common:actions.confirm": {
+    "status": "to-review"
+  },
+  "common:actions.dontKnow": {
+    "status": "to-review"
+  },
+  "common:actions.later": {
+    "status": "to-review"
+  },
+  "common:actions.save": {
+    "status": "to-review"
+  },
+  "common:actions.yesAdd": {
+    "status": "to-review"
+  },
+  "common:app.name": {
+    "status": "to-review"
+  },
+  "common:languages.en": {
+    "status": "to-review"
+  },
+  "common:languages.fr": {
+    "status": "to-review"
+  },
+  "common:people.count": {
+    "status": "to-review"
+  },
+  "common:privacy.onlyYou": {
+    "status": "to-review"
+  },
+  "common:tree.personJoined": {
+    "status": "to-review"
+  }
+}

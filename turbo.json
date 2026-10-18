@@ -51,6 +51,17 @@
       "outputs": [],
       "passThroughEnv": ["LIGNEE_SCENARIOS_PLAYED_DIR"]
     },
+    "@lignee/ui#test": {
+      "dependsOn": ["transit"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/docs/charte/tokens.json",
+        "$TURBO_ROOT$/docs/charte/*.md",
+        "$TURBO_ROOT$/docs/charte/fonts/**",
+        "$TURBO_ROOT$/.prettierrc*"
+      ],
+      "outputs": []
+    },
     "//#format:write": {
       "cache": false
     },

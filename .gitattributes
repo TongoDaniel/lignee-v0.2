@@ -7,3 +7,8 @@ Dockerfile      text eol=lf
 .dockerignore   text eol=lf
 .env.example    text eol=lf
 compose.yaml    text eol=lf
+
+# Polices : binaires, jamais de conversion de fin de ligne (les tests comparent leurs empreintes).
+*.ttf           binary
+*.otf           binary
+*.woff2         binary

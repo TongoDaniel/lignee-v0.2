@@ -1,0 +1,51 @@
+[
+  {
+    "ttf": "FrauncesLignee-Display.ttf",
+    "ttfSha256": "f9217eaf5548cc19c707d0d95172070098016928fd4afe3f2061ad9d55a54a0e",
+    "ttfBytes": 73112,
+    "woff2": "docs/charte/fonts/FrauncesLignee-Display.woff2",
+    "woff2Sha256": "c0201e447d02bcae224733187dae34c6972b8dac62aeb4e769c47263445494e3"
+  },
+  {
+    "ttf": "FrauncesLignee-Italic.ttf",
+    "ttfSha256": "4f10f9e0591518434bfa296b415f3c2aff39577e6d518a00de7b9ed2bf539482",
+    "ttfBytes": 89128,
+    "woff2": "docs/charte/fonts/FrauncesLignee-Italic.woff2",
+    "woff2Sha256": "7c28987811df4c26bb80bf050b67e8c08cd15b0b6f1b884bd3c6fef9a5380832"
+  },
+  {
+    "ttf": "InstrumentSans-Regular.ttf",
+    "ttfSha256": "9b15cdee629439fb9b5229bf700cddf660f2ef5c9e7adac73cb212d1d603279d",
+    "ttfBytes": 68980,
+    "woff2": "docs/charte/fonts/InstrumentSans-Regular.woff2",
+    "woff2Sha256": "ea0a67807b8c310ead117f89575eb6ae45958627ac7302c048ed468ba2921003"
+  },
+  {
+    "ttf": "InstrumentSans-Medium.ttf",
+    "ttfSha256": "2ab6397374efd8f04e29e0051759c73cbc3b68e9087aa5d10b267b5ddd4a7712",
+    "ttfBytes": 69204,
+    "woff2": "docs/charte/fonts/InstrumentSans-Medium.woff2",
+    "woff2Sha256": "e959ec7b17d06727c2d16257832b1b0ae79279f267787320c3734eb96216efa3"
+  },
+  {
+    "ttf": "InstrumentSans-SemiBold.ttf",
+    "ttfSha256": "9dadfcfa6c107ef4286fb9f8fc9bef407d08e7102d9350d925c91284b1e21570",
+    "ttfBytes": 69180,
+    "woff2": "docs/charte/fonts/InstrumentSans-SemiBold.woff2",
+    "woff2Sha256": "b90cf235021d1b838e287be15a2d5353520d9373cedfc2ce1701af948546206c"
+  },
+  {
+    "ttf": "InstrumentSans-Bold.ttf",
+    "ttfSha256": "7e30684a29d9305f431817139ae5e994cc0716b814416ad90aa388198901433d",
+    "ttfBytes": 69004,
+    "woff2": "docs/charte/fonts/InstrumentSans-Bold.woff2",
+    "woff2Sha256": "d193ad7fae4ab42a825764432d3d81d653d8caeaac1f0cc7f1176a7a3ac968f9"
+  },
+  {
+    "ttf": "LaBelleAurore-Regular.ttf",
+    "ttfSha256": "04bc4c971c022c57c45443894c2426d300c300375f7744d83d225a11212b39be",
+    "ttfBytes": 59364,
+    "woff2": "docs/charte/fonts/LaBelleAurore-Regular.woff2",
+    "woff2Sha256": "f291dd186f4b8898f7541ed48d50c288bd5509551a191d545082f84135d0e475"
+  }
+]

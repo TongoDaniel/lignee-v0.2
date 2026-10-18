@@ -1,0 +1,26 @@
+{
+  "app": {
+    "name": "Lignée"
+  },
+  "actions": {
+    "confirm": "Valider",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "later": "Plus tard",
+    "yesAdd": "Oui, ajouter",
+    "dontKnow": "Je ne sais pas"
+  },
+  "privacy": {
+    "onlyYou": "Visible par vous seul"
+  },
+  "people": {
+    "count": "{count, plural, =0 {Aucune personne} one {# personne} other {# personnes}}"
+  },
+  "tree": {
+    "personJoined": "{name} a rejoint l’arbre."
+  },
+  "languages": {
+    "fr": "Français",
+    "en": "English"
+  }
+}
