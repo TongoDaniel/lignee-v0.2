@@ -4,6 +4,8 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
+import { findCoherenceIssues } from '../coherence';
+import type { FuzzyDate } from '../fuzzy-date';
 import type { Id } from '../ids';
 import { treeArbitrary } from './arbitraries';
 import { medianTime, reportBudget } from './timing';
@@ -58,11 +60,17 @@ function observeStructures(data: TreeData) {
           levirate += 1;
       }
     }
-    // Sororat : un homme uni à deux sœurs.
+    // Sororat : une union d'un homme avec une sœur (ou demi-sœur) d'une épouse précédente. Une
+    // union compte une fois, même si l'épouse est sœur de plusieurs épouses précédentes ; deux
+    // demi-sœurs d'une même épouse comptent deux fois, même si elles ne sont pas sœurs entre elles.
     if (gender.get(personId) === 'male') {
-      const wives = own.map((union) => other(union, personId));
+      const rankOf = (union: (typeof own)[number]) =>
+        union.spouses.find((spouse) => spouse.personId === personId)?.rank ?? 0;
+      const wives = [...own]
+        .sort((a, b) => rankOf(a) - rankOf(b))
+        .map((union) => other(union, personId));
       wives.forEach((wife, index) => {
-        if (wives.slice(index + 1).some((second) => siblings(wife, second))) sororate += 1;
+        if (wives.slice(0, index).some((earlier) => siblings(earlier, wife))) sororate += 1;
       });
     }
   }
@@ -113,6 +121,14 @@ function expectAnnouncedStructures(data: TreeData, features: TreeFeatures) {
   expect(seen.polygamous).toBeGreaterThanOrEqual(features.polygamousPeople);
 }
 
+/**
+ * Année écrite par le générateur pour un fait : celle de la date, ou la borne basse de
+ * « entre ». Un texte seul n'en donne pas.
+ */
+function yearOf(date: FuzzyDate): number | undefined {
+  return 'date' in date ? date.date.year : 'from' in date ? date.from.year : undefined;
+}
+
 describe('générateur d’arbres', () => {
   it('donne le même arbre pour la même graine, et un autre pour une autre graine', () => {
     const first = generateTree({ seed: 42, size: 300 });
@@ -153,6 +169,109 @@ describe('générateur d’arbres', () => {
       }),
       { numRuns: 300 },
     );
+  });
+
+  it('cas réduit : deux unions de sororat avec deux demi-sœurs de la première épouse, qui ne sont pas sœurs entre elles, comptent pour deux', () => {
+    // Trouvé avec des probabilités uniformes (graine 1840440687) : un homme épouse une femme,
+    // puis deux de ses demi-sœurs (l'une par la mère, l'autre par le père). Le générateur annonce
+    // deux sororats ; l'oracle n'en voyait qu'un, car il comptait les épouses ayant une sœur
+    // épousée après elles, et non les épouses sœurs d'une épouse précédente.
+    const tree = generateTree({
+      seed: 1_737_657_185,
+      size: 76,
+      rates: {
+        marriage: 0.8350542159751058,
+        polygamy: 0.6737241759896279,
+        sororate: 0.5860955284908415,
+        implex: 0.08308978658169508,
+        withinTree: 0.03222480565309525,
+        levirate: 0.6768374685198069,
+        remarriage: 0,
+        unknownParent: 0,
+        placeholder: 0.22309238389134406,
+        adoption: 0.03068766789510846,
+        twins: 0.3286441382020712,
+        hidden: 0,
+        toPlace: 0,
+        distinctFrom: 0,
+      },
+    });
+    expect(tree.features.sororate).toBe(4);
+    expect(observeStructures(tree).sororate).toBe(4);
+    expectAnnouncedStructures(tree, tree.features);
+  });
+
+  it('un adulte qui adopte, élève, accueille ou a la tutelle est né au moins 15 ans avant l’enfant (300 arbres)', () => {
+    let checked = 0;
+    fc.assert(
+      fc.property(treeArbitrary({ maxSize: 200 }), (tree) => {
+        const births = new Map<Id, number>();
+        for (const fact of tree.facts) {
+          if (fact.type !== 'birth' || fact.subject.kind !== 'person' || !fact.date) continue;
+          const year = yearOf(fact.date);
+          if (year !== undefined) births.set(fact.subject.personId, year);
+        }
+        for (const filiation of tree.filiations) {
+          if (filiation.type === 'birth') continue;
+          const adult = births.get(filiation.parentId);
+          const child = births.get(filiation.childId);
+          if (adult === undefined || child === undefined) continue;
+          checked += 1;
+          expect(adult).toBeLessThanOrEqual(child - 15);
+        }
+      }),
+      { numRuns: 300 },
+    );
+    expect(checked).toBeGreaterThan(0);
+  });
+
+  it('une personne meurt au plus tôt l’année qui suit sa naissance (300 arbres)', () => {
+    // Les jours sont tirés au hasard dans l'année : un décès la même année pourrait tomber avant
+    // la naissance (death_before_birth).
+    let checked = 0;
+    fc.assert(
+      fc.property(treeArbitrary({ maxSize: 200 }), (tree) => {
+        const years = new Map<string, number>();
+        for (const fact of tree.facts) {
+          if (fact.subject.kind !== 'person' || !fact.date) continue;
+          if (fact.type !== 'birth' && fact.type !== 'death') continue;
+          const year = yearOf(fact.date);
+          if (year !== undefined) years.set(`${fact.type}|${fact.subject.personId}`, year);
+        }
+        for (const person of tree.people) {
+          const birth = years.get(`birth|${person.id}`);
+          const death = years.get(`death|${person.id}`);
+          if (birth === undefined || death === undefined) continue;
+          checked += 1;
+          expect(death).toBeGreaterThan(birth);
+        }
+      }),
+      { numRuns: 300 },
+    );
+    expect(checked).toBeGreaterThan(0);
+  });
+
+  it('cas réduit : une personne née l’année qui précède l’année de référence ne meurt pas la même année', () => {
+    const tree = generateTree({
+      seed: 98_423_808,
+      size: 73,
+      rates: {
+        marriage: 0.3133406089618802,
+        polygamy: 0.6555849842727185,
+        sororate: 0.4438391955569387,
+        implex: 0.15861922614276408,
+        withinTree: 0.04341028407216072,
+        levirate: 0.7601718613877892,
+        remarriage: 0.6274802377447486,
+        unknownParent: 0.03459266386926174,
+        placeholder: 0.544641699269414,
+        adoption: 0.32124260952696204,
+        twins: 0.186702723428607,
+        hidden: 0.26740870624780655,
+        toPlace: 0.02989154076203704,
+      },
+    });
+    expect(findCoherenceIssues(tree)).toEqual([]);
   });
 
   it('noms générés : jamais « Inconnu », toujours une forme lisible', () => {

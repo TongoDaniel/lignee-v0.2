@@ -32,6 +32,7 @@ import type { Id } from '../ids';
 import type { Gender } from '../person';
 import { treeArbitrary } from '../test-support/arbitraries';
 import { fuzzyDateArbitrary } from '../test-support/fuzzy-date-arbitrary';
+import { probabilityArbitrary } from '../test-support/probability';
 import { treeDataIssues, type TreeData } from '../test-support/tree-data';
 import { medianTime, reportBudget } from '../test-support/timing';
 import { generateTree, referenceTree } from '../test-support/tree-generator';
@@ -151,6 +152,32 @@ describe('arbres générés valides', () => {
       { numRuns: 300 },
     );
   }, 120_000);
+
+  it('cas réduit : une co-épouse plus jeune que l’enfant de son mari ne l’adopte pas', () => {
+    // Trouvé quand les probabilités sont devenues uniformes : le générateur faisait adopter un
+    // enfant par une co-épouse de son père née après lui (parent_younger_than_child).
+    const tree = generateTree({
+      seed: 1_917_009_540,
+      size: 104,
+      rates: {
+        marriage: 0.18460748717188835,
+        polygamy: 0.21872238740324976,
+        sororate: 0,
+        implex: 0,
+        withinTree: 0.36788080185651784,
+        levirate: 0,
+        remarriage: 0.6219983166083694,
+        unknownParent: 0,
+        placeholder: 0,
+        adoption: 0.48326580459252,
+        twins: 0.19723288342356682,
+        hidden: 0,
+        toPlace: 0.006288457289338112,
+      },
+    });
+    expect(tree.features.nonBirthFiliations).toBeGreaterThan(0);
+    expect(findCoherenceIssues(tree)).toEqual([]);
+  });
 });
 
 describe('arbres générés volontairement fautifs', () => {
@@ -268,7 +295,7 @@ describe('dates floues générées', () => {
         dates,
         fc.constantFrom<Gender>('female', 'male', 'other'),
         fc.constantFrom<FiliationType>('birth', 'donor', 'surrogacy', 'adoptive', 'raised'),
-        fc.array(fc.double({ min: 0, max: 1, maxExcluded: true, noNaN: true }), {
+        fc.array(probabilityArbitrary(0, 1, { maxExcluded: true }), {
           minLength: 3,
           maxLength: 3,
         }),
@@ -392,7 +419,7 @@ describe('dates floues générées', () => {
         optional,
         optional,
         optional,
-        fc.array(fc.double({ min: 0, max: 1, maxExcluded: true, noNaN: true }), {
+        fc.array(probabilityArbitrary(0, 1, { maxExcluded: true }), {
           minLength: 4,
           maxLength: 4,
         }),
@@ -491,7 +518,7 @@ describe('présumée vivante sur des dates générées', () => {
     fc.assert(
       fc.property(
         fuzzyDateArbitrary({ minYear: 1850, maxYear: 2026, withText: true }),
-        fc.double({ min: 0, max: 1, maxExcluded: true, noNaN: true }),
+        probabilityArbitrary(0, 1, { maxExcluded: true }),
         (birth, draw) => {
           const tree = {
             people: [{ ...PARENT, vitalStatus: 'unknown' as const }],

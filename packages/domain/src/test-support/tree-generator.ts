@@ -122,6 +122,8 @@ export interface GeneratedTree extends TreeData {
 
 const CURRENT_YEAR = 2025;
 const LAST_MARRIAGE_BIRTH_YEAR = CURRENT_YEAR - 20;
+/** Écart minimal d'âge entre l'adulte d'un lien non biologique et l'enfant (générateur). */
+const MIN_NON_BIRTH_PARENT_GAP = 15;
 
 type Sex = 'female' | 'male';
 
@@ -282,8 +284,13 @@ export function generateTree(options: TreeGeneratorOptions): GeneratedTree {
   function decideDeath(birthYear: number): number | undefined {
     const oldest = birthYear < CURRENT_YEAR - 95;
     if (!oldest && !random.chance(birthYear < 1960 ? 0.35 : 0.06)) return undefined;
-    const year = birthYear + (oldest ? random.int(30, 95) : random.int(1, 90));
-    return Math.min(year, CURRENT_YEAR - 1);
+    const year = Math.min(
+      birthYear + (oldest ? random.int(30, 95) : random.int(1, 90)),
+      CURRENT_YEAR - 1,
+    );
+    // Les jours sont tirés au hasard dans l'année : un décès l'année de la naissance (né en
+    // CURRENT_YEAR - 1) pourrait tomber avant elle (death_before_birth). La personne vit.
+    return year > birthYear ? year : undefined;
   }
 
   function namesFor(gender: Person['gender'], surname: string): NameSpec[] {
@@ -602,7 +609,11 @@ export function generateTree(options: TreeGeneratorOptions): GeneratedTree {
     return child;
   }
 
-  /** Adoption, « a élevé », confiage ou tutelle par un adulte de la génération précédente. */
+  /**
+   * Adoption, « a élevé », confiage ou tutelle par un adulte de la génération précédente, né au
+   * moins `MIN_NON_BIRTH_PARENT_GAP` ans avant l'enfant : une co-épouse du père ou un oncle peut
+   * être plus jeune que l'enfant, et ce lien serait invraisemblable (parent_younger_than_child).
+   */
   function addNonBirthLink(child: PersonInfo, birthParents: PersonInfo[]) {
     const options: PersonInfo[] = [];
     for (const parent of birthParents) {
@@ -614,6 +625,7 @@ export function generateTree(options: TreeGeneratorOptions): GeneratedTree {
       (adult) =>
         !birthParents.includes(adult) &&
         adult.generation < child.generation &&
+        adult.birthYear <= child.birthYear - MIN_NON_BIRTH_PARENT_GAP &&
         adult.nature === 'known',
     );
     if (eligible.length === 0) return;
