@@ -1,14 +1,16 @@
 # Exemple repris du TRD (Tests et qualité). Un fichier par identifiant de l'onglet Cas limites.
 # Partie lecture (T-006) : le scénario est lu, son arbre construit en objets valides du modèle
-# (rang de Rose absent : rang suivant, 1) et le plan attendu applicable à cet arbre. Reste : le
-# lien « frère ou demi-frère » (moteur, T-020 ; mots, T-026 et T-027), le rattachement au père
-# seul avec les épouses candidates à la saisie (T-033) et le plan de la dictée (voix, T-062).
+# (rang de Rose absent : rang suivant, 1) et le plan attendu applicable à cet arbre. Partie lien
+# (T-020) : après le plan, la fratrie de Joseph et Samuel est « frère ou demi-frère » (père
+# commun, mère non précisée parmi les épouses candidates), puis change dès que la mère est
+# précisée. Reste : les mots (T-026, T-027), le rattachement au père seul avec les épouses
+# candidates à la saisie (T-033) et le plan de la dictée (voix, T-062).
 # Écart au TRD : `creer: samuel/M` au lieu de `creer: samuel`, le genre fixant « frère ».
 id: CL-POL-03
 titre: Enfant du grand-père, mère inconnue parmi ses épouses
 couverture:
-  teste: [lecture]
-  reste: [T-020, T-026, T-027, T-033, T-062]
+  teste: [lecture, lien]
+  reste: [T-026, T-027, T-033, T-062]
 arbre:
   personnes: [pierre/M, rose/F, odile/F, joseph/M, comfort/F]
   unions:

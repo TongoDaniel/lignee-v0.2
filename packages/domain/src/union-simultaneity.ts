@@ -135,7 +135,7 @@ interface Lookup {
   readonly answers: ReadonlyMap<string, UnionSimultaneity>;
 }
 
-const lookupOf = (tree: SimultaneityTree): Lookup => ({
+const lookupOf = (tree: Pick<SimultaneityTree, 'facts' | 'simultaneityAnswers'>): Lookup => ({
   events: createLifeEvents(tree.facts),
   answers: new Map(
     tree.simultaneityAnswers.map((answer) => [
@@ -163,6 +163,18 @@ export function resolveSimultaneity(
   b: UnionDates,
 ): SimultaneityResolution {
   return resolve(lookupOf(tree), a, b);
+}
+
+/**
+ * La même déduction que `resolveSimultaneity`, pour plusieurs paires d'un même arbre : les faits
+ * et les réponses ne sont lus qu'une fois (moteur de parenté, T-021 : co-épouse, conjoint d'un
+ * parent). L'arbre doit être celui du lecteur, déjà filtré (ADR 0012, point 3).
+ */
+export function simultaneityResolver(
+  tree: Pick<SimultaneityTree, 'facts' | 'simultaneityAnswers'>,
+): (a: UnionDates, b: UnionDates) => SimultaneityResolution {
+  const lookup = lookupOf(tree);
+  return (a, b) => resolve(lookup, a, b);
 }
 
 /** Unions de chaque personne, dans l'ordre de l'arbre. */

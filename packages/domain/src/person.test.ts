@@ -92,6 +92,18 @@ describe('personnes (UNI-01, UNI-02)', () => {
     ).toBe(false);
   });
 
+  it('une place à compléter peut être dite distincte d’autres personnes, jamais une personne connue (ADR 0017)', () => {
+    const other = tree.personId('irene');
+    const base = { id: personId, treeId: tree.treeId };
+    const parse = (fields: object) => personSchema.safeParse({ ...base, ...fields }).success;
+    expect(parse({ nature: 'placeholder', distinctFrom: [other] })).toBe(true);
+    expect(parse({ nature: 'known', distinctFrom: [other] })).toBe(false);
+    expect(parse({ nature: 'placeholder', distinctFrom: [personId] })).toBe(false);
+    expect(parse({ nature: 'placeholder', distinctFrom: [other, other] })).toBe(false);
+    expect(parse({ nature: 'placeholder', distinctFrom: [] })).toBe(false);
+    expect(parse({ nature: 'placeholder' })).toBe(true);
+  });
+
   it('refuse un champ inconnu', () => {
     expect(
       personSchema.safeParse({ id: personId, treeId: tree.treeId, nature: 'known', label: 'x' })

@@ -12,7 +12,7 @@ import { treeDataIssues } from '../test-support/tree-data';
 describe('CL-POL-03 — enfant du grand-père, mère inconnue parmi ses épouses', () => {
   it('lecture : l’arbre de départ et l’arbre après le plan attendu sont des objets valides du modèle', () => {
     const scenario = loadScenario('CL-POL-03', actionScenarioSchema('CL-POL-03'));
-    expect(scenario.couverture?.teste).toEqual(['lecture']);
+    expect(scenario.couverture?.teste).toContain('lecture');
 
     const tree = buildScenarioTree(scenario.arbre);
     const { data, id } = tree;

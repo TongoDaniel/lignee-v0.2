@@ -26,7 +26,8 @@ export interface Theme extends ThemeOptions {
   readonly shadows: ThemeShadows;
   /**
    * Styles de texte, déjà multipliés par le facteur du mode Aînés. Le réglage de taille du
-   * téléphone s'ajoute par-dessus : ne bloquez jamais `allowFontScaling`.
+   * téléphone s'ajoute par-dessus : ne bloquez jamais `allowFontScaling`. Seule exception : l'initiale
+   * d'un avatar, dans un disque de taille fixe ; le nom complet est lu et affiché à côté, et grossit.
    */
   readonly typography: { readonly [K in TypographyName]: TextStyle };
   /** Facteur appliqué aux tailles et interlignes : 1, ou 1,3 en mode Aînés. */

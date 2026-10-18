@@ -1,0 +1,24 @@
+# « Ma sœur Lucienne » sans parents dans l'arbre : deux parents à compléter, partagés par la
+# locutrice et Lucienne (UNI-12). Partie lien (T-020) : deux places à compléter partagées font
+# des sœurs, jamais « sœur ou demi-sœur ». Reste : les mots (T-026, T-027), l'expression « ma
+# sœur » (T-036), la création des places (T-037) et le plan de la dictée (voix, T-062).
+id: CL-GEN-07
+titre: « Ma sœur Lucienne », parents absents
+couverture:
+  teste: [lien]
+  reste: [T-026, T-027, T-036, T-037, T-062]
+arbre:
+  personnes: [mireille/F]
+action:
+  locuteur: mireille
+  dictee: "J'ai une sœur, elle s'appelle Lucienne"
+attendu:
+  plan:
+    - creer: lucienne/F
+    - a_completer: parent_1/N
+    - a_completer: parent_2/N
+    - filiation: { parent: parent_1, enfant: mireille, type: naissance }
+    - filiation: { parent: parent_2, enfant: mireille, type: naissance }
+    - filiation: { parent: parent_1, enfant: lucienne, type: naissance }
+    - filiation: { parent: parent_2, enfant: lucienne, type: naissance }
+  lien: { de: mireille, vers: lucienne, fr: "sœur", en: "sister" }

@@ -1,18 +1,20 @@
 // Écran d'onglet encore vide (T-011) : titre d'écran et phrase d'attente, lisibles jusqu'à
 // 200 % de texte (défilement, aucune hauteur fixe, aucune ligne coupée).
+import type { ReactNode } from 'react';
 import { ScrollView, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useTheme } from '../theme/ThemeProvider';
-import { space } from '@lignee/ui';
+import { space, useTheme } from '@lignee/ui';
 
 export interface EmptyTabScreenProps {
   readonly title: string;
   readonly message: string;
   readonly testID: string;
+  /** Contenu sous le message (en développement : accès à la page des composants). */
+  readonly footer?: ReactNode;
 }
 
-export function EmptyTabScreen({ title, message, testID }: EmptyTabScreenProps) {
+export function EmptyTabScreen({ title, message, testID, footer }: EmptyTabScreenProps) {
   const { colors, typography } = useTheme();
   const insets = useSafeAreaInsets();
   return (
@@ -30,6 +32,7 @@ export function EmptyTabScreen({ title, message, testID }: EmptyTabScreenProps) 
         {title}
       </Text>
       <Text style={[typography.corps, { color: colors.texteSecondaire }]}>{message}</Text>
+      {footer}
     </ScrollView>
   );
 }
