@@ -9,6 +9,9 @@ import type { TreeData } from '@lignee/domain/test-support';
 import {
   buildScenarioTree,
   loadScenario,
+  otherPartsShape,
+  readScenarioYaml,
+  requireScenarioParts,
   scenarioSchema,
   scenarioTreeSchema,
   type ScenarioTree,
@@ -39,18 +42,17 @@ const expectedPresentedSchema = z.strictObject({
 type ExpectedPresented = z.infer<typeof expectedPresentedSchema>;
 
 function linksScenarioSchema(id: string) {
+  // Partie disposition du même scénario (action et clés d'attendu de packages/layout), vérifiée
+  // par packages/layout : déclarée sans être lue, admise seulement si `couverture.teste` contient
+  // `disposition` ; `teste` contient toujours `lien` (`requireScenarioParts`).
   return scenarioSchema(id, {
     arbre: scenarioTreeSchema,
-    // Partie disposition du même scénario (action, générations, unités, disposition), vérifiée
-    // par packages/layout : ignorée ici.
-    action: z.unknown().optional(),
+    ...otherPartsShape(['disposition'], 'racine'),
     attendu: z.strictObject({
       liens: z.array(expectedPresentedSchema).min(1),
-      generations: z.unknown().optional(),
-      unites: z.unknown().optional(),
-      disposition: z.unknown().optional(),
+      ...otherPartsShape(['disposition'], 'attendu'),
     }),
-  });
+  }).superRefine(requireScenarioParts('lien', ['disposition']));
 }
 
 function present(data: TreeData, a: Id, b: Id): PresentationResult {
@@ -188,6 +190,50 @@ describe('PAR-06 — liens non biologiques, jamais confondus avec la naissance',
     expect(link?.basis).toBe('other');
     expect(link?.nonBirthTypes).toEqual(['fostered']);
     expect(result.links.some((entry) => entry.basis === 'birth')).toBe(false);
+  });
+});
+
+/** Contenu brut d'un scénario, `couverture.teste` remplacé, sans trace de scénario joué. */
+function withTested(id: string, teste: string[], extra: Record<string, unknown> = {}) {
+  const raw = readScenarioYaml(id) as Record<string, unknown> & {
+    couverture: Record<string, unknown>;
+    attendu: Record<string, unknown>;
+  };
+  return {
+    ...raw,
+    couverture: { ...raw.couverture, teste },
+    attendu: { ...raw.attendu, ...extra },
+  };
+}
+
+describe('scénarios à plusieurs parties : chaque partie présente est jouée', () => {
+  it('refuse une partie disposition quand `teste` ne contient pas `disposition`', () => {
+    const schema = linksScenarioSchema('CL-POL-09');
+    expect(schema.safeParse(withTested('CL-POL-09', ['disposition', 'lien'])).success).toBe(true);
+    const result = schema.safeParse(withTested('CL-POL-09', ['lien']));
+    expect(result.success).toBe(false);
+    expect(result.error?.issues.map((issue) => issue.path.join('.'))).toEqual([
+      'action',
+      'attendu.generations',
+      'attendu.unites',
+      'attendu.disposition',
+    ]);
+  });
+
+  it('refuse une clé propre à layout ajoutée à un scénario de lien seul', () => {
+    const schema = linksScenarioSchema('CL-POL-10');
+    expect(schema.safeParse(withTested('CL-POL-10', ['lien'])).success).toBe(true);
+    const extra = { apres_deplier: { lignes: {} } };
+    expect(schema.safeParse(withTested('CL-POL-10', ['lien'], extra)).success).toBe(false);
+    const both = withTested('CL-POL-10', ['lien', 'disposition'], extra);
+    expect(schema.safeParse(both).success).toBe(true);
+  });
+
+  it('refuse des liens attendus quand `teste` ne contient pas `lien`', () => {
+    const result = linksScenarioSchema('CL-POL-09').safeParse(
+      withTested('CL-POL-09', ['disposition']),
+    );
+    expect(result.error?.issues.map((issue) => issue.path.join('.'))).toEqual(['couverture.teste']);
   });
 });
 
