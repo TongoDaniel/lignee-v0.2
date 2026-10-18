@@ -1,6 +1,13 @@
 // Point d'entrée de @lignee/kinship : graphe de parenté et calcul structurel des liens (TRD,
 // « Moteur de parenté », question 1). Paquet pur : ni réseau, ni base, ni Node, ni React.
 export {
+  AllianceContext,
+  EMPTY_ALLIANCE_CONTEXT,
+  classifyAlliance,
+  createAllianceContext,
+  type AllianceContextInput,
+} from './alliance';
+export {
   ALL_FILIATION_TYPES_MASK,
   CERTAINTY_ORDER,
   FILIATION_TYPES,
@@ -21,8 +28,19 @@ export {
   type KinshipOptions,
 } from './kinship';
 export {
+  INVERSE_ALLIANCE_KIND,
+  invertAlliance,
   invertRelationship,
   relationshipKey,
+  type AllianceCrossing,
+  type AllianceKind,
+  type AllianceLink,
+  type AllianceUnion,
+  type ChildSide,
+  type OtherParentUnion,
+  type SharedSpouse,
+  type TimingSummary,
+  type UnionEnding,
   type BloodSegment,
   type CommonAncestor,
   type FiliationLink,

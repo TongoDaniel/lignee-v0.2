@@ -1,0 +1,38 @@
+# Famille recomposée (noms générés). Paul et Anne, parents d'Emma, ont divorcé ; Paul a épousé
+# ensuite Carine, mère de Luc, né de son union avec Marc. Luc n'a aucun parent commun avec Emma :
+# jamais « demi-frère », mais « fils de l'épouse de votre père » (PAR-04).
+# Partie lien (T-021) : aucun chemin de sang entre Emma et Luc ; le lien le plus proche est un
+# lien par alliance, ramené à sa structure (enfant du conjoint d'un parent, par le père et son
+# épouse) et comparé au lien calculé ; l'union de Paul et Carine est successive à celle de Paul
+# et Anne (dates). Reste : les mots en français et en anglais (T-026, T-027).
+id: CL-FAM-01
+titre: Enfant du conjoint d'un parent (famille recomposée)
+couverture:
+  teste: [lien]
+  reste: [T-026, T-027]
+arbre:
+  personnes: [paul/M, anne/F, carine/F, marc/M, emma/F, luc/M]
+  unions:
+    - conjoints: [paul, anne]
+      debut: { qualificatif: exacte, date: "1990" }
+      fin: { qualificatif: exacte, date: "2000" }
+      motif: divorce
+    - conjoints: [carine, marc]
+      debut: { qualificatif: exacte, date: "1994" }
+      fin: { qualificatif: exacte, date: "2001" }
+      motif: separation
+    - conjoints: [paul, carine]
+      debut: { qualificatif: exacte, date: "2003" }
+  filiations:
+    - { parents: [paul, anne], enfant: emma }
+    - { parents: [carine, marc], enfant: luc }
+attendu:
+  liens:
+    - { de: emma, vers: luc, fr: "fils de l'épouse de votre père", en: "son of your father's wife" }
+    - de: luc
+      vers: emma
+      fr: "fille du mari de votre mère"
+      en: "daughter of your mother's husband"
+    - { de: emma, vers: carine, fr: "épouse de votre père", en: "your father's wife" }
+    - { de: carine, vers: emma, fr: "fille de votre mari", en: "your husband's daughter" }
+    - { de: luc, vers: paul, fr: "mari de votre mère", en: "your mother's husband" }

@@ -13,7 +13,9 @@
 // aussi l'autre parent de l'enfant est son parent, pas « l'épouse de votre père »). ADR 0010.
 //
 // Tous les chemins sont gardés, du plus proche au plus lointain, le sang avant l'alliance, avec
-// la certitude la plus faible du chemin. Aucun mot ici : T-026 et T-027.
+// la certitude la plus faible du chemin. Chaque chemin par alliance porte son lien nommé
+// structurellement (conjoint, conjoint d'un parent, co-épouse… : `alliance.ts`, T-021). Aucun mot
+// ici : T-026 et T-027.
 //
 // Calcul borné (ADR 0010, point 7) : chaque côté a son propre budget de chaînes, le sang et
 // l'alliance ont des budgets séparés, et les paires sont examinées de la plus proche à la plus
@@ -22,6 +24,7 @@
 // limite est atteinte.
 import type { Certainty, FiliationType, Id } from '@lignee/domain';
 
+import { EMPTY_ALLIANCE_CONTEXT, classifyAlliance, type AllianceContext } from './alliance';
 import {
   CERTAINTY_ORDER,
   FILIATION_TYPES,
@@ -60,6 +63,12 @@ export interface KinshipOptions {
   maxChains?: number;
   /** Paires de chaînes examinées au plus pour le sang (garde-fou). Par défaut 65 536. */
   maxPathChecks?: number;
+  /**
+   * Arbre filtré du lecteur pour nommer l'alliance (T-021, ADR 0020) : décès et réponses « unions
+   * simultanées ou successives » (`createAllianceContext`). Sans lui, seules les dates des unions
+   * comptent : jamais de co-épouse supposée. Ne change ni les chemins, ni leur ordre.
+   */
+  allianceContext?: AllianceContext;
 }
 
 const DEFAULTS = {
@@ -79,6 +88,7 @@ interface ResolvedOptions {
   maxRelationships: number;
   maxChains: number;
   maxPathChecks: number;
+  allianceContext: AllianceContext;
 }
 
 function resolve(options: KinshipOptions): ResolvedOptions {
@@ -91,6 +101,7 @@ function resolve(options: KinshipOptions): ResolvedOptions {
     maxRelationships: options.maxRelationships ?? DEFAULTS.maxRelationships,
     maxChains: options.maxChains ?? DEFAULTS.maxChains,
     maxPathChecks: options.maxPathChecks ?? DEFAULTS.maxPathChecks,
+    allianceContext: options.allianceContext ?? EMPTY_ALLIANCE_CONTEXT,
   };
 }
 
@@ -777,7 +788,11 @@ function computeRelationships(
   if (grouped.length === 0)
     return limited ? { status: 'incomplete', truncated: true } : { status: 'none' };
   const sorted = sortRelationships(grouped.map((path) => toPublic(graph, path)));
-  const relationships = sorted.slice(0, options.maxRelationships);
+  // Alliance nommée (T-021) sur les chemins rendus : elle ne change ni les chemins ni leur ordre.
+  const relationships = sorted.slice(0, options.maxRelationships).map((relationship) => {
+    const alliance = classifyAlliance(graph, relationship, options.allianceContext);
+    return alliance === undefined ? relationship : { ...relationship, alliance };
+  });
   return {
     status: 'related',
     relationships,
