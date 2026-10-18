@@ -34,6 +34,34 @@ const nativeDialogTextSelectors = [
   },
 ];
 
+// Imports réservés aux tests ou au développement (voir la configuration plus bas).
+function devOnlyImportPatterns({ allowTreeGenerator = false, allowDevSeed = false } = {}) {
+  return [
+    {
+      regex: '^@lignee/domain/test-support(/|$)',
+      message: '@lignee/domain/test-support est réservé aux fichiers de test (*.test.ts).',
+    },
+    ...(allowTreeGenerator
+      ? []
+      : [
+          {
+            regex: '^@lignee/domain/tree-generator$',
+            message:
+              'Générateur d’arbres : tests et packages/sync/src/dev-seed seulement (développement).',
+          },
+        ]),
+    ...(allowDevSeed
+      ? []
+      : [
+          {
+            regex: '^@lignee/sync/dev-seed$',
+            message:
+              'Arbre généré de développement : tests et apps/mobile/src/db/dev seulement, derrière __DEV__.',
+          },
+        ]),
+  ];
+}
+
 // Règles du code de packages/domain hors des tests. Une configuration par profondeur de dossier
 // sous src/ : un import relatif ne peut pas remonter au-dessus de src/.
 function domainSourceRules() {
@@ -239,20 +267,35 @@ export default tseslint.config(
   // Node et n'entrent jamais dans l'app ni dans le serveur. Importables par les seuls tests.
   // Placé avant les règles de packages/domain, qui fixent leur propre `no-restricted-imports`
   // (et y interdisent aussi test-support).
+  //
+  // Le générateur d'arbres (`@lignee/domain/tree-generator`) et le chargement d'un arbre généré
+  // (`@lignee/sync/dev-seed`) ne servent qu'en développement (T-016) : le premier n'est importé
+  // que par packages/sync/src/dev-seed, le second que par apps/mobile/src/db/dev, derrière
+  // `if (__DEV__)`. La CI vérifie qu'ils n'entrent pas dans le bundle de production.
   {
     files: ['**/*.{ts,tsx,mts,cts}'],
     ignores: ['**/*.test.{ts,tsx}', '**/test-support/**'],
     rules: {
+      'no-restricted-imports': ['error', { patterns: devOnlyImportPatterns() }],
+    },
+  },
+  {
+    files: ['packages/sync/src/dev-seed/**/*.ts'],
+    ignores: ['**/*.test.ts'],
+    rules: {
       'no-restricted-imports': [
         'error',
-        {
-          patterns: [
-            {
-              regex: '^@lignee/domain/test-support(/|$)',
-              message: '@lignee/domain/test-support est réservé aux fichiers de test (*.test.ts).',
-            },
-          ],
-        },
+        { patterns: devOnlyImportPatterns({ allowTreeGenerator: true }) },
+      ],
+    },
+  },
+  {
+    files: ['apps/mobile/src/db/dev/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        { patterns: devOnlyImportPatterns({ allowDevSeed: true }) },
       ],
     },
   },

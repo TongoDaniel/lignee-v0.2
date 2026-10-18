@@ -15,3 +15,8 @@ docs/charte/
 
 # Types générés depuis les messages (packages/i18n) : un test compare le fichier à la sortie du générateur.
 packages/i18n/src/generated/
+
+# Base du téléphone (packages/sync) : SQL et instantanés écrits par drizzle-kit, et leur module
+# TypeScript ; un test compare le module au SQL et le dernier instantané au schéma Drizzle.
+packages/sync/src/local-db/migrations/
+packages/sync/src/local-db/generated/

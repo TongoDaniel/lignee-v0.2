@@ -128,7 +128,7 @@ corepack pnpm --filter @lignee/domain test
 
 ## Outils de test (T-006)
 
-`src/test-support/`, exporté pour les tests des autres paquets sous `@lignee/domain/test-support` (jamais importé par l'app : ce code lit des fichiers avec Node). Exclu de `tsconfig.src.json` et des règles ESLint du code du paquet. ESLint (`eslint.config.mjs`) interdit d'importer `@lignee/domain/test-support` hors des fichiers `*.test.ts` et des dossiers `test-support`, et interdit au code de `packages/domain` d'importer son propre `test-support`.
+`src/test-support/`, exporté pour les tests des autres paquets sous `@lignee/domain/test-support` (jamais importé par l'app : ce code lit des fichiers avec Node). Seul le générateur est aussi exporté à part, sous `@lignee/domain/tree-generator` (sans Node), pour charger un arbre généré dans la base du téléphone en développement (T-016, ADR 0023) : ESLint ne permet de l'importer que dans les tests et `packages/sync/src/dev-seed`, et la CI vérifie qu'il n'entre pas dans le bundle de production. Exclu de `tsconfig.src.json` et des règles ESLint du code du paquet. ESLint (`eslint.config.mjs`) interdit d'importer `@lignee/domain/test-support` hors des fichiers `*.test.ts` et des dossiers `test-support`, et interdit au code de `packages/domain` d'importer son propre `test-support`.
 
 | Fichier | Contenu |
 | --- | --- |

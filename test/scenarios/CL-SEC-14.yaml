@@ -1,0 +1,24 @@
+# Noms générés. Partie base locale chiffrée (T-016, packages/sync) : le voleur copie le fichier de
+# la base, sans le trousseau du téléphone. Le test charge un arbre généré dans une base chiffrée au
+# format SQLCipher 4 (celui d'expo-sqlite avec SQLCipher), avec une cause de décès saisie par le
+# lecteur, puis lit le fichier et son journal comme le ferait le voleur. Le chiffrement réel sur le
+# téléphone (expo-sqlite, trousseau) se vérifie sur l'appareil (ticket « À vérifier sur
+# téléphone »). Reste : révoquer les sessions depuis un autre appareil et verrouiller l'app (T-055).
+id: CL-SEC-14
+titre: Téléphone perdu ou volé
+couverture:
+  teste: [base_locale]
+  reste: [T-055]
+action:
+  arbre_genere: { graine: 1414, personnes: 200 }
+  cause_de_deces: "Maladie inventée pour le test"
+  voleur: { fichier: true, journal: true, trousseau: false }
+attendu:
+  en_tete_sqlite_en_clair: false
+  textes_en_clair: aucun
+  ouverture_sans_cle: refusee
+  ouverture_autre_cle: refusee
+  ouverture_avec_le_trousseau: arbre_identique
+  apres_rotation:
+    ancienne_cle: refusee
+    nouvelle_cle: arbre_identique

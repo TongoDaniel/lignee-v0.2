@@ -33,6 +33,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   android: {
     package: applicationId,
+    // Pas de sauvegarde automatique Android (Google Drive, transfert d'appareil) : la base est
+    // chiffrée par une clé qui ne quitte pas le trousseau de ce téléphone ; restaurée ailleurs,
+    // elle serait illisible et ne ferait que copier des données chiffrées (CL-SEC-14, ADR 0023).
+    allowBackup: false,
     adaptiveIcon: {
       foregroundImage: `${brandAssets}/android-adaptive-avant-plan-1024.png`,
       monochromeImage: `${brandAssets}/android-icone-monochrome-1024.png`,
@@ -54,6 +58,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     // Langues de l'interface déclarées au système (choix de la langue par app, Android 13+ et iOS).
     ['expo-localization', { supportedLocales: ['fr', 'en'] }],
     'expo-font',
+    // Base locale chiffrée par SQLCipher (TRD, « Hors-ligne et synchronisation » ; T-016).
+    ['expo-sqlite', { useSQLCipher: true }],
+    // Clé de la base dans le trousseau du système.
+    'expo-secure-store',
   ],
   experiments: {
     typedRoutes: true,

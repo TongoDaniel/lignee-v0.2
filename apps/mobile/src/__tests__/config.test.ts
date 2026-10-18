@@ -63,6 +63,15 @@ describe('app.config.ts', () => {
     expect(config.plugins).toContain('expo-router');
     expect(config.android?.package).toBe(config.ios?.bundleIdentifier);
   });
+
+  it('chiffre la base locale avec SQLCipher, clé dans le trousseau (CL-SEC-14)', () => {
+    expect(plugin('expo-sqlite')).toEqual({ useSQLCipher: true });
+    expect(config.plugins).toContain('expo-secure-store');
+  });
+
+  it('exclut l’app des sauvegardes automatiques Android (base chiffrée, clé sur l’appareil)', () => {
+    expect(config.android?.allowBackup).toBe(false);
+  });
 });
 
 describe('eas.json', () => {
