@@ -1,0 +1,36 @@
+# Noms générés. Partie disposition (T-008, packages/layout) : générations et foyers calculés
+# depuis Oumar, puis comparés à l'attendu. Les unions sont saisies dans le désordre : seul le rang
+# de Moussa compte. Reste : ordre des frères et sœurs, placement et repli (T-012), revue visuelle
+# (T-017).
+id: CL-POL-01
+titre: Un homme a trois épouses en même temps
+couverture:
+  teste: [disposition]
+  reste: [T-012, T-017]
+arbre:
+  personnes: [moussa/M, awa/F, fatou/F, mariam/F, ali/M, binta/F, oumar/M, kadi/F, issa/M]
+  unions:
+    - { conjoints: [moussa, fatou], rang_moussa: 2 }
+    - { conjoints: [moussa, mariam], rang_moussa: 3 }
+    - { conjoints: [moussa, awa], rang_moussa: 1 }
+  filiations:
+    - { parents: [moussa, awa], enfant: ali }
+    - { parents: [moussa, awa], enfant: binta }
+    - { parents: [moussa, fatou], enfant: oumar }
+    - { parents: [moussa, mariam], enfant: kadi }
+    - { parents: [moussa, mariam], enfant: issa }
+  simultaneites:
+    - unions: [[moussa, awa], [moussa, fatou], [moussa, mariam]]
+      reponse: simultanees
+action:
+  centre: oumar
+attendu:
+  generations:
+    { oumar: 0, ali: 0, binta: 0, kadi: 0, issa: 0, moussa: -1, awa: -1, fatou: -1, mariam: -1 }
+  unites:
+    moussa:
+      forme: simultanees
+      foyers:
+        - { conjoint: awa, enfants: [ali, binta], en_cours: true, vers_centre: false }
+        - { conjoint: fatou, enfants: [oumar], en_cours: true, vers_centre: true }
+        - { conjoint: mariam, enfants: [kadi, issa], en_cours: true, vers_centre: false }

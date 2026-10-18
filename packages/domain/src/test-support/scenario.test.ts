@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
 import { loadScenario, scenarioSchema, scenarioUnionSchema } from './scenario';
+import { buildScenarioTree, scenarioTreeSchema } from './scenario-tree';
 
 const VARIABLE = 'LIGNEE_SCENARIOS_PLAYED_DIR';
 const previous = process.env[VARIABLE];
@@ -79,5 +80,78 @@ describe('lecture simple des scénarios', () => {
     expect(scenarioUnionSchema.safeParse({ conjoints: ['a', 'b'], rang_a: 1.5 }).success).toBe(
       false,
     );
+  });
+  it('une union peut dire ses dates et son motif de fin ; la simultanéité se dit par paire d’unions (T-008)', () => {
+    const line = {
+      conjoints: ['a', 'b'],
+      debut: { qualificatif: 'vers', date: '1970' },
+      fin: { qualificatif: 'exacte', date: '1980-05-02' },
+      motif: 'deces',
+    };
+    expect(scenarioUnionSchema.parse(line)).toMatchObject({ endReason: 'death' });
+    for (const wrong of [
+      { motif: 'abandon' },
+      { simultaneite_a: 'simultanee' },
+      { debut: '1970' },
+    ]) {
+      expect(scenarioUnionSchema.safeParse({ conjoints: ['a', 'b'], ...wrong }).success).toBe(
+        false,
+      );
+    }
+    const section = {
+      personnes: ['a/M', 'b/F', 'c/F', 'd/F', 'e/N'],
+      unions: [line, { conjoints: ['a', 'c'] }, { conjoints: ['a', 'd'] }],
+      filiations: [{ parents: ['a'], enfant: 'e' }],
+      candidats: [{ enfant: 'e', candidates: ['b', 'c'] }],
+      simultaneites: [
+        {
+          unions: [
+            ['a', 'b'],
+            ['a', 'c'],
+            ['d', 'a'],
+          ],
+          reponse: 'simultanees',
+        },
+      ],
+    };
+    const tree = buildScenarioTree(scenarioTreeSchema.parse(section));
+    const [union] = tree.data.unions;
+    expect(union?.start).toMatchObject({ qualifier: 'about', date: { year: 1970 } });
+    expect(union?.end).toMatchObject({ qualifier: 'exact', precision: 'day' });
+    expect(union?.endReason).toBe('death');
+    // Trois unions : trois paires, chacune rangée, toutes simultanées.
+    expect(tree.data.simultaneityAnswers).toHaveLength(3);
+    for (const answer of tree.data.simultaneityAnswers) {
+      expect(answer.unionIds[0] < answer.unionIds[1]).toBe(true);
+      expect(answer.simultaneity).toBe('simultaneous');
+    }
+    expect(tree.data.parentCandidates.map((candidate) => candidate.candidateId)).toEqual([
+      tree.id('b'),
+      tree.id('c'),
+    ]);
+    expect(() =>
+      buildScenarioTree(
+        scenarioTreeSchema.parse({
+          ...section,
+          simultaneites: [
+            {
+              unions: [
+                ['a', 'b'],
+                ['b', 'c'],
+              ],
+              reponse: 'successives',
+            },
+          ],
+        }),
+      ),
+    ).toThrow(/exactly one union/);
+    expect(() =>
+      buildScenarioTree(
+        scenarioTreeSchema.parse({
+          personnes: ['a/M'],
+          candidats: [{ enfant: 'a', candidates: ['z'] }],
+        }),
+      ),
+    ).toThrow(/Unknown person/);
   });
 });

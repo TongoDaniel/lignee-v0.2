@@ -52,6 +52,50 @@ function domainSourceRules() {
   }));
 }
 
+// Règles du code de packages/layout hors des tests (T-008) : même discipline que packages/domain.
+// Seul @lignee/domain (sans ses outils de test) est importé ; ni Node, ni React, ni Skia, ni
+// réseau ; aucun import relatif hors de src/.
+function layoutSourceRules() {
+  const onlyDomain = {
+    regex: '^(?!@lignee/domain$|\\.{1,2}/)',
+    message: 'packages/layout ne dépend que de @lignee/domain (TRD, « Disposition de l’arbre »).',
+  };
+  const message = 'packages/layout : aucun import relatif hors de src/.';
+  const testSupport = {
+    regex: '(^|/)test-support(/|$)',
+    message: 'Le code de packages/layout n’importe pas d’outils de test (test-support).',
+  };
+  const globals = [
+    'process',
+    'Buffer',
+    'require',
+    'fetch',
+    'global',
+    '__dirname',
+    '__filename',
+  ].map((name) => ({
+    name,
+    message: `packages/layout ne dépend ni de Node ni du réseau (${name}).`,
+  }));
+  return [0, 1, 2, 3].map((depth) => ({
+    files: [`packages/layout/src/${'*/'.repeat(depth)}*.ts`],
+    ignores: ['packages/layout/src/**/*.test.ts', 'packages/layout/src/test-support/**'],
+    rules: {
+      'no-restricted-globals': ['error', ...globals],
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            onlyDomain,
+            testSupport,
+            { regex: `^(\\.\\./){${String(depth + 1)},}`, message },
+          ],
+        },
+      ],
+    },
+  }));
+}
+
 export default tseslint.config(
   {
     ignores: [
@@ -115,6 +159,9 @@ export default tseslint.config(
   // ni Expo, ni Prisma, ni réseau, et aucun fichier hors du paquet. Les tests et leurs aides
   // (test-support) peuvent lire des fichiers. Types : tsconfig.src.json (sans types de Node).
   ...domainSourceRules(),
+
+  // packages/layout tourne sur le téléphone et sur le serveur : @lignee/domain seul.
+  ...layoutSourceRules(),
 
   // Accessibilité React Native : app mobile et composants de la charte (TRD, « Tests et qualité »).
   {

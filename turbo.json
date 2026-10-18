@@ -30,6 +30,12 @@
       "outputs": [],
       "passThroughEnv": ["LIGNEE_SCENARIOS_PLAYED_DIR"]
     },
+    "@lignee/layout#test": {
+      "dependsOn": ["transit"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/test/scenarios/**"],
+      "outputs": [],
+      "passThroughEnv": ["LIGNEE_SCENARIOS_PLAYED_DIR"]
+    },
     "@lignee/ci#test": {
       "dependsOn": ["transit"],
       "inputs": [

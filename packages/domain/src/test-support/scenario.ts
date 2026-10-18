@@ -19,10 +19,11 @@ const PLAYED_DIR_VARIABLE = 'LIGNEE_SCENARIOS_PLAYED_DIR';
 /**
  * Couverture partielle (test/scenarios/README.md) : parties testées, tickets qui complètent.
  * `lecture` : le scénario est lu et son arbre de départ construit en objets valides du modèle,
- * sans que son attendu soit encore vérifié.
+ * sans que son attendu soit encore vérifié. `disposition` : générations et foyers calculés par
+ * packages/layout et comparés à l'attendu (T-008).
  */
 export const coverageSchema = z.strictObject({
-  teste: z.array(z.enum(['lecture', 'modele'])).min(1),
+  teste: z.array(z.enum(['lecture', 'modele', 'disposition'])).min(1),
   reste: z.array(z.string().regex(/^T-\d{3}$/)),
 });
 
@@ -91,32 +92,78 @@ export const scenarioNameSchema = z.strictObject({
 });
 export type ScenarioName = z.infer<typeof scenarioNameSchema>;
 
+/** Motifs de fin d'union, dans les mots du cahier (UNI-05). */
+export const scenarioEndReasons = {
+  deces: 'death',
+  divorce: 'divorce',
+  separation: 'separation',
+  non_renseigne: 'unspecified',
+} as const;
+
+/** Réponse de simultanéité (UNI-08, ADR 0012), dans les mots de CL-POL-05. */
+export const scenarioSimultaneities = {
+  simultanees: 'simultaneous',
+  successives: 'successive',
+} as const;
+
+/**
+ * Réponse gardée pour des unions désignées par leurs conjoints (`[[a, b], [a, c]]`, comme dans
+ * CL-POL-05) : chaque paire de ces unions reçoit la même valeur (ADR 0012).
+ */
+export const scenarioSimultaneityAnswerSchema = z.strictObject({
+  unions: z.array(z.tuple([z.string(), z.string()])).min(2),
+  reponse: z.enum(Object.keys(scenarioSimultaneities) as [keyof typeof scenarioSimultaneities]),
+});
+
 /**
  * Union au format de CL-POL-03 : `{ conjoints: [a, b], rang_a: 1 }`. Le rang de chaque conjoint
  * est facultatif (le TRD n'écrit que `rang_pierre`) : absent, la construction de l'arbre donne
- * le rang suivant de ce conjoint, comme l'app (UNI-07). Aucune autre clé.
+ * le rang suivant de ce conjoint, comme l'app (UNI-07). Facultatifs aussi : `debut` et `fin`
+ * (dates floues au format `scenarioFuzzyDateSchema`) et `motif` de fin. Aucune autre clé. La
+ * simultanéité se dit par paire d'unions, dans la section `simultaneites` de l'arbre.
  */
 export const scenarioUnionSchema = z
   .looseObject({ conjoints: z.tuple([z.string(), z.string()]) })
   .transform((line, context) => {
     const [a, b] = line.conjoints;
-    const allowed = new Set(['conjoints', `rang_${a}`, `rang_${b}`]);
+    const allowed = new Set(['conjoints', `rang_${a}`, `rang_${b}`, 'debut', 'fin', 'motif']);
     const extra = Object.keys(line).filter((key) => !allowed.has(key));
-    const rank = (key: string) =>
+    const optional = <T extends z.ZodType>(schema: T, key: string) =>
       line[key] === undefined
         ? { success: true as const, data: undefined }
-        : z.int().min(1).safeParse(line[key]);
-    const rankA = rank(`rang_${a}`);
-    const rankB = rank(`rang_${b}`);
-    if (extra.length > 0 || !rankA.success || !rankB.success) {
+        : schema.safeParse(line[key]);
+    const rankA = optional(z.int().min(1), `rang_${a}`);
+    const rankB = optional(z.int().min(1), `rang_${b}`);
+    const start = optional(scenarioFuzzyDateSchema, 'debut');
+    const end = optional(scenarioFuzzyDateSchema, 'fin');
+    const reason = optional(
+      z.enum(Object.keys(scenarioEndReasons) as [keyof typeof scenarioEndReasons]),
+      'motif',
+    );
+    const parsed = [rankA, rankB, start, end, reason];
+    if (extra.length > 0 || parsed.some((result) => !result.success)) {
       context.addIssue({
         code: 'custom',
-        message: `Expected conjoints and optional rang_${a}, rang_${b} (positive integers)`,
+        message:
+          `Expected conjoints and optional rang_${a}, rang_${b} (positive integers), debut, ` +
+          'fin, motif',
       });
       return z.NEVER;
     }
-    return { spouses: [a, b] as const, ranks: [rankA.data, rankB.data] as const };
+    return {
+      spouses: [a, b] as const,
+      ranks: [rankA.data, rankB.data] as const,
+      start: start.data,
+      end: end.data,
+      endReason: reason.data === undefined ? undefined : scenarioEndReasons[reason.data],
+    };
   });
+
+/** Parents candidats d'un enfant (UNI-11) : « mère parmi ses épouses ». */
+export const scenarioCandidatesSchema = z.strictObject({
+  enfant: z.string(),
+  candidates: z.array(z.string()).min(1),
+});
 
 /** Types de filiation, dans les mots du cahier (UNI-09). Sans type : de naissance. */
 export const scenarioFiliationTypes = {

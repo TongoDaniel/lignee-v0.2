@@ -1,0 +1,7 @@
+{
+  // Code du paquet, partagé par le téléphone et le serveur : aucun type de Node ni du DOM
+  // (`types: []` hérité de la base). Un `process` ou un `Buffer` y est une erreur de type.
+  "extends": "../../tsconfig.base.json",
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts", "src/test-support"]
+}
