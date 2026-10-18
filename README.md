@@ -82,7 +82,7 @@ GitHub Actions, à chaque pull request et à chaque push sur `main` :
 | --- | --- | --- |
 | `.github/workflows/ci.yml` | `verifications` | CON-12, Prettier, ESLint, tsc, Vitest (unitaires et propriétés), commitlint sur les commits et sur le titre de la pull request |
 | | `audit-dependances` | `pnpm audit --audit-level high` : échoue sur une faille haute ou critique |
-| | `cas-limites` | Scénarios `test/scenarios/*.yaml` : aucun n'est joué avant T-006 ; le job tolère avec un avertissement la liste fermée `PENDING_T006` (`CL-POL-03`) et échoue sur tout autre scénario |
+| | `cas-limites` | Scénarios `test/scenarios/*.yaml` : les tests tournent avec `LIGNEE_SCENARIOS_PLAYED_DIR` ; un scénario est joué si un test l'a réellement chargé (`loadScenario`, voir `test/scenarios/README.md`) ; le job échoue sur tout scénario non joué, sans liste d'exception. Ce qu'un test ne vérifie pas encore est déclaré dans le champ `couverture` du scénario |
 | | `integration-postgresql` | Tests `*.integration.test.ts` sur PostgreSQL réel ; à brancher avec T-042 et T-043 |
 | | `taille-synchro` | Taille des réponses de synchronisation ; à brancher avec T-064 |
 | | `images-docker` | hadolint et construction des images de l'API et du worker (`apps/*/Dockerfile`), démarrage sous un utilisateur autre que root ; échoue si un Dockerfile n'est construit par aucun service de `compose.yaml`. Publication sur GitHub Container Registry : T-068 |

@@ -1,0 +1,45 @@
+# Noms générés. Partie disposition (T-008, packages/layout) : sans date de mariage, les foyers
+# suivent le rang saisi ; une date en texte libre ne passe pas devant le rang. Puis le rang est
+# changé à la main : les foyers se réordonnent au calcul suivant (UNI-07). Reste : placement et
+# repli (T-012), saisie du rang (T-032), revue visuelle (T-017).
+id: CL-POL-04
+titre: Rang des épouses connu, dates de mariage inconnues
+couverture:
+  teste: [disposition]
+  reste: [T-012, T-017, T-032]
+arbre:
+  personnes: [pierre/M, rose/F, odile/F, clarisse/F, jean/M, marthe/F, paul/M]
+  unions:
+    - { conjoints: [pierre, odile], rang_pierre: 2 }
+    - { conjoints: [pierre, clarisse], rang_pierre: 3 }
+    - conjoints: [pierre, rose]
+      rang_pierre: 1
+      debut: { qualificatif: texte, texte: "avant l'indépendance" }
+  filiations:
+    - { parents: [pierre, rose], enfant: jean }
+    - { parents: [pierre, odile], enfant: marthe }
+    - { parents: [pierre, clarisse], enfant: paul }
+  simultaneites:
+    - unions: [[pierre, rose], [pierre, odile], [pierre, clarisse]]
+      reponse: simultanees
+action:
+  centre: marthe
+  puis:
+    - { rang: { conjoints: [pierre, clarisse], de: pierre, rang: 1 } }
+    - { rang: { conjoints: [pierre, rose], de: pierre, rang: 3 } }
+attendu:
+  unites:
+    pierre:
+      forme: simultanees
+      foyers:
+        - { conjoint: rose, enfants: [jean] }
+        - { conjoint: odile, enfants: [marthe], vers_centre: true }
+        - { conjoint: clarisse, enfants: [paul] }
+  apres:
+    unites:
+      pierre:
+        forme: simultanees
+        foyers:
+          - { conjoint: clarisse, enfants: [paul] }
+          - { conjoint: odile, enfants: [marthe], vers_centre: true }
+          - { conjoint: rose, enfants: [jean] }
