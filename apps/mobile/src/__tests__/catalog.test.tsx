@@ -43,3 +43,22 @@ describe('Page des composants', () => {
     expect(await screen.findByText('Lucienne a rejoint l’arbre.')).toBeOnTheScreen();
   });
 });
+
+describe('Page des composants : personnes et navigation', () => {
+  it('montre les nœuds de l’arbre avec leur libellé complet', async () => {
+    await openCatalog();
+    expect(
+      screen.getByRole('button', { name: 'Claire Martin, votre mère, née en 1968' }),
+    ).toBeOnTheScreen();
+    expect(
+      screen.getByRole('button', { name: 'Place de votre mère à compléter' }),
+    ).toBeOnTheScreen();
+  });
+
+  it('montre la mention privée, les onglets de fiche et la notification', async () => {
+    await openCatalog();
+    expect(screen.getAllByText('Visible par vous seul').length).toBeGreaterThan(0);
+    expect(screen.getByRole('tab', { name: 'Souvenirs' })).toBeSelected();
+    expect(screen.getByRole('button', { name: /Odette a ajouté une photo/ })).toBeOnTheScreen();
+  });
+});

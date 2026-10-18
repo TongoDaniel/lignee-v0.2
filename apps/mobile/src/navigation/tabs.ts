@@ -5,10 +5,7 @@
 // ils n'apparaissent pas en V1 (doute n° 5 de docs/plan/v1-decoupage.md, ADR 0015). Quand ils arriveront,
 // ils s'ajoutent ici, à leur place dans l'ordre de la charte.
 import type { MessageKey } from '@lignee/i18n';
-import type { ComponentType } from 'react';
-
-import { FamilyIcon } from '../icons/FamilyIcon';
-import { TreeSymbolIcon, type IconProps } from '../icons/TreeSymbolIcon';
+import type { TabBarIcon } from '@lignee/ui';
 
 export interface MainTab {
   /** Nom de la route dans app/(tabs)/ (fichier sans extension). */
@@ -17,7 +14,8 @@ export interface MainTab {
   readonly label: MessageKey & `common:navigation.${string}`;
   /** Ce que fait l'onglet, lu par le lecteur d'écran après le libellé. */
   readonly hint: MessageKey & `common:navigation.${string}`;
-  readonly Icon: ComponentType<IconProps>;
+  /** Symbole Lignée compact pour l'Arbre, icône du jeu pour les autres (charte, BarreOnglets). */
+  readonly icon: TabBarIcon;
 }
 
 export const mainTabs: readonly MainTab[] = [
@@ -25,12 +23,12 @@ export const mainTabs: readonly MainTab[] = [
     route: 'index',
     label: 'common:navigation.tree',
     hint: 'common:navigation.treeHint',
-    Icon: TreeSymbolIcon,
+    icon: 'treeSymbol',
   },
   {
     route: 'family',
     label: 'common:navigation.family',
     hint: 'common:navigation.familyHint',
-    Icon: FamilyIcon,
+    icon: 'famille',
   },
 ];

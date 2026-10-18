@@ -56,7 +56,12 @@
       "settings": "Lignes de réglage",
       "feedback": "Confirmation et feuille",
       "icons": "Icônes",
-      "logo": "Logo"
+      "logo": "Logo",
+      "people": "Avatars et nœuds de l’arbre",
+      "privacy": "Mentions de confidentialité",
+      "profileTabs": "Onglets de fiche",
+      "tabBar": "Barre d’onglets",
+      "notification": "Notification"
     },
     "display": {
       "seniorMode": "Mode Aînés",
@@ -94,7 +99,31 @@
       "openSheet": "Ouvrir la feuille",
       "sheetSubtitle": "Ils recevront un lien pour rejoindre l’arbre.",
       "sendInvite": "Envoyer l’invitation",
-      "addMotherHint": "Ouvre une fiche à remplir."
+      "addMotherHint": "Ouvre une fiche à remplir.",
+      "mom": "Maman",
+      "sister": "Sœur",
+      "motherNodeLabel": "Claire Martin, votre mère, née en 1968",
+      "deceasedYears": "1931 – 2019",
+      "deceasedNodeLabel": "Odette Diallo, votre grand-mère, de 1931 à 2019",
+      "youNodeLabel": "Vous",
+      "probableRelation": "Peut-être son frère",
+      "probableNodeLabel": "Samuel Bah, peut-être son frère, lien à confirmer",
+      "birthdayNodeLabel": "Lucienne Martin, votre sœur, anniversaire aujourd’hui",
+      "healthNodeLabel": "Moussa Bah, votre père, un antécédent est noté",
+      "fadedNodeLabel": "Jean Bah, hors du chemin de parenté",
+      "unknownPlace": "Mère",
+      "unknownNodeLabel": "Place de votre mère à compléter",
+      "openProfileHint": "Ouvre la fiche de la personne.",
+      "showPathAction": "Voir le lien de parenté",
+      "privacyFamily": "Visible par la famille Martin",
+      "privacyHealth": "Visible par vous seul",
+      "tabMemories": "Souvenirs",
+      "tabDocuments": "Documents",
+      "tabsHint": "Affiche cette rubrique de la fiche.",
+      "notificationTitle": "Odette a ajouté une photo",
+      "notificationText": "Ouvrez Lignée pour la voir.",
+      "notificationTime": "Maintenant",
+      "unknownRelation": "À compléter"
     },
     "backHint": "Revient à l’écran précédent."
   }

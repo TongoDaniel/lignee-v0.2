@@ -92,6 +92,79 @@ export const metrics = {
     /** Tirée de plus d'un quart de sa hauteur vers le bas, elle se ferme. */
     dismissRatio: 0.25,
   },
+  avatar: {
+    /** Initiale à 86 % du rayon (README d'Avatar). */
+    initialRatio: 0.86,
+    /** Contour de l'avatar neutre, en `filet-fort` (bundle.css : inset 0 0 0 1.5px). */
+    neutralOutlineWidth: 1.5,
+    /** Silhouette de « Vous », en proportions du diamètre (bundle.css, .lg-avatar--vous). */
+    silhouette: {
+      headSize: 0.34,
+      headLeft: 0.33,
+      headTop: 0.17,
+      bodySize: 0.62,
+      bodyLeft: 0.19,
+      bodyTop: 0.61,
+      /** Blanc à 92 % sur le dégradé doré. */
+      opacity: 0.92,
+    },
+  },
+  treeNode: {
+    /** Largeur d'un nœud au zoom par défaut (bundle.css : 96px). */
+    width: 96,
+    /** Écart entre l'avatar, le prénom et la ligne secondaire (bundle.css : 6px). */
+    gap: 6,
+    /** Anneau de 3 px, séparé de l'avatar par 3 px de `fond` (README de NoeudArbre). */
+    ringWidth: 3,
+    ringGap: 3,
+    /** Pastille (cœur, anniversaire) : disque de 22 px, icône de 14 px (bundle.css). */
+    badgeSize: 22,
+    badgeIconSize: 14,
+    /** Rapproche la ligne secondaire du prénom (bundle.css : margin-top -4px). */
+    secondaryOverlap: 4,
+    /** Débord de la pastille au-dessus et à droite de l'avatar (bundle.css : top -2px). */
+    badgeOffsetTop: -2,
+    badgeOffsetRight: -3,
+    /** Point « proposition en attente » en haut à droite (06-arbre.md). */
+    pendingDotSize: 12,
+    /** Contour du cercle pointillé d'une place à compléter : le trait des icônes. */
+    unknownBorderWidth: 2,
+    /** L'anneau d'anniversaire respire en 2 s : 1 s pour chaque sens (06-arbre.md). */
+    breathHalfCycle: 1000,
+    breathLowOpacity: 0.45,
+  },
+  privacyNote: {
+    /** Icône de 16 px à gauche du texte (README de MentionPrivee). */
+    iconSize: 16,
+    gap: 6,
+  },
+  profileTabs: {
+    /** Libellés en 16 (README d'OngletsFiche), graisse 500 puis 600 pour l'actif. */
+    fontSize: 16,
+    lineHeight: 20,
+    /** Trait sous l'onglet actif : 4 px de haut, 72 de large au plus (bundle.css). */
+    indicatorHeight: 4,
+    indicatorWidth: 72,
+    indicatorRadius: 2,
+    /** Filet sous la rangée (bundle.css : 1px). */
+    ruleWidth: 1,
+    paddingTop: 14,
+    paddingBottom: 14,
+  },
+  tabBar: {
+    /** Au-delà, le libellé ne tiendrait plus sur une ligne (09-accessibilite.md, « Mise en œuvre »). */
+    labelMaxFontScale: 2,
+  },
+  notification: {
+    /** Icône d'app : carré de 40 px, coins de 10, symbole or sur `vert-700` (bundle.css). */
+    iconBoxSize: 40,
+    iconBoxRadius: 10,
+    iconSize: size.iconeM,
+    gap: 14,
+    padding: space[4],
+    textGap: 2,
+    titleGap: space[1],
+  },
   logo: {
     /** Sous 48 px de haut, le symbole compact, au trait plus épais (02-logo.md). */
     compactBelow: 48,
