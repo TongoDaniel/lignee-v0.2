@@ -79,6 +79,7 @@ describe('arbres variés', () => {
       multipleBirths: 0,
       hiddenObjects: 0,
       toPlace: 0,
+      distinctPlaceholders: 0,
     };
     for (const tree of trees) {
       for (const key of Object.keys(counter) as (keyof TreeFeatures)[]) {
