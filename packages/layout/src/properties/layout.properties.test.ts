@@ -170,8 +170,10 @@ describe('propriétés de la disposition (étapes 3 à 5)', { timeout: 120_000 }
         fc.array(fc.nat(), { maxLength: 4 }),
         fc.array(fc.nat(), { maxLength: 6 }),
         ({ tree, centerId }, unionPicks, filiationPicks, factPicks) => {
-          const pick = <T extends { id: Id }>(list: readonly T[], picks: readonly number[]) =>
-            new Set(list.length === 0 ? [] : picks.map((at) => (list[at % list.length] as T).id));
+          const pick = (list: readonly { id: Id }[], picks: readonly number[]) =>
+            new Set(
+              list.length === 0 ? [] : picks.map((at) => (list[at % list.length] as { id: Id }).id),
+            );
           const births = tree.facts.filter((fact) => fact.type === 'birth');
           const masked = {
             unions: pick(tree.unions, unionPicks),

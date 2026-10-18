@@ -362,7 +362,8 @@ export function neverEntered(data: TreeData, masked: MaskedObjects): TreeData {
       if (filiation.originUnionId === undefined || !masked.unions.has(filiation.originUnionId)) {
         return filiation;
       }
-      const { originUnionId: _origin, ...rest } = filiation;
+      const rest = { ...filiation };
+      delete rest.originUnionId;
       return rest;
     }),
     simultaneityAnswers: removed.simultaneityAnswers.filter((answer) =>

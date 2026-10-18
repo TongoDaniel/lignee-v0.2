@@ -94,7 +94,7 @@ describe('étape 3 : jumeaux visibles parmi des triplés (non-fuite)', () => {
         personId: tree.keyOf(person.personId),
       }));
     const strip = (rows: ReturnType<typeof shape>) =>
-      rows.map(({ foldedParentsKey: _key, block: _block, ...rest }) => rest);
+      rows.map((row) => ({ personId: row.personId, row: row.row, x: row.x, y: row.y }));
     expect(strip(shape(seen, triplets))).toEqual(strip(shape(alone, twins)));
   });
 });
