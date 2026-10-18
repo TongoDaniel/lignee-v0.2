@@ -54,6 +54,11 @@ export interface TreeGeneratorRates {
   hidden: number;
   /** Une personne est créée « à placer », sans lien. */
   toPlace: number;
+  /**
+   * Une place à compléter est dite distincte d'une autre personne (`distinctFrom`, ADR 0017) :
+   * de l'autre parent d'un demi-frère quand il y en a, sinon (trois fois moins) de n'importe qui.
+   */
+  distinctFrom: number;
 }
 
 export const DEFAULT_TREE_GENERATOR_RATES: Readonly<TreeGeneratorRates> = {
@@ -70,6 +75,7 @@ export const DEFAULT_TREE_GENERATOR_RATES: Readonly<TreeGeneratorRates> = {
   twins: 0.03,
   hidden: 0.08,
   toPlace: 0.01,
+  distinctFrom: 0.4,
 };
 
 export interface TreeGeneratorOptions {
@@ -98,6 +104,8 @@ export interface TreeFeatures {
   /** Objets qui portent une règle autre que « tout l'arbre ». */
   hiddenObjects: number;
   toPlace: number;
+  /** Places à compléter dites distinctes d'une autre personne. */
+  distinctPlaceholders: number;
 }
 
 /** Un compte membre de l'arbre, relié ou non à une fiche (le premier est le propriétaire). */
@@ -253,6 +261,7 @@ export function generateTree(options: TreeGeneratorOptions): GeneratedTree {
     multipleBirths: 0,
     hiddenObjects: 0,
     toPlace: 0,
+    distinctPlaceholders: 0,
   };
 
   const people: PersonInfo[] = [];
@@ -1095,6 +1104,51 @@ export function generateTree(options: TreeGeneratorOptions): GeneratedTree {
           authorAccountId: author(),
           level: 'tree',
         });
+      }
+    }
+
+    // Places à compléter dites distinctes de certaines personnes (`distinctFrom`, ADR 0017) :
+    // surtout de l'autre parent d'un demi-frère (« mon frère de même père »), parfois de
+    // n'importe qui. Tirage à part, pour ne rien changer au reste de l'arbre d'une graine donnée.
+    const distinctRandom = createRandom(options.seed + 0x5eed);
+    const birthParentsOf = new Map<Id, Id[]>();
+    const birthChildrenOf = new Map<Id, Id[]>();
+    for (const filiation of data.filiations) {
+      if (filiation.type !== 'birth') continue;
+      birthParentsOf.set(filiation.childId, [
+        ...(birthParentsOf.get(filiation.childId) ?? []),
+        filiation.parentId,
+      ]);
+      birthChildrenOf.set(filiation.parentId, [
+        ...(birthChildrenOf.get(filiation.parentId) ?? []),
+        filiation.childId,
+      ]);
+    }
+    for (const person of data.people) {
+      if (person.nature !== 'placeholder') continue;
+      const coParents = new Set<Id>();
+      for (const child of birthChildrenOf.get(person.id) ?? []) {
+        for (const parent of birthParentsOf.get(child) ?? []) coParents.add(parent);
+      }
+      coParents.delete(person.id);
+      const halfSiblingParents = new Set<Id>();
+      for (const coParent of coParents) {
+        for (const child of birthChildrenOf.get(coParent) ?? []) {
+          for (const parent of birthParentsOf.get(child) ?? []) halfSiblingParents.add(parent);
+        }
+      }
+      halfSiblingParents.delete(person.id);
+      for (const coParent of coParents) halfSiblingParents.delete(coParent);
+      let distinctFrom: Id | undefined;
+      if (halfSiblingParents.size > 0 && distinctRandom.chance(rates.distinctFrom)) {
+        distinctFrom = distinctRandom.pick([...halfSiblingParents].sort());
+      } else if (data.people.length > 1 && distinctRandom.chance(rates.distinctFrom / 3)) {
+        const other = distinctRandom.pick(data.people).id;
+        if (other !== person.id) distinctFrom = other;
+      }
+      if (distinctFrom !== undefined) {
+        person.distinctFrom = [distinctFrom];
+        features.distinctPlaceholders += 1;
       }
     }
 

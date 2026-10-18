@@ -115,7 +115,13 @@ export function treeDataIssues(data: TreeData): TreeDataIssue[] {
     });
   };
 
-  check('people', data.people, personSchema, () => []);
+  check('people', data.people, personSchema, (person) =>
+    (person.distinctFrom ?? []).map((id, index): [string, Id, ReadonlySet<Id>] => [
+      `distinctFrom[${String(index)}]`,
+      id,
+      people,
+    ]),
+  );
   check('names', data.names, nameSchema, (name) => [['personId', name.personId, people]]);
   check('unions', data.unions, unionSchema, (union) => [
     ['spouses[0]', union.spouses[0].personId, people],

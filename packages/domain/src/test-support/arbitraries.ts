@@ -37,6 +37,7 @@ const RATE_CEILINGS: Record<keyof TreeGeneratorRates, number> = {
   twins: 0.4,
   hidden: 0.6,
   toPlace: 0.1,
+  distinctFrom: 1,
 };
 
 /** Probabilités tirées au hasard, chacune entre 0 et son plafond. */

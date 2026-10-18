@@ -26,6 +26,7 @@ Les identifiants et valeurs sont en anglais ; correspondance avec les mots du ca
 | Cahier | Modèle |
 | --- | --- |
 | nature connue, à compléter | `known`, `placeholder` |
+| place à compléter dite distincte de certaines personnes (« mon frère de même père ») | `distinctFrom` sur `Person`, place à compléter seulement (ADR 0017) |
 | genre femme, homme, autre, non renseigné | `female`, `male`, `other`, `unspecified` |
 | statut vital (vivant, décédé, inconnu) | `living`, `deceased`, `unknown` ; « présumée vivante » est calculée (T-007) |
 | nom de naissance, d'usage, surnom, titre, variante, ancien | `birth`, `usage`, `nickname`, `title`, `variant`, `former` |
@@ -38,7 +39,7 @@ Les identifiants et valeurs sont en anglais ; correspondance avec les mots du ca
 | visibilité tout l'arbre, branche, personnes choisies, moi seul | `tree`, `branch`, `chosen_people`, `only_me` |
 | portée du nom d'usage moi seul, famille | `only_me`, `family` |
 
-Les tables absentes du TRD (titres et rôles datés, naissances multiples) et les autres compléments sont décrits dans l'ADR 0008 (proposée).
+Les tables absentes du TRD (titres et rôles datés, naissances multiples) et les autres compléments sont décrits dans l'ADR 0008 (proposée). Le champ `distinctFrom` d'une personne à compléter est décrit dans l'ADR 0017 (proposée).
 
 ### Ce que les schémas garantissent, et ce qui vient après
 
