@@ -23,14 +23,15 @@ export default function RootLayout() {
     if (ready) void SplashScreen.hideAsync();
   }, [ready]);
 
-  if (!ready) return null;
-
+  // La base locale s'ouvre dès le premier rendu, pendant le chargement des polices.
   return (
     <LocalDatabaseProvider>
-      <AppProviders>
-        <Stack screenOptions={{ headerShown: false }} />
-        <StatusBar style="auto" />
-      </AppProviders>
+      {ready ? (
+        <AppProviders>
+          <Stack screenOptions={{ headerShown: false }} />
+          <StatusBar style="auto" />
+        </AppProviders>
+      ) : null}
     </LocalDatabaseProvider>
   );
 }

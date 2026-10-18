@@ -5,19 +5,17 @@
 import {
   localSchema,
   openLocalDatabase,
-  type DatabaseFile,
   type KeyStore,
   type LocalDatabase,
   type OpenOutcome,
-  type SqlConnection,
 } from '@lignee/sync';
 import { drizzle } from 'drizzle-orm/expo-sqlite';
 import { getRandomBytes } from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
-import { deleteDatabaseSync, openDatabaseSync, type SQLiteDatabase } from 'expo-sqlite';
 
-/** Nom du fichier, dans le dossier par défaut d'expo-sqlite (données privées de l'app). */
-export const DATABASE_NAME = 'lignee.db';
+import { expoDatabaseFile, type ExpoConnection } from './expoDatabaseFile';
+
+export { DATABASE_NAME } from './expoDatabaseFile';
 
 /**
  * Trousseau : la clé n'est lisible qu'après le premier déverrouillage depuis le démarrage (la
@@ -34,49 +32,44 @@ export const secureKeyStore: KeyStore = {
   delete: (name) => SecureStore.deleteItemAsync(name, keychainOptions),
 };
 
-interface ExpoConnection extends SqlConnection {
-  readonly native: SQLiteDatabase;
-}
-
-function expoDatabaseFile(): DatabaseFile & { open(): ExpoConnection } {
-  return {
-    open() {
-      const native = openDatabaseSync(DATABASE_NAME);
-      return {
-        native,
-        exec: (sql) => {
-          native.execSync(sql);
-        },
-        get: (sql) => native.getFirstSync<Record<string, unknown>>(sql) ?? undefined,
-        close: () => {
-          native.closeSync();
-        },
-      };
-    },
-    deleteIfExists() {
-      try {
-        deleteDatabaseSync(DATABASE_NAME);
-        return true;
-      } catch {
-        // expo-sqlite refuse d'effacer un fichier absent.
-        return false;
-      }
-    },
-  };
-}
-
 export interface AppDatabase {
   readonly db: LocalDatabase;
   readonly outcome: OpenOutcome;
+  /** Ferme la connexion ; la prochaine demande rouvre la base. */
+  close(): void;
 }
 
-/** Ouvre (ou crée) la base chiffrée et applique les migrations. */
-export async function openAppDatabase(): Promise<AppDatabase> {
+let opening: Promise<AppDatabase> | undefined;
+
+async function open(): Promise<AppDatabase> {
   const opened = await openLocalDatabase({
     file: expoDatabaseFile(),
     keyStore: secureKeyStore,
     randomBytes: getRandomBytes,
   });
-  const { native } = opened.connection as ExpoConnection;
-  return { db: drizzle(native, { schema: localSchema }), outcome: opened.outcome };
+  const connection = opened.connection as ExpoConnection;
+  return {
+    db: drizzle(connection.native, { schema: localSchema }),
+    outcome: opened.outcome,
+    close: () => {
+      if (opening !== undefined) opening = undefined;
+      connection.close();
+    },
+  };
+}
+
+/**
+ * Ouvre (ou crée) la base chiffrée et applique les migrations, une seule fois : tous les appels
+ * reçoivent la même promesse, jusqu'à `close()`. Un échec n'est pas gardé : l'appel suivant
+ * réessaie.
+ */
+export function openAppDatabase(): Promise<AppDatabase> {
+  if (opening === undefined) {
+    const attempt = open();
+    opening = attempt;
+    attempt.catch(() => {
+      if (opening === attempt) opening = undefined;
+    });
+  }
+  return opening;
 }
