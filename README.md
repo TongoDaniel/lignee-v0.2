@@ -59,6 +59,16 @@ corepack pnpm check:forbidden-dependencies  # CON-12 : aucune bibliothèque de r
 
 Pour un seul paquet : `corepack pnpm --filter @lignee/kinship test`.
 
+### Tests de performance
+
+Les budgets de temps du cahier des charges (TRD, « Performance et appareils cibles » ; par exemple 100 ms de disposition pour 500 personnes visibles, PAR-01) visent l'Android de référence et y sont vérifiés (T-028, T-105). Dans Vitest, sur un poste ou un runner partagé, un test de temps n'est qu'un garde-fou contre une régression grossière. Règle commune, outillée par `@lignee/domain/test-support` (`medianTime`, `reportBudget`) :
+
+- chauffe d'abord, puis médiane de plusieurs exécutions, jamais une mesure unique ;
+- plafond = budget × facteur : 3 en CI (variable `CI`), 1,5 sur un poste ; `LIGNEE_PERF_FACTOR` le remplace (par exemple `LIGNEE_PERF_FACTOR=1 corepack pnpm test` pour comparer au budget brut) ;
+- chaque mesure est écrite dans la sortie du test avec le budget et le plafond (lignes `[perf]`), pour suivre la tendance d'un build à l'autre.
+
+Les budgets eux-mêmes ne changent pas pour faire passer la CI ; seul le facteur absorbe la lenteur des runners.
+
 Textes d'interface : jamais en dur (ACC-04). ESLint refuse le texte dans le JSX de `apps/mobile`, `apps/web`, `apps/admin` et `packages/ui` (règle `i18next/no-literal-string`) ; pour ajouter un texte, voir [packages/i18n/README.md](packages/i18n/README.md).
 
 ### Environnement local
@@ -85,7 +95,7 @@ GitHub Actions, à chaque pull request et à chaque push sur `main` :
 | `.github/workflows/ci.yml` | `verifications` | CON-12, Prettier, ESLint, tsc, Vitest (unitaires et propriétés) et Jest (app mobile), commitlint sur les commits et sur le titre de la pull request |
 | | `bundle-mobile` | App mobile : versions conformes au SDK Expo (`expo install --check`), bundle Hermes Android et iOS (`expo export`), taille relevée dans le résumé |
 | | `audit-dependances` | `pnpm audit --audit-level high` : échoue sur une faille haute ou critique |
-| | `cas-limites` | Scénarios `test/scenarios/*.yaml` : aucun n'est joué avant T-006 ; le job tolère avec un avertissement la liste fermée `PENDING_T006` (`CL-POL-03`) et échoue sur tout autre scénario |
+| | `cas-limites` | Scénarios `test/scenarios/*.yaml` : les tests tournent avec `LIGNEE_SCENARIOS_PLAYED_DIR` ; un scénario est joué si un test l'a réellement chargé (`loadScenario`, voir `test/scenarios/README.md`) ; le job échoue sur tout scénario non joué, sans liste d'exception. Ce qu'un test ne vérifie pas encore est déclaré dans le champ `couverture` du scénario |
 | | `integration-postgresql` | Tests `*.integration.test.ts` sur PostgreSQL réel ; à brancher avec T-042 et T-043 |
 | | `taille-synchro` | Taille des réponses de synchronisation ; à brancher avec T-064 |
 | | `images-docker` | hadolint et construction des images de l'API et du worker (`apps/*/Dockerfile`), démarrage sous un utilisateur autre que root ; échoue si un Dockerfile n'est construit par aucun service de `compose.yaml`. Publication sur GitHub Container Registry : T-068 |

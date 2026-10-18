@@ -1,4 +1,10 @@
 {
+  // Configuration des tests et de l'éditeur (ESLint s'en sert aussi) : tout src/, avec les types
+  // de Node pour lire les scénarios. Le code du paquet est vérifié à part, sans types de Node,
+  // par tsconfig.src.json.
   "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"]
+  },
   "include": ["src"]
 }

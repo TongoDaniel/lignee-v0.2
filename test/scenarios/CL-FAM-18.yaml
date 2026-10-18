@@ -1,0 +1,25 @@
+# Noms générés. Noms successifs datés : mariage, conversion, francisation. Les dates restent du
+# texte tant que les dates floues (T-005) ne sont pas là. Reste : la saisie (T-031).
+id: CL-FAM-18
+titre: Changement de nom (mariage, conversion, francisation)
+couverture:
+  teste: [modele]
+  reste: [T-031]
+arbre:
+  personnes: [marthe/F, ngassa/M]
+  noms:
+    - { personne: marthe, type: naissance, prenoms: Marthe, nom: Tchoupa, fin: "1978" }
+    - { personne: marthe, type: usage, prenoms: Marthe, nom: Essaka, debut: "1978", fin: "1991" }
+    - { personne: marthe, type: usage, prenoms: Aminatou, nom: Essaka, debut: "1991" }
+    - { personne: ngassa, type: naissance, prenoms: Ngassa, nom: Mbolang, fin: "vers 1960" }
+    - { personne: ngassa, type: variante, prenoms: Nicolas, nom: Mbolang, debut: "vers 1960" }
+attendu:
+  valide: true
+  noms_dates:
+    marthe:
+      - { nom: Tchoupa, prenoms: Marthe, fin: "1978" }
+      - { nom: Essaka, prenoms: Marthe, debut: "1978", fin: "1991" }
+      - { nom: Essaka, prenoms: Aminatou, debut: "1991" }
+    ngassa:
+      - { nom: Mbolang, prenoms: Ngassa, fin: "vers 1960" }
+      - { nom: Mbolang, prenoms: Nicolas, debut: "vers 1960" }

@@ -1,0 +1,70 @@
+# Noms générés. Partie disposition (T-008, packages/layout) : deux groupes de foyers imbriqués,
+# celui du grand-père et celui du père, Samuel étant l'enfant d'un foyer du grand-père. Chaque
+# foyer sait s'il mène à la personne qui regarde : depuis Noémie, ceux de Sarah et de Judith ;
+# depuis Théo, ceux de Sarah et de Grace. Le repli lui-même est T-012 ; reste aussi la revue
+# visuelle (T-017).
+id: CL-POL-18
+titre: Polygamie sur deux générations (grand-père et père)
+couverture:
+  teste: [disposition]
+  reste: [T-012, T-017]
+arbre:
+  personnes:
+    - emmanuel/M
+    - ruth/F
+    - sarah/F
+    - lydia/F
+    - joel/M
+    - samuel/M
+    - esther/F
+    - grace/F
+    - judith/F
+    - theo/M
+    - noemie/F
+  unions:
+    - { conjoints: [emmanuel, ruth], rang_emmanuel: 1 }
+    - { conjoints: [emmanuel, sarah], rang_emmanuel: 2 }
+    - { conjoints: [emmanuel, lydia], rang_emmanuel: 3 }
+    - { conjoints: [samuel, grace], rang_samuel: 1 }
+    - { conjoints: [samuel, judith], rang_samuel: 2 }
+  filiations:
+    - { parents: [emmanuel, ruth], enfant: joel }
+    - { parents: [emmanuel, sarah], enfant: samuel }
+    - { parents: [emmanuel, lydia], enfant: esther }
+    - { parents: [samuel, grace], enfant: theo }
+    - { parents: [samuel, judith], enfant: noemie }
+  simultaneites:
+    - unions: [[emmanuel, ruth], [emmanuel, sarah], [emmanuel, lydia]]
+      reponse: simultanees
+    - unions: [[samuel, grace], [samuel, judith]]
+      reponse: simultanees
+action:
+  centre: noemie
+  autres_centres: [theo]
+attendu:
+  generations:
+    noemie: 0
+    theo: 0
+    samuel: -1
+    grace: -1
+    judith: -1
+    joel: -1
+    esther: -1
+    emmanuel: -2
+    ruth: -2
+    sarah: -2
+    lydia: -2
+  unites:
+    emmanuel:
+      forme: simultanees
+      foyers:
+        - { conjoint: ruth, enfants: [joel], vers_centre: false }
+        - { conjoint: sarah, enfants: [samuel], vers_centre: true }
+        - { conjoint: lydia, enfants: [esther], vers_centre: false }
+    samuel:
+      forme: simultanees
+      foyers:
+        - { conjoint: grace, enfants: [theo], vers_centre: false }
+        - { conjoint: judith, enfants: [noemie], vers_centre: true }
+  vers_centre_depuis:
+    theo: [[emmanuel, sarah], [samuel, grace]]

@@ -2,6 +2,8 @@
   "$schema": "https://turborepo.com/schema.json",
   "agentGuidance": false,
   "globalDependencies": ["tsconfig.base.json", "eslint.config.mjs"],
+  "globalEnv": ["LIGNEE_PERF_FACTOR"],
+  "globalPassThroughEnv": ["CI"],
   "tasks": {
     "transit": {
       "dependsOn": ["^transit"]
@@ -16,7 +18,25 @@
     },
     "test": {
       "dependsOn": ["transit"],
-      "outputs": []
+      "outputs": [],
+      "passThroughEnv": ["LIGNEE_SCENARIOS_PLAYED_DIR"]
+    },
+    "@lignee/domain#test": {
+      "dependsOn": ["transit"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/test/scenarios/**",
+        "$TURBO_ROOT$/docs/cahier-des-charges/cahier-des-charges-4-cas-limites.md",
+        "$TURBO_ROOT$/docs/plan/v1-decoupage.md"
+      ],
+      "outputs": [],
+      "passThroughEnv": ["LIGNEE_SCENARIOS_PLAYED_DIR"]
+    },
+    "@lignee/layout#test": {
+      "dependsOn": ["transit"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/test/scenarios/**"],
+      "outputs": [],
+      "passThroughEnv": ["LIGNEE_SCENARIOS_PLAYED_DIR"]
     },
     "@lignee/ci#test": {
       "dependsOn": ["transit"],
@@ -35,7 +55,8 @@
         "$TURBO_ROOT$/package.json",
         "$TURBO_ROOT$/apps/mobile/package.json"
       ],
-      "outputs": []
+      "outputs": [],
+      "passThroughEnv": ["LIGNEE_SCENARIOS_PLAYED_DIR"]
     },
     "@lignee/ui#test": {
       "dependsOn": ["transit"],
