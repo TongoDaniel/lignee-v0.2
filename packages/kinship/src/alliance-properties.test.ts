@@ -152,6 +152,7 @@ function allianceIssues(graph: KinshipGraph, tree: TreeData, relationship: Relat
   const blood = relationship.segments.filter((s): s is BloodSegment => s.kind === 'blood');
   const links = relationship.segments.filter((s) => s.kind === 'union');
   if (alliance.crossings.length !== links.length) issues.push('crossing count');
+  const unionById = new Map<Id, Union>(tree.unions.map((union) => [union.id, union]));
   alliance.crossings.forEach((crossing, index) => {
     const link = links[index];
     if (crossing.fromId !== link?.fromId || crossing.toId !== link.toId) {
@@ -174,10 +175,18 @@ function allianceIssues(graph: KinshipGraph, tree: TreeData, relationship: Relat
           issues.push('child side: union does not join the parents');
         }
         if (!parentIds.includes(entry.otherParentId)) issues.push('child side: other parent');
+        const own = unionById.get(entry.unionId);
+        const crossed = unionById.get(entry.crossedUnionId);
+        if (own === undefined || crossed === undefined) {
+          issues.push('child side: unknown union');
+        } else if (
+          JSON.stringify(resolveSimultaneity(tree, own, crossed)) !== JSON.stringify(entry.timing)
+        ) {
+          issues.push('child side: timing');
+        }
       }
     }
   });
-  const unionById = new Map<Id, Union>(tree.unions.map((union) => [union.id, union]));
   let simultaneous = false;
   if (alliance.sharedSpouse !== undefined) {
     for (const pair of alliance.sharedSpouse.pairs) {
@@ -300,8 +309,9 @@ describe('alliance nommée sur des arbres générés', () => {
           trees,
           fc.array(fc.nat(), { maxLength: 4 }),
           fc.array(fc.nat(), { minLength: 1, maxLength: 4 }),
+          fc.array(fc.nat(), { maxLength: 4 }),
           picks,
-          (tree: GeneratedTree, peoplePicks, unionPicks, chosen) => {
+          (tree: GeneratedTree, peoplePicks, unionPicks, factPicks, chosen) => {
             const at = <T>(items: readonly T[], index: number) => items[index % items.length];
             const hiddenPeople = new Set(
               peoplePicks.map((i) => at(tree.people, i)?.id).filter((id) => id !== undefined),
@@ -311,14 +321,28 @@ describe('alliance nommée sur des arbres générés', () => {
                 ? []
                 : unionPicks.map((i) => at(tree.unions, i)?.id).filter((id) => id !== undefined),
             );
-            // Filtre : objets masqués retirés ; réponses et faits laissés dans le contexte.
+            // Faits de décès masqués pour eux-mêmes (visibilité par fait, CON-03, ADR 0008), la
+            // personne restant visible.
+            const deaths = tree.facts.filter((fact) => fact.type === 'death');
+            const hiddenFacts = new Set(
+              deaths.length === 0
+                ? []
+                : factPicks.map((i) => at(deaths, i)?.id).filter((id) => id !== undefined),
+            );
+            // Filtre : objets masqués retirés du graphe. Le contexte garde les réponses des unions
+            // masquées et les faits des personnes masquées (jamais lus par construction) ; un fait
+            // de décès masqué d'une personne visible, lui, serait lu : le filtre le retire (T-052),
+            // et la réponse doit alors être celle d'un arbre où il n'a jamais été saisi.
             const filtered = graphOf({
               ...tree,
               people: tree.people.filter((person) => !hiddenPeople.has(person.id)),
               unions: tree.unions.filter((union) => !hiddenUnions.has(union.id)),
             });
-            const leaky = createAllianceContext(tree);
-            const never = neverEntered(tree, hiddenPeople, hiddenUnions, new Set());
+            const leaky = createAllianceContext({
+              ...tree,
+              facts: tree.facts.filter((fact) => !hiddenFacts.has(fact.id)),
+            });
+            const never = neverEntered(tree, hiddenPeople, hiddenUnions, new Set(), hiddenFacts);
             const reference = graphOf(never);
             const context = createAllianceContext(never);
             const visible = new Set(never.people.map((person) => person.id));
@@ -333,6 +357,7 @@ describe('alliance nommée sur des arbres générés', () => {
               const text = JSON.stringify(result);
               for (const id of hiddenUnions) expect(text).not.toContain(id);
               for (const id of hiddenPeople) expect(text).not.toContain(id);
+              for (const id of hiddenFacts) expect(text).not.toContain(id);
             }
           },
         ),

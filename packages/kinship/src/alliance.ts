@@ -48,7 +48,10 @@ export interface AllianceContextInput {
 
 /**
  * Contexte de l'alliance, construit une fois par arbre (comme le graphe) : faits et réponses ne
- * sont lus qu'une fois.
+ * sont lus qu'une fois. Il doit être construit à partir du **même arbre filtré** que le graphe
+ * (ADR 0020, point 6) : le moteur ignore par construction une réponse qui cite une union absente
+ * du graphe, ou un décès d'une personne absente, mais pas un fait de décès masqué (visibilité par
+ * fait, CON-03, ADR 0008) d'une personne visible, que le filtre doit retirer.
  */
 export class AllianceContext {
   private readonly resolver: ReturnType<typeof simultaneityResolver>;
@@ -93,8 +96,10 @@ export const EMPTY_ALLIANCE_CONTEXT = createAllianceContext();
 function endingOf(union: KinshipUnion, context: AllianceContext): UnionEnding {
   if (union.endReason !== undefined) return { status: 'ended', reason: union.endReason };
   if (union.end !== undefined) return { status: 'ended', reason: 'unspecified' };
+  // Un conjoint décédé : l'union est finie au plus tard à sa mort, mais pas forcément par elle
+  // (un divorce jamais saisi, puis la mort de l'ex) : motif non renseigné, jamais « décès ».
   if (union.spouses.some((spouse) => context.isDeceased(spouse.personId))) {
-    return { status: 'ended', reason: 'death' };
+    return { status: 'ended', reason: 'unspecified' };
   }
   return { status: 'no_end_known' };
 }

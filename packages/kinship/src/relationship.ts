@@ -151,8 +151,9 @@ export const INVERSE_ALLIANCE_KIND: Readonly<Record<AllianceKind, AllianceKind>>
 
 /**
  * Fin d'une union, dans le graphe du lecteur : `ended`, avec le motif saisi (décès, divorce,
- * séparation, non renseigné), `unspecified` pour une date de fin sans motif, `death` pour le
- * décès connu d'un conjoint ; sinon `no_end_known`. Une union sans fin n'est pas présumée en
+ * séparation, non renseigné) ; `unspecified` pour une date de fin sans motif ou un conjoint
+ * décédé sans motif saisi (la mort borne l'union, sans dire qu'elle l'a terminée : un divorce
+ * jamais saisi est possible) ; sinon `no_end_known`. Une union sans fin n'est pas présumée en
  * cours (ADR 0012, point 5) : « épouse » se dit, rien de plus ne s'affirme.
  */
 export type UnionEnding = { status: 'no_end_known' } | { status: 'ended'; reason: UnionEndReason };

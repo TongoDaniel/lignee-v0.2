@@ -58,7 +58,7 @@ describe('conjoint', () => {
     ]);
   });
 
-  it('terminée par divorce, séparation, décès (motif ou fait de décès), ou fin sans motif', () => {
+  it('terminée par divorce, séparation, fin sans motif, conjoint décédé sans motif', () => {
     const f = fixture({
       personnes: ['a/M', 'b/F', 'c/M', 'd/F', 'e/M', 'g/F', 'h/M', 'k/F'],
       unions: [
@@ -73,7 +73,9 @@ describe('conjoint', () => {
     expect(ending('a', 'b')).toEqual({ status: 'ended', reason: 'divorce' });
     expect(ending('c', 'd')).toEqual({ status: 'ended', reason: 'separation' });
     expect(ending('e', 'g')).toEqual({ status: 'ended', reason: 'unspecified' });
-    expect(ending('h', 'k')).toEqual({ status: 'ended', reason: 'death' });
+    // Un conjoint décédé, sans motif saisi : l'union est finie, sans dire que c'est par le décès
+    // (un divorce jamais saisi, puis la mort de l'ex).
+    expect(ending('h', 'k')).toEqual({ status: 'ended', reason: 'unspecified' });
     // Sans le fait de décès (masqué ou jamais saisi), rien n'est affirmé.
     expect(closest(f, 'h', 'k', createAllianceContext({})).crossings[0]?.unions[0]?.ending).toEqual(
       { status: 'no_end_known' },

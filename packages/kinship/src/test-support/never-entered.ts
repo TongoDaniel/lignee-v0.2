@@ -10,6 +10,8 @@ export function neverEntered(
   hiddenPeople: ReadonlySet<Id>,
   hiddenUnions: ReadonlySet<Id>,
   hiddenFiliations: ReadonlySet<Id>,
+  /** Faits masqués pour eux-mêmes (visibilité par fait, CON-03, ADR 0008). */
+  hiddenFacts: ReadonlySet<Id> = new Set(),
 ) {
   // Une mention « distincte de » vers une personne masquée n'aurait pas été saisie (ADR 0017).
   const people = tree.people
@@ -88,7 +90,9 @@ export function neverEntered(
   );
   const present = new Set(people.map((person) => person.id));
   const facts = tree.facts.filter(
-    (fact) => fact.subject.kind !== 'person' || present.has(fact.subject.personId),
+    (fact) =>
+      !hiddenFacts.has(fact.id) &&
+      (fact.subject.kind !== 'person' || present.has(fact.subject.personId)),
   );
   return { people, unions, filiations, parentCandidates, simultaneityAnswers, facts };
 }
