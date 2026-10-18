@@ -58,7 +58,7 @@ attendu:
       - { famille: [bernard, alice], replie: false, enfants: 1 }
       - { famille: [colette, denis], replie: false, enfants: 1 }
       - { famille: [paul, marie], replie: false, enfants: 1 }
-    liens:
+    liens_hors_foyers:
       - { nature: ailleurs, de: [colette, denis], vers: marie, trace: trait }
   descendance:
     visibles: [gaspard, honorine, bernard, alice, colette, denis, paul, marie, luc]
@@ -67,5 +67,5 @@ attendu:
       "1": [bernard, alice, colette, denis]
       "2": [paul, marie]
       "3": [luc]
-    liens:
+    liens_hors_foyers:
       - { nature: ailleurs, de: [colette, denis], vers: marie, trace: trait }

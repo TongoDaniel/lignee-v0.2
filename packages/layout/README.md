@@ -62,4 +62,4 @@ Garanties vérifiées sur des arbres générés (`src/properties/implex.properti
 
 ## Scénarios
 
-Les cas limites CL-POL-01, 04, 06, 09, 13, 14 et 18 sont joués par `src/scenarios/polygamy-scenarios.test.ts` (structure, puis ordre, placement et repli) ; CL-POL-12 et CL-SEC-03 par `src/scenarios/fold-scenarios.test.ts` ; CL-FAM-09 et CL-FAM-10 par `src/scenarios/implex-scenarios.test.ts` (T-019). Format de disposition : `test/scenarios/README.md`.
+Les cas limites CL-POL-01, 04, 06, 09, 13, 14 et 18 sont joués par `src/scenarios/polygamy-scenarios.test.ts` (structure, puis ordre, placement et repli) ; CL-POL-12 et CL-SEC-03 par `src/scenarios/fold-scenarios.test.ts` ; CL-FAM-09 et CL-FAM-10 par `src/scenarios/implex-scenarios.test.ts` (T-019 ; liens attendus sous `liens_hors_foyers`, distincte de `attendu.liens` des liens de parenté). Format de disposition : `test/scenarios/README.md`.

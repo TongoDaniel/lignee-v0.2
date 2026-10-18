@@ -71,7 +71,9 @@ describe('étape 6 : renvoi « voir aussi »', () => {
     expectLayoutInvariants(layout);
     expect(layout.people.size).toBe(7);
     expectDisposition(layout, scenario, {
-      liens: [{ nature: 'secondaire', de: ['hortense'], vers: 'theo', trace: 'renvoi' }],
+      liens_hors_foyers: [
+        { nature: 'secondaire', de: ['hortense'], vers: 'theo', trace: 'renvoi' },
+      ],
     });
     const [link] = layout.links;
     expect(link?.rowSpan).toBe(3);
@@ -224,7 +226,7 @@ describe('vue « descendance » (ARB-14)', () => {
         'vic',
       ],
       lignes: { '0': ['pierre'], '0.5': ['rose', 'odile', 'clarisse'] },
-      liens: [],
+      liens_hors_foyers: [],
     });
     expect(layout.people.get(pierre)?.x).toBe(0);
     // Ses trois foyers, dépliés, chacun avec son enfant dessiné juste en dessous de la mère.

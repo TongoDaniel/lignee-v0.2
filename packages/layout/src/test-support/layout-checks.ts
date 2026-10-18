@@ -198,8 +198,8 @@ export function expectDisposition(
     const byKey = (a: { key: string }, b: { key: string }) => (a.key < b.key ? -1 : 1);
     expect(actual.sort(byKey)).toEqual(wanted.sort(byKey));
   }
-  if (expected.liens !== undefined) {
-    const wanted = expected.liens
+  if (expected.liens_hors_foyers !== undefined) {
+    const wanted = expected.liens_hors_foyers
       .map((line) => {
         const nature = linkNatures[line.nature];
         const from =

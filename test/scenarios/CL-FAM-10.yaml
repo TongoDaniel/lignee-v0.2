@@ -53,7 +53,7 @@ attendu:
       - { famille: [gaston, nadia], replie: true, enfants: 1 }
       - { famille: [gerard, jeanne], replie: false, enfants: 2 }
       - { famille: [paul, mireille], replie: false, enfants: 1 }
-    liens:
+    liens_hors_foyers:
       - { nature: couple, de: [gaston], vers: nadia, trace: trait }
       - { nature: ailleurs, de: [gerard, jeanne], vers: mireille, trace: trait }
   apres_deplier:
@@ -63,6 +63,6 @@ attendu:
       - { famille: [gaston, nadia], replie: false, enfants: 1 }
       - { famille: [gerard, jeanne], replie: false, enfants: 2 }
       - { famille: [paul, mireille], replie: false, enfants: 1 }
-    liens:
+    liens_hors_foyers:
       - { nature: couple, de: [gaston], vers: nadia, trace: trait }
       - { nature: ailleurs, de: [gerard, jeanne], vers: mireille, trace: trait }

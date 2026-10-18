@@ -132,7 +132,7 @@ export const dispositionExpectedSchema = z.strictObject({
   /** Largeur du dessin, en fiches, au plus. */
   largeur_max: z.int().min(1).optional(),
   /** Liste complète des liens hors des foyers, sans ordre (T-019). */
-  liens: z.array(linkExpectationSchema).optional(),
+  liens_hors_foyers: z.array(linkExpectationSchema).optional(),
 });
 export type DispositionExpected = z.infer<typeof dispositionExpectedSchema>;
 
