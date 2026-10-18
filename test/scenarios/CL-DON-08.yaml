@@ -1,0 +1,56 @@
+# Noms générés. Une mère née après sa fille : alerte expliquée, qu'on peut passer outre (UNI-18),
+# jamais un refus. L'alerte ne part que lorsqu'elle est certaine au vu des étendues des dates,
+# marge des dates « vers » (5 ans) et « calculée » (2 ans) comprise (ADR 0011) : les variantes
+# rejouent la même filiation avec d'autres dates de naissance.
+# Reste : l'affichage de l'alerte et le choix de passer outre à la saisie (T-031, T-033).
+id: CL-DON-08
+titre: Mère plus jeune que sa fille
+couverture:
+  teste: [modele]
+  reste: [T-031, T-033]
+arbre:
+  personnes: [esso/F, kanga/F]
+  filiations:
+    - { parents: [esso], enfant: kanga }
+  faits:
+    - { personne: esso, type: naissance, date: { qualificatif: exacte, date: "1962-04-03" } }
+    - { personne: kanga, type: naissance, date: { qualificatif: exacte, date: "1958" } }
+attendu:
+  alertes:
+    - { code: parent_younger_than_child, severite: alerte, personnes: [esso, kanga] }
+  variantes:
+    # Née en 1955 au plus tôt : pas certainement plus jeune que sa fille, mais certainement âgée
+    # de moins de 12 ans à sa naissance.
+    - parent: { qualificatif: vers, date: "1960" }
+      enfant: { qualificatif: exacte, date: "1958" }
+      alertes: [parent_too_young]
+    # 12 ans tout juste : rien ; un jour de moins : l'alerte.
+    - parent: { qualificatif: exacte, date: "1946-05-10" }
+      enfant: { qualificatif: exacte, date: "1958-05-10" }
+      alertes: []
+    - parent: { qualificatif: exacte, date: "1946-05-11" }
+      enfant: { qualificatif: exacte, date: "1958-05-10" }
+      alertes: [parent_too_young]
+    # Calculée (« morte à 70 ans en 2032 ») : 1962 à 2 ans près, encore certainement trop tard.
+    - parent: { qualificatif: calculee, date: "1962" }
+      enfant: { qualificatif: exacte, date: "1958" }
+      alertes: [parent_younger_than_child]
+    # Deux ans d'écart : la marge de « vers » couvre le doute sur l'ordre, pas sur l'âge.
+    - parent: { qualificatif: vers, date: "1963" }
+      enfant: { qualificatif: exacte, date: "1961" }
+      alertes: [parent_too_young]
+    - parent: { qualificatif: vers, date: "1940" }
+      enfant: { qualificatif: exacte, date: "1958" }
+      alertes: []
+    - parent: { qualificatif: entre, de: "1955", a: "1965" }
+      enfant: { qualificatif: exacte, date: "1958" }
+      alertes: [parent_too_young]
+    - parent: { qualificatif: apres, date: "1960" }
+      enfant: { qualificatif: exacte, date: "1958" }
+      alertes: [parent_younger_than_child]
+    - parent: { qualificatif: avant, date: "1960" }
+      enfant: { qualificatif: exacte, date: "1958" }
+      alertes: []
+    - parent: { qualificatif: texte, texte: "l'année de la grande crue" }
+      enfant: { qualificatif: exacte, date: "1958" }
+      alertes: []

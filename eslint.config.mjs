@@ -1,5 +1,7 @@
 // Configuration ESLint plate, commune à tout le monorepo.
 // Chaque paquet lance `eslint .` depuis son dossier ; ESLint remonte jusqu'à ce fichier.
+import path from 'node:path';
+
 import { fixupPluginRules } from '@eslint/compat';
 import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
@@ -31,6 +33,165 @@ const nativeDialogTextSelectors = [
     message: nativeDialogMessage,
   },
 ];
+
+// Règles du code de packages/domain hors des tests. Une configuration par profondeur de dossier
+// sous src/ : un import relatif ne peut pas remonter au-dessus de src/.
+function domainSourceRules() {
+  const onlyZod = {
+    regex: '^(?!zod$|\\.{1,2}/)',
+    message: 'packages/domain ne dépend que de Zod (TRD, « Organisation du code »).',
+  };
+  const message = 'packages/domain : aucun import relatif hors de src/.';
+  const testSupport = {
+    regex: '(^|/)test-support(/|$)',
+    message: 'Le code de packages/domain n’importe pas ses outils de test (test-support).',
+  };
+  const globals = [
+    'process',
+    'Buffer',
+    'require',
+    'fetch',
+    'global',
+    '__dirname',
+    '__filename',
+  ].map((name) => ({
+    name,
+    message: `packages/domain ne dépend ni de Node ni du réseau (${name}).`,
+  }));
+  return [0, 1, 2, 3].map((depth) => ({
+    files: [`packages/domain/src/${'*/'.repeat(depth)}*.ts`],
+    ignores: ['packages/domain/src/**/*.test.ts', 'packages/domain/src/test-support/**'],
+    rules: {
+      'no-restricted-globals': ['error', ...globals],
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [onlyZod, testSupport, { regex: `^(\\.\\./){${String(depth + 1)},}`, message }],
+        },
+      ],
+    },
+  }));
+}
+
+// Règles du code de packages/layout hors des tests (T-008) : même discipline que packages/domain.
+// Seul @lignee/domain (sans ses outils de test) est importé ; ni Node, ni React, ni Skia, ni
+// réseau ; aucun import relatif hors de src/.
+function layoutSourceRules() {
+  const onlyDomain = {
+    regex: '^(?!@lignee/domain$|\\.{1,2}/)',
+    message: 'packages/layout ne dépend que de @lignee/domain (TRD, « Disposition de l’arbre »).',
+  };
+  const message = 'packages/layout : aucun import relatif hors de src/.';
+  const testSupport = {
+    regex: '(^|/)test-support(/|$)',
+    message: 'Le code de packages/layout n’importe pas d’outils de test (test-support).',
+  };
+  const globals = [
+    'process',
+    'Buffer',
+    'require',
+    'fetch',
+    'global',
+    '__dirname',
+    '__filename',
+  ].map((name) => ({
+    name,
+    message: `packages/layout ne dépend ni de Node ni du réseau (${name}).`,
+  }));
+  return [0, 1, 2, 3].map((depth) => ({
+    files: [`packages/layout/src/${'*/'.repeat(depth)}*.ts`],
+    ignores: ['packages/layout/src/**/*.test.ts', 'packages/layout/src/test-support/**'],
+    rules: {
+      'no-restricted-globals': ['error', ...globals],
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            onlyDomain,
+            testSupport,
+            { regex: `^(\\.\\./){${String(depth + 1)},}`, message },
+          ],
+        },
+      ],
+    },
+  }));
+}
+
+// Règles du code de packages/kinship hors des tests : le moteur de parenté tourne à l'identique
+// sur le téléphone et sur le serveur (TRD, « Moteur de parenté ») : il n'importe que
+// @lignee/domain (sans ses outils de test) et ses propres fichiers, sans Node ni réseau.
+function kinshipSourceRules() {
+  const onlyDomain = {
+    regex: '^(?!@lignee/domain$|\\.{1,2}/)',
+    message: 'packages/kinship ne dépend que de @lignee/domain (TRD, « Moteur de parenté »).',
+  };
+  const testSupport = {
+    regex: '(^|/)test-support(/|$)',
+    message: 'Le code de packages/kinship n’importe pas ses outils de test (test-support).',
+  };
+  const globals = [
+    'process',
+    'Buffer',
+    'require',
+    'fetch',
+    'global',
+    '__dirname',
+    '__filename',
+  ].map((name) => ({
+    name,
+    message: `packages/kinship ne dépend ni de Node ni du réseau (${name}).`,
+  }));
+  // Une seule configuration, à toute profondeur sous src/ : les imports relatifs sont résolus
+  // depuis le fichier par la règle locale `lignee/no-relative-import-outside`.
+  return [
+    {
+      files: ['packages/kinship/src/**/*.ts'],
+      ignores: ['packages/kinship/src/**/*.test.ts', 'packages/kinship/src/test-support/**'],
+      plugins: { lignee: localPlugin },
+      rules: {
+        'no-restricted-globals': ['error', ...globals],
+        'no-restricted-imports': ['error', { patterns: [onlyDomain, testSupport] }],
+        'lignee/no-relative-import-outside': ['error', 'packages/kinship/src'],
+      },
+    },
+  ];
+}
+
+// Règle locale : un import relatif (import, export … from, import()) ne doit pas sortir du
+// dossier donné (chemin depuis la racine du dépôt), quelle que soit la profondeur du fichier.
+const localPlugin = {
+  rules: {
+    'no-relative-import-outside': {
+      meta: {
+        type: 'problem',
+        schema: [{ type: 'string' }],
+        messages: { outside: 'Import relatif hors de {{root}} : {{source}}.' },
+      },
+      create(context) {
+        const relativeRoot = String(context.options[0]);
+        const root = path.resolve(import.meta.dirname, relativeRoot);
+        const check = (source) => {
+          if (source?.type !== 'Literal' || typeof source.value !== 'string') return;
+          if (!source.value.startsWith('.')) return;
+          const target = path.resolve(path.dirname(context.filename), source.value);
+          if (target !== root && !target.startsWith(root + path.sep)) {
+            context.report({
+              node: source,
+              messageId: 'outside',
+              data: { root: relativeRoot, source: source.value },
+            });
+          }
+        };
+        return {
+          ImportDeclaration: (node) => check(node.source),
+          ExportNamedDeclaration: (node) => check(node.source),
+          ExportAllDeclaration: (node) => check(node.source),
+          ImportExpression: (node) => check(node.source),
+        };
+      },
+    },
+  },
+};
 
 export default tseslint.config(
   {
@@ -73,6 +234,39 @@ export default tseslint.config(
     files: ['**/*.{js,mjs,cjs}'],
     ...tseslint.configs.disableTypeChecked,
   },
+
+  // Outils de test de packages/domain (générateur, scénarios) : ils lisent des fichiers avec
+  // Node et n'entrent jamais dans l'app ni dans le serveur. Importables par les seuls tests.
+  // Placé avant les règles de packages/domain, qui fixent leur propre `no-restricted-imports`
+  // (et y interdisent aussi test-support).
+  {
+    files: ['**/*.{ts,tsx,mts,cts}'],
+    ignores: ['**/*.test.{ts,tsx}', '**/test-support/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              regex: '^@lignee/domain/test-support(/|$)',
+              message: '@lignee/domain/test-support est réservé aux fichiers de test (*.test.ts).',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  // packages/domain est partagé par le téléphone et le serveur : Zod seul, ni Node, ni React,
+  // ni Expo, ni Prisma, ni réseau, et aucun fichier hors du paquet. Les tests et leurs aides
+  // (test-support) peuvent lire des fichiers. Types : tsconfig.src.json (sans types de Node).
+  ...domainSourceRules(),
+
+  // packages/layout tourne sur le téléphone et sur le serveur : @lignee/domain seul.
+  ...layoutSourceRules(),
+
+  // packages/kinship : @lignee/domain seul, ni Node, ni React, ni Prisma, ni réseau.
+  ...kinshipSourceRules(),
 
   // Accessibilité React Native : app mobile et composants de la charte (TRD, « Tests et qualité »).
   {

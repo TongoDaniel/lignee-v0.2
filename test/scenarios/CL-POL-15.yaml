@@ -1,0 +1,30 @@
+# Noms générés. Partie modèle (T-004) : une famille polygame où chaque fiche porte ses propres
+# noms s'enregistre et se valide. « Aucun nom recopié automatiquement » se joue là où un nom
+# pourrait être recopié : la saisie à la main (T-031) et le plan d'une dictée (T-062).
+id: CL-POL-15
+titre: Épouses qui gardent leur nom, enfants qui ne portent pas celui du père
+couverture:
+  teste: [modele]
+  reste: [T-031, T-062]
+arbre:
+  personnes: [samuel/M, rose/F, odile/F, joseph/M, comfort/F]
+  noms:
+    - { personne: samuel, type: naissance, prenoms: Samuel, nom: Ndembo }
+    - { personne: rose, type: naissance, prenoms: Rose, nom: Essaka }
+    - { personne: odile, type: naissance, prenoms: Odile, nom: Mbolang }
+    - { personne: joseph, type: naissance, prenoms: Joseph, nom: Tchoupa }
+    - { personne: comfort, type: naissance, prenoms: Comfort, nom: Ewondi }
+  unions:
+    - { conjoints: [samuel, rose], rang_samuel: 1, rang_rose: 1 }
+    - { conjoints: [samuel, odile], rang_samuel: 2, rang_odile: 1 }
+  filiations:
+    - { parents: [samuel, rose], enfant: joseph }
+    - { parents: [samuel, odile], enfant: comfort }
+attendu:
+  valide: true
+  noms_de_famille:
+    samuel: [Ndembo]
+    rose: [Essaka]
+    odile: [Mbolang]
+    joseph: [Tchoupa]
+    comfort: [Ewondi]

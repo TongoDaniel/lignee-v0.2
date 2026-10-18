@@ -1,0 +1,32 @@
+# 0013 — Générations et foyers : règles que le cahier ne fixe pas
+
+Date : 17 octobre 2026 · Statut : proposée (T-008)
+
+## Contexte
+
+T-008 calcule les étapes 1 et 2 de la disposition de l'arbre (TRD, « Disposition de l'arbre ») dans `packages/layout` : la rangée de chaque personne, puis les unités familiales (foyers d'une personne, colonne « parent non précisé »). Le cahier dit quoi obtenir (ARB-03, ARB-04, ARB-05, UNI-07, UNI-08, UNI-11) mais pas comment trancher dans plusieurs cas : dates et rang qui se contredisent, simultanéité inconnue, chemins de même longueur, qui porte un foyer, quel parent range un enfant, « mère » ou « père » non précisé.
+
+## Décision proposée
+
+1. **Rangée d'une personne atteinte par plusieurs chemins** (étape 1) : le TRD dit qu'elle « garde la rangée la plus proche ». Nous lisons « la plus proche » comme la rangée donnée par le **plus court chemin** (le moins de liens de filiation ou d'union depuis la personne centrale), c'est-à-dire celle que le parcours en largeur atteint d'abord. Le TRD ne dit rien de deux chemins **de même longueur** menant à des rangées différentes ; nous gardons alors la rangée la plus proche de la rangée 0, puis la plus haute. Dans les deux cas, l'autre lien devient un trait long (`crossLinks`, rôle `long`).
+2. **Ordre des foyers** (ARB-04, UNI-07) : les unions qu'une unité porte sont rangées entre elles, par le rang de la personne ; puis les unions dont le début est daté (date grégorienne, pas un texte libre) sont remises dans l'ordre de leur début, aux places qu'occupent des unions datées. Les dates l'emportent quand elles existent ; sans date, le rang saisi décide, et le changer réordonne les foyers. Un rang en double se départage par la date, puis l'identifiant. Une union portée par l'unité de l'autre conjoint (règle 5) n'entre pas dans cet ordre : elle ne déplace pas les places des unions datées.
+3. **Union terminée, simultanéité de deux unions** : une union est terminée (`status: 'ended'`) si une date de fin ou un motif de fin est saisi, **ou si l'un des conjoints a un fait de décès**, daté ou non : une union ne survit pas à un conjoint. La simultanéité est celle de `packages/domain` (`resolveSimultaneity`, ADR 0012) : les dates, décès des conjoints compris, puis la réponse gardée pour la paire d'unions. Tant que la question d'UNI-08 n'a pas de réponse, il faut quand même dessiner : deux unions toutes deux en cours (ni fin, ni motif de fin, ni conjoint décédé) sont montrées simultanées (ARB-03), sinon successives (ARB-04). Un veuf remarié sans aucune date n'est donc pas dessiné polygame. Ce repli ne sert qu'à l'affichage et n'est jamais enregistré. La question ouverte est signalée par personne, sur toutes ses unions : `simultaneityPending` sur son unité, et la liste `simultaneityPending` de la structure, qui compte aussi les personnes sans unité (une épouse dont les deux unions sont portées par ses maris).
+4. **Forme d'une unité**, d'après les seuls foyers qu'elle porte (une union portée ailleurs n'y est pas dessinée) : `single` (aucun foyer, seulement une colonne « non précisé »), `couple` (un foyer), `simultaneous` (au moins deux unions portées simultanées : demi-rangée des conjoints, ARB-03), `successive` sinon. Une personne dont l'une des deux unions est portée par son autre conjoint a donc une unité `couple`, et sa question de simultanéité reste signalée (règle 3).
+5. **Qui porte un foyer** : le conjoint qui a le plus d'unions ; à égalité, le plus proche de la personne centrale (chemin, puis rangée), puis l'identifiant. Aucune règle de genre (CL-POL-13, CL-POL-14). L'autre conjoint, s'il a sa propre unité, y voit ce foyer dans `foyersElsewhere` : chaque foyer n'est porté qu'une fois.
+6. **Quel lien range un enfant** : les parents de naissance ; à défaut adoptifs ; à défaut « a élevé », confié, tuteur ; à défaut donneur, gestation pour autrui. Les autres filiations restent des liens secondaires. Deux parents d'un même niveau : le foyer de leur union (l'union d'origine saisie s'ils en ont plusieurs) ; sans union enregistrée, un foyer `parents:<a>:<b>` rangé après les unions. Un seul parent : sa colonne « non précisé », même si la filiation porte une union d'origine (montrer l'enfant dans le foyer d'une épouse la désignerait comme mère).
+7. **« Mère », « père » ou « parent » non précisé** (ARB-05) : seulement pour un lien de naissance ; candidates toutes femmes : mère ; tous hommes : père ; sans candidat, d'après le parent connu (un homme : mère non précisée ; une femme : père non précisé) ; sinon « parent non précisé ». Hors naissance, toujours « parent ».
+8. **Foyers qui mènent à la personne centrale** (`leadsToCenter`) : ceux dont elle est un parent, et ceux de ses ascendants par les placements. C'est l'entrée du repli de T-012 (« foyers repliés hors du vôtre »), pas le repli lui-même.
+
+## Écarté
+
+- Le rang seul : un ordre saisi dans le désordre contredirait des dates connues (ARB-04, « ordre correct avec des dates »).
+- Les dates seules, avec le rang en départage : changer un rang ne réordonnerait plus rien dès qu'une date existe, et un tri mêlant unions datées et non datées ne serait pas un ordre total.
+- Ranger l'enfant au parent d'un seul côté dans le foyer de l'union d'origine : la disposition affirmerait une mère que le modèle ne connaît pas.
+- Déduire « mère » ou « père » pour l'adoption ou le confiage : aucune raison d'y supposer un genre.
+
+## Conséquences
+
+- T-012 ordonne les frères et sœurs (les enfants d'un foyer sont dans l'ordre d'arrivée), place et replie à partir de `TreeStructure`, et place l'union en cours au plus près de la personne (`status`).
+- T-017 traduit `missing` en « mère non précisée », « père non précisé », « parent non précisé » via `packages/i18n`.
+- Si la règle de simultanéité de `packages/domain` change (ADR 0012), la disposition suit sans changer elle-même ; seul le repli d'affichage de la règle 3 lui est propre.
+- **Pour T-052 (visibilité)** : la disposition ne voit que le graphe filtré, mais elle reconstitue des regroupements. Une union masquée dont les deux filiations restent visibles serait reconstituée en foyer `parents:<a>:<b>` (règle 6), ce qui laisse deviner le couple. T-052 doit propager le masquage d'une union à ses filiations, ou au moins à ce regroupement. De même, un parent masqué fait afficher l'enfant dans une colonne « mère non précisée » (règle 7) : le lecteur voit qu'un parent manque, sans savoir lequel ; T-052 et `gardien-confidentialite` doivent dire si cela est acceptable.

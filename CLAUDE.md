@@ -10,10 +10,10 @@
 - Secrets : jamais dans le dépôt. `.env` local, GitHub Actions, EAS, SOPS sur le serveur.
 - Agents spécialisés : `.claude/agents/`. Toute modification de `packages/domain` (visibilité), `packages/sync`, `apps/api` (droits, auth) ou du contexte envoyé à la voix passe par une relecture de `gardien-confidentialite`.
 
-## Comment Claude développe Lignée (ADR 0005)
+## Comment Claude développe Lignée (ADR 0005, modifiée par l'ADR 0019)
 
-- C'est Claude qui écrit le code ; Daniel décide, relit et fusionne. La session principale est le maître d'œuvre : elle ne code pas elle-même un ticket, elle le confie à l'agent du module.
+- C'est Claude qui écrit, relit et fusionne le code ; Daniel décide de ce qui est humain (voir plus bas) et peut annuler toute fusion. La session principale est le maître d'œuvre : elle ne code pas elle-même un ticket, elle le confie à l'agent du module.
 - Ordre de travail : les tickets GitHub dans l'ordre de `docs/plan/v1-decoupage.md` ; un ticket ne commence que si ses dépendances sont fusionnées.
-- Un ticket : branche `feat/T-0NN-<slug>` dans un worktree isolé → agent du module (`modele-domaine`, `moteur-parente`, `sync-hors-ligne`, `pipeline-vocal`, `api-serveur`, `ecrans-lignee`, `exploitation`, `testeur-qualite`), scénarios et tests d'abord → lint, types et tests lancés, sortie réelle rapportée → `relecteur-code`, et `gardien-confidentialite` si le ticket le demande → corrections → pull request avec le modèle rempli et le verdict des relecteurs.
-- Claude ne fusionne jamais, ne pousse jamais sur `main`, n'accepte jamais une ADR à la place de Daniel.
-- Ce que seul Daniel fait : fusionner, tester sur les téléphones physiques, ouvrir les comptes, signer, payer, saisir les secrets, voir le juriste, recruter les familles et les locuteurs. Quand un ticket en dépend, demandez-le-lui tôt et précisément.
+- Un ticket : branche `feat/T-0NN-<slug>` dans un worktree isolé → agent du module (`modele-domaine`, `moteur-parente`, `sync-hors-ligne`, `pipeline-vocal`, `api-serveur`, `ecrans-lignee`, `exploitation`, `testeur-qualite`), scénarios et tests d'abord → lint, types et tests lancés, sortie réelle rapportée → `relecteur-code`, et `gardien-confidentialite` si le ticket le demande → corrections → pull request avec le modèle rempli et le verdict des relecteurs → **fusion par la session principale** quand la CI est verte et les relecteurs disent « à fusionner » (squash ; merge commit pour une pile), puis ticket suivant sans attendre Daniel.
+- Claude ne pousse jamais directement sur `main` et ne fusionne jamais avec une CI rouge. Il accepte les ADR techniques ; les ADR de produit, de droit ou d'argent restent « proposées » pour Daniel.
+- Ce que seul Daniel fait : tester sur les téléphones physiques (ticket « À vérifier sur téléphone », non bloquant), ouvrir les comptes, signer, payer, saisir les secrets, voir le juriste, recruter les familles et les locuteurs. Quand un ticket en dépend, demandez-le-lui tôt et précisément.
