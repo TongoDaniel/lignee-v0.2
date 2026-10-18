@@ -70,8 +70,12 @@ describe.each(THEME_CASES)('Nœud de l’arbre ($scheme, mode Aînés : $seniorM
     expectReadableTexts(view, theme.scheme);
   });
 
-  it('un prénom long passe à la ligne au lieu d’être coupé', () => {
+  it('un prénom long passe à la ligne : le nœud garde sa largeur de 96 (ou la zone), sans hauteur fixe', () => {
     renderThemed(<TreeNode {...CLAIRE} name="Marie-Madeleine Ndongo-Bekolo" />, theme);
+    const wide = Math.max(metrics.treeNode.width, touchTargetFor(theme));
+    const bounded = screen.root.findAll((node) => flat(node.props.style).width === wide);
+    expect(bounded.length).toBeGreaterThan(0);
+    expect(flat(bounded[0]?.props.style).minWidth).toBeUndefined();
     expectScalable(screen.getByText('Marie-Madeleine Ndongo-Bekolo'));
   });
 
@@ -141,32 +145,32 @@ describe.each(THEME_CASES)('Nœud de l’arbre ($scheme, mode Aînés : $seniorM
     ).toBeOnTheScreen();
   });
 
-  it('place à compléter : ni lien, ni pastille, ni point de proposition', () => {
+  it('place à compléter : la ligne secondaire dit « À compléter » ; ni pastille ni point', () => {
     renderThemed(
       <TreeNode
         name="Mère"
         state="unknown"
-        relation="Maman"
+        relation="À compléter"
         health
-        probable
+        pendingProposal
         accessibilityLabel="Place à compléter"
         accessibilityHint="Ouvre l’ajout."
         testID="n"
       />,
       theme,
     );
-    expect(screen.queryByText('Maman')).toBeNull();
+    expect(screen.getByText('À compléter')).toBeOnTheScreen();
     expect(screen.queryByTestId('n-badge')).toBeNull();
     expect(screen.queryByTestId('n-pending')).toBeNull();
   });
 
-  it('lien probable : point `parente` en haut à droite, et le lien proposé', () => {
+  it('proposition en attente : point `parente` en haut à droite ; le lien probable reste dans `relation`', () => {
     renderThemed(
       <TreeNode
         {...CLAIRE}
         name="Samuel"
         relation="Peut-être son frère"
-        probable
+        pendingProposal
         accessibilityLabel="Samuel Bah, peut-être son frère, lien à confirmer"
         accessibilityHint="Ouvre la fiche."
       />,

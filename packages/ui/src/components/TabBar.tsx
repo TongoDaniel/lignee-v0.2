@@ -110,7 +110,9 @@ export function TabBar({ items, activeKey, onSelect, bottomInset = 0, testID }: 
           item={item}
           focused={item.key === activeKey}
           onPress={() => {
-            if (item.key !== activeKey) onSelect(item.key);
+            // Toujours relayé, même pour l'onglet courant : la navigation en fait un retour en
+            // haut ou à la racine de la pile (événement `tabPress`).
+            onSelect(item.key);
           }}
         />
       ))}

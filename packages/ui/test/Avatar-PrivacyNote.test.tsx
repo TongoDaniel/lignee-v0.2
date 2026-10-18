@@ -1,6 +1,6 @@
 // Avatar et Mention de confidentialité : teintes Jour et Nuit lisibles, neutre, « Vous », photo et
 // repli sur l'initiale, lecteur d'écran, texte agrandi.
-import { configure, fireEvent, screen } from '@testing-library/react-native';
+import { configure, fireEvent, render, screen } from '@testing-library/react-native';
 import { Image } from 'react-native';
 
 import { Avatar, AVATAR_SIZES } from '../src/components/Avatar';
@@ -8,6 +8,7 @@ import { avatarTintColors, avatarTintFromBirthName } from '../src/components/ava
 import { metrics } from '../src/components/metrics';
 import { PrivacyNote } from '../src/components/PrivacyNote';
 import { iconShapes } from '../src/icons/icons.generated';
+import { ThemeProvider } from '../src/theme/ThemeProvider';
 import { size, themes } from '../src/tokens';
 import {
   expectReadableTexts,
@@ -187,5 +188,27 @@ describe.each(THEME_CASES)('Mention privée ($scheme, mode Aînés : $seniorMode
       theme,
     );
     expectScalableTexts(view);
+  });
+});
+
+describe('Avatar : changement de photo après un échec', () => {
+  it('réessaie la nouvelle photo quand l’adresse change', () => {
+    const first = { ...CLAIRE, photoUri: 'https://exemple.test/a.jpg' };
+    const second = { ...CLAIRE, photoUri: 'https://exemple.test/b.jpg' };
+    const view = render(
+      <ThemeProvider scheme="jour" reduceMotion>
+        <Avatar person={first} testID="a" />
+      </ThemeProvider>,
+    );
+    fireEvent(screen.getByTestId('a').findByType(Image), 'error');
+    expect(screen.getByText('C')).toBeOnTheScreen();
+    view.rerender(
+      <ThemeProvider scheme="jour" reduceMotion>
+        <Avatar person={second} testID="a" />
+      </ThemeProvider>,
+    );
+    expect(screen.getByTestId('a').findByType(Image).props.source).toEqual({
+      uri: 'https://exemple.test/b.jpg',
+    });
   });
 });

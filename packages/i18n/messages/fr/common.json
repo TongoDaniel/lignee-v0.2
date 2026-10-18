@@ -101,7 +101,6 @@
       "sendInvite": "Envoyer l’invitation",
       "addMotherHint": "Ouvre une fiche à remplir.",
       "mom": "Maman",
-      "father": "Papa",
       "sister": "Sœur",
       "motherNodeLabel": "Claire Martin, votre mère, née en 1968",
       "deceasedYears": "1931 – 2019",
@@ -123,7 +122,8 @@
       "tabsHint": "Affiche cette rubrique de la fiche.",
       "notificationTitle": "Odette a ajouté une photo",
       "notificationText": "Ouvrez Lignée pour la voir.",
-      "notificationTime": "Maintenant"
+      "notificationTime": "Maintenant",
+      "unknownRelation": "À compléter"
     },
     "backHint": "Revient à l’écran précédent."
   }

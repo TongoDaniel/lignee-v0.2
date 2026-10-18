@@ -27,8 +27,11 @@ export function MainTabBar({ state, navigation, insets }: BottomTabBarProps) {
   const onSelect = (key: string): void => {
     const route = state.routes.find((candidate) => candidate.key === key);
     if (route === undefined) return;
+    const focused = state.routes[state.index]?.key === key;
+    // `tabPress` part toujours, même sur l'onglet ouvert : les écrans s'en servent pour revenir en
+    // haut ou à la racine de leur pile. On ne navigue que si l'onglet n'est pas déjà ouvert.
     const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
-    if (!event.defaultPrevented) navigation.navigate(route.name, route.params);
+    if (!focused && !event.defaultPrevented) navigation.navigate(route.name, route.params);
   };
 
   return (

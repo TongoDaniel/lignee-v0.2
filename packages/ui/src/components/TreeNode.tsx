@@ -20,7 +20,7 @@ const LONG_PRESS_ACTION = 'longpress';
 
 export type TreeNodeState = 'normal' | 'path' | 'faded' | 'birthday' | 'unknown';
 
-export interface TreeNodeProps {
+interface TreeNodeBaseProps {
   /** La personne ; absente pour « Vous » et pour une place à compléter. */
   readonly person?: AvatarPerson;
   /** Prénom affiché sous l'avatar (« Claire », « Vous »). Pour une place à compléter : la place (« Mère »). */
@@ -32,10 +32,10 @@ export interface TreeNodeProps {
   /** Années de vie (« 1931 – 2019 ») d'une personne décédée : à la place du lien. */
   readonly years?: string;
   /**
-   * Lien probable, proposé et pas encore confirmé (« Peut-être son frère ») : même emplacement que
-   * `relation`, avec le point `parente` des propositions en attente.
+   * Proposition en attente (06-arbre.md) : petit point `parente` en haut à droite de l'avatar.
+   * Un lien probable (« Peut-être son frère ») se dit dans `relation`, pas ici.
    */
-  readonly probable?: boolean;
+  readonly pendingProposal?: boolean;
   readonly state?: TreeNodeState;
   /** Calque santé actif : tous les avatars passent en neutre. */
   readonly neutral?: boolean;
@@ -48,12 +48,19 @@ export interface TreeNodeProps {
   readonly accessibilityHint?: string;
   /** Ouvre la fiche (ou l'ajout, pour une place à compléter). */
   readonly onPress?: () => void;
-  /** Appui long : affiche le chemin de parenté. */
-  readonly onLongPress?: () => void;
-  /** Nom de l'action d'appui long pour le lecteur d'écran (« Voir le lien de parenté »). */
-  readonly longPressLabel?: string;
   readonly testID?: string;
 }
+
+export type TreeNodeProps = TreeNodeBaseProps & LongPressProps;
+
+/** Appui long (affiche le chemin de parenté) : toujours avec le nom de son action pour le lecteur d'écran. */
+type LongPressProps =
+  | { readonly onLongPress?: undefined; readonly longPressLabel?: undefined }
+  | {
+      readonly onLongPress: () => void;
+      /** Nom de l'action d'accessibilité (« Voir le lien de parenté »), déjà traduit. */
+      readonly longPressLabel: string;
+    };
 
 /** Anneau d'anniversaire : il respire, ou reste fixe quand les animations sont réduites. */
 function useBreathing(active: boolean, reduceMotion: boolean): Animated.Value {
@@ -88,7 +95,7 @@ export function TreeNode({
   you = false,
   relation,
   years,
-  probable = false,
+  pendingProposal = false,
   state = 'normal',
   neutral = false,
   health = false,
@@ -111,7 +118,8 @@ export function TreeNode({
   const unknown = state === 'unknown';
   const ringColor =
     state === 'path' ? colors.chemin : state === 'birthday' ? colors.fete : undefined;
-  const secondary = years ?? relation;
+  // Place à compléter : la ligne secondaire dit l'invitation (« À compléter »).
+  const secondary = unknown ? relation : (years ?? relation);
   const interactive = onPress !== undefined || onLongPress !== undefined;
 
   const nameStyle = {
@@ -125,7 +133,7 @@ export function TreeNode({
       style={[
         styles.node,
         {
-          minWidth: Math.max(metrics.treeNode.width, touchTarget),
+          width: Math.max(metrics.treeNode.width, touchTarget),
           minHeight: touchTarget,
           gap: metrics.treeNode.gap,
         },
@@ -206,7 +214,7 @@ export function TreeNode({
             />
           </View>
         )}
-        {probable && !unknown && (
+        {pendingProposal && !unknown && (
           <View
             testID={testID === undefined ? undefined : `${testID}-pending`}
             style={[
@@ -226,7 +234,7 @@ export function TreeNode({
         )}
       </View>
       <Text style={[nameStyle, styles.text]}>{name}</Text>
-      {secondary !== undefined && !unknown && (
+      {secondary !== undefined && (
         <Text
           style={[
             typography.legende,
@@ -255,7 +263,7 @@ export function TreeNode({
     );
   }
 
-  const withLongPressAction = onLongPress !== undefined && longPressLabel !== undefined;
+  const withLongPressAction = onLongPress !== undefined;
   return (
     <Pressable
       testID={testID}

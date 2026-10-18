@@ -315,7 +315,7 @@ function Catalog({
                 person={PEOPLE.samuel}
                 name={PEOPLE.samuel.firstName}
                 relation={t('common:catalog.samples.probableRelation')}
-                probable
+                pendingProposal
                 accessibilityLabel={t('common:catalog.samples.probableNodeLabel')}
                 accessibilityHint={t('common:catalog.samples.openProfileHint')}
                 onPress={noop}
@@ -323,7 +323,7 @@ function Catalog({
               <TreeNode
                 person={PEOPLE.moussa}
                 name={PEOPLE.moussa.firstName}
-                relation={t('common:catalog.samples.father')}
+                relation={t('common:catalog.samples.dad')}
                 neutral
                 health
                 accessibilityLabel={t('common:catalog.samples.healthNodeLabel')}
@@ -332,6 +332,7 @@ function Catalog({
               />
               <TreeNode
                 name={t('common:catalog.samples.unknownPlace')}
+                relation={t('common:catalog.samples.unknownRelation')}
                 state="unknown"
                 accessibilityLabel={t('common:catalog.samples.unknownNodeLabel')}
                 accessibilityHint={t('common:catalog.samples.addMotherHint')}
@@ -340,7 +341,7 @@ function Catalog({
               <TreeNode
                 person={PEOPLE.jean}
                 name={PEOPLE.jean.firstName}
-                relation={t('common:catalog.samples.father')}
+                relation={t('common:catalog.samples.dad')}
                 state="faded"
                 accessibilityLabel={t('common:catalog.samples.fadedNodeLabel')}
                 accessibilityHint={t('common:catalog.samples.openProfileHint')}

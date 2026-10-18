@@ -101,7 +101,6 @@
       "sendInvite": "Send the invitation",
       "addMotherHint": "Opens a profile to fill in.",
       "mom": "Mom",
-      "father": "Dad",
       "sister": "Sister",
       "motherNodeLabel": "Claire Martin, your mother, born in 1968",
       "deceasedYears": "1931 – 2019",
@@ -123,7 +122,8 @@
       "tabsHint": "Shows this section of the profile.",
       "notificationTitle": "Odette added a photo",
       "notificationText": "Open Lignée to see it.",
-      "notificationTime": "Now"
+      "notificationTime": "Now",
+      "unknownRelation": "To complete"
     },
     "backHint": "Returns to the previous screen."
   }

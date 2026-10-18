@@ -31,7 +31,6 @@ export interface MessageParams {
   'common:catalog.samples.dictateFirstName': null;
   'common:catalog.samples.enabled': null;
   'common:catalog.samples.fadedNodeLabel': null;
-  'common:catalog.samples.father': null;
   'common:catalog.samples.firstName': null;
   'common:catalog.samples.firstNameError': null;
   'common:catalog.samples.firstNamePlaceholder': null;
@@ -67,6 +66,7 @@ export interface MessageParams {
   'common:catalog.samples.toConfirm': null;
   'common:catalog.samples.unknownNodeLabel': null;
   'common:catalog.samples.unknownPlace': null;
+  'common:catalog.samples.unknownRelation': null;
   'common:catalog.samples.you': null;
   'common:catalog.samples.youNodeLabel': null;
   'common:catalog.sections.buttons': null;

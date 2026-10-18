@@ -58,6 +58,10 @@ function initialOf(firstName: string): string {
   return first === undefined ? '' : first.toLocaleUpperCase();
 }
 
+/**
+ * Dégradé doré de « Vous » : `or-500` vers `or-700` de la palette. bundle.css écrit #F8CB66 vers
+ * #D18A22 en clair, hors palette ; on reste sur les tokens (écart de teinte à peine visible).
+ */
 function YouAvatar({ diameter }: { readonly diameter: number }) {
   const { silhouette } = metrics.avatar;
   const radius = diameter / 2;
@@ -98,7 +102,8 @@ export function Avatar({
   testID,
 }: AvatarProps) {
   const { colors, typography } = useTheme();
-  const [photoFailed, setPhotoFailed] = useState(false);
+  // Une photo qui échoue est retenue avec son adresse : changer de photo repart de zéro.
+  const [failedUri, setFailedUri] = useState<string | undefined>(undefined);
   const diameter = AVATAR_SIZES[size];
   const a11y =
     accessibilityLabel === undefined
@@ -119,7 +124,7 @@ export function Avatar({
   }
 
   const photoUri = person?.photoUri;
-  const showPhoto = photoUri !== undefined && !photoFailed && !neutral;
+  const showPhoto = photoUri !== undefined && failedUri !== photoUri && !neutral;
   const tinted = avatarTintColors(
     tint ?? (person === undefined ? 'green' : defaultAvatarTintRule(person)),
     colors,
@@ -146,7 +151,7 @@ export function Avatar({
           // Une photo de visage ne s'inverse pas en mode sombre forcé.
           accessibilityIgnoresInvertColors
           onError={() => {
-            setPhotoFailed(true);
+            setFailedUri(photoUri);
           }}
           style={frame}
         />

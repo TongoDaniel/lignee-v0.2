@@ -86,9 +86,6 @@
   "common:catalog.samples.fadedNodeLabel": {
     "status": "to-review"
   },
-  "common:catalog.samples.father": {
-    "status": "to-review"
-  },
   "common:catalog.samples.firstName": {
     "status": "to-review"
   },
@@ -192,6 +189,9 @@
     "status": "to-review"
   },
   "common:catalog.samples.unknownPlace": {
+    "status": "to-review"
+  },
+  "common:catalog.samples.unknownRelation": {
     "status": "to-review"
   },
   "common:catalog.samples.you": {

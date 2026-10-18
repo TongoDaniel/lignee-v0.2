@@ -227,13 +227,13 @@ describe.each(THEME_CASES)('Barre d’onglets ($scheme, mode Aînés : $seniorMo
     }
   });
 
-  it('relaie le toucher d’un autre onglet, pas celui de l’onglet courant', () => {
+  it('relaie le toucher de chaque onglet, y compris l’onglet courant (retour en haut)', () => {
     const onSelect = jest.fn();
     renderThemed(<TabBar items={TAB_ITEMS} activeKey="tree" onSelect={onSelect} />, theme);
     fireEvent.press(screen.getByTestId('tab-tree'));
-    expect(onSelect).not.toHaveBeenCalled();
+    expect(onSelect).toHaveBeenLastCalledWith('tree');
     fireEvent.press(screen.getByTestId('tab-family'));
-    expect(onSelect).toHaveBeenCalledWith('family');
+    expect(onSelect).toHaveBeenLastCalledWith('family');
   });
 
   it('texte lisible sur `fond-carte`', () => {
