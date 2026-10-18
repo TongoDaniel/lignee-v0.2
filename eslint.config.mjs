@@ -13,6 +13,39 @@ import tseslint from 'typescript-eslint';
 const reactNativeA11yPlugin = fixupPluginRules(reactNativeA11y);
 const jsxA11yPlugin = fixupPluginRules(jsxA11y);
 
+// Règles du code de packages/domain hors des tests. Une configuration par profondeur de dossier
+// sous src/ : un import relatif ne peut pas remonter au-dessus de src/.
+function domainSourceRules() {
+  const onlyZod = {
+    regex: '^(?!zod$|\\.{1,2}/)',
+    message: 'packages/domain ne dépend que de Zod (TRD, « Organisation du code »).',
+  };
+  const message = 'packages/domain : aucun import relatif hors de src/.';
+  const globals = [
+    'process',
+    'Buffer',
+    'require',
+    'fetch',
+    'global',
+    '__dirname',
+    '__filename',
+  ].map((name) => ({
+    name,
+    message: `packages/domain ne dépend ni de Node ni du réseau (${name}).`,
+  }));
+  return [0, 1, 2, 3].map((depth) => ({
+    files: [`packages/domain/src/${'*/'.repeat(depth)}*.ts`],
+    ignores: ['packages/domain/src/**/*.test.ts', 'packages/domain/src/test-support/**'],
+    rules: {
+      'no-restricted-globals': ['error', ...globals],
+      'no-restricted-imports': [
+        'error',
+        { patterns: [onlyZod, { regex: `^(\\.\\./){${String(depth + 1)},}`, message }] },
+      ],
+    },
+  }));
+}
+
 export default tseslint.config(
   {
     ignores: [
@@ -49,6 +82,11 @@ export default tseslint.config(
     files: ['**/*.{js,mjs,cjs}'],
     ...tseslint.configs.disableTypeChecked,
   },
+
+  // packages/domain est partagé par le téléphone et le serveur : Zod seul, ni Node, ni React,
+  // ni Expo, ni Prisma, ni réseau, et aucun fichier hors du paquet. Les tests et leurs aides
+  // (test-support) peuvent lire des fichiers. Types : tsconfig.src.json (sans types de Node).
+  ...domainSourceRules(),
 
   // Accessibilité React Native : app mobile et composants de la charte (TRD, « Tests et qualité »).
   {

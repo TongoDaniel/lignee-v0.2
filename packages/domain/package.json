@@ -8,12 +8,18 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit -p tsconfig.src.json && tsc --noEmit",
     "test": "vitest run"
   },
   "devDependencies": {
+    "@types/node": "catalog:",
     "eslint": "catalog:",
+    "fast-check": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "yaml": "catalog:"
+  },
+  "dependencies": {
+    "zod": "catalog:"
   }
 }
