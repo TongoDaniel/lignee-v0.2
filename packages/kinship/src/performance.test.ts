@@ -205,14 +205,21 @@ describe('PAR-01 : temps de réponse du moteur', () => {
 
     // Fratrie de chaque enfant (T-020) : 4 frères et sœurs par la même mère, 35 demi par le père.
     let siblings: ReturnType<typeof siblingsOf> = [];
-    const siblingTimes = children.map((childPerson) =>
-      measure(() => {
-        siblings = siblingsOf(graph, childPerson.id);
-      }),
+    const siblingTimes = children.map(
+      (childPerson) =>
+        medianTime(
+          () => {
+            siblings = siblingsOf(graph, childPerson.id);
+          },
+          { warmup: 0, runs: 1 },
+        ).medianMs,
     );
-    const siblingMax = Math.max(...siblingTimes);
-    console.info(`T-020, fratrie de chacun des 40 enfants : max ${siblingMax.toFixed(2)} ms`);
-    expect(siblingMax).toBeLessThan(PAR_01_BUDGET_MS);
+    const siblingReport = reportBudget(
+      'T-020, fratrie de chacun des 40 enfants (max)',
+      Math.max(...siblingTimes),
+      PAR_01_BUDGET_MS,
+    );
+    expect(siblingReport.measuredMs).toBeLessThan(siblingReport.ceilingMs);
     const kinds = siblings.map((link) =>
       link.kind === 'sibling' ? `${link.sharing}/${link.side ?? '-'}` : 'step',
     );
