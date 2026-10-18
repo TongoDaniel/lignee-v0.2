@@ -350,6 +350,33 @@ describe('le format refuse ce qui est mal formé', () => {
     ).toThrow(/own parent/);
   });
 
+  it('préciser refuse une union d’une personne avec elle-même et une union en double', () => {
+    const tree = buildScenarioTree(
+      scenarioTreeSchema.parse({
+        personnes: ['jules/M', 'irene/F', 'x/F', 'y/F', 'bruno/M'],
+        a_completer: ['x', 'y'],
+        unions: [
+          { conjoints: ['jules', 'irene'] },
+          { conjoints: ['jules', 'x'] },
+          { conjoints: ['irene', 'y'] },
+        ],
+        filiations: [{ parents: ['jules', 'x'], enfant: 'bruno' }],
+      }),
+    );
+    expect(treeDataIssues(tree.data)).toEqual([]);
+    // x épouse de Jules, précisée comme Irène, déjà épouse de Jules : doublon.
+    expect(() =>
+      applyExpectedPlan(tree, [{ preciser: { place: 'x', personne: 'irene' } }]),
+    ).toThrow(/Duplicate union/);
+    // y épouse d'Irène, précisée comme Irène : union d'Irène avec elle-même.
+    expect(() =>
+      applyExpectedPlan(tree, [{ preciser: { place: 'y', personne: 'irene' } }]),
+    ).toThrow(/themselves/);
+    // Sans conflit : l'union de x passe à la personne.
+    const after = applyExpectedPlan(tree, [{ preciser: { place: 'x', personne: 'y' } }]);
+    expect(treeDataIssues(after.data)).toEqual([]);
+  });
+
   it('des dictées successives (etapes) : une forme de dictée et un attendu par étape', () => {
     const steps = {
       id: 'CL-POL-03',

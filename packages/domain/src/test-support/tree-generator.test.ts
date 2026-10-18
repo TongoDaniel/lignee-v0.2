@@ -92,6 +92,7 @@ function observeStructures(data: TreeData) {
     multipleBirths: data.multipleBirths.length,
     hidden: data.visibilityRules.filter((rule) => rule.level !== 'tree').length,
     toPlace: data.toPlace.length,
+    distinct: data.people.filter((person) => person.distinctFrom !== undefined).length,
   };
 }
 
@@ -106,6 +107,7 @@ function expectAnnouncedStructures(data: TreeData, features: TreeFeatures) {
   expect(seen.multipleBirths).toBe(features.multipleBirths);
   expect(seen.hidden).toBe(features.hiddenObjects);
   expect(seen.toPlace).toBe(features.toPlace);
+  expect(seen.distinct).toBe(features.distinctPlaceholders);
   expect(seen.sororate).toBeGreaterThanOrEqual(features.sororate);
   expect(seen.polygamous).toBeGreaterThanOrEqual(features.polygamousPeople);
 }
@@ -193,6 +195,7 @@ describe('arbres types de 100, 1 000 et 5 000 personnes', () => {
       expect(features.unknownParentChildren).toBeGreaterThan(0);
       expect(features.hiddenObjects).toBeGreaterThan(0);
       if (size >= 1000) {
+        expect(features.distinctPlaceholders).toBeGreaterThan(0);
         expect(features.levirate).toBeGreaterThan(0);
         expect(features.sororate).toBeGreaterThan(0);
         expect(features.implex).toBeGreaterThan(0);

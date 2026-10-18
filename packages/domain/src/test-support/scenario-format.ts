@@ -247,8 +247,9 @@ export function readScenarioFile(id: string): ScenarioFile {
  * Remplace une place à compléter par la personne qu'elle était (pas `preciser` d'un plan) : ses
  * filiations, unions et candidatures passent à `personId`, la place disparaît. Une filiation qui
  * ferait double emploi (même parent, même enfant, même type) n'est pas recopiée. Refuse une place
- * qui n'est pas à compléter, une place citée ailleurs (faits, titres, naissances multiples) et une
- * filiation d'une personne vers elle-même.
+ * qui n'est pas à compléter, une place citée ailleurs (faits, titres, naissances multiples), une
+ * filiation ou une union d'une personne avec elle-même, et deux unions de la personne avec le même
+ * conjoint.
  */
 function precisePlaceholder(data: TreeData, placeId: Id, personId: Id): void {
   const place = data.people.find((person) => person.id === placeId);
@@ -289,6 +290,19 @@ function precisePlaceholder(data: TreeData, placeId: Id, personId: Id): void {
       { ...union.spouses[1], personId: swap(union.spouses[1].personId) },
     ],
   }));
+  // Une union de la place avec la personne deviendrait une union d'une personne avec elle-même ;
+  // deux unions avec le même conjoint seraient un doublon que le plan ne dit pas comment fondre
+  // (rangs, dates) : refusés, le scénario doit écrire la fusion voulue.
+  const pairs = new Set<string>();
+  for (const union of data.unions) {
+    const [first, second] = union.spouses.map((spouse) => spouse.personId).sort();
+    if (first === second) throw new Error('A union cannot join a person with themselves');
+    if (!union.spouses.some((spouse) => spouse.personId === personId)) continue;
+    const key = `${String(first)}|${String(second)}`;
+    if (pairs.has(key))
+      throw new Error(`Duplicate union between ${String(first)} and ${String(second)}`);
+    pairs.add(key);
+  }
   data.parentCandidates = data.parentCandidates.map((candidate) => ({
     ...candidate,
     childId: swap(candidate.childId),
