@@ -1,0 +1,61 @@
+# Noms générés. André meurt ; sa veuve Wanda épouse son frère Benoît, déjà marié à Claire et qui le
+# reste (lévirat). W1 est né d'André et de Wanda, W2 de Benoît et de Wanda, C1 de Benoît et de
+# Claire. Arbre identique à celui de la partie disposition (T-012, branche
+# feat/T-012-ordre-placement-repli) : à la fusion des deux branches, réunir `teste`, `action` et
+# `attendu` dans ce fichier.
+# Partie lien (T-022) : chaque lien attendu (le principal, puis « aussi », dans l'ordre) est
+# ramené à sa structure et comparé à la présentation calculée (`presentRelationships`). W1 et W2
+# sont demi-frères par leur mère et cousins par leurs pères (UNI-21, PAR-05) ; pour C1, W2 est
+# son demi-frère par leur père, et aussi le fils de l'épouse de son oncle André ; W1 est sa
+# cousine, et aussi la fille de l'épouse de son père. Les deux sens sont vérifiés. Reste : les mots en français et en anglais (T-026, T-027).
+id: CL-POL-09
+titre: Lévirat, la veuve épouse le frère du défunt, déjà marié
+couverture:
+  teste: [lien]
+  reste: [T-026, T-027]
+arbre:
+  personnes: [pa/M, andre/M, wanda/F, benoit/M, claire/F, w1/F, w2/M, c1/F]
+  unions:
+    - conjoints: [andre, wanda]
+      debut: { qualificatif: exacte, date: "1985" }
+      fin: { qualificatif: exacte, date: "1995" }
+      motif: deces
+    - { conjoints: [benoit, claire], rang_benoit: 1, debut: { qualificatif: exacte, date: "1980" } }
+    - { conjoints: [benoit, wanda], rang_benoit: 2, debut: { qualificatif: exacte, date: "1997" } }
+  filiations:
+    - { parents: [pa], enfant: andre }
+    - { parents: [pa], enfant: benoit }
+    - { parents: [andre, wanda], enfant: w1 }
+    - { parents: [benoit, wanda], enfant: w2 }
+    - { parents: [benoit, claire], enfant: c1 }
+  simultaneites:
+    - unions: [[benoit, claire], [benoit, wanda]]
+      reponse: simultanees
+  faits:
+    - { personne: andre, type: deces, date: { qualificatif: exacte, date: "1995" } }
+attendu:
+  liens:
+    - de: w2
+      vers: w1
+      fr: "demi-sœur, même mère"
+      en: "half-sister, same mother"
+      aussi:
+        - { fr: "cousine par votre père", en: "cousin through your father" }
+    - de: w1
+      vers: w2
+      fr: "demi-frère, même mère"
+      en: "half-brother, same mother"
+      aussi:
+        - { fr: "cousin par votre père", en: "cousin through your father" }
+    - de: c1
+      vers: w2
+      fr: "demi-frère, même père"
+      en: "half-brother, same father"
+      aussi:
+        - { fr: "fils de l'épouse de votre oncle", en: "son of your uncle's wife" }
+    - de: c1
+      vers: w1
+      fr: "cousine par votre père"
+      en: "cousin through your father"
+      aussi:
+        - { fr: "fille de l'épouse de votre père", en: "daughter of your father's wife" }
