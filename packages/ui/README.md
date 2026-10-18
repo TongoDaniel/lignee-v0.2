@@ -20,7 +20,7 @@ Dans un écran, n'écrivez jamais une couleur, une taille ou un rayon : importez
 
 ## Composants de base (T-014)
 
-Noms et props en anglais (ADR 0016, `docs/adr/0016-noms-des-composants-en-anglais.md`) :
+Noms et props en anglais (ADR 0018, `docs/adr/0018-noms-des-composants-en-anglais.md`) :
 
 | Charte | Composant |
 | --- | --- |

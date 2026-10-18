@@ -1,4 +1,4 @@
-# 0016 — Noms et props des composants de la charte en anglais
+# 0018 — Noms et props des composants de la charte en anglais
 
 Date : 17 octobre 2026 · Statut : proposée (T-014)
 

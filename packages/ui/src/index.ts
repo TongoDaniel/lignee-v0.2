@@ -1,6 +1,6 @@
 // Point d'entrée de @lignee/ui : tokens de la charte (générés), thème, contraste, et composants de
 // base de la charte (T-014). Les composants de personne et de navigation arrivent avec T-015.
-// Correspondance avec les noms de la charte : docs/adr/0016-noms-des-composants-en-anglais.md.
+// Correspondance avec les noms de la charte : docs/adr/0018-noms-des-composants-en-anglais.md.
 export * from './tokens';
 export * from './theme';
 export * from './contrast';
