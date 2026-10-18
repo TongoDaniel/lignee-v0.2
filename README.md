@@ -59,6 +59,16 @@ corepack pnpm check:forbidden-dependencies  # CON-12 : aucune bibliothèque de r
 
 Pour un seul paquet : `corepack pnpm --filter @lignee/kinship test`.
 
+### Tests de performance
+
+Les budgets de temps du cahier des charges (TRD, « Performance et appareils cibles » ; par exemple 100 ms de disposition pour 500 personnes visibles, PAR-01) visent l'Android de référence et y sont vérifiés (T-028, T-105). Dans Vitest, sur un poste ou un runner partagé, un test de temps n'est qu'un garde-fou contre une régression grossière. Règle commune, outillée par `@lignee/domain/test-support` (`medianTime`, `reportBudget`) :
+
+- chauffe d'abord, puis médiane de plusieurs exécutions, jamais une mesure unique ;
+- plafond = budget × facteur : 3 en CI (variable `CI`), 1,5 sur un poste ; `LIGNEE_PERF_FACTOR` le remplace (par exemple `LIGNEE_PERF_FACTOR=1 corepack pnpm test` pour comparer au budget brut) ;
+- chaque mesure est écrite dans la sortie du test avec le budget et le plafond (lignes `[perf]`), pour suivre la tendance d'un build à l'autre.
+
+Les budgets eux-mêmes ne changent pas pour faire passer la CI ; seul le facteur absorbe la lenteur des runners.
+
 Textes d'interface : jamais en dur (ACC-04). ESLint refuse le texte dans le JSX de `apps/mobile`, `apps/web`, `apps/admin` et `packages/ui` (règle `i18next/no-literal-string`) ; pour ajouter un texte, voir [packages/i18n/README.md](packages/i18n/README.md).
 
 ### Environnement local

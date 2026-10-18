@@ -33,6 +33,7 @@ import type { Gender } from '../person';
 import { treeArbitrary } from '../test-support/arbitraries';
 import { fuzzyDateArbitrary } from '../test-support/fuzzy-date-arbitrary';
 import { treeDataIssues, type TreeData } from '../test-support/tree-data';
+import { medianTime, reportBudget } from '../test-support/timing';
 import { generateTree, referenceTree } from '../test-support/tree-generator';
 import type { Union, UnionSimultaneity } from '../union';
 import {
@@ -509,30 +510,41 @@ describe('présumée vivante sur des dates générées', () => {
 });
 
 describe('performance sur l’arbre type de 5 000 personnes', () => {
-  // Budget large pour la CI ; la mesure réelle est affichée et reportée dans le README.
+  // Budget du test (le TRD ne chiffre pas ce contrôle) ; garde-fou budget × facteur et mesures
+  // écrites dans la sortie (README racine, « Tests de performance »).
   const BUDGET_MS = 2000;
 
-  it(`contrôle complet, questions, présumée vivante et 100 saisies en moins de ${String(BUDGET_MS)} ms chacun`, () => {
+  it(`contrôle complet, questions, présumée vivante et 100 saisies en moins de ${String(BUDGET_MS)} ms chacun (garde-fou × facteur)`, () => {
     const tree = referenceTree(5000);
-    const time = <T>(run: () => T): [T, number] => {
-      const started = performance.now();
-      const result = run();
-      return [result, performance.now() - started];
-    };
-    const [issues, full] = time(() =>
-      findCoherenceIssues(tree, { today: { year: 2026, month: 10, day: 16 } }),
-    );
-    const [questions, asking] = time(() => simultaneityQuestions(tree));
-    const [statuses, living] = time(() =>
-      assessVitalStatuses(tree, { year: 2026, month: 10, day: 16 }),
-    );
-    const [, entries] = time(() => {
+    const today = { year: 2026, month: 10, day: 16 };
+    // Premier passage : les résultats vérifiés, et la chauffe des mesures.
+    const issues = findCoherenceIssues(tree, { today });
+    const questions = simultaneityQuestions(tree);
+    const statuses = assessVitalStatuses(tree, today);
+    const entries = () => {
       for (const filiation of tree.filiations.slice(0, 100)) checkNewFiliation(tree, filiation);
-    });
-    console.info(
-      `arbre type 5 000 : contrôle complet ${full.toFixed(0)} ms (${String(issues.length)} constats), questions ${asking.toFixed(0)} ms (${String(questions.length)}), présumée vivante ${living.toFixed(0)} ms (${String(statuses.size)}), 100 saisies de filiation ${entries.toFixed(0)} ms`,
-    );
+    };
+    entries();
     expect(hasRefusal(issues)).toBe(false);
-    for (const elapsed of [full, asking, living, entries]) expect(elapsed).toBeLessThan(BUDGET_MS);
-  }, 60_000);
+    const runs = { warmup: 0, runs: 3 };
+    const measures = [
+      [
+        `contrôle complet (${String(issues.length)} constats)`,
+        medianTime(() => findCoherenceIssues(tree, { today }), runs),
+      ],
+      [
+        `questions (${String(questions.length)})`,
+        medianTime(() => simultaneityQuestions(tree), runs),
+      ],
+      [
+        `présumée vivante (${String(statuses.size)})`,
+        medianTime(() => assessVitalStatuses(tree, today), runs),
+      ],
+      ['100 saisies de filiation', medianTime(entries, runs)],
+    ] as const;
+    for (const [label, timing] of measures) {
+      const report = reportBudget(`arbre type 5 000, ${label}`, timing.medianMs, BUDGET_MS);
+      expect(report.measuredMs).toBeLessThan(report.ceilingMs);
+    }
+  }, 120_000);
 });
