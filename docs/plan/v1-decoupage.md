@@ -854,13 +854,16 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - Obligations reçues des relectures (T-020 à T-022) :
     - Renvois : ADR 0017, Conséquences (`distinctFrom`) ; ADR 0020 (point 6 et Choix laissés à Daniel) ; ADR 0021, point 8.
     - `distinctFrom` : retirer les identifiants de personnes non visibles (API, synchro, base locale, exports, contexte voix). Valider à l'écriture contre l'ensemble visible du rédacteur : même réponse pour « inexistant » et « masqué ».
-    - Alliance (ADR 0020) : le filtre retire toute réponse de simultanéité dont une union est masquée, et tout fait de décès masqué par sa propre règle ou par celle de sa personne. Si le motif ou la date de fin d'une union devient masquable à part, le filtre les retire de l'union. Le contexte d'alliance se construit depuis le même arbre filtré que le graphe.
+    - Alliance (ADR 0020) : le filtre retire toute réponse de simultanéité dont une union est masquée, et tout fait de décès masqué par sa propre règle ou par celle de sa personne. Si le motif ou la date de fin d'une union devient masquable à part, le filtre les retire de l'union (relecture gardien-confidentialite de T-021, hors ADR). Le contexte d'alliance se construit depuis le même arbre filtré que le graphe.
     - Question ouverte pour Daniel : masquer aussi le statut vital « décédé » quand le fait de décès est masqué ?
-    - CL-FAM-14 : la projection rend l'ancienne filiation avec son type d'avant le test ADN (« naissance ») pour un lecteur qui ne voit pas le nouveau lien. Test de non-fuite par canal : API, synchro, base locale, exports, notifications, recherche, contexte voix.
-    - Question de produit pour Daniel (CL-FAM-03) : une adoption tenue secrète se projette-t-elle en « naissance » pour l'enfant (comme CL-FAM-14) ou en « lien non disponible » ?
-    - Si la certitude ou le type non biologique d'une filiation visible deviennent masquables à part (CON-03), la projection les réécrit avant de construire le graphe.
-    - Exports, notifications et contexte voix construits depuis la présentation d'un auteur (« moi seul ») ne partent jamais vers un autre lecteur.
-- Cas limites : CL-SEC-01, CL-SEC-07, CL-SEC-11 (visibilité), CL-POL-17, CL-FAM-06, CL-FAM-07, CL-FAM-12 (visibilité), CL-FAM-03, CL-FAM-14, CL-FAM-15.
+    - CL-FAM-14 : la projection rend l'ancienne filiation avec son type d'avant le test ADN (« naissance ») pour un lecteur qui ne voit pas le nouveau lien. Test de non-fuite par canal : ceux de l'ADR 0021, auxquels s'ajoutent notifications et recherche. Condition : le modèle garde le type antérieur de la filiation (voir plus bas).
+    - Question de produit pour Daniel (CL-FAM-03) : une adoption tenue secrète se projette-t-elle en « naissance » pour l'enfant (comme CL-FAM-14) ou en « lien non disponible », ou une autre règle de visibilité au choix (ligne CL-FAM-03 du cahier) ? T-052 fournira `test/scenarios/CL-FAM-03.yaml` (relecture gardien-confidentialite de T-022, hors ADR).
+    - Si la certitude ou le type non biologique d'une filiation visible deviennent masquables à part (CON-03), la projection les réécrit avant de construire le graphe (relecture gardien-confidentialite de T-022, hors ADR).
+    - Exports, notifications et contexte voix construits depuis la présentation d'un auteur (« moi seul ») ne partent jamais vers un autre lecteur (relecture gardien-confidentialite de T-022, hors ADR).
+    - ADR 0017, Conséquences, dernier point : la mention « distincte de » sur la mère à compléter d'un enfant peut trahir une paternité ou maternité tenue secrète. À trancher en T-052.
+    - ADR 0021, point 8 : le modèle garde le type antérieur de la filiation (champ de la filiation, ou entrée d'historique UNI-19 rattachée au test ADN). À trancher en T-052 ; c'est la condition de l'obligation CL-FAM-14.
+    - ADR 0017, synchronisation montante : une mention reçue vers une personne que le rédacteur ne voit pas est refusée comme inexistante (appliquée côté serveur par T-060).
+- Cas limites : CL-SEC-01, CL-SEC-07, CL-SEC-11 (visibilité), CL-POL-17, CL-FAM-03, CL-FAM-06, CL-FAM-07, CL-FAM-12 (visibilité), CL-FAM-14, CL-FAM-15.
 - Dépend de : T-004, T-007.
 - Agent : modele-domaine, avec api-serveur ; relecture gardien-confidentialite.
 - Taille : L.
@@ -918,6 +921,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - CON-05 : « Test automatique de non-fuite sur chaque écran et chaque réponse de l'API »
   - PAR-09 : « Avec une fiche masquée sur le seul chemin : « Lien non disponible », sans autre indice »
   - ARB-11 : « Les filtres n'affichent jamais une personne masquée »
+  - Obligations reçues des relectures : les tests de non-fuite par canal exigés par l'ADR 0017 (`distinctFrom`) et l'ADR 0021.
 - Cas limites : CL-SEC-01, CL-SEC-02, CL-SEC-03, CL-SEC-04.
 - Dépend de : T-028, T-038, T-056.
 - Agent : testeur-qualite ; relecture gardien-confidentialite.
@@ -954,6 +958,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - HOL-01 (partie serveur) : « En mode avion, les parcours de la V1 passent ; seuls les invitations et l'analyse de la voix attendent le réseau »
   - VOX-23 (partie conversion en proposition) : « Le responsable de la branche reçoit la proposition »
   - TRD : par lots de 100 ; droits, visibilité et invariants vérifiés ; réponse par mutation (appliquée, convertie en proposition, refusée avec la raison) ; identifiant de mutation idempotent.
+  - Obligations reçues des relectures : ADR 0017 (c), synchronisation montante : une mention `distinctFrom` vers une personne que le rédacteur ne voit pas est refusée comme inexistante.
 - Cas limites : CL-DON-10, CL-DON-11 (refus serveur), CL-VOI-28 (conversion), CL-SEC-08 (refus).
 - Dépend de : T-030, T-049, T-056.
 - Agent : sync-hors-ligne, avec api-serveur ; relecture gardien-confidentialite.
@@ -977,7 +982,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - VOX-06 : « Sur le téléphone de Comfort, Papa Emmanuel dit « ma sœur » : la sœur créée est la sienne »
   - VOX-07 : « « Ajoute ma grand-mère Odette » sans parents : une question, une place à compléter, puis Odette »
   - VOX-13 : « 95 % des doublons du jeu de test détectés »
-  - Obligations reçues des relectures : ADR 0017, Conséquences (`distinctFrom`).
+  - Obligations reçues des relectures : ADR 0017, Conséquences (`distinctFrom`) : le résolveur ne construit `distinctFrom` qu'à partir du graphe visible du locuteur. Le contexte d'alliance vient de l'arbre filtré (ADR 0020).
 - Cas limites : CL-VOI-01, CL-VOI-02, CL-VOI-15, CL-VOI-18 (plan), CL-POL-03, CL-GEN-03, CL-GEN-06, CL-GEN-07.
 - Dépend de : T-036, T-040, T-058.
 - Agent : pipeline-vocal, avec moteur-parente.
@@ -1028,8 +1033,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - VOX-19 : « Aucune donnée de santé enregistrée par la voix en V1 et en V2 »
   - VOX-22 : « Aucune fiche créée sur le jeu de test « hors sujet » »
   - CON-04 (partie liens sensibles proposés « moi seul ») : « Le choix est affiché dans l'aperçu avant validation »
-  - Obligations reçues des relectures : ADR 0017, Conséquences (`distinctFrom`). « Frère de même père » ne construit `distinctFrom` qu'à partir du graphe visible du locuteur.
-  - Obligations reçues des relectures : le contexte d'alliance de la voix vient du même arbre filtré (ADR 0020).
+  - Obligations reçues des relectures : ADR 0017, Conséquences (`distinctFrom`) : « frère de même père » ne construit `distinctFrom` qu'à partir du graphe visible du locuteur. Le contexte d'alliance de la voix vient du même arbre filtré (ADR 0020).
 - Cas limites : CL-VOI-07, CL-VOI-08, CL-VOI-09, CL-VOI-10, CL-VOI-11, CL-VOI-16, CL-VOI-17, CL-VOI-19, CL-VOI-21, CL-VOI-23, CL-VOI-27.
 - Dépend de : T-062.
 - Agent : pipeline-vocal ; relecture gardien-confidentialite (santé, liens sensibles).
