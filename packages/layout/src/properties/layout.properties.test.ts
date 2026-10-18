@@ -8,8 +8,13 @@ import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
 import type { FoldChoices, TreeLayout } from '../layout-types';
-import { expectLayoutInvariants } from '../test-support/layout-checks';
-import { swapGenders, withoutPeople } from '../test-support/layout-scenario';
+import { expectLayoutInvariants, overlaps } from '../test-support/layout-checks';
+import {
+  neverEntered,
+  swapGenders,
+  withoutObjects,
+  withoutPeople,
+} from '../test-support/layout-scenario';
 import { treeViewArbitrary } from '../test-support/view-arbitrary';
 import {
   createTreeLayoutCache,
@@ -59,7 +64,10 @@ describe('propriétés de la disposition (étapes 3 à 5)', { timeout: 120_000 }
     );
   });
 
-  it('tout déplié : chaque personne reliée est dessinée, sans chevauchement', () => {
+  it('tout déplié : chaque personne reliée est dessinée, sans chevauchement, demi-rangée comprise', () => {
+    // Fiches l'une au-dessus de l'autre (rangée et demi-rangée, même x) : le contrat de hauteur
+    // les autorise, et la vérification en deux dimensions doit en avoir vu.
+    let stacked = 0;
     fc.assert(
       fc.property(viewArbitrary, ({ tree, centerId }) => {
         const prepared = prepareTree(tree, centerId);
@@ -67,9 +75,11 @@ describe('propriétés de la disposition (étapes 3 à 5)', { timeout: 120_000 }
         const layout = layoutPrepared(prepared, { folds });
         expectLayoutInvariants(layout);
         expect(layout.people.size).toBe(prepared.structure.rowOf.size);
+        stacked += overlaps(layout).stacked;
       }),
       { numRuns: 60 },
     );
+    expect(stacked).toBeGreaterThan(0);
   });
 
   it('repli par défaut : ouvert sur la ligne de la personne centrale seulement, jusqu’à 3 générations', () => {
@@ -147,6 +157,34 @@ describe('propriétés de la disposition (étapes 3 à 5)', { timeout: 120_000 }
           }
           const serialized = JSON.stringify(comparable(layout));
           for (const id of masked) expect(serialized).not.toContain(id);
+        },
+      ),
+    );
+  });
+
+  it('unions, filiations ou naissances masquées seules : même disposition que si elles n’avaient jamais été saisies', () => {
+    fc.assert(
+      fc.property(
+        viewArbitrary,
+        fc.array(fc.nat(), { maxLength: 4 }),
+        fc.array(fc.nat(), { maxLength: 4 }),
+        fc.array(fc.nat(), { maxLength: 6 }),
+        ({ tree, centerId }, unionPicks, filiationPicks, factPicks) => {
+          const pick = <T extends { id: Id }>(list: readonly T[], picks: readonly number[]) =>
+            new Set(list.length === 0 ? [] : picks.map((at) => (list[at % list.length] as T).id));
+          const births = tree.facts.filter((fact) => fact.type === 'birth');
+          const masked = {
+            unions: pick(tree.unions, unionPicks),
+            filiations: pick(tree.filiations, filiationPicks),
+            facts: pick(births, factPicks),
+          };
+          const reader = withoutObjects(tree, masked);
+          const clean = neverEntered(tree, masked);
+          const seen = layoutTree(reader, centerId);
+          expect(comparable(seen)).toEqual(comparable(layoutTree(clean, centerId)));
+          for (const id of [...masked.unions, ...masked.filiations]) {
+            expect(JSON.stringify(comparable(seen))).not.toContain(id);
+          }
         },
       ),
     );

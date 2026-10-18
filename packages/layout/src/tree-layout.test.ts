@@ -11,6 +11,7 @@ import type { z } from 'zod';
 
 import type { TreeLayout } from './layout-types';
 import { expectLayoutInvariants, familyKeyOf } from './test-support/layout-checks';
+import { withoutPeople } from './test-support/layout-scenario';
 import { layoutTree, setFolded, toggleFamily } from './tree-layout';
 
 function familyTree(section: z.input<typeof scenarioTreeSchema>): ScenarioTree {
@@ -63,6 +64,41 @@ describe('étape 3 : ordre des frères et sœurs', () => {
   });
 });
 
+describe('étape 3 : jumeaux visibles parmi des triplés (non-fuite)', () => {
+  it('le deuxième triplé masqué : même ordre et même disposition que des jumeaux saisis seuls', () => {
+    const section = (children: string[], order: number[]) =>
+      familyTree({
+        personnes: ['papa/M', 'maman/F', ...children.map((key) => `${key}/F`)],
+        unions: [{ conjoints: ['papa', 'maman'] }],
+        // Saisis dans le désordre : seul l'ordre de la naissance multiple les range.
+        filiations: [...children]
+          .reverse()
+          .map((enfant) => ({ parents: ['papa', 'maman'], enfant })),
+        faits: children.map((personne) => ({
+          personne,
+          type: 'naissance',
+          date: year('2001-04-05'),
+        })),
+        naissances_multiples: [{ enfants: children, ordre: order }],
+      });
+    const triplets = section(['t1', 't2', 't3'], [1, 2, 3]);
+    const masked = withoutPeople(triplets.data, new Set([triplets.id('t2')]));
+    expect(masked.multipleBirths[0]?.members.map((member) => member.birthOrder)).toEqual([1, 2]);
+    const seen = layoutTree(masked, triplets.id('papa'));
+    expect(line(seen, triplets, 1)).toEqual(['t1', 't3']);
+    const twins = section(['t1', 't3'], [1, 2]);
+    const alone = layoutTree(twins.data, twins.id('papa'));
+    const shape = (layout: TreeLayout, tree: ScenarioTree) =>
+      [...layout.people.values()].map((person) => ({
+        ...person,
+        personId: tree.keyOf(person.personId),
+      }));
+    const strip = (rows: ReturnType<typeof shape>) =>
+      rows.map(({ foldedParentsKey: _key, block: _block, ...rest }) => rest);
+    expect(strip(shape(seen, triplets))).toEqual(strip(shape(alone, twins)));
+  });
+});
+
 describe('étape 4 : placement', () => {
   it('unions successives : la plus ancienne loin, l’union en cours au plus près, même saisie dans un autre rang (ARB-04)', () => {
     const tree = familyTree({
@@ -89,6 +125,41 @@ describe('étape 4 : placement', () => {
     const layout = layoutTree(tree.data, tree.id('enfant'));
     expectLayoutInvariants(layout);
     expect(line(layout, tree, -1)).toEqual(['zoe', 'ines', 'lina', 'marc']);
+  });
+
+  it('co-épouse déjà mariée avant : le chef reste centré sur ses épouses, l’autre mari hors de la demi-rangée, quelle que soit la personne centrale', () => {
+    const tree = familyTree({
+      personnes: ['pierre/M', 'rose/F', 'odile/F', 'marc/M', 'jean/M', 'ana/F', 'luc/M', 'kid/F'],
+      unions: [
+        { conjoints: ['marc', 'rose'], debut: year('1960'), fin: year('1965'), motif: 'divorce' },
+        { conjoints: ['pierre', 'rose'], rang_pierre: 1, debut: year('1970') },
+        { conjoints: ['pierre', 'odile'], rang_pierre: 2, debut: year('1975') },
+      ],
+      filiations: [
+        { parents: ['pierre', 'rose'], enfant: 'jean' },
+        { parents: ['pierre', 'odile'], enfant: 'ana' },
+        { parents: ['marc', 'rose'], enfant: 'luc' },
+        { parents: ['marc', 'rose'], enfant: 'kid' },
+      ],
+    });
+    for (const center of ['jean', 'luc', 'ana']) {
+      const layout = layoutTree(tree.data, tree.id(center));
+      expectLayoutInvariants(layout);
+      const at = (key: string) => layout.people.get(tree.id(key));
+      // Les deux épouses sur la demi-rangée, dans l'ordre des rangs, le chef au-dessus de leur
+      // milieu ; Marc sur la rangée, à l'extérieur du groupe, pas entre elles ni sous le chef.
+      expect(line(layout, tree, -0.5), center).toEqual(['rose', 'odile']);
+      expect(line(layout, tree, -1), center).toEqual(['marc', 'pierre']);
+      expect(at('pierre')?.x).toBeCloseTo(((at('rose')?.x ?? NaN) + (at('odile')?.x ?? NaN)) / 2);
+      expect(at('marc')?.x ?? NaN).toBeLessThan(at('rose')?.x ?? NaN);
+      // Le foyer de Marc et Rose s'attache entre eux, pas sous Rose comme celui de Pierre.
+      const marcRose = layout.families.get(familyKeyOf(layout.structure, tree, ['marc', 'rose']));
+      const pierreRose = layout.families.get(
+        familyKeyOf(layout.structure, tree, ['pierre', 'rose']),
+      );
+      expect(pierreRose?.anchor?.x).toBe(at('rose')?.x);
+      expect(marcRose?.anchor?.x).toBeLessThan(at('rose')?.x ?? NaN);
+    }
   });
 
   it('colonne « mère non précisée » : une place sur la demi-rangée, ses enfants dessous (ARB-05)', () => {

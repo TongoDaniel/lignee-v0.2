@@ -1,7 +1,14 @@
 // Scénarios de disposition (T-008) : l'action et l'attendu propres à packages/layout, lus en
 // schéma strict (test/scenarios/README.md, « Disposition »). L'arbre (dates, fin et
 // simultanéité des unions, candidats compris) est celui du format commun. Réservé aux tests.
-import { filiationSchema, unionSchema, type Id, type Person, type Union } from '@lignee/domain';
+import {
+  filiationSchema,
+  projectMultipleBirth,
+  unionSchema,
+  type Id,
+  type Person,
+  type Union,
+} from '@lignee/domain';
 import {
   buildScenarioTree,
   scenarioSchema,
@@ -177,9 +184,12 @@ export function withoutPeople(data: TreeData, masked: ReadonlySet<Id>): TreeData
     facts: data.facts.filter(
       (fact) => fact.subject.kind !== 'person' || keep(fact.subject.personId),
     ),
-    multipleBirths: data.multipleBirths.filter((birth) =>
-      birth.members.every((member) => keep(member.personId)),
-    ),
+    // Comme le fera T-052 : la naissance multiple est projetée (enfants masqués retirés, rangs
+    // renumérotés), pas supprimée, pour que des jumeaux visibles parmi des triplés soient testés.
+    multipleBirths: data.multipleBirths.flatMap((birth) => {
+      const projected = projectMultipleBirth(birth, keep);
+      return projected === undefined ? [] : [projected];
+    }),
     titleRoles: data.titleRoles.filter((title) => keep(title.personId)),
   };
   const unions = new Set(result.unions.map((union) => union.id));
@@ -316,5 +326,47 @@ export function comparableStructure(structure: TreeStructure) {
     })),
     crossLinks: structure.crossLinks,
     unreachable: structure.unreachable,
+  };
+}
+
+/** Objets masqués seuls (sans masquer de personne) : unions, filiations, faits. */
+export interface MaskedObjects {
+  readonly unions: ReadonlySet<Id>;
+  readonly filiations: ReadonlySet<Id>;
+  readonly facts: ReadonlySet<Id>;
+}
+
+/**
+ * Le graphe d'un lecteur pour qui ces objets sont masqués, retirés par un filtre qui laisse les
+ * références restantes (réponses de simultanéité, union d'origine d'une filiation) pointer vers
+ * eux : le pire cas à attendre d'un filtrage. Réservé aux tests.
+ */
+export function withoutObjects(data: TreeData, masked: MaskedObjects): TreeData {
+  return {
+    ...data,
+    unions: data.unions.filter((union) => !masked.unions.has(union.id)),
+    filiations: data.filiations.filter((filiation) => !masked.filiations.has(filiation.id)),
+    facts: data.facts.filter((fact) => !masked.facts.has(fact.id)),
+  };
+}
+
+/**
+ * Le même arbre si ces objets n'avaient jamais été saisis : sans eux, et sans aucune référence
+ * vers eux. Réservé aux tests.
+ */
+export function neverEntered(data: TreeData, masked: MaskedObjects): TreeData {
+  const removed = withoutObjects(data, masked);
+  return {
+    ...removed,
+    filiations: removed.filiations.map((filiation) => {
+      if (filiation.originUnionId === undefined || !masked.unions.has(filiation.originUnionId)) {
+        return filiation;
+      }
+      const { originUnionId: _origin, ...rest } = filiation;
+      return rest;
+    }),
+    simultaneityAnswers: removed.simultaneityAnswers.filter((answer) =>
+      answer.unionIds.every((id) => !masked.unions.has(id)),
+    ),
   };
 }

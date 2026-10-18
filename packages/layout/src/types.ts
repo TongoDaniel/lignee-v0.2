@@ -186,4 +186,15 @@ export interface TreeStructure extends Generations {
   readonly crossLinks: readonly CrossLink[];
   /** Personnes dessinées dont la question d'UNI-08 reste ouverte, par rangée (ADR 0013). */
   readonly simultaneityPending: readonly Id[];
+  /**
+   * Personnes dont au moins deux unions sont simultanées (dates, réponse gardée, ou repli
+   * d'affichage de l'ADR 0013), qu'elles portent ces foyers ou non : le placement les dessine au
+   * centre de leurs conjoints (T-012, ADR 0016).
+   */
+  readonly simultaneousSpouses: ReadonlySet<Id>;
+  /**
+   * Unions de chaque personne qui en a au moins deux, de la plus ancienne à la plus récente
+   * (`orderUnions`, ADR 0013, règle 2), qu'elle les porte ou non.
+   */
+  readonly unionOrderOf: ReadonlyMap<Id, readonly Id[]>;
 }

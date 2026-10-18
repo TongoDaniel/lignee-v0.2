@@ -23,6 +23,10 @@ const SCENARIOS = [
   ['CL-POL-01', 'trois épouses en même temps : foyers dans l’ordre, enfants sous leur mère'],
   ['CL-POL-04', 'rang saisi sans date de mariage, puis rang changé à la main (UNI-07)'],
   ['CL-POL-06', 'première épouse décédée, puis nouvelle épouse : affichage successif'],
+  [
+    'CL-POL-09',
+    'lévirat avec un frère déjà marié : polygamie dessinée, premier mari à l’extérieur',
+  ],
   ['CL-POL-13', 'femme avec plusieurs maris successifs, sans règle de genre'],
   ['CL-POL-14', 'polyandrie : acceptée sans avertissement, sans règle de genre'],
   ['CL-POL-18', 'polygamie sur deux générations : foyers imbriqués, vus de deux personnes'],

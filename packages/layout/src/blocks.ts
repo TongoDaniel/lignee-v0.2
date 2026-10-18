@@ -18,6 +18,12 @@ export const BLOCK_GAP = 0.5;
 export const CLUSTER_GAP = 1;
 /** Hauteur de la demi-rangée des conjoints d'unions simultanées. */
 export const HALF_ROW = 0.5;
+/**
+ * Contrat du dessin (T-017) : une fiche fait une unité de large au plus, espace compris, et moins
+ * d'une demi-rangée de haut. Deux fiches au même `x`, l'une à `y`, l'autre à `y + 0,5` (une
+ * personne et son conjoint de la demi-rangée), ne se touchent donc pas.
+ */
+export const CARD_HEIGHT_LIMIT = HALF_ROW;
 
 /** Une place dans un groupe : `x` relatif au groupe, `level` 0 ou la demi-rangée. */
 export interface Slot {
@@ -46,6 +52,13 @@ export interface Blocks {
   readonly anchorOf: ReadonlyMap<string, { readonly block: number; readonly slot: Slot }>;
 }
 
+/** Un foyer dessiné qui lie deux personnes d'une même rangée. */
+interface SpouseLink {
+  readonly spouse: Id;
+  readonly key: string;
+  readonly ended: boolean;
+}
+
 export function buildBlocks(
   structure: TreeStructure,
   index: FamilyIndex,
@@ -55,7 +68,9 @@ export function buildBlocks(
   const row = (id: Id) => structure.rowOf.get(id) ?? 0;
 
   // Foyers dessinés dont les deux parents sont sur la même rangée : ils lient un groupe.
-  const spousesOf = new Map<Id, { spouse: Id; key: string; ended: boolean }[]>();
+  const spousesOf = new Map<Id, SpouseLink[]>();
+  /** Conjoint de la demi-rangée -> la personne aux unions simultanées au-dessus de lui. */
+  const directSpouse = new Map<Id, Id>();
   const parentOf = new Map<Id, Id>(visibility.people.map((id) => [id, id]));
   const find = (id: Id): Id => {
     let root = id;
@@ -69,7 +84,7 @@ export function buildBlocks(
     return root;
   };
   for (const id of visibility.people) {
-    const links: { spouse: Id; key: string; ended: boolean }[] = [];
+    const links: SpouseLink[] = [];
     for (const key of index.asParent.get(id) ?? []) {
       const family = index.families.get(key);
       if (family?.kind !== 'foyer') continue;
@@ -113,13 +128,18 @@ export function buildBlocks(
     return Math.max(1, width + CLUSTER_GAP);
   };
   const groups = [...members.values()].sort((a, b) => row(b[0] as Id) - row(a[0] as Id));
+  const polygamous = (id: Id) => structure.simultaneousSpouses.has(id);
   for (const group of groups) {
-    // Racine : le plus de conjoints dans le groupe, puis le premier découvert.
+    // Racine : une personne aux unions simultanées s'il y en a une, puis le plus de conjoints
+    // dans le groupe, puis la première découverte.
     let rootId = group[0] as Id;
-    for (const id of group) {
-      const degree = spousesOf.get(id)?.length ?? 0;
-      if (degree > (spousesOf.get(rootId)?.length ?? 0)) rootId = id;
-    }
+    const better = (id: Id, than: Id) => {
+      const p = polygamous(id) ? 1 : 0;
+      const q = polygamous(than) ? 1 : 0;
+      if (p !== q) return p > q;
+      return (spousesOf.get(id)?.length ?? 0) > (spousesOf.get(than)?.length ?? 0);
+    };
+    for (const id of group) if (better(id, rootId)) rootId = id;
     const slots = new Map<Id, Slot>();
     const headers = new Map<string, Slot>();
     /** Ce qui a reçu une place, dans l'ordre : pour décaler un conjoint dans sa réserve. */
@@ -152,29 +172,16 @@ export function buildBlocks(
       cursor += 1;
       reserve(start, from, childrenWidth(key));
     };
-    const visit = (id: Id, level: number) => {
+    /** Conjoints pas encore placés de `id`, désormais réservés à son appel. */
+    const take = (id: Id) => {
       const links = (spousesOf.get(id) ?? []).filter((link) => !visited.has(link.spouse));
       for (const link of links) visited.add(link.spouse);
-      const simultaneous =
-        level === 0 && links.length > 0 && structure.unitOf.get(id)?.kind === 'simultaneous';
-      if (simultaneous) {
-        // Chaque conjoint en tête de la colonne de ses enfants : il réserve leur largeur.
-        const from = emitted.length;
-        for (const link of links) {
-          const start = cursor;
-          const at = emitted.length;
-          visit(link.spouse, HALF_ROW);
-          reserve(start, at, childrenWidth(link.key));
-        }
-        header(id);
-        const xs = emitted
-          .slice(from)
-          .map((entry) =>
-            entry.kind === 'person'
-              ? (slots.get(entry.key)?.x ?? 0)
-              : (headers.get(entry.key)?.x ?? 0),
-          );
-        setSlot('person', id, { x: (Math.min(...xs) + Math.max(...xs)) / 2, level: 0 });
+      return links;
+    };
+    const visit = (id: Id, level: number) => {
+      const links = take(id);
+      if (level === 0 && links.length > 0 && polygamous(id)) {
+        placePolygamous(id, links);
       } else if (links.length >= 2) {
         // Successives : unions terminées d'abord, l'union en cours au plus près de la personne.
         const ordered = [
@@ -191,6 +198,48 @@ export function buildBlocks(
         for (const link of links) visit(link.spouse, level);
         header(id);
       }
+    };
+    /**
+     * Unions simultanées (ARB-03) : la personne au-dessus du milieu de ses conjoints, eux sur la
+     * demi-rangée dans l'ordre de ses unions, chacun réservant la largeur de ses enfants. Les
+     * autres conjoints de la première épouse sont placés à gauche du groupe, ceux de la dernière
+     * à droite, sur la rangée : ils ne s'intercalent pas entre les co-épouses.
+     */
+    const placePolygamous = (id: Id, links: readonly SpouseLink[]) => {
+      const order = structure.unionOrderOf.get(id) ?? [];
+      const rank = (key: string) => {
+        const at = order.indexOf(key);
+        return at < 0 ? Infinity : at;
+      };
+      const ordered = [...links].sort((a, b) => rank(a.key) - rank(b.key));
+      const first = ordered[0] as SpouseLink;
+      const last = ordered[ordered.length - 1] as SpouseLink;
+      for (const link of take(first.spouse)) visit(link.spouse, 0);
+      const rightOuter = last === first ? [] : take(last.spouse);
+      const spouses: Id[] = [];
+      for (const link of ordered) {
+        const start = cursor;
+        const at = emitted.length;
+        directSpouse.set(link.spouse, id);
+        if (link === first || link === last) {
+          setSlot('person', link.spouse, { x: cursor, level: HALF_ROW });
+          cursor += 1;
+          header(link.spouse);
+        } else {
+          visit(link.spouse, HALF_ROW);
+        }
+        reserve(start, at, childrenWidth(link.key));
+        spouses.push(link.spouse);
+      }
+      const headerFrom = emitted.length;
+      header(id);
+      // Centré sur ses seuls conjoints et sa colonne « non précisé ».
+      const xs = [
+        ...spouses.map((spouse) => slots.get(spouse)?.x ?? 0),
+        ...emitted.slice(headerFrom).map((entry) => headers.get(entry.key)?.x ?? 0),
+      ];
+      setSlot('person', id, { x: (Math.min(...xs) + Math.max(...xs)) / 2, level: 0 });
+      for (const link of rightOuter) visit(link.spouse, 0);
     };
     visit(rootId, 0);
     const blockIndex = blocks.length;
@@ -224,13 +273,16 @@ export function buildBlocks(
         const [hub, partner] = family.parentIds;
         const hubSlot = hub === undefined ? undefined : slots.get(hub);
         const partnerSlot = partner === undefined ? undefined : slots.get(partner);
-        if (hubSlot !== undefined && partnerSlot !== undefined) {
-          anchorOf.set(key, { block: blockIndex, slot: foyerAnchor(hubSlot, partnerSlot) });
+        if (hub !== undefined && partner !== undefined && hubSlot && partnerSlot) {
+          const direct = directSpouse.get(partner) === hub || directSpouse.get(hub) === partner;
+          anchorOf.set(key, {
+            block: blockIndex,
+            slot: foyerAnchor(hubSlot, partnerSlot, direct),
+          });
         } else if (hub === id && hubSlot !== undefined) {
           // Conjoint sur une autre rangée (union entre générations) : sous la personne au centre.
+          // Les deux parents sont dessinés (vérifié plus haut), le conjoint dans un autre groupe.
           anchorOf.set(key, { block: blockIndex, slot: hubSlot });
-        } else if (hub !== undefined && !visible(hub) && partnerSlot !== undefined) {
-          anchorOf.set(key, { block: blockIndex, slot: partnerSlot });
         }
       }
     }
@@ -239,12 +291,15 @@ export function buildBlocks(
 }
 
 /**
- * Point d'attache d'un foyer dont les deux parents sont dans le groupe : le conjoint sur la
- * demi-rangée (il est en tête de la colonne de ses enfants) ; côte à côte, le milieu du couple ;
- * sinon le conjoint, à l'extérieur des unions successives.
+ * Point d'attache d'un foyer dont les deux parents sont dans le groupe : le conjoint de la
+ * demi-rangée sous une personne aux unions simultanées (il est en tête de la colonne de ses
+ * enfants) ; deux voisins, même d'une rangée et d'une demi-rangée, le milieu du couple ; sinon le
+ * conjoint, à l'extérieur des unions successives.
  */
-function foyerAnchor(hub: Slot, partner: Slot): Slot {
-  if (hub.level !== partner.level) return hub.level > partner.level ? hub : partner;
-  if (Math.abs(hub.x - partner.x) <= 1) return { x: (hub.x + partner.x) / 2, level: hub.level };
+function foyerAnchor(hub: Slot, partner: Slot, direct: boolean): Slot {
+  if (direct && hub.level !== partner.level) return hub.level > partner.level ? hub : partner;
+  if (hub.level !== partner.level || Math.abs(hub.x - partner.x) <= 1) {
+    return { x: (hub.x + partner.x) / 2, level: Math.max(hub.level, partner.level) };
+  }
   return partner;
 }

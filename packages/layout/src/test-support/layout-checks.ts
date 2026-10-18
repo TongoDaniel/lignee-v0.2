@@ -5,6 +5,7 @@ import type { Id } from '@lignee/domain';
 import type { ScenarioTree } from '@lignee/domain/test-support';
 import { expect } from 'vitest';
 
+import { CARD_HEIGHT_LIMIT } from '../blocks';
 import { unspecifiedKey } from '../folding';
 import type { TreeLayout } from '../layout-types';
 import type { TreeStructure } from '../types';
@@ -23,22 +24,27 @@ function cards(layout: TreeLayout) {
   return list;
 }
 
-/** Nombre de paires de fiches qui se chevauchent (même hauteur, moins d'une fiche d'écart). */
-export function overlaps(layout: TreeLayout): number {
-  const byY = new Map<number, number[]>();
-  for (const card of cards(layout)) {
-    const list = byY.get(card.y);
-    if (list === undefined) byY.set(card.y, [card.x]);
-    else list.push(card.x);
-  }
-  let count = 0;
-  for (const xs of byY.values()) {
-    xs.sort((a, b) => a - b);
-    for (let i = 1; i < xs.length; i += 1) {
-      if ((xs[i] as number) - (xs[i - 1] as number) < 1 - EPSILON) count += 1;
+/**
+ * Paires de fiches qui se chevauchent, en deux dimensions, avec le contrat de hauteur du dessin
+ * (`CARD_HEIGHT_LIMIT`) : moins d'une fiche d'écart en largeur et moins d'une demi-rangée en
+ * hauteur. `stacked` compte les paires au même endroit en largeur, l'une sur la rangée et l'autre
+ * sur la demi-rangée, que le contrat autorise.
+ */
+export function overlaps(layout: TreeLayout): { overlapping: number; stacked: number } {
+  const list = cards(layout).sort((a, b) => a.x - b.x);
+  let overlapping = 0;
+  let stacked = 0;
+  for (let i = 0; i < list.length; i += 1) {
+    const a = list[i] as { x: number; y: number };
+    for (let j = i + 1; j < list.length; j += 1) {
+      const b = list[j] as { x: number; y: number };
+      if (b.x - a.x >= 1 - EPSILON) break;
+      const dy = Math.abs(a.y - b.y);
+      if (dy < CARD_HEIGHT_LIMIT - EPSILON) overlapping += 1;
+      else if (dy < 2 * CARD_HEIGHT_LIMIT - EPSILON) stacked += 1;
     }
   }
-  return count;
+  return { overlapping, stacked };
 }
 
 /** Les invariants de la disposition, sur n'importe quel arbre. */
@@ -50,7 +56,7 @@ export function expectLayoutInvariants(layout: TreeLayout): void {
     expect(person.row).toBe(structure.rowOf.get(person.personId));
     expect([0, 0.5]).toContain(person.y - person.row);
   }
-  expect(overlaps(layout)).toBe(0);
+  expect(overlaps(layout).overlapping).toBe(0);
 
   // Groupes : intervalles disjoints sur chaque rangée, une personne dans un seul groupe.
   const blocksByRow = new Map<number, TreeLayout['blocks'][number][]>();
