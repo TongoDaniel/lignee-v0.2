@@ -195,12 +195,20 @@ describe('findForbiddenInLockfile', () => {
   });
 });
 
+// Le lockfile réel grandit avec les dépendances : son analyse dépasse parfois les 5 s par défaut
+// de vitest quand turbo lance tous les paquets en parallèle sur un runner de CI.
+const REAL_LOCKFILE_TIMEOUT_MS = 30_000;
+
 describe('pnpm-lock.yaml du dépôt', () => {
-  it('ne contient aucune bibliothèque de reconnaissance faciale (CON-12)', () => {
-    const text = readFileSync(join(repoRoot, 'pnpm-lock.yaml'), 'utf8');
-    expect(listLockfilePackageNames(text).size).toBeGreaterThan(50);
-    expect(findForbiddenInLockfile(text)).toEqual([]);
-  });
+  it(
+    'ne contient aucune bibliothèque de reconnaissance faciale (CON-12)',
+    () => {
+      const text = readFileSync(join(repoRoot, 'pnpm-lock.yaml'), 'utf8');
+      expect(listLockfilePackageNames(text).size).toBeGreaterThan(50);
+      expect(findForbiddenInLockfile(text)).toEqual([]);
+    },
+    REAL_LOCKFILE_TIMEOUT_MS,
+  );
 });
 
 describe('script check-forbidden-dependencies', () => {

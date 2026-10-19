@@ -4,16 +4,29 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./dev-seed": "./src/dev-seed/index.ts"
   },
   "scripts": {
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "typecheck": "tsc --noEmit -p tsconfig.src.json && tsc --noEmit",
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate && node src/tooling/bundle-migrations.cli.ts"
+  },
+  "dependencies": {
+    "@lignee/domain": "workspace:*",
+    "drizzle-orm": "0.45.3",
+    "zod": "catalog:"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "9.6.0",
+    "@types/node": "catalog:",
+    "better-sqlite3-multiple-ciphers": "13.0.3",
+    "drizzle-kit": "0.31.11",
     "eslint": "catalog:",
+    "fast-check": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "yaml": "catalog:"
   }
 }

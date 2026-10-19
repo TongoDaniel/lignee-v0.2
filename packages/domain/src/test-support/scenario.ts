@@ -25,7 +25,7 @@ const PLAYED_DIR_VARIABLE = 'LIGNEE_SCENARIOS_PLAYED_DIR';
  * T-026 et T-027.
  */
 export const coverageSchema = z.strictObject({
-  teste: z.array(z.enum(['lecture', 'modele', 'disposition', 'lien'])).min(1),
+  teste: z.array(z.enum(['lecture', 'modele', 'disposition', 'lien', 'base_locale'])).min(1),
   reste: z.array(z.string().regex(/^T-\d{3}$/)),
 });
 

@@ -1,4 +1,14 @@
 {
+  // Tout src, tests et outillage compris : celui qu'ESLint utilise. Les types Node servent aux
+  // tests (base SQLite chiffrée sur le poste) et à l'outillage (src/tooling), qui tourne
+  // directement sous Node 24 : ses imports relatifs gardent l'extension `.ts`. Le code partagé
+  // par le téléphone et le serveur est vérifié sans Node par tsconfig.src.json.
   "extends": "../../tsconfig.base.json",
-  "include": ["src"]
+  "compilerOptions": {
+    "types": ["node"],
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "declaration": false
+  },
+  "include": ["src", "types"]
 }

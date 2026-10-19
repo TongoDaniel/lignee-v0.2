@@ -1,0 +1,11 @@
+{
+  // Code du paquet, embarqué dans l'app et le serveur : aucun type de Node (`types: []` hérité
+  // de la base). Un `process`, un `Buffer` ou un `node:fs` y est une erreur de type.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "declaration": false
+  },
+  "include": ["src", "types"],
+  "exclude": ["src/**/*.test.ts", "src/test-support", "src/tooling"]
+}

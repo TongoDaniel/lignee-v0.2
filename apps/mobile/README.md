@@ -16,6 +16,7 @@ Expo SDK 57, React Native 0.86, Hermes et nouvelle architecture (imposés par le
 | `src/theme/`, `src/i18n/` | Fournisseurs de thème (`getTheme` de `@lignee/ui`) et de traduction (`@lignee/i18n`, langue de l'appareil suivie à chaud) |
 | `src/navigation/` | Onglets de la V1 et barre d'onglets de la charte |
 | `src/icons/` | Symbole compact (onglet Arbre) et icône Famille |
+| `src/db/` | Base locale chiffrée (T-016, ADR 0023) : `openAppDatabase` branche expo-sqlite (SQLCipher), expo-secure-store et expo-crypto sur `@lignee/sync` ; `LocalDatabaseProvider` l'ouvre au démarrage sans retarder l'interface (`useLocalDatabase`) ; `dev/` charge un arbre généré de 500 personnes dans une base vide, en développement seulement (`if (__DEV__)`, absent du bundle de production) |
 
 La barre d'onglets, les icônes et le fournisseur de thème sont provisoirement dans l'app : ils rejoindront `@lignee/ui` avec les composants de la charte (T-014, T-015).
 
@@ -37,4 +38,6 @@ Les tests rendent l'app entière avec Expo Router : onglets de la V1, libellés 
 
 Chaque dépendance directe est épinglée sur une version publiée depuis au moins 14 jours et compatible avec le SDK (`EXPO_OFFLINE=1 corepack pnpm exec expo install --check`). Quatre paquets transitifs d'Expo sont tenus au même niveau par `pnpm.overrides` à la racine. pnpm reste en installation isolée : depuis le SDK 54, Expo n'exige plus `nodeLinker: hoisted`. Metro trouve seul les paquets du monorepo depuis le SDK 52 : pas de `metro.config.js`.
 
-Taille : le bundle Hermes fait environ 5,5 Mo sur Android. `expo-router` embarque `expo-symbols` et sa police Material Symbols (971 Ko) : à réexaminer pour HOL-06 (moins de 40 Mo installé).
+Base locale : `expo-sqlite` avec `useSQLCipher: true` et `expo-secure-store` sont des modules natifs ; après leur ajout (T-016), le build de développement doit être refait (`eas build --profile development`). `android.allowBackup` vaut `false` : la base chiffrée ne part pas dans les sauvegardes Android.
+
+Taille : le bundle Hermes fait environ 6,8 Mo sur Android et 6,5 Mo sur iOS, dont environ 1,2 Mo ajoutés par la base locale (T-016 : Drizzle, @lignee/sync, schémas de @lignee/domain), à suivre pour HOL-06. `expo-router` embarque `expo-symbols` et sa police Material Symbols (971 Ko) : à réexaminer pour HOL-06 (moins de 40 Mo installé).

@@ -139,6 +139,29 @@ jobs:
         working-directory: apps/mobile
         run: pnpm exec expo export --platform android --platform ios --output-dir dist
 
+      # T-016 : l'arbre généré ne se charge qu'en développement. Le bundle de production ne doit
+      # contenir ni le module de chargement (son repère) ni le générateur (une profession générée ;
+      # repères en ASCII, Hermes range les autres chaînes en UTF-16). Témoin : le code de la base
+      # locale, lui, y est (nom de l'entrée du trousseau), preuve que la recherche lit bien les
+      # chaînes du bytecode Hermes.
+      - name: Aucun arbre généré dans le bundle de production
+        working-directory: apps/mobile
+        run: |
+          status=0
+          for bundle in $(find dist/_expo/static/js -name '*.hbc'); do
+            if ! grep -q -a -F 'lignee.local-db.key' "$bundle"; then
+              echo "::error title=Bundle Hermes::$bundle ne contient pas la base locale : contrôle inopérant."
+              status=1
+            fi
+            for marker in 'lignee-dev-seed-generated-tree' 'menuisier'; do
+              if grep -q -a -F "$marker" "$bundle"; then
+                echo "::error title=Arbre généré en production::$bundle contient « $marker »."
+                status=1
+              fi
+            done
+          done
+          exit "$status"
+
       - name: Taille des bundles
         working-directory: apps/mobile
         run: |

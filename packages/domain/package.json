@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./test-support": "./src/test-support/index.ts"
+    "./test-support": "./src/test-support/index.ts",
+    "./tree-generator": "./src/test-support/tree-generator.ts"
   },
   "scripts": {
     "lint": "eslint .",
