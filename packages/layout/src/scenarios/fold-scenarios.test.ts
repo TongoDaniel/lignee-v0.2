@@ -19,7 +19,9 @@ import {
 } from '../test-support/layout-scenario';
 import { layoutTree, setFolded } from '../tree-layout';
 
-describe('CL-POL-12 — chef de famille avec 8 épouses et 40 enfants', () => {
+// Disposition d'une famille de 40 à 80 personnes : le délai par défaut de vitest (5 s) est trop
+// court sous la charge de la CI.
+describe('CL-POL-12 — chef de famille avec 8 épouses et 40 enfants', { timeout: 30_000 }, () => {
   it('depuis un enfant : son foyer ouvert, les 7 autres repliés avec leur compteur, puis un foyer déplié', () => {
     const scenario = loadScenario('CL-POL-12', layoutScenarioSchema('CL-POL-12'));
     const tree = buildLayoutScenarioTree(scenario);

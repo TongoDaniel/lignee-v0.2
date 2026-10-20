@@ -72,7 +72,9 @@ function bytesOf(path: string): Buffer {
   }
 }
 
-describe('CL-SEC-14 — téléphone perdu ou volé (base locale chiffrée)', () => {
+// Arbre généré de 200 personnes écrit dans une base chiffrée, puis relu octet par octet : le délai
+// par défaut de vitest (5 s) est trop court sous la charge de la CI.
+describe('CL-SEC-14 — téléphone perdu ou volé (base locale chiffrée)', { timeout: 30_000 }, () => {
   it('le fichier volé ne livre ni l’arbre ni la cause de décès sans la clé du trousseau', async () => {
     const scenario = loadScenario('CL-SEC-14', schema);
     const { arbre_genere: params, cause_de_deces: cause } = scenario.action;

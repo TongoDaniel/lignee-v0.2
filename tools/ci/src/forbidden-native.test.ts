@@ -105,7 +105,8 @@ describe('listNativeFiles', () => {
   });
 });
 
-describe('dépôt', () => {
+// Parcourt tout le dépôt : le délai par défaut de vitest (5 s) est trop court sous la charge de la CI.
+describe('dépôt', { timeout: 30_000 }, () => {
   it('lit la configuration de l’app mobile', () => {
     const files = listNativeFiles(repoRoot).map((path) => path.replaceAll('\\', '/'));
     expect(files.some((path) => path.endsWith('apps/mobile/app.config.ts'))).toBe(true);

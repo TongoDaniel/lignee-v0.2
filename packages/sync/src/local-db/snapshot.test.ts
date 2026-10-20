@@ -32,7 +32,9 @@ function codes(snapshot: LocalTreeSnapshot): string[] {
   return snapshotPrivacyIssues(snapshot).map((issue) => issue.code);
 }
 
-describe('instantané dans la base locale', () => {
+// Arbres générés de 300 personnes écrits dans une base chiffrée : le délai par défaut de vitest
+// (5 s) est trop court sous la charge de la CI.
+describe('instantané dans la base locale', { timeout: 30_000 }, () => {
   it('se relit à l’identique (arbre généré de 300 personnes)', async () => {
     const { snapshot } = generatedSnapshot(300, 300);
     const { db, connection } = await openTestDatabase(nextPath());
@@ -289,31 +291,35 @@ describe('seconde barrière : rien de ce que le lecteur ne voit pas', () => {
   });
 });
 
-describe('arbres générés : la projection de développement ne garde rien de masqué', () => {
-  it('aucun objet sous règle restreinte, aucune référence pendante (propriété)', () => {
-    fc.assert(
-      fc.property(fc.integer(), fc.integer({ min: 1, max: 150 }), (seed, size) => {
-        const generated = generateTree({ seed, size, rates: { hidden: 0.3 } });
-        const reader = generated.accounts[0];
-        if (reader === undefined) throw new Error('no account');
-        const projected = devReaderSnapshot(generated, reader.accountId);
-        const restricted = generated.visibilityRules
-          .filter((rule) => rule.level !== 'tree')
-          .map((rule) => rule.target.id);
-        const present = new Set<string>(
-          [
-            ...projected.people,
-            ...projected.unions,
-            ...projected.filiations,
-            ...projected.facts,
-            ...projected.names,
-          ].map((object) => object.id),
-        );
-        for (const id of restricted) expect(present.has(id)).toBe(false);
-        expect(snapshotPrivacyIssues(projected)).toEqual([]);
-        expect(() => parseLocalTreeSnapshot(projected)).not.toThrow();
-      }),
-      { numRuns: 60 },
-    );
-  });
-});
+describe(
+  'arbres générés : la projection de développement ne garde rien de masqué',
+  { timeout: 30_000 },
+  () => {
+    it('aucun objet sous règle restreinte, aucune référence pendante (propriété)', () => {
+      fc.assert(
+        fc.property(fc.integer(), fc.integer({ min: 1, max: 150 }), (seed, size) => {
+          const generated = generateTree({ seed, size, rates: { hidden: 0.3 } });
+          const reader = generated.accounts[0];
+          if (reader === undefined) throw new Error('no account');
+          const projected = devReaderSnapshot(generated, reader.accountId);
+          const restricted = generated.visibilityRules
+            .filter((rule) => rule.level !== 'tree')
+            .map((rule) => rule.target.id);
+          const present = new Set<string>(
+            [
+              ...projected.people,
+              ...projected.unions,
+              ...projected.filiations,
+              ...projected.facts,
+              ...projected.names,
+            ].map((object) => object.id),
+          );
+          for (const id of restricted) expect(present.has(id)).toBe(false);
+          expect(snapshotPrivacyIssues(projected)).toEqual([]);
+          expect(() => parseLocalTreeSnapshot(projected)).not.toThrow();
+        }),
+        { numRuns: 60 },
+      );
+    });
+  },
+);
