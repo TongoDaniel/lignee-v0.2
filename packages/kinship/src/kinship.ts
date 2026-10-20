@@ -50,6 +50,14 @@ import {
   type Segment,
   type Sharing,
 } from './relationship';
+import {
+  NEVER_PAUSE,
+  drain,
+  runInSlices,
+  type Pacer,
+  type SliceOptions,
+  type Steps,
+} from './slicing';
 
 export interface KinshipOptions {
   /** Types de filiation suivis (par défaut tous ; les seuls liens de naissance pour la santé). */
@@ -92,9 +100,11 @@ interface ResolvedOptions {
   maxChains: number;
   maxPathChecks: number;
   allianceContext: AllianceContext;
+  /** Points de pause du calcul (jamais dus pour le calcul direct). */
+  pacer: Pacer;
 }
 
-function resolve(options: KinshipOptions): ResolvedOptions {
+function resolve(options: KinshipOptions, pacer: Pacer = NEVER_PAUSE): ResolvedOptions {
   return {
     mask: filiationTypeMask(options.filiationTypes ?? FILIATION_TYPES),
     maxUnions: options.maxUnions ?? DEFAULTS.maxUnions,
@@ -105,6 +115,7 @@ function resolve(options: KinshipOptions): ResolvedOptions {
     maxChains: options.maxChains ?? DEFAULTS.maxChains,
     maxPathChecks: options.maxPathChecks ?? DEFAULTS.maxPathChecks,
     allianceContext: options.allianceContext ?? EMPTY_ALLIANCE_CONTEXT,
+    pacer,
   };
 }
 
@@ -148,16 +159,18 @@ function budget(amount: number): Budget {
  * d'abord, de sorte qu'une limite atteinte n'écarte que les plus lointaines. `allowed` : seules
  * ces personnes peuvent être atteintes.
  */
-function upChains(
+function* upChains(
   graph: KinshipGraph,
   start: number,
   mask: FiliationTypeMask,
   maxDepth: number,
   limit: Budget,
+  pacer: Pacer,
   allowed?: ReadonlySet<number>,
-): Chain[] {
+): Steps<Chain[]> {
   const chains: Chain[] = [{ node: start, edge: undefined, prev: undefined, depth: 0 }];
   for (let index = 0; index < chains.length; index += 1) {
+    if (pacer.due()) yield;
     const chain = chains[index];
     if (chain === undefined || chain.depth >= maxDepth) continue;
     for (const edge of graph.parentEdges[chain.node] ?? []) {
@@ -220,20 +233,22 @@ function rawNodes(segment: RawBlood): number[] {
  * Chemins de sang de `start` vers toute personne, de degré au plus `maxDegree` (montée puis
  * descente, sans repasser par une personne), `start` lui-même compris (degré 0).
  */
-function nearWalks(
+function* nearWalks(
   graph: KinshipGraph,
   start: number,
   mask: FiliationTypeMask,
   maxDegree: number,
   limit: Budget,
-): RawBlood[] {
+  pacer: Pacer,
+): Steps<RawBlood[]> {
   const walks: RawBlood[] = [];
-  for (const up of upChains(graph, start, mask, maxDegree, limit)) {
+  for (const up of yield* upChains(graph, start, mask, maxDegree, limit, pacer)) {
     const upEdges = chainEdges(up);
     walks.push(rawBlood(start, upEdges, []));
     // Descente en profondeur depuis le sommet, sans repasser par la montée.
     const stack: Chain[] = [{ node: up.node, edge: undefined, prev: undefined, depth: 0 }];
     while (stack.length > 0) {
+      if (pacer.due()) yield;
       const down = stack.pop();
       if (down === undefined || up.depth + down.depth >= maxDegree) continue;
       for (const edge of graph.childEdges[down.node] ?? []) {
@@ -257,16 +272,18 @@ function nearWalks(
  * Personnes utiles pour monter depuis `start` : ses ancêtres (et elle) qui descendent d'un
  * ancêtre commun ou en sont un. Une montée hors de cet ensemble n'atteint aucun sommet possible.
  */
-function usefulAncestors(
+function* usefulAncestors(
   graph: KinshipGraph,
   start: number,
   own: ReadonlySet<number>,
   common: readonly number[],
   mask: FiliationTypeMask,
-): Set<number> {
+  pacer: Pacer,
+): Steps<Set<number>> {
   const useful = new Set<number>(common);
   const stack = [...common];
   while (stack.length > 0) {
+    if (pacer.due()) yield;
     const node = stack.pop();
     if (node === undefined) break;
     for (const edge of graph.childEdges[node] ?? []) {
@@ -288,14 +305,15 @@ function usefulAncestors(
  * écartés avant toute énumération. A ou B lui-même (ligne directe) reste un sommet possible.
  * Rend `undefined` si `nodes` contient un cycle (données corrompues) : pas de filtre.
  */
-function viableApexes(
+function* viableApexes(
   graph: KinshipGraph,
   a: number,
   b: number,
   nodes: ReadonlySet<number>,
   common: readonly number[],
   mask: FiliationTypeMask,
-): Set<number> | undefined {
+  pacer: Pacer,
+): Steps<Set<number> | undefined> {
   const root = -1;
   // Arêtes de l'enfant vers le parent ; la racine fictive mène à A et à B.
   const preds = new Map<number, number[]>();
@@ -311,6 +329,7 @@ function viableApexes(
   addEdge(root, a);
   addEdge(root, b);
   for (const node of nodes) {
+    if (pacer.due()) yield;
     for (const edge of graph.parentEdges[node] ?? []) {
       if ((edge.typeBit & mask) !== 0 && nodes.has(edge.parent)) addEdge(node, edge.parent);
     }
@@ -321,6 +340,7 @@ function viableApexes(
   const order: number[] = [root];
   const position = new Map<number, number>([[root, 0]]);
   for (let index = 0; index < order.length; index += 1) {
+    if (pacer.due()) yield;
     const node = order[index];
     if (node === undefined) break;
     for (const next of succs.get(node) ?? []) {
@@ -347,6 +367,7 @@ function viableApexes(
     return left;
   };
   for (const node of order.slice(1)) {
+    if (pacer.due()) yield;
     let dominator: number | undefined;
     for (const pred of preds.get(node) ?? []) {
       dominator = dominator === undefined ? pred : intersect(dominator, pred);
@@ -368,15 +389,15 @@ function byDepth(chains: readonly Chain[]): Chain[][] {
  * aux ancêtres qui mènent à un ancêtre commun (ensembles d'ancêtres du graphe, en cache) ; chaque
  * côté a son budget, et les paires de chaînes ont le leur.
  */
-function bloodPaths(
+function* bloodPaths(
   graph: KinshipGraph,
   a: number,
   b: number,
   options: ResolvedOptions,
-): { paths: RawBlood[]; truncated: boolean } {
-  const { mask } = options;
-  const ofA = new Set(graph.ancestorGenerations(a, mask).keys()).add(a);
-  const ofB = new Set(graph.ancestorGenerations(b, mask).keys()).add(b);
+): Steps<{ paths: RawBlood[]; truncated: boolean }> {
+  const { mask, pacer } = options;
+  const ofA = new Set((yield* graph.ancestorGenerationSteps(a, mask, pacer)).keys()).add(a);
+  const ofB = new Set((yield* graph.ancestorGenerationSteps(b, mask, pacer)).keys()).add(b);
   const common = [...ofA].filter((node) => ofB.has(node));
   if (common.length === 0) return { paths: [], truncated: false };
 
@@ -385,18 +406,21 @@ function bloodPaths(
   // Montées vers un ancêtre commun, puis seulement vers un sommet possible (deux montées
   // disjointes) : l'implexe ne fait ni exploser l'énumération ni signaler une fausse limite.
   const reachable = new Set([
-    ...usefulAncestors(graph, a, ofA, common, mask),
-    ...usefulAncestors(graph, b, ofB, common, mask),
+    ...(yield* usefulAncestors(graph, a, ofA, common, mask, pacer)),
+    ...(yield* usefulAncestors(graph, b, ofB, common, mask, pacer)),
   ]);
-  const viable = viableApexes(graph, a, b, reachable, common, mask);
+  const viable = yield* viableApexes(graph, a, b, reachable, common, mask, pacer);
   const apexes = viable === undefined ? common : [...viable];
   if (apexes.length === 0) return { paths: [], truncated: false };
-  const usefulA = usefulAncestors(graph, a, ofA, apexes, mask);
-  const usefulB = usefulAncestors(graph, b, ofB, apexes, mask);
-  const levelsA = byDepth(upChains(graph, a, mask, Number.POSITIVE_INFINITY, limitA, usefulA));
+  const usefulA = yield* usefulAncestors(graph, a, ofA, apexes, mask, pacer);
+  const usefulB = yield* usefulAncestors(graph, b, ofB, apexes, mask, pacer);
+  const levelsA = byDepth(
+    yield* upChains(graph, a, mask, Number.POSITIVE_INFINITY, limitA, pacer, usefulA),
+  );
+  const chainsB = yield* upChains(graph, b, mask, Number.POSITIVE_INFINITY, limitB, pacer, usefulB);
   const fromB = new Map<number, Chain[][]>();
   let deepestB = 0;
-  for (const chain of upChains(graph, b, mask, Number.POSITIVE_INFINITY, limitB, usefulB)) {
+  for (const chain of chainsB) {
     const levels = fromB.get(chain.node) ?? [];
     (levels[chain.depth] ??= []).push(chain);
     fromB.set(chain.node, levels);
@@ -413,6 +437,7 @@ function bloodPaths(
         const candidates = fromB.get(chainA.node)?.[total - up];
         if (candidates === undefined) continue;
         for (const chainB of candidates) {
+          if (pacer.due()) yield;
           if (checks <= 0) {
             truncated = true;
             break search;
@@ -482,13 +507,13 @@ function indexByEnd(walks: readonly RawBlood[]): Map<number, RawBlood[]> {
 }
 
 /** Chemins par une ou deux unions de A vers B ; chaque recherche de segments a son budget. */
-function alliancePaths(
+function* alliancePaths(
   graph: KinshipGraph,
   a: number,
   b: number,
   options: ResolvedOptions,
-): { paths: RawSegment[][]; truncated: boolean } {
-  const { mask, maxUnions } = options;
+): Steps<{ paths: RawSegment[][]; truncated: boolean }> {
+  const { mask, maxUnions, pacer } = options;
   if (maxUnions < 1) return { paths: [], truncated: false };
   const one = options.maxAllianceDegree;
   const two = maxUnions >= 2 ? options.maxTwoUnionAllianceDegree : -1;
@@ -497,29 +522,24 @@ function alliancePaths(
   const walksFrom = (node: number, degree: number) => {
     const limit = budget(options.maxChains);
     limits.push(limit);
-    return nearWalks(graph, node, mask, degree, limit);
+    return nearWalks(graph, node, mask, degree, limit, pacer);
   };
-  const fromA = walksFrom(a, reach);
-  const fromB = indexByEnd(walksFrom(b, reach));
+  const fromA = yield* walksFrom(a, reach);
+  const fromB = indexByEnd(yield* walksFrom(b, reach));
   const paths: RawSegment[][] = [];
 
+  // Segments du milieu, par personne et degré : calculés une fois (lus avant tout générateur,
+  // pour ne pas en créer un à chaque passage).
   const middleCache = new Map<string, RawBlood[]>();
-  const middle = (node: number, degree: number) => {
-    const key = `${String(node)}:${String(degree)}`;
-    let walks = middleCache.get(key);
-    if (walks === undefined) {
-      walks = walksFrom(node, degree);
-      middleCache.set(key, walks);
-    }
-    return walks;
-  };
 
   for (const left of fromA) {
+    if (pacer.due()) yield;
     const leftDegree = degreeOf(left);
     for (const first of graph.unionEdges[left.end] ?? []) {
       // Une union : sang, union, sang.
       if (leftDegree <= one) {
         for (const walk of fromB.get(first.spouse) ?? []) {
+          if (pacer.due()) yield;
           if (leftDegree + degreeOf(walk) > one) continue;
           const right = invertRaw(walk);
           if (!crossingIsUseful(graph, left, first, right, mask)) continue;
@@ -529,11 +549,19 @@ function alliancePaths(
       }
       // Deux unions : sang, union, sang, union, sang.
       if (leftDegree > two) continue;
-      for (const center of middle(first.spouse, two - leftDegree)) {
+      const middleKey = `${String(first.spouse)}:${String(two - leftDegree)}`;
+      let centers = middleCache.get(middleKey);
+      if (centers === undefined) {
+        centers = yield* walksFrom(first.spouse, two - leftDegree);
+        middleCache.set(middleKey, centers);
+      }
+      for (const center of centers) {
+        if (pacer.due()) yield;
         const centerDegree = leftDegree + degreeOf(center);
         if (!crossingIsUseful(graph, left, first, center, mask)) continue;
         for (const second of graph.unionEdges[center.end] ?? []) {
           for (const walk of fromB.get(second.spouse) ?? []) {
+            if (pacer.due()) yield;
             if (centerDegree + degreeOf(walk) > two) continue;
             const right = invertRaw(walk);
             if (!crossingIsUseful(graph, center, second, right, mask)) continue;
@@ -615,13 +643,19 @@ function groupKey(segments: readonly GroupedSegment[], loose: number): string {
 }
 
 /** Réunit les chemins qui ne diffèrent que par l'ancêtre au sommet d'un segment collatéral. */
-function groupApexes(paths: readonly GroupedSegment[][], graph: KinshipGraph): GroupedSegment[][] {
+function* groupApexes(
+  paths: readonly GroupedSegment[][],
+  graph: KinshipGraph,
+  pacer: Pacer,
+): Steps<GroupedSegment[][]> {
   let current = [...paths];
-  const length = Math.max(0, ...paths.map((path) => path.length));
+  let length = 0;
+  for (const path of paths) length = Math.max(length, path.length);
   for (let index = 0; index < length; index += 1) {
     const groups = new Map<string, GroupedSegment[]>();
     const order: string[] = [];
     for (const path of current) {
+      if (pacer.due()) yield;
       const segment = path[index];
       const loose = segment?.kind === 'blood' && isCollateral(segment) ? index : -1;
       const key = `${String(path.length)}#${groupKey(path, loose)}`;
@@ -766,11 +800,15 @@ function nonBirthRank(relationship: Relationship): number {
  * naissance avant « l'a élevé » quand il l'a aussi élevé), le plus certain ; à égalité, une clé
  * identique pour un chemin et son inverse.
  */
-function sortRelationships(relationships: Relationship[]): Relationship[] {
-  const keyed = relationships.map((relationship) => ({
-    relationship,
-    key: relationshipKey(relationship),
-  }));
+function* sortRelationships(
+  relationships: readonly Relationship[],
+  pacer: Pacer,
+): Steps<Relationship[]> {
+  const keyed: { relationship: Relationship; key: string }[] = [];
+  for (const relationship of relationships) {
+    if (pacer.due()) yield;
+    keyed.push({ relationship, key: relationshipKey(relationship) });
+  }
   keyed.sort(
     (x, y) =>
       (x.relationship.kind === 'blood' ? 0 : 1) - (y.relationship.kind === 'blood' ? 0 : 1) ||
@@ -787,30 +825,39 @@ function sortRelationships(relationships: Relationship[]): Relationship[] {
 }
 
 /** Calcul dans le sens canonique (A avant B par identifiant). */
-function computeRelationships(
+function* computeRelationships(
   graph: KinshipGraph,
   a: number,
   b: number,
   options: ResolvedOptions,
-): KinshipResult {
-  const blood = bloodPaths(graph, a, b, options);
-  const alliance = alliancePaths(graph, a, b, options);
-  const grouped = groupApexes(
+): Steps<KinshipResult> {
+  const { pacer } = options;
+  const blood = yield* bloodPaths(graph, a, b, options);
+  const alliance = yield* alliancePaths(graph, a, b, options);
+  const grouped = yield* groupApexes(
     [
       ...blood.paths.map((path) => [toGrouped(path)]),
       ...alliance.paths.map((p) => p.map(toGrouped)),
     ],
     graph,
+    pacer,
   );
   const limited = blood.truncated || alliance.truncated;
   if (grouped.length === 0)
     return limited ? { status: 'incomplete', truncated: true } : { status: 'none' };
-  const sorted = sortRelationships(grouped.map((path) => toPublic(graph, path)));
+  const found: Relationship[] = [];
+  for (const path of grouped) {
+    if (pacer.due()) yield;
+    found.push(toPublic(graph, path));
+  }
+  const sorted = yield* sortRelationships(found, pacer);
   // Alliance nommée (T-021) sur les chemins rendus : elle ne change ni les chemins ni leur ordre.
-  const relationships = sorted.slice(0, options.maxRelationships).map((relationship) => {
+  const relationships: Relationship[] = [];
+  for (const relationship of sorted.slice(0, options.maxRelationships)) {
+    if (pacer.due()) yield;
     const alliance = classifyAlliance(graph, relationship, options.allianceContext);
-    return alliance === undefined ? relationship : { ...relationship, alliance };
-  });
+    relationships.push(alliance === undefined ? relationship : { ...relationship, alliance });
+  }
   return {
     status: 'related',
     relationships,
@@ -829,16 +876,42 @@ export function findRelationships(
   bId: Id,
   options: KinshipOptions = {},
 ): KinshipResult {
+  return drain(findRelationshipSteps(graph, aId, bId, options, NEVER_PAUSE));
+}
+
+/** `findRelationships`, en calcul découpable (`slicing.ts`). */
+export function* findRelationshipSteps(
+  graph: KinshipGraph,
+  aId: Id,
+  bId: Id,
+  options: KinshipOptions,
+  pacer: Pacer,
+): Steps<KinshipResult> {
   const a = graph.indexOf(aId);
   const b = graph.indexOf(bId);
   if (a === undefined || b === undefined) return { status: 'none' };
   if (a === b) return { status: 'same_person' };
-  const resolved = resolve(options);
-  if (compareIds(aId, bId) < 0) return computeRelationships(graph, a, b, resolved);
-  const result = computeRelationships(graph, b, a, resolved);
+  const resolved = resolve(options, pacer);
+  if (compareIds(aId, bId) < 0) return yield* computeRelationships(graph, a, b, resolved);
+  const result = yield* computeRelationships(graph, b, a, resolved);
   return result.status === 'related'
     ? { ...result, relationships: result.relationships.map(invertRelationship) }
     : result;
+}
+
+/**
+ * `findRelationships` par tranches (TRD, Performance : jamais plus de 50 ms d'interface bloquée) :
+ * même résultat, rendu par une promesse ; rejetée par `KinshipCancelledError` si le signal annule
+ * (par exemple quand le lecteur choisit une autre fiche). Le graphe est immuable : rien ne change
+ * pendant le calcul.
+ */
+export function findRelationshipsInSlices(
+  graph: KinshipGraph,
+  aId: Id,
+  bId: Id,
+  options: KinshipOptions & SliceOptions,
+): Promise<KinshipResult> {
+  return runInSlices((pacer) => findRelationshipSteps(graph, aId, bId, options, pacer), options);
 }
 
 /** Un ancêtre au sommet d'un chemin de sang, et ses générations les plus proches de chaque côté. */
@@ -868,7 +941,9 @@ export function commonAncestorsOfPaths(
   const b = graph.indexOf(bId);
   if (a === undefined || b === undefined || a === b) return { ancestors: [], truncated: false };
   const swap = compareIds(aId, bId) > 0;
-  const { paths, truncated } = bloodPaths(graph, swap ? b : a, swap ? a : b, resolve(options));
+  const { paths, truncated } = drain(
+    bloodPaths(graph, swap ? b : a, swap ? a : b, resolve(options)),
+  );
   const best = new Map<number, [number, number]>();
   for (const path of paths) {
     const fromA = swap ? path.down.length : path.up.length;

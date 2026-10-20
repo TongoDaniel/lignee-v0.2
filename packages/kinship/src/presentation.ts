@@ -17,7 +17,7 @@ import type { Certainty, FiliationType, Id } from '@lignee/domain';
 
 import { FILIATION_TYPES, compareIds, weakestCertainty } from './graph';
 import type { KinshipGraph } from './graph';
-import { findRelationships, type KinshipOptions } from './kinship';
+import { findRelationshipSteps, type KinshipOptions } from './kinship';
 import {
   invertRelationship,
   type AllianceLink,
@@ -34,6 +34,14 @@ import {
   type SiblingLink,
   type SiblingSharing,
 } from './siblings';
+import {
+  NEVER_PAUSE,
+  drain,
+  runInSlices,
+  type Pacer,
+  type SliceOptions,
+  type Steps,
+} from './slicing';
 
 /**
  * Côté d'un lien pour une personne : le parent par lequel il passe, son côté (père, mère,
@@ -282,8 +290,38 @@ export function presentRelationships(
   bId: Id,
   options: PresentationOptions = {},
 ): PresentationResult {
-  const result = findRelationships(graph, aId, bId, options);
+  return drain(presentRelationshipSteps(graph, aId, bId, options, NEVER_PAUSE));
+}
+
+/**
+ * `presentRelationships` par tranches, pour l'écran « Qui est-ce pour moi ? » (T-029) : même
+ * résultat, rendu par une promesse, sans jamais bloquer l'interface plus d'une tranche (TRD,
+ * Performance). Rejetée par `KinshipCancelledError` si le signal annule : une autre fiche
+ * choisie entre-temps annule la question précédente.
+ */
+export function presentRelationshipsInSlices(
+  graph: KinshipGraph,
+  aId: Id,
+  bId: Id,
+  options: PresentationOptions & SliceOptions,
+): Promise<PresentationResult> {
+  return runInSlices((pacer) => presentRelationshipSteps(graph, aId, bId, options, pacer), options);
+}
+
+/**
+ * `presentRelationships`, en calcul découpable : la recherche des chemins est découpée, la mise
+ * en forme (au plus `maxRelationships` chemins) se fait d'un trait.
+ */
+function* presentRelationshipSteps(
+  graph: KinshipGraph,
+  aId: Id,
+  bId: Id,
+  options: PresentationOptions,
+  pacer: Pacer,
+): Steps<PresentationResult> {
+  const result = yield* findRelationshipSteps(graph, aId, bId, options, pacer);
   if (result.status !== 'related') return result;
+  if (pacer.due()) yield;
   const sibling = siblingLink(graph, aId, bId);
   const siblingPaths = result.relationships.filter(isSiblingPath);
   const entries: Omit<PresentedLink, 'rank'>[] = [];

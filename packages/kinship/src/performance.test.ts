@@ -20,6 +20,7 @@ import { siblingsOf } from './siblings';
 
 const PAR_01_BUDGET_MS = 200;
 const TREE_OPENING_BUDGET_MS = 1000;
+const PERF_TIMEOUT_MS = 60_000;
 
 /** Graine fixe pour tirer les paires (reproductible). */
 function* pairsOf(ids: readonly Id[], count: number): Generator<[Id, Id]> {
@@ -49,7 +50,9 @@ function pairTimes(graph: KinshipGraph, pairs: readonly (readonly [Id, Id])[]) {
   return { cold, warm };
 }
 
-describe('PAR-01 : temps de réponse du moteur', () => {
+// Délai explicite pour chaque test (T-028) : l'arbre type et les mesures répétées dépassent les
+// 5 s par défaut de Vitest sur une machine chargée.
+describe('PAR-01 : temps de réponse du moteur', { timeout: PERF_TIMEOUT_MS }, () => {
   it('arbre de 5 000 personnes : chaque lien en moins de 200 ms, graphe en moins de 1 s', () => {
     // La copie de l'arbre type (environ 110 ms) est faite hors des mesures.
     const tree = referenceTree(5000);
