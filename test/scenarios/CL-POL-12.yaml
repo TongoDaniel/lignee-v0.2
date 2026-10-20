@@ -4,13 +4,15 @@
 # tient en 15 fiches de large : une par épouse repliée, la largeur de ses enfants pour Carine, en
 # tête de leur colonne (ARB-03, « niveau branche »). Les frères et sœurs suivent leurs dates de
 # naissance, sans date l'ordre saisi. Déplier le foyer d'Amina montre ses enfants sous elle.
-# Vu depuis le chef (test), les 8 foyers sont ouverts sans chevauchement. Reste : revue visuelle
-# sur l'Android de référence (T-017) et fluidité mesurée sur le téléphone (T-105).
+# Vu depuis le chef (test), les 8 foyers sont ouverts sans chevauchement. Dessin (T-017) : quatorze
+# fiches, huit traits d'union, sept pastilles « + 5 », une descente de cinq enfants ; le parcours
+# accessible donne au chef ses huit foyers dans l'ordre des rangs, avec leurs 40 enfants. Reste :
+# revue visuelle sur l'Android de référence (issue #34) et fluidité mesurée sur le téléphone (T-105).
 id: CL-POL-12
 titre: Chef de famille avec 8 épouses et 40 enfants
 couverture:
   teste: [disposition]
-  reste: [T-017, T-105]
+  reste: [T-105]
 arbre:
   personnes:
     - bekono/M
@@ -222,3 +224,49 @@ attendu:
       - { famille: [bekono, florence], replie: true, enfants: 5 }
       - { famille: [bekono, gisele], replie: true, enfants: 5 }
       - { famille: [bekono, helene], replie: true, enfants: 5 }
+  dessin:
+    noeuds: 14
+    unions:
+      [
+        [bekono, amina],
+        [bekono, beatrice],
+        [bekono, carine],
+        [bekono, delphine],
+        [bekono, edith],
+        [bekono, florence],
+        [bekono, gisele],
+        [bekono, helene],
+      ]
+    pastilles:
+      - { famille: [bekono, amina], enfants: 5 }
+      - { famille: [bekono, beatrice], enfants: 5 }
+      - { famille: [bekono, delphine], enfants: 5 }
+      - { famille: [bekono, edith], enfants: 5 }
+      - { famille: [bekono, florence], enfants: 5 }
+      - { famille: [bekono, gisele], enfants: 5 }
+      - { famille: [bekono, helene], enfants: 5 }
+    descentes:
+      - { famille: [bekono, carine], enfants: [carine_3, carine_1, carine_2, carine_4, carine_5] }
+    renvois: 0
+    parcours:
+      - personne: bekono
+        conjoints:
+          - { conjoint: amina, enfants: [amina_1, amina_2, amina_3, amina_4, amina_5] }
+          - {
+              conjoint: beatrice,
+              enfants: [beatrice_1, beatrice_2, beatrice_3, beatrice_4, beatrice_5],
+            }
+          - { conjoint: carine, enfants: [carine_1, carine_2, carine_3, carine_4, carine_5] }
+          - {
+              conjoint: delphine,
+              enfants: [delphine_1, delphine_2, delphine_3, delphine_4, delphine_5],
+            }
+          - { conjoint: edith, enfants: [edith_1, edith_2, edith_3, edith_4, edith_5] }
+          - {
+              conjoint: florence,
+              enfants: [florence_1, florence_2, florence_3, florence_4, florence_5],
+            }
+          - { conjoint: gisele, enfants: [gisele_1, gisele_2, gisele_3, gisele_4, gisele_5] }
+          - { conjoint: helene, enfants: [helene_1, helene_2, helene_3, helene_4, helene_5] }
+      - personne: carine_2
+        parents: [[bekono, carine]]

@@ -64,6 +64,7 @@ export const scenarioPartKeys = {
       'disposition',
       'apres_deplier',
       'descendance',
+      'dessin',
     ],
   },
   lien: { racine: [], attendu: ['liens'] },

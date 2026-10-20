@@ -138,6 +138,39 @@ export const dispositionExpectedSchema = z.strictObject({
 });
 export type DispositionExpected = z.infer<typeof dispositionExpectedSchema>;
 
+/**
+ * Scène à peindre (T-017), au zoom standard, texte à 100 % : ce que l'écran dessine, compté sans
+ * Skia. Les listes sont complètes ; les enfants d'une descente ou d'un foyer du parcours se lisent
+ * sans ordre.
+ */
+export const drawingExpectedSchema = z.strictObject({
+  /** Fiches de personnes dessinées. */
+  noeuds: z.int().min(0),
+  /** Traits d'union, un par couple de conjoints dessinés sur la même rangée. */
+  unions: z.array(pairSchema),
+  /** Pastilles « + n » des foyers repliés. */
+  pastilles: z.array(z.strictObject({ famille: familySchema, enfants: z.int().min(1) })),
+  /** Foyers dépliés : les enfants au bout de leurs traits. */
+  descentes: z.array(
+    z.strictObject({ famille: familySchema, enfants: z.array(z.string()).min(1) }),
+  ),
+  /** Renvois « Voir aussi » (un par lien, deux mentions). */
+  renvois: z.int().min(0).optional(),
+  /** Parcours accessible (ACC-06) : parents, conjoints dans l'ordre des rangs, enfants par foyer. */
+  parcours: z
+    .array(
+      z.strictObject({
+        personne: z.string(),
+        parents: z.array(familySchema).optional(),
+        conjoints: z
+          .array(z.strictObject({ conjoint: z.string(), enfants: z.array(z.string()) }))
+          .optional(),
+      }),
+    )
+    .optional(),
+});
+export type DrawingExpected = z.infer<typeof drawingExpectedSchema>;
+
 export const layoutExpectedSchema = z.strictObject({
   /** Rangée de chaque personne nommée (0 pour la personne centrale). */
   generations: z.record(z.string(), z.int()).optional(),
@@ -156,6 +189,8 @@ export const layoutExpectedSchema = z.strictObject({
   apres_deplier: dispositionExpectedSchema.optional(),
   /** Vue « descendance » de `action.descendance_de`, tout déplié par défaut (ARB-14, T-019). */
   descendance: dispositionExpectedSchema.optional(),
+  /** Scène à peindre et parcours accessible de l'arbre par défaut (T-017). */
+  dessin: drawingExpectedSchema.optional(),
   /**
    * Partie lien du même scénario, vérifiée par packages/kinship (T-022) : déclarée sans être lue,
    * admise seulement si `couverture.teste` contient `lien` (`requireScenarioParts`).

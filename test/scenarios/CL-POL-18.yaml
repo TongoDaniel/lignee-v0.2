@@ -2,12 +2,15 @@
 # celui du grand-père et celui du père, Samuel étant l'enfant d'un foyer du grand-père. Chaque
 # foyer sait s'il mène à la personne qui regarde : depuis Noémie, ceux de Sarah et de Judith ;
 # depuis Théo, ceux de Sarah et de Grace. Repli (T-012) : depuis Noémie, ces deux foyers sont
-# ouverts et les autres repliés, chacun avec son compteur. Reste : la revue visuelle (T-017).
+# ouverts et les autres repliés, chacun avec son compteur. Dessin (T-017) : huit fiches, cinq traits
+# d'union, deux descentes (le fils d'un foyer du grand-père est le père du foyer suivant), trois
+# pastilles ; le parcours accessible monte du père à son foyer d'origine. Reste : la revue visuelle
+# sur l'Android de référence (issue #34).
 id: CL-POL-18
 titre: Polygamie sur deux générations (grand-père et père)
 couverture:
   teste: [disposition]
-  reste: [T-017]
+  reste: []
 arbre:
   personnes:
     - emmanuel/M
@@ -81,3 +84,26 @@ attendu:
       - { famille: [emmanuel, lydia], replie: true, enfants: 1 }
       - { famille: [samuel, grace], replie: true, enfants: 1 }
       - { famille: [samuel, judith], replie: false, enfants: 1 }
+  dessin:
+    noeuds: 8
+    unions:
+      [[emmanuel, ruth], [emmanuel, sarah], [emmanuel, lydia], [samuel, grace], [samuel, judith]]
+    pastilles:
+      - { famille: [emmanuel, ruth], enfants: 1 }
+      - { famille: [emmanuel, lydia], enfants: 1 }
+      - { famille: [samuel, grace], enfants: 1 }
+    descentes:
+      - { famille: [emmanuel, sarah], enfants: [samuel] }
+      - { famille: [samuel, judith], enfants: [noemie] }
+    renvois: 0
+    parcours:
+      - personne: samuel
+        parents: [[emmanuel, sarah]]
+        conjoints:
+          - { conjoint: grace, enfants: [theo] }
+          - { conjoint: judith, enfants: [noemie] }
+      - personne: emmanuel
+        conjoints:
+          - { conjoint: ruth, enfants: [joel] }
+          - { conjoint: sarah, enfants: [samuel] }
+          - { conjoint: lydia, enfants: [esther] }
