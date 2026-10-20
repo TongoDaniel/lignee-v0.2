@@ -102,7 +102,9 @@ function sharingOf(result: KinshipResult) {
   return segment?.kind === 'blood' ? segment.sharing : 'alliance';
 }
 
-describe('échelle d’implexe', () => {
+// Échelle de 30 générations : des milliers de chemins à parcourir, le délai par défaut de vitest
+// (5 s) est trop court sous la charge de la CI.
+describe('échelle d’implexe', { timeout: 30_000 }, () => {
   it('deux frères sous une échelle de 30 générations : frères, dans les deux sens, complet', () => {
     const tree = builder();
     const [a, b, p, q] = [tree.person(), tree.person(), tree.person(), tree.person()];

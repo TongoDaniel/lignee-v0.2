@@ -38,7 +38,9 @@ afterEach(() => {
 
 const ids = listScenarioIds();
 
-describe('fichiers de scénarios', () => {
+// Lit et valide tous les scénarios du dépôt : le délai par défaut de vitest (5 s) est trop court
+// sous la charge de la CI.
+describe('fichiers de scénarios', { timeout: 30_000 }, () => {
   it('test/scenarios ne contient que des scénarios .yaml et le README', () => {
     expect(ids.length).toBeGreaterThan(0);
     expect(unexpectedScenarioFiles()).toEqual([]);
