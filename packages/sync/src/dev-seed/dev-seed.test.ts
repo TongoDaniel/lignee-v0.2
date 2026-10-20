@@ -18,7 +18,9 @@ afterAll(() => {
   tmp.cleanup();
 });
 
-describe('arbre généré chargé en développement', () => {
+// Génération, projection et écriture chiffrée de 500 personnes : le délai par défaut de vitest
+// (5 s) est trop court sous la charge de la CI.
+describe('arbre généré chargé en développement', { timeout: 60_000 }, () => {
   it('écrit un arbre de 500 personnes générées, projeté pour son propriétaire', async () => {
     const { db, connection } = await openTestDatabase(join(tmp.dir, 'seed.db'));
     const result = seedGeneratedTree(db, { now: 1 });

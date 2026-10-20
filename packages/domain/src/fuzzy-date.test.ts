@@ -437,7 +437,9 @@ describe('date floue : affichage neutre', () => {
   });
 });
 
-describe('date floue : propriétés sur des dates générées', () => {
+// Jusqu'à 3 000 exécutions par propriété : le délai par défaut de vitest (5 s) est trop court sous
+// la charge de la CI.
+describe('date floue : propriétés sur des dates générées', { timeout: 60_000 }, () => {
   const anyDate = fuzzyDateArbitrary({ calendars: ['gregorian', 'hijri'], withText: true });
   /** Années voisines : beaucoup de dates qui se chevauchent ou se touchent. */
   const nearDate = fuzzyDateArbitrary({ minYear: 1930, maxYear: 1950 });
