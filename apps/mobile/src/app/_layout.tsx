@@ -7,6 +7,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { AppProviders } from '../AppProviders';
 import { LocalDatabaseProvider } from '../db/LocalDatabaseProvider';
@@ -23,14 +24,17 @@ export default function RootLayout() {
     if (ready) void SplashScreen.hideAsync();
   }, [ready]);
 
-  // La base locale s'ouvre dès le premier rendu, pendant le chargement des polices.
+  // La base locale s'ouvre dès le premier rendu, pendant le chargement des polices. Les gestes de
+  // l'arbre (déplacer, pincer) exigent la racine de Gesture Handler.
   return (
     <LocalDatabaseProvider>
       {ready ? (
-        <AppProviders>
-          <Stack screenOptions={{ headerShown: false }} />
-          <StatusBar style="auto" />
-        </AppProviders>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <AppProviders>
+            <Stack screenOptions={{ headerShown: false }} />
+            <StatusBar style="auto" />
+          </AppProviders>
+        </GestureHandlerRootView>
       ) : null}
     </LocalDatabaseProvider>
   );
