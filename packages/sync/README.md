@@ -12,6 +12,9 @@ Protocole de synchronisation, côté téléphone et côté serveur. Agent : sync
 | `src/local-db/migrate.ts` | Migrateur : version dans `PRAGMA user_version`, une transaction par migration |
 | `src/local-db/key.ts`, `open.ts` | Clé aléatoire de 256 bits en clé brute SQLCipher, trousseau, ouverture, rotation, effacement |
 | `src/local-db/snapshot.ts` | Instantané d'un arbre pour un lecteur : validation, seconde barrière de confidentialité, écriture, relecture, effacement d'un arbre |
+| `src/mutations/apply.ts` | Application pure d'un lot de mutations à un arbre (T-030, ADR 0027) : contrôles sur l'état final, refus du lot entier, point d'extension `canWriterSee` (visibilité du rédacteur, ADR 0017) |
+| `src/mutations/local-changes.ts` | Saisie locale : `recordLocalChanges` (changements de l'écran ou du plan vocal) et `applyLocalMutationBatch` (lot déjà formé, idempotent), arbre et file écrits dans la même transaction |
+| `src/mutations/queue.ts` | File de changements (`mutation_queue`) : ordre de saisie, lots, « N changements en attente », états en attente, envoyée, refusée |
 | `src/dev-seed/` | `@lignee/sync/dev-seed` : arbre généré de 500 personnes, projeté prudemment, chargé en développement seulement |
 | `src/test-support/` | Base chiffrée sur le poste (better-sqlite3-multiple-ciphers au format SQLCipher 4), trousseau en mémoire |
 | `src/tooling/` | Production du module des migrations |
@@ -22,15 +25,17 @@ Le code de `src/` hors tests, outils de test et outillage est embarqué dans l'a
 
 ```sh
 # 1. modifier src/local-db/schema.ts
-corepack pnpm --filter @lignee/sync db:generate -- --name <nom_court>   # SQL + module embarqué
+corepack pnpm --filter @lignee/sync exec drizzle-kit generate --name <nom_court>   # SQL nommé
+corepack pnpm --filter @lignee/sync exec node src/tooling/bundle-migrations.cli.ts # module embarqué
 corepack pnpm --filter @lignee/sync test                                 # schéma, SQL et module d'accord
 ```
 
-Une migration publiée ne se modifie plus : on en ajoute une. Toute colonne autre qu'un identifiant est refusée par `schema.test.ts` (aucune valeur saisie hors du corps JSON, donc jamais dans un index).
+`db:generate` fait les deux étapes, mais sans nom de migration (un argument après `--` irait au second script). Une migration publiée ne se modifie plus : on en ajoute une. Toute colonne autre qu'un identifiant est refusée par `schema.test.ts` (aucune valeur saisie hors du corps JSON, donc jamais dans un index).
 
 ### Confidentialité
 
 - Le téléphone ne reçoit que ce que son utilisateur voit (TRD, « Confidentialité appliquée ») : le filtrage est fait par le serveur (T-052, T-056). `replaceTreeSnapshot` refuse, sans rien écrire, un instantané qui porte la trace d'un filtrage incomplet : règle de visibilité, référence vers un objet absent (dont `distinctFrom`, ADR 0017), source, cause de décès ou ancien prénom d'un autre auteur. Erreurs et constats ne contiennent que des chemins.
+- La file de changements ne garde que ce que l'auteur a saisi : une modification ne porte que les champs réellement changés, une suppression aucun champ. Elle vit dans la base chiffrée (dossier `SQLite`, exclu des sauvegardes Android) ; recharger un instantané la garde, effacer l'arbre la vide. Les constats d'un lot refusé ne portent qu'un code et un chemin.
 - Aucune valeur saisie n'est journalisée ; l'issue de l'ouverture (`OpenOutcome`) et les nombres d'objets peuvent l'être.
 
 ## Tests
@@ -39,7 +44,7 @@ Une migration publiée ne se modifie plus : on en ajoute une. Toute colonne autr
 corepack pnpm --filter @lignee/sync test
 ```
 
-Clé (format, refus d'une injection), migrations (ordre, transaction, base trop récente, table recréée sans effacement en cascade, clé étrangère rompue refusée), schéma (drizzle-kit d'accord, colonnes et index), ouverture (création, réouverture, clé absente ou fausse, rotation et ses interruptions, effacement), instantané (aller-retour sur des arbres générés, remplacement, effacement d'un arbre, seconde barrière), projection de développement (propriété : aucun objet sous règle restreinte), chargement de 500 personnes, et CL-SEC-14 (partie base locale : `src/scenarios/CL-SEC-14.test.ts`).
+Clé (format, refus d'une injection), migrations (ordre, transaction, base trop récente, table recréée sans effacement en cascade, clé étrangère rompue refusée), schéma (drizzle-kit d'accord, colonnes et index), ouverture (création, réouverture, clé absente ou fausse, rotation et ses interruptions, effacement), instantané (aller-retour sur des arbres générés, remplacement, effacement d'un arbre, seconde barrière), projection de développement (propriété : aucun objet sous règle restreinte), chargement de 500 personnes, mutations (lot appliqué puis relu = état attendu, lot invalide = base et file inchangées, propriétés sur des arbres générés ; « distincte de » vers une personne absente ou masquée, même réponse ; refus de cohérence ; idempotence ; file après redémarrage ; migration 2 sur une base remplie), et CL-SEC-14 (partie base locale : `src/scenarios/CL-SEC-14.test.ts`).
 
 ## À vérifier sur téléphone
 
