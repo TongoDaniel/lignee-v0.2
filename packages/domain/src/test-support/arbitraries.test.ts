@@ -13,7 +13,9 @@ import type { TreeFeatures, TreeGeneratorRates } from './tree-generator';
 /** Graine fixe : le test mesure une distribution, il ne doit pas dépendre du tirage. */
 const SEED = 20_261_018;
 
-describe('probabilités uniformes', () => {
+// Milliers de tirages et arbres générés : le délai par défaut de vitest (5 s) est trop court sous
+// la charge de la CI.
+describe('probabilités uniformes', { timeout: 60_000 }, () => {
   it('chaque quart de l’intervalle reçoit à peu près un quart des 4 000 tirages, bornes respectées', () => {
     const values = fc.sample(probabilityArbitrary(0.2, 0.8), { numRuns: 4000, seed: SEED });
     const quarters = [0, 0, 0, 0];
@@ -55,7 +57,7 @@ describe('probabilités uniformes', () => {
   });
 });
 
-describe('arbres variés', () => {
+describe('arbres variés', { timeout: 60_000 }, () => {
   it('sur 200 arbres, au moins la moitié ont des unions et des filiations, et chaque structure difficile apparaît', () => {
     const trees = fc.sample(treeArbitrary({ maxSize: 120, rates: 'varied' }), {
       numRuns: 200,

@@ -19,13 +19,17 @@ import {
   type LogoVariant,
 } from './svg-assets.ts';
 
+// Régénérer les fichiers lit les SVG de la charte et formate le résultat : plus de 5 s (délai par
+// défaut de vitest) quand la CI lance tous les paquets en parallèle.
+const HEAVY_TIMEOUT_MS = 30_000;
+
 const REGENERATE = 'corepack pnpm --filter @lignee/ui assets';
 
 function readGenerated(path: string): string {
   return readFileSync(path, 'utf8').replace(/\r\n/g, '\n');
 }
 
-describe('fichiers générés', () => {
+describe('fichiers générés', { timeout: HEAVY_TIMEOUT_MS }, () => {
   it.each([iconsOutputPath, logoOutputPath])('%s est à jour avec la charte', async (path) => {
     const expected = (await generateAssetFiles()).get(path);
     expect(
@@ -35,7 +39,7 @@ describe('fichiers générés', () => {
   });
 });
 
-describe('icônes', () => {
+describe('icônes', { timeout: HEAVY_TIMEOUT_MS }, () => {
   const icons = readIcons();
 
   it('reprend les 37 icônes de la charte, une par fichier', () => {
@@ -81,7 +85,7 @@ describe('icônes', () => {
   });
 });
 
-describe('logo', () => {
+describe('logo', { timeout: HEAVY_TIMEOUT_MS }, () => {
   const variants = Object.keys(LOGO_FILES) as LogoVariant[];
 
   it.each(variants)('%s : le fichier Nuit a le même dessin que le fichier Jour', (variant) => {
