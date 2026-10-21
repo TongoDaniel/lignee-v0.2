@@ -10,7 +10,8 @@
 //
 // Ce fichier n'importe que drizzle-orm : drizzle-kit le lit pour écrire les migrations
 // (`corepack pnpm --filter @lignee/sync db:generate`).
-import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { sql } from 'drizzle-orm';
+import { check, index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 /** Arbres présents sur le téléphone, chacun projeté pour un lecteur (le compte connecté). */
 export const trees = sqliteTable('trees', {
@@ -178,6 +179,50 @@ export const toPlace = sqliteTable(
   (table) => [index('to_place_tree_idx').on(table.treeId)],
 );
 
+/** États d'une mutation dans la file (ADR 0027). */
+export const QUEUE_STATUSES = ['pending', 'sent', 'refused'] as const;
+export type QueueStatus = (typeof QUEUE_STATUSES)[number];
+
+/**
+ * File de changements (TRD, « Hors-ligne et synchronisation », point 2 ; T-030, ADR 0027) : une
+ * ligne par mutation, dans l'ordre de saisie (`seq`, croissant), groupées par lot. Le corps est
+ * la mutation entière (ce que l'auteur a saisi, rien d'autre) ; les colonnes ne portent que des
+ * identifiants, l'ordre, l'état et le code d'un refus (jamais une valeur saisie).
+ *
+ * Pas de clé étrangère vers `trees` : recharger l'instantané d'un arbre (`replaceTreeSnapshot`
+ * efface puis réécrit la ligne de l'arbre) ne doit jamais effacer des saisies pas encore
+ * envoyées. L'effacement d'un arbre retiré (`eraseLocalTree`) vide aussi sa file, explicitement.
+ */
+export const mutationQueue = sqliteTable(
+  'mutation_queue',
+  {
+    /** Ordre de saisie : alias du rowid, toujours plus grand que les lignes présentes. */
+    seq: integer('seq').primaryKey(),
+    /** Identifiant de la mutation (UUIDv7), unique : une mutation n'entre qu'une fois. */
+    id: text('id').notNull().unique(),
+    batchId: text('batch_id').notNull(),
+    treeId: text('tree_id').notNull(),
+    /** Compte qui a saisi la mutation : seul ce compte l'envoie (T-067). */
+    authorAccountId: text('author_account_id').notNull(),
+    /** Objet visé, pour dire qu'une fiche a des changements en attente. */
+    entityId: text('entity_id').notNull(),
+    status: text('status', { enum: QUEUE_STATUSES }).notNull(),
+    /** Code stable du refus du serveur (T-060), sans texte ni valeur. */
+    refusalCode: text('refusal_code'),
+    body: text('body', { mode: 'json' }).notNull(),
+  },
+  (table) => [
+    index('mutation_queue_tree_idx').on(table.treeId),
+    index('mutation_queue_batch_idx').on(table.batchId),
+    index('mutation_queue_entity_idx').on(table.entityId),
+    check('mutation_queue_status_check', sql`${table.status} IN ('pending', 'sent', 'refused')`),
+    check(
+      'mutation_queue_refusal_check',
+      sql`(${table.status} = 'refused') = (${table.refusalCode} IS NOT NULL)`,
+    ),
+  ],
+);
+
 /** Toutes les tables, pour `drizzle(…, { schema: localSchema })`. */
 export const localSchema = {
   trees,
@@ -192,5 +237,6 @@ export const localSchema = {
   multipleBirths,
   places,
   toPlace,
+  mutationQueue,
 };
 export type LocalSchema = typeof localSchema;

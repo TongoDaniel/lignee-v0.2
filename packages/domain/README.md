@@ -16,6 +16,7 @@ Zod est la seule dépendance du code du paquet. Hors des tests, ESLint (`eslint.
 | `fact.ts` | `factSchema`, `titleRoleSchema`, `multipleBirthSchema`, `findMultipleBirth`, `projectMultipleBirth` | UNI-01, UNI-14, UNI-15, UNI-17 ; CL-FAM-11, CL-FAM-13, CL-FAM-19 |
 | `place.ts` | `placeSchema`, `toPlaceSchema`, `usageNameSchema` | UNI-04 ; tables `lieux`, `a_placer`, `noms_usage` |
 | `visibility.ts` | `visibilityRuleSchema`, `visibilityRuleSetSchema` (données seules) | CON-02, CON-03 ; le calcul est T-052 |
+| `mutation.ts` | `mutationSchema`, `mutationBatchSchema`, `MUTATION_ENTITY_SCHEMAS`, `createdObject`, `updatedObject`, `normalizeMutationFields` (T-030, ADR 0027) | TRD, Hors-ligne (point 2) |
 | `tree.ts` | `treeSchema`, `treeSettingsSchema` (`mapEnabled`) | CON-13 |
 | `coherence.ts` | `findCoherenceIssues`, `checkNewFiliation`, `checkUnion`, `checkPersonDates`, `checkStatedAge`, `coherenceIssueSchema`, `toleratedSpan` (T-007, voir plus bas) | UNI-09, UNI-18 ; CL-DON-08 à CL-DON-11 |
 | `union-simultaneity.ts` | `resolveSimultaneity`, `simultaneityQuestions`, `simultaneityQuestionFor`, `uniformPairAnswers`, `pairAnswersFromHouseholds`, `answerSimultaneity` (T-007) | UNI-08 ; CL-POL-05 |
