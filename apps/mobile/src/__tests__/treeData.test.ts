@@ -109,12 +109,12 @@ describe('dessin', () => {
 
   it('trois niveaux de détail : rien, le prénom, le nom entier', () => {
     const c = card();
-    expect(nameForLevel(c, 'overview', 'X')).toBe('');
-    expect(nameForLevel(c, 'standard', 'X')).toBe('Claire');
-    expect(nameForLevel(c, 'detail', 'X')).toBe('Claire Martin');
-    expect(nameForLevel(card({ placeholder: true }), 'standard', 'À compléter')).toBe(
-      'À compléter',
-    );
+    const texts = { placeholder: 'À compléter', noName: 'Sans nom' };
+    expect(nameForLevel(c, 'overview', texts)).toBe('');
+    expect(nameForLevel(c, 'standard', texts)).toBe('Claire');
+    expect(nameForLevel(c, 'detail', texts)).toBe('Claire Martin');
+    expect(nameForLevel(card({ firstName: '', fullName: '' }), 'standard', texts)).toBe('Sans nom');
+    expect(nameForLevel(card({ placeholder: true }), 'standard', texts)).toBe('À compléter');
   });
 
   it('le nom tient sur deux lignes au plus, jamais coupé sans « … »', () => {

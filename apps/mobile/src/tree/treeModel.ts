@@ -1,7 +1,7 @@
 // Données de l'arbre pour l'écran (T-017) : de la copie locale (T-016) au graphe de la disposition,
 // aux fiches affichées, aux liens supposés. Pas de logique de parenté ici : l'écran affiche.
 import type { Id } from '@lignee/domain';
-import type { LayoutGraph } from '@lignee/layout';
+import { supposedKey, type LayoutGraph } from '@lignee/layout';
 import {
   listLocalTrees,
   readTreeSnapshot,
@@ -16,8 +16,11 @@ export interface TreeModel {
   readonly cards: ReadonlyMap<Id, PersonCard>;
   /** Personne au centre, « Vous » (provisoire, voir `chooseCenter`). */
   readonly centerId: Id;
-  /** Enfants dont une filiation n'est pas certaine : leur trait est en pointillés. */
-  readonly supposedChildren: ReadonlySet<Id>;
+  /**
+   * Filiations dont la certitude n'est pas « certain » (clé `supposedKey(parent, enfant)`) : leur
+   * trait est en pointillés. Une adoption certaine reste un trait plein (06-arbre.md).
+   */
+  readonly supposedFiliations: ReadonlySet<string>;
 }
 
 /**
@@ -56,10 +59,10 @@ export function modelFromSnapshot(
       nameOrder: snapshot.tree.nameOrder,
     }),
     centerId,
-    supposedChildren: new Set(
+    supposedFiliations: new Set(
       snapshot.filiations
         .filter((filiation) => filiation.certainty !== 'certain')
-        .map((filiation) => filiation.childId),
+        .map((filiation) => supposedKey(filiation.parentId, filiation.childId)),
     ),
   };
 }

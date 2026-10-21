@@ -29,16 +29,21 @@ function round(value: number): string {
   return String(Math.round(value * 100) / 100);
 }
 
-/** Texte d'une fiche à un niveau de zoom : rien en vue d'ensemble, le prénom, puis le nom entier. */
+/**
+ * Texte d'une fiche à un niveau de zoom : rien en vue d'ensemble, le prénom, puis le nom entier.
+ * Sans fiche (« Vous » n'a pas besoin de la sienne : on lui donne son texte) ou pour une place à
+ * compléter, le texte `placeholder` ; sans aucun nom utilisable, `noName`.
+ */
 export function nameForLevel(
   card: PersonCard | undefined,
   level: ZoomLevel,
-  placeholderText: string,
+  texts: { readonly placeholder: string; readonly noName: string },
 ): string {
   if (level === 'overview') return '';
-  if (card === undefined || card.placeholder) return placeholderText;
+  if (card === undefined || card.placeholder) return texts.placeholder;
   if (level === 'detail' && card.fullName !== '') return card.fullName;
-  return card.firstName === '' ? card.fullName : card.firstName;
+  const name = card.firstName === '' ? card.fullName : card.firstName;
+  return name === '' ? texts.noName : name;
 }
 
 export interface CardLines {

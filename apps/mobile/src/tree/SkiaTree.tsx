@@ -6,10 +6,12 @@
 import {
   Circle,
   DashPathEffect,
+  LinearGradient,
   Group,
   Path,
   RoundedRect,
   Text as SkiaText,
+  vec,
   type SkFont,
 } from '@shopify/react-native-skia';
 import type { Id } from '@lignee/domain';
@@ -47,7 +49,8 @@ export interface TreeFonts {
 }
 
 /** Traits d'une fiche à l'autre : 2,5 px en `lien-arbre`, pointillés de 6 et 7 pour un lien supposé. */
-const SUPPOSED_DASH = [6, 7];
+const { drawing: measures } = componentMetrics.treeNode;
+const SUPPOSED_DASH = [...measures.supposedDash];
 const DASH_PLUS = [stroke.icone * 2, stroke.icone * 2];
 
 interface DrawProps {
@@ -110,14 +113,20 @@ function PersonShape({
   const lines = useMemo(
     () =>
       cardLines({
-        name: nameForLevel(card, level, t('common:treeScreen.unknownPerson')),
-        secondary: lifespan(card, t),
+        // Sous l'avatar doré, « Vous » ; les années ne concernent que les personnes décédées.
+        name: you
+          ? nameForLevel(undefined, level, { placeholder: t('common:treeScreen.you'), noName: '' })
+          : nameForLevel(card, level, {
+              placeholder: t('common:treeScreen.unknownPerson'),
+              noName: t('common:treeScreen.noName'),
+            }),
+        secondary: you ? undefined : lifespan(card, t),
         width: spec.nodeWidth - spec.input.nodeGap / 2,
         maxLines: spec.input.nameLines,
         measure: (text) => textWidth(fonts.name, text),
         level,
       }),
-    [card, level, spec, fonts.name, t],
+    [card, level, spec, fonts.name, you, t],
   );
   const { x, y } = person;
   const diameter = spec.radius * 2;
@@ -148,7 +157,7 @@ function PersonShape({
             <DashPathEffect intervals={DASH_PLUS} />
           </Circle>
           <Path
-            path={plusPath(x, y, spec.radius / 3)}
+            path={plusPath(x, y, spec.radius * measures.plusRadiusRatio)}
             style="stroke"
             color={colors.texteSecondaire}
             strokeWidth={stroke.icone}
@@ -157,7 +166,13 @@ function PersonShape({
         </>
       ) : you ? (
         <>
-          <Circle cx={x} cy={y} r={spec.radius} color={palette.or500} />
+          <Circle cx={x} cy={y} r={spec.radius}>
+            <LinearGradient
+              start={vec(x - spec.radius, y - spec.radius)}
+              end={vec(x + spec.radius, y + spec.radius)}
+              colors={[palette.or500, palette.or700]}
+            />
+          </Circle>
           <Group opacity={silhouette.opacity}>
             <Circle
               cx={x - spec.radius + diameter * (silhouette.headLeft + silhouette.headSize / 2)}
@@ -182,7 +197,7 @@ function PersonShape({
               font={fonts.initial}
               color={tint.text}
               x={x - textWidth(fonts.initial, initial) / 2}
-              y={y + fonts.initial.getSize() * 0.35}
+              y={y + fonts.initial.getSize() * measures.baseline.centered}
             />
           ) : null}
         </>
@@ -194,7 +209,11 @@ function PersonShape({
           font={fonts.name}
           color={colors.texte}
           x={x - textWidth(fonts.name, line) / 2}
-          y={nameTop + (index + 1) * spec.nameLineHeight - spec.nameLineHeight * 0.25}
+          y={
+            nameTop +
+            (index + 1) * spec.nameLineHeight -
+            spec.nameLineHeight * measures.baseline.name
+          }
         />
       ))}
       {lines.secondary === undefined ? null : (
@@ -207,7 +226,7 @@ function PersonShape({
             nameTop +
             lines.name.length * spec.nameLineHeight -
             spec.input.secondaryOverlap +
-            spec.secondaryLineHeight * 0.8
+            spec.secondaryLineHeight * measures.baseline.secondary
           }
         />
       )}
@@ -251,7 +270,7 @@ function MissingShape({
         <DashPathEffect intervals={DASH_PLUS} />
       </Circle>
       <Path
-        path={plusPath(x, y, spec.radius / 3)}
+        path={plusPath(x, y, spec.radius * measures.plusRadiusRatio)}
         style="stroke"
         color={colors.texteSecondaire}
         strokeWidth={stroke.icone}
@@ -264,7 +283,12 @@ function MissingShape({
           font={fonts.name}
           color={colors.texteSecondaire}
           x={x - textWidth(fonts.name, line) / 2}
-          y={y + spec.nameTop + (index + 1) * spec.nameLineHeight - spec.nameLineHeight * 0.25}
+          y={
+            y +
+            spec.nameTop +
+            (index + 1) * spec.nameLineHeight -
+            spec.nameLineHeight * measures.baseline.name
+          }
         />
       ))}
     </Group>
@@ -298,7 +322,7 @@ function CounterShape({
           font={fonts.name}
           color={colors.texte}
           x={counter.x - textWidth(fonts.name, text) / 2}
-          y={counter.y + fonts.name.getSize() * 0.35}
+          y={counter.y + fonts.name.getSize() * measures.baseline.centered}
         />
       )}
     </Group>
@@ -314,7 +338,7 @@ function MarkShape({ mark, spec, theme, fonts, t }: DrawProps & { readonly mark:
       font={fonts.secondary}
       color={theme.colors.parente}
       x={mark.x - textWidth(fonts.secondary, text) / 2}
-      y={mark.y + spec.markLineHeight * 0.3}
+      y={mark.y + spec.markLineHeight * measures.baseline.mark}
     />
   );
 }

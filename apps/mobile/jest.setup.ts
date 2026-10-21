@@ -38,6 +38,8 @@ jest.mock('@shopify/react-native-skia', () => {
     RoundedRect: host('RoundedRect'),
     Text: host('Text'),
     DashPathEffect: host('DashPathEffect'),
+    LinearGradient: host('LinearGradient'),
+    vec: (x: number, y: number) => ({ x, y }),
     useFont: () => font,
   };
 });

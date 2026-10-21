@@ -8,13 +8,15 @@ import { Button, space, useTheme } from '@lignee/ui';
 import { ScrollView, Text, View } from 'react-native';
 
 import { useTranslator } from '../i18n/I18nProvider';
-import { fullName, lifespan, missingParentText } from './labels';
+import { fullName, lifespan, missingParentText, personLabel } from './labels';
 import type { PersonCard } from './personCards';
 
 export interface TreeOutlineListProps {
   readonly outline: ReadonlyMap<Id, OutlineEntry>;
   readonly cards: ReadonlyMap<Id, PersonCard>;
   readonly focusId: Id;
+  /** « Vous » : sa fiche est annoncée comme telle. */
+  readonly centerId: Id;
   readonly onFocus: (id: Id) => void;
   /** Replie ou déplie un foyer (ou les parents d'une branche repliée) sur le dessin. */
   readonly onToggleFamily: (familyKey: string) => void;
@@ -25,6 +27,7 @@ export function TreeOutlineList({
   outline,
   cards,
   focusId,
+  centerId,
   onFocus,
   onToggleFamily,
   testID,
@@ -42,7 +45,9 @@ export function TreeOutlineList({
       key={id}
       testID={`outline-go-${id}`}
       label={name(id)}
-      accessibilityLabel={t('common:treeScreen.list.goTo', { name: name(id) })}
+      accessibilityLabel={t('common:treeScreen.list.goTo', {
+        name: personLabel(cards.get(id), { you: id === centerId }, t),
+      })}
       accessibilityHint={t('common:treeScreen.list.goToHint')}
       variant="quiet"
       compact
@@ -59,7 +64,12 @@ export function TreeOutlineList({
         ? t('common:treeScreen.list.householdUnspecified', {
             place: missingParentText(item.missing ?? 'parent', t),
           })
-        : t('common:treeScreen.list.household', { name: partner ?? '' });
+        : t(
+            item.ended
+              ? 'common:treeScreen.list.householdEnded'
+              : 'common:treeScreen.list.household',
+            { name: partner ?? '' },
+          );
     return (
       <View
         key={item.familyKey}
@@ -68,13 +78,15 @@ export function TreeOutlineList({
       >
         <Text accessibilityRole="header" style={heading}>
           {title}
-          {item.ended ? ` (${t('common:treeScreen.list.ended')})` : ''}
         </Text>
         {item.partnerId === undefined ? null : person(item.partnerId)}
         {item.childIds.length === 0 ? (
           <Text style={note}>{t('common:treeScreen.list.noChildren')}</Text>
         ) : (
-          item.childIds.map((childId) => person(childId))
+          <>
+            <Text style={note}>{t('common:treeScreen.list.children')}</Text>
+            {item.childIds.map((childId) => person(childId))}
+          </>
         )}
         {item.childIds.length === 0 ? null : (
           <Button
@@ -110,7 +122,12 @@ export function TreeOutlineList({
         <Text style={[typography.secondaire, { color: colors.texteSecondaire }]}>
           {t('common:treeScreen.list.focus')}
         </Text>
-        <Text accessibilityRole="header" style={[typography.titreSection, { color: colors.texte }]}>
+        <Text
+          accessibilityRole="header"
+          accessibilityLabel={personLabel(cards.get(focusId), { you: focusId === centerId }, t)}
+          accessibilityHint={t('common:treeScreen.list.focusHint')}
+          style={[typography.titreSection, { color: colors.texte }]}
+        >
           {name(focusId)}
         </Text>
         {years === undefined ? null : <Text style={body}>{years}</Text>}

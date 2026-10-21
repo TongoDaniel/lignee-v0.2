@@ -10,6 +10,7 @@
 import { Canvas, Group, useFont } from '@shopify/react-native-skia';
 import type { Id } from '@lignee/domain';
 import {
+  clampViewport,
   cullScene,
   hitTest,
   visibleRect,
@@ -24,7 +25,7 @@ import {
   type ZoomLevel,
 } from '@lignee/layout';
 import { fontFiles } from '@lignee/ui/fontFiles';
-import { motion, typography, useTheme } from '@lignee/ui';
+import { componentMetrics, motion, typography, useTheme } from '@lignee/ui';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -97,7 +98,10 @@ export function TreeCanvas({
     fontFiles['InstrumentSans-Medium'],
     typography.legende.fontSize * scaleText,
   );
-  const initialFont = useFont(fontFiles['InstrumentSans-SemiBold'], spec.radius * 0.86 * 1.1);
+  const initialFont = useFont(
+    fontFiles['InstrumentSans-SemiBold'],
+    spec.radius * componentMetrics.avatar.initialRatio,
+  );
 
   const scale = useSharedValue(initialViewport.scale);
   const translateX = useSharedValue(initialViewport.x);
@@ -128,25 +132,15 @@ export function TreeCanvas({
     refresh({ scale: scale.value, x: translateX.value, y: translateY.value });
   }, [refresh, scale, translateX, translateY]);
 
-  const settle = useCallback(
+  // Déplace le cadre : animé, ou immédiat si le téléphone demande de réduire les animations.
+  const moveTo = useCallback(
     (viewport: Viewport) => {
-      refresh(viewport);
-      onSettle(viewport);
-    },
-    [refresh, onSettle],
-  );
-
-  // Ordre des boutons : animé, ou immédiat si le téléphone demande de réduire les animations.
-  const lastCommand = useRef<number | undefined>(undefined);
-  useEffect(() => {
-    if (command === undefined || command.id === lastCommand.current) return;
-    lastCommand.current = command.id;
-    const { viewport } = command;
-    if (theme.reduceMotion) {
-      scale.value = viewport.scale;
-      translateX.value = viewport.x;
-      translateY.value = viewport.y;
-    } else {
+      if (theme.reduceMotion) {
+        scale.value = viewport.scale;
+        translateX.value = viewport.x;
+        translateY.value = viewport.y;
+        return;
+      }
       const timing = {
         duration: motion.duration.transition,
         easing: Easing.bezier(...motion.easing.entreeSortie),
@@ -154,9 +148,30 @@ export function TreeCanvas({
       scale.value = withTiming(viewport.scale, timing);
       translateX.value = withTiming(viewport.x, timing);
       translateY.value = withTiming(viewport.y, timing);
-    }
-    settle(viewport);
-  }, [command, theme.reduceMotion, scale, translateX, translateY, settle]);
+    },
+    [theme.reduceMotion, scale, translateX, translateY],
+  );
+
+  // Au repos (geste fini ou ordre appliqué), le dessin ne reste jamais hors de vue : le cadre est
+  // ramené dans les bornes du dessin.
+  const bounds = scene.bounds;
+  const settle = useCallback(
+    (viewport: Viewport) => {
+      const bounded = clampViewport(viewport, size, bounds);
+      if (bounded !== viewport) moveTo(bounded);
+      refresh(bounded);
+      onSettle(bounded);
+    },
+    [size, bounds, moveTo, refresh, onSettle],
+  );
+
+  const lastCommand = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    if (command === undefined || command.id === lastCommand.current) return;
+    lastCommand.current = command.id;
+    moveTo(command.viewport);
+    settle(command.viewport);
+  }, [command, moveTo, settle]);
 
   // À chaque image : l'écran sort-il de la zone préparée, ou change-t-il de niveau ?
   const { overviewBelow, detailFrom, min, max } = zoom;
@@ -201,7 +216,8 @@ export function TreeCanvas({
 
   const gestures = useMemo(() => {
     const pan = Gesture.Pan()
-      .minDistance(8)
+      .minDistance(componentMetrics.treeNode.drawing.panMinDistance)
+      .maxPointers(1)
       .onStart(() => {
         startX.value = translateX.value;
         startY.value = translateY.value;

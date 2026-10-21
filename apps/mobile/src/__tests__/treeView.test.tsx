@@ -2,7 +2,14 @@
 // parcours en liste, réduction des animations. Skia, Reanimated et Gesture Handler sont simulés
 // (jest.setup.ts) : le rendu réel et les gestes se vérifient sur le téléphone (issue #34).
 import { generateTree } from '@lignee/domain/tree-generator';
-import { sceneSpecIssues } from '@lignee/layout';
+import {
+  buildOutline,
+  buildScene,
+  clampViewport,
+  indexScene,
+  layoutTree,
+  sceneSpecIssues,
+} from '@lignee/layout';
 import { devReaderSnapshot } from '@lignee/sync/dev-seed';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { AccessibilityInfo } from 'react-native';
@@ -11,6 +18,7 @@ import { withTiming } from 'react-native-reanimated';
 import { AppProviders } from '../AppProviders';
 import { sceneSpecFor } from '../tree/sceneSpec';
 import { modelFromSnapshot } from '../tree/treeModel';
+import { TreeCanvas } from '../tree/TreeCanvas';
 import { TreeView } from '../tree/TreeView';
 
 jest.mock('expo-localization', () => ({
@@ -26,8 +34,9 @@ function model(size = 300) {
   return built;
 }
 
-function renderTree(options: { reduceMotion?: boolean; seniorMode?: boolean } = {}) {
+async function renderTree(options: { reduceMotion?: boolean; seniorMode?: boolean } = {}) {
   const built = model();
+  // Le lecteur d'écran répond après le premier rendu : on laisse la réponse arriver dans `act`.
   render(
     <AppProviders
       theme={{
@@ -38,6 +47,7 @@ function renderTree(options: { reduceMotion?: boolean; seniorMode?: boolean } = 
       <TreeView model={built} />
     </AppProviders>,
   );
+  await act(() => Promise.resolve());
   return built;
 }
 
@@ -54,14 +64,18 @@ function isDisabled(testID: string): boolean {
   return props.accessibilityState?.disabled === true;
 }
 
+beforeEach(() => {
+  jest.spyOn(AccessibilityInfo, 'isScreenReaderEnabled').mockResolvedValue(false);
+});
+
 afterEach(() => {
   jest.restoreAllMocks();
   jest.mocked(withTiming).mockClear();
 });
 
 describe('TreeView — dessin', () => {
-  it('ne peint que ce qui est à l’écran et sa marge (ARB-02)', () => {
-    const built = renderTree();
+  it('ne peint que ce qui est à l’écran et sa marge (ARB-02)', async () => {
+    const built = await renderTree();
     expect(screen.queryByTestId('skia-Canvas')).toBeNull();
     layOut();
     expect(screen.getByTestId('skia-Canvas')).toBeTruthy();
@@ -71,8 +85,8 @@ describe('TreeView — dessin', () => {
     expect(circles).toBeLessThan(built.graph.people.length / 3);
   });
 
-  it('chaque bouton porte un verbe et un libellé complet pour le lecteur d’écran', () => {
-    renderTree();
+  it('chaque bouton porte un verbe et un libellé complet pour le lecteur d’écran', async () => {
+    await renderTree();
     expect(screen.getByLabelText('Agrandir l’arbre')).toBeTruthy();
     expect(screen.getByLabelText('Réduire l’arbre')).toBeTruthy();
     expect(screen.getByLabelText('Voir tout l’arbre')).toBeTruthy();
@@ -81,8 +95,8 @@ describe('TreeView — dessin', () => {
 });
 
 describe('TreeView — zoom sans pincer (ACC-06)', () => {
-  it('« + » puis « − » parcourent tous les crans jusqu’aux butées', () => {
-    renderTree();
+  it('« + » puis « − » parcourent tous les crans jusqu’aux butées', async () => {
+    await renderTree();
     layOut();
     const stops = sceneSpecFor({ seniorScale: 1, systemFontScale: 1, touchTarget: 48 }).zoom.stops;
     expect(isDisabled('tree-zoom-in')).toBe(false);
@@ -101,8 +115,8 @@ describe('TreeView — zoom sans pincer (ACC-06)', () => {
     expect(isDisabled('tree-zoom-out')).toBe(true);
   });
 
-  it('les boutons animent le zoom, sauf si le téléphone demande de réduire les animations', () => {
-    renderTree({ reduceMotion: false });
+  it('les boutons animent le zoom, sauf si le téléphone demande de réduire les animations', async () => {
+    await renderTree({ reduceMotion: false });
     layOut();
     act(() => {
       fireEvent.press(screen.getByTestId('tree-zoom-in'));
@@ -110,8 +124,8 @@ describe('TreeView — zoom sans pincer (ACC-06)', () => {
     expect(withTiming).toHaveBeenCalled();
   });
 
-  it('avec « Réduire les animations », le cadre change sans animation', () => {
-    renderTree({ reduceMotion: true });
+  it('avec « Réduire les animations », le cadre change sans animation', async () => {
+    await renderTree({ reduceMotion: true });
     layOut();
     act(() => {
       fireEvent.press(screen.getByTestId('tree-zoom-in'));
@@ -122,8 +136,8 @@ describe('TreeView — zoom sans pincer (ACC-06)', () => {
 });
 
 describe('TreeView — parcours en liste (ACC-06)', () => {
-  it('la liste donne les parents, les conjoints et les enfants ; un nom mène à cette personne', () => {
-    const built = renderTree();
+  it('la liste donne les parents, les conjoints et les enfants ; un nom mène à cette personne', async () => {
+    const built = await renderTree();
     layOut();
     act(() => {
       fireEvent.press(screen.getByTestId('tree-show-list'));
@@ -153,10 +167,69 @@ describe('TreeView — parcours en liste (ACC-06)', () => {
     expect(screen.getByTestId('tree-zoom-in')).toBeTruthy();
   });
 
+  it('revenir au dessin depuis une personne non dessinée recentre sur sa voisine dessinée', async () => {
+    // Un enfant d'un foyer replié n'est pas sur le dessin : on y va par les boutons de la liste,
+    // de proche en proche depuis « Vous ».
+    const built = model();
+    const outline = buildOutline(layoutTree(built.graph, built.centerId));
+    const neighbours = (id: string) => {
+      const entry = outline.get(id);
+      return [
+        ...(entry?.parents.flatMap((parents) => parents.parentIds) ?? []),
+        ...(entry?.unions.flatMap((union) => [
+          ...(union.partnerId === undefined ? [] : [union.partnerId]),
+          ...union.childIds,
+        ]) ?? []),
+      ];
+    };
+    const previous = new Map<string, string>();
+    const queue = [built.centerId];
+    let hiddenId: string | undefined;
+    for (let id = queue.shift(); id !== undefined && hiddenId === undefined; id = queue.shift()) {
+      for (const next of neighbours(id)) {
+        if (next === built.centerId || previous.has(next)) continue;
+        previous.set(next, id);
+        if (outline.get(next)?.drawn === false && (built.cards.get(next)?.fullName ?? '') !== '') {
+          hiddenId = next;
+          break;
+        }
+        queue.push(next);
+      }
+    }
+    if (hiddenId === undefined) throw new Error('no hidden person in the generated tree');
+    const path: string[] = [];
+    for (let id: string | undefined = hiddenId; id !== undefined && id !== built.centerId;) {
+      path.unshift(id);
+      id = previous.get(id);
+    }
+    render(
+      <AppProviders theme={{ reduceMotion: true }}>
+        <TreeView model={built} />
+      </AppProviders>,
+    );
+    await act(() => Promise.resolve());
+    layOut();
+    act(() => {
+      fireEvent.press(screen.getByTestId('tree-show-list'));
+    });
+    for (const id of path) {
+      act(() => {
+        fireEvent.press(screen.getByTestId(`outline-go-${id}`));
+      });
+    }
+    expect(screen.getByText('pas encore sur le dessin')).toBeTruthy();
+    act(() => {
+      fireEvent.press(screen.getByTestId('tree-show-drawing'));
+    });
+    // Le dessin revient, même si la personne choisie n'y est pas.
+    expect(screen.getByTestId('tree-zoom-in')).toBeTruthy();
+    expect(screen.queryByTestId('tree-list')).toBeNull();
+  });
+
   it('avec un lecteur d’écran actif, la liste est proposée d’office', async () => {
     jest.spyOn(AccessibilityInfo, 'isScreenReaderEnabled').mockResolvedValue(true);
-    renderTree();
-    expect(await screen.findByTestId('tree-list')).toBeTruthy();
+    await renderTree();
+    expect(screen.getByTestId('tree-list')).toBeTruthy();
     expect(screen.queryByTestId('skia-Canvas')).toBeNull();
     expect(screen.getByTestId('tree-show-drawing')).toBeTruthy();
   });
@@ -186,5 +259,50 @@ describe('mesures du dessin dans l’app', () => {
     const at2 = sceneSpecFor({ seniorScale: 1, systemFontScale: 2, touchTarget: 48 });
     const at3 = sceneSpecFor({ seniorScale: 1, systemFontScale: 3, touchTarget: 48 });
     expect(at3.unitX).toBe(at2.unitX);
+  });
+});
+
+describe('TreeCanvas — cadre au repos', () => {
+  it('le dessin ne reste jamais hors de vue : un cadre lointain est ramené dans les bornes', async () => {
+    const built = model(80);
+    const spec = sceneSpecFor({ seniorScale: 1, systemFontScale: 1, touchTarget: 48 });
+    const layout = layoutTree(built.graph, built.centerId);
+    const scene = buildScene(layout, spec);
+    const size = { width: 360, height: 800 };
+    const onSettle = jest.fn();
+    const far = { scale: 1, x: 1_000_000, y: -1_000_000 };
+    render(
+      <AppProviders theme={{ reduceMotion: true }}>
+        <TreeCanvas
+          scene={scene}
+          index={indexScene(scene)}
+          size={size}
+          cards={built.cards}
+          missingOf={new Map()}
+          selectedId={undefined}
+          initialViewport={{ scale: 1, x: 0, y: 0 }}
+          command={{ id: 1, viewport: far }}
+          onSettle={onSettle}
+          onActivate={jest.fn()}
+        />
+      </AppProviders>,
+    );
+    await act(() => Promise.resolve());
+    const calls = onSettle.mock.calls as [typeof far][];
+    const settled = calls[calls.length - 1]?.[0] as typeof far;
+    expect(settled).not.toEqual(far);
+    expect(clampViewport(settled, size, scene.bounds)).toEqual(settled);
+  });
+});
+
+describe('TreeView — « Vous »', () => {
+  it('l’avatar doré a son dégradé et la mention « Vous » sous lui', async () => {
+    await renderTree();
+    layOut();
+    expect(screen.getAllByTestId('skia-LinearGradient').length).toBeGreaterThan(0);
+    const labels = screen
+      .getAllByTestId('skia-Text')
+      .map((node) => (node.props as { accessibilityLabel?: string }).accessibilityLabel);
+    expect(labels).toContain('"Vous"');
   });
 });

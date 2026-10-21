@@ -13,6 +13,7 @@ import {
   createTreeLayoutCache,
   fitViewport,
   indexScene,
+  nearestDrawn,
   placeAt,
   toggleFamily,
   zoomAbout,
@@ -25,7 +26,7 @@ import {
 } from '@lignee/layout';
 import { Button, space, useTheme } from '@lignee/ui';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { PixelRatio, Text, View, type LayoutChangeEvent } from 'react-native';
+import { Text, useWindowDimensions, View, type LayoutChangeEvent } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTranslator } from '../i18n/I18nProvider';
@@ -61,6 +62,8 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
   const { t } = useTranslator();
   const insets = useSafeAreaInsets();
   const screenReader = useScreenReader();
+  // Réglage de taille du texte du téléphone, suivi à chaud.
+  const { fontScale } = useWindowDimensions();
 
   const [size, setSize] = useState<ScreenSize | undefined>(undefined);
   const [folds, setFolds] = useState<FoldChoices>(NO_FOLDS);
@@ -83,14 +86,14 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
     () =>
       sceneSpecFor({
         seniorScale: theme.textScale,
-        systemFontScale: PixelRatio.getFontScale(),
+        systemFontScale: fontScale,
         touchTarget: theme.touchTarget,
       }),
-    [theme.textScale, theme.touchTarget],
+    [theme.textScale, theme.touchTarget, fontScale],
   );
   const scene = useMemo(
-    () => buildScene(layout, spec, { supposedChildren: model.supposedChildren }),
-    [layout, spec, model.supposedChildren],
+    () => buildScene(layout, spec, { supposedFiliations: model.supposedFiliations }),
+    [layout, spec, model.supposedFiliations],
   );
   const index = useMemo(() => indexScene(scene), [scene]);
   const outline = useMemo(() => buildOutline(layout), [layout]);
@@ -126,16 +129,18 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
     send(fitViewport(scene.bounds, size, space[4], spec.zoom));
   };
 
-  /** Amène une personne au centre de l'écran, ou à la liste si elle n'est pas sur le dessin. */
+  /**
+   * Amène une personne au centre de l'écran. Si elle n'est pas sur le dessin (foyer ou branche
+   * replié), le dessin se recentre sur la personne dessinée la plus proche : revenir de la liste
+   * montre toujours le dessin (ACC-06).
+   */
   const goTo = (personId: Id) => {
-    setSelectedId(personId);
+    const shown = scene.personById.has(personId) ? personId : nearestDrawn(outline, personId);
+    const target = shown === undefined ? undefined : scene.personById.get(shown);
     setFocusId(personId);
-    const target = scene.personById.get(personId);
+    setSelectedId(shown);
     const now = current.current ?? initialViewport;
-    if (target === undefined || now === undefined || size === undefined) {
-      setListChoice('list');
-      return;
-    }
+    if (target === undefined || now === undefined || size === undefined) return;
     send(placeAt(now.scale, { x: target.x, y: target.y }, centerOf(size)));
   };
 
@@ -243,6 +248,7 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
             outline={outline}
             cards={model.cards}
             focusId={focusId}
+            centerId={model.centerId}
             onFocus={(id) => {
               setFocusId(id);
               setSelectedId(id);
