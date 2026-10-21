@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { generatedSnapshot } from '../test-support/generated-snapshot';
 import {
   nodeDatabaseFile,
+  nodeDrizzle,
   openTestDatabase,
   temporaryDirectory,
   type NodeConnection,
@@ -17,7 +18,13 @@ import {
   readSchemaVersion,
   type LocalMigration,
 } from './migrate';
-import { replaceTreeSnapshot } from './snapshot';
+import { trees } from './schema';
+import {
+  COLLECTION_TABLES,
+  SNAPSHOT_COLLECTIONS,
+  readTreeSnapshot,
+  replaceTreeSnapshot,
+} from './snapshot';
 
 let cleanup: (() => void) | undefined;
 afterEach(() => {
@@ -53,6 +60,7 @@ describe('migrations de la base locale', () => {
       'facts',
       'filiations',
       'multiple_births',
+      'mutation_queue',
       'names',
       'parent_candidates',
       'people',
@@ -177,4 +185,50 @@ describe('migrations et clés étrangères', () => {
     expect(connection.get('PRAGMA foreign_keys')).toEqual({ foreign_keys: 1 });
     connection.close();
   });
+});
+
+describe('migration 2 : file de changements (T-030)', () => {
+  it('s’applique à une base remplie en version 1 sans toucher à l’arbre', () => {
+    const tmp = temporaryDirectory();
+    cleanup = tmp.cleanup;
+    const connection = nodeDatabaseFile(join(tmp.dir, 'v1.db')).open();
+    connection.exec(`PRAGMA key = "x'${'2e'.repeat(32)}'"`);
+    expect(migrateLocalDatabase(connection, localMigrations.slice(0, 1))).toEqual([1]);
+    connection.exec('PRAGMA foreign_keys = ON');
+    const db = nodeDrizzle(connection);
+    const { snapshot } = generatedSnapshot(45, 120);
+    // Remplie comme le ferait l'app en version 1 : lignes écrites table par table
+    // (`replaceTreeSnapshot` touche aujourd'hui la file, absente de cette version).
+    db.insert(trees)
+      .values({
+        id: snapshot.tree.id,
+        readerAccountId: snapshot.readerAccountId,
+        loadedAt: 1,
+        body: snapshot.tree,
+      })
+      .run();
+    for (const collection of SNAPSHOT_COLLECTIONS) {
+      const { table, row } = COLLECTION_TABLES[collection] as unknown as {
+        table: typeof trees;
+        row: (object: unknown) => Record<string, unknown>;
+      };
+      for (const object of snapshot[collection]) {
+        db.insert(table)
+          .values({ id: object.id, treeId: object.treeId, ...row(object), body: object } as never)
+          .run();
+      }
+    }
+    expect(tableNames(connection)).not.toContain('mutation_queue');
+
+    expect(migrateLocalDatabase(connection)).toEqual([2]);
+    expect(readSchemaVersion(connection)).toBe(2);
+    expect(tableNames(connection)).toContain('mutation_queue');
+    expect(readTreeSnapshot(db, snapshot.tree.id)).toEqual(snapshot);
+    expect(connection.get('PRAGMA foreign_key_check')).toBeUndefined();
+    expect(connection.get('PRAGMA foreign_keys')).toEqual({ foreign_keys: 1 });
+    expect(connection.raw.prepare('SELECT count(*) AS n FROM mutation_queue').get()).toEqual({
+      n: 0,
+    });
+    connection.close();
+  }, 30_000);
 });

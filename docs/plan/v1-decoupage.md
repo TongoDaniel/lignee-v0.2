@@ -599,6 +599,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - UNI-15 (partie saisie ; voir doute section 4) : « La cause n'apparaît ni dans l'arbre, ni dans une notification, ni dans un export partagé »
   - CAR-01 : « Aucune permission de localisation demandée »
   - Obligations reçues des relectures : ADR 0020 (le contexte d'alliance vient de l'arbre filtré).
+  - Obligations reçues des relectures (T-030, ADR 0027, Conséquences) : une suppression liste ses dépendants (noms, faits, liens, unions) dans le même lot de `recordLocalChanges` ; codes de refus (`MUTATION_ISSUE_CODES`) traduits par `packages/i18n`.
 - Cas limites : CL-POL-15, CL-DON-01, CL-DON-02, CL-DON-05, CL-DON-06, CL-FAM-12 (ajout), CL-FAM-17, CL-FAM-18, CL-FAM-19.
 - Dépend de : T-005, T-024, T-030.
 - Agent : ecrans-lignee ; relecture gardien-confidentialite (cause de décès).
@@ -612,6 +613,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - UNI-06 : « Douze unions simultanées s'enregistrent et s'affichent »
   - UNI-07 : « Changer un rang réordonne les foyers immédiatement »
   - UNI-08 : « La réponse est gardée et reste modifiable »
+  - Obligations reçues des relectures (T-030, ADR 0027, Conséquences) : une suppression liste ses dépendants (noms, faits, liens, unions) dans le même lot de `recordLocalChanges` ; codes de refus (`MUTATION_ISSUE_CODES`) traduits par `packages/i18n`.
 - Cas limites : CL-POL-01, CL-POL-04, CL-POL-05, CL-POL-06, CL-POL-07 (fin d'union), CL-POL-13, CL-POL-14.
 - Dépend de : T-007, T-019, T-031.
 - Agent : ecrans-lignee.
@@ -626,6 +628,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - UNI-11 : « Choisir la mère plus tard déplace l'enfant dans son foyer »
   - UNI-14 (partie saisie) : « « Jumeaux » affiché sur les deux fiches »
   - ARB-05 : « Préciser la mère déplace l'enfant dans le bon foyer »
+  - Obligations reçues des relectures (T-030, ADR 0027, Conséquences) : une suppression liste ses dépendants (noms, faits, liens, unions) dans le même lot de `recordLocalChanges` ; codes de refus (`MUTATION_ISSUE_CODES`) traduits par `packages/i18n`.
 - Cas limites : CL-POL-03, CL-POL-11, CL-GEN-14, CL-FAM-02, CL-FAM-03, CL-FAM-04, CL-FAM-05, CL-FAM-06, CL-FAM-07, CL-FAM-08, CL-FAM-11, CL-FAM-13, CL-DON-11.
 - Dépend de : T-032.
 - Agent : ecrans-lignee.
@@ -865,6 +868,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
     - ADR 0021, point 8 : le modèle garde le type antérieur de la filiation (champ de la filiation, ou entrée d'historique UNI-19 rattachée au test ADN). À trancher en T-052 ; c'est la condition de l'obligation CL-FAM-14.
     - ADR 0017, synchronisation montante : une mention reçue vers une personne que le rédacteur ne voit pas est refusée comme inexistante (appliquée côté serveur par T-060).
     - Base locale (ADR 0023, Conséquences ; relectures de T-016) : si une règle explicite peut ouvrir une cause de décès ou un ancien prénom à d'autres lecteurs, la seconde barrière de `packages/sync/src/local-db/snapshot.ts` (refus d'une cause de décès ou d'un ancien prénom d'un autre auteur) suit la règle. Un nom d'usage « moi seul » n'entre jamais dans l'instantané d'un autre lecteur. Un chemin « À placer » qui traverse une personne masquée est traité par le filtre (entrée retirée ou chemin coupé).
+  - Obligations reçues des relectures (T-030, ADR 0027, Conséquences) : les règles « personnes choisies » restent dans la file chiffrée de leur seul auteur (`mutation_queue`) : acceptable parce que la file est lue, comptée et envoyée par compte, vidée au changement de lecteur, et purgée par T-067.
 - Cas limites : CL-SEC-01, CL-SEC-07, CL-SEC-11 (visibilité), CL-POL-17, CL-FAM-03, CL-FAM-06, CL-FAM-07, CL-FAM-12 (visibilité), CL-FAM-14, CL-FAM-15.
 - Dépend de : T-004, T-007.
 - Agent : modele-domaine, avec api-serveur ; relecture gardien-confidentialite.
@@ -902,6 +906,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - CPT-03 : « L'app s'ouvre sans réseau sur une session existante ; Lignée ne stocke aucune donnée biométrique »
   - CON-10 (partie sélecteur d'apps ; les notifications dans T-088) : « Aucun nom visible sur l'écran verrouillé »
 - Obligations reçues des relectures (T-016, ADR 0023, Conséquences) : brancher `rotateDatabaseKey` et `destroyLocalDatabase` de `@lignee/sync` (appareil retrouvé, déconnexion, appareil déconnecté à distance) ; avant toute lecture, vérifier que `trees.reader_account_id` est le compte connecté (aussi T-054 et T-063) ; jamais l'arbre généré de développement avec un compte réel.
+- Obligations reçues des relectures (T-030, ADR 0027, Conséquences) : à la déconnexion, `destroyLocalDatabase` emporte les changements non envoyés de la file : prévenir l'utilisateur avant (forme de l'avertissement à décider par Daniel).
 - Cas limites : CL-SEC-14.
 - Dépend de : T-047.
 - Agent : ecrans-lignee, avec api-serveur ; relecture gardien-confidentialite.
@@ -964,6 +969,11 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - VOX-23 (partie conversion en proposition) : « Le responsable de la branche reçoit la proposition »
   - TRD : par lots de 100 ; droits, visibilité et invariants vérifiés ; réponse par mutation (appliquée, convertie en proposition, refusée avec la raison) ; identifiant de mutation idempotent.
   - Obligations reçues des relectures : ADR 0017, Conséquences (`distinctFrom`), synchronisation montante : une mention `distinctFrom` vers une personne que le rédacteur ne voit pas est refusée comme inexistante.
+  - Obligations reçues des relectures (T-030, ADR 0027, Conséquences) :
+    - accepter un lot de plus de 100 mutations envoyé seul (un lot ne se coupe jamais, écart au TRD point 3).
+    - neutraliser les oracles de `applyMutationBatch` sur l'arbre complet (réponse générique ou conversion en proposition, test de non-fuite sur arbres générés) : `duplicate_id` (identifiants de tout l'arbre), `person_without_name` (tous les noms), réponse de simultanéité (réponses et unions complètes), suppression refusée parce qu'un objet masqué la cite, `checkNewFiliation` sur l'arbre complet (`third_birth_parent` révèle une paternité secrète), fusion d'une modification contre l'objet complet (la faire contre la projection du rédacteur en conservant ce qu'il ne voit pas).
+    - `canWriterSee` branché sur la projection du rédacteur (T-056), vrai pour les objets créés dans le lot ; suppression d'une règle : même réponse pour un non-auteur et une règle inexistante ; un objet et sa règle « moi seul » appliqués d'un seul bloc.
+    - ne jamais journaliser une ZodError brute (clé de champ inconnue fournie par le client) ; état « convertie en proposition » face à la contrainte CHECK de `mutation_queue.status` (migration qui recrée la table).
 - Cas limites : CL-DON-10, CL-DON-11 (refus serveur), CL-VOI-28 (conversion), CL-SEC-08 (refus).
 - Dépend de : T-030, T-049, T-056.
 - Agent : sync-hors-ligne, avec api-serveur ; relecture gardien-confidentialite.
@@ -1000,6 +1010,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - HOL-05 (partie instantané) : « Mesuré à chaque build en intégration continue » ; « première synchronisation d'un arbre de 1 000 personnes en moins de 2 Mo ».
   - TRD : changements filtrés pour ce lecteur ; suppression locale quand une donnée devient invisible.
   - Obligations reçues des relectures (T-016, ADR 0023) : vérifier que `trees.reader_account_id` est le compte connecté avant d'écrire ou de lire un tirage ; instantanés écrits par `replaceTreeSnapshot` (seconde barrière).
+  - Obligations reçues des relectures (T-030, ADR 0027, Conséquences) : ne rejouer sur un nouvel instantané ou après un tirage que les mutations dont l'auteur est le lecteur, par `recordLocalChanges` ou une fonction de rejeu dédiée qui garde la seconde barrière (pas `applyLocalMutationBatch`).
 - Cas limites : CL-SEC-08 (effacement).
 - Dépend de : T-056, T-060.
 - Agent : sync-hors-ligne, avec api-serveur ; relecture gardien-confidentialite.
@@ -1052,6 +1063,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - HOL-02 : « Aucune action demandée à l'utilisateur »
   - COL-07 (partie téléphone) : « Aucune saisie perdue sur le scénario de test à deux téléphones »
   - CPT-13 (partie téléphone) : « Accès retiré à la synchronisation suivante ; ses ajouts restent dans l'arbre »
+  - Obligations reçues des relectures (T-030, ADR 0027, Conséquences) : ne lire, n'envoyer et ne compter que les saisies du compte connecté (`listQueuedBatches`, `countPendingMutations` l'exigent) ; noter les réponses par `recordQueueOutcomes` ; purger les entrées `sent` après le tirage qui les reflète ; annuler localement une mutation refusée ; ne jamais couper un lot.
 - Cas limites : CL-RES-06, CL-RES-07, CL-SEC-08.
 - Dépend de : T-047, T-063.
 - Agent : sync-hors-ligne ; relecture gardien-confidentialite.
@@ -1192,6 +1204,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - VOX-04 : « Le parcours « Dicter une branche polygame » passe sans clavier »
   - VOX-23 : « Le responsable de la branche reçoit la proposition »
   - CON-04 : « Le choix est affiché dans l'aperçu avant validation »
+  - Obligations reçues des relectures (T-030, ADR 0027, Conséquences) : le plan validé passe par `recordLocalChanges`, en un seul lot ; une suppression liste ses dépendants dans le même lot.
 - Cas limites : CL-VOI-18, CL-VOI-19, CL-VOI-23, CL-VOI-28.
 - Dépend de : T-062, T-067, T-077.
 - Agent : ecrans-lignee, avec pipeline-vocal ; relecture gardien-confidentialite.

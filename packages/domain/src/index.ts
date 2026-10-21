@@ -5,6 +5,7 @@ export * from './fact';
 export * from './filiation';
 export * from './fuzzy-date';
 export * from './ids';
+export * from './mutation';
 export * from './person';
 export * from './place';
 export * from './schemas';
