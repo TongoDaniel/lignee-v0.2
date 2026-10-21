@@ -174,9 +174,16 @@ function familyStart(
   anchor: Point,
   obstacles: Obstacles,
 ): FamilyStart {
-  const baseBottom = Math.max(anchor.y, ...parents.map((parent) => parent.y)) + spec.cardBottom;
+  // Bas des fiches des conjoints voisins du point d'attache. Un conjoint sur une autre rangée
+  // (union entre générations, lien `couple`) ne compte pas : la pastille se pose sous le départ.
+  const baseBottom =
+    Math.max(
+      anchor.y,
+      ...parents.filter((parent) => Math.abs(parent.y - anchor.y) < spec.unitY / 2).map((p) => p.y),
+    ) + spec.cardBottom;
   const underCard = (card: Point): FamilyStart => {
     const start = { x: card.x, y: card.y + spec.cardBottom };
+    const baseBottom = start.y;
     if (obstacles.columnFree(start.x, start.y, start.y + spec.unitY / 2)) {
       return { start, via: [], baseBottom };
     }
