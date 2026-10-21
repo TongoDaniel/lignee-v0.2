@@ -5,6 +5,7 @@ export {
   EMPTY_ALLIANCE_CONTEXT,
   classifyAlliance,
   createAllianceContext,
+  createAllianceContextInSlices,
   type AllianceContextInput,
 } from './alliance';
 export {
@@ -13,6 +14,7 @@ export {
   FILIATION_TYPES,
   KinshipGraph,
   createKinshipGraph,
+  createKinshipGraphInSlices,
   weakestCertainty,
   type AncestorEntry,
   type KinshipFiliation,
@@ -24,6 +26,7 @@ export {
 export {
   commonAncestorsOfPaths,
   findRelationships,
+  findRelationshipsInSlices,
   type PathCommonAncestor,
   type KinshipOptions,
 } from './kinship';
@@ -31,6 +34,7 @@ export {
   ascentSide,
   invertPresentedLink,
   presentRelationships,
+  presentRelationshipsInSlices,
   type LineSide,
   type PresentationOptions,
   type PresentationResult,
@@ -62,6 +66,14 @@ export {
   type UnionLink,
   type UnionRank,
 } from './relationship';
+export {
+  DEFAULT_SLICE_MS,
+  KinshipCancelledError,
+  MAX_SLICE_MS,
+  type CancelSignal,
+  type SliceOptions,
+  type SliceScheduler,
+} from './slicing';
 export {
   invertSiblingLink,
   parentSide,
