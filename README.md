@@ -52,6 +52,7 @@ corepack pnpm install        # installe les dépendances (pnpm-lock.yaml)
 corepack pnpm lint           # ESLint dans chaque paquet, via Turborepo
 corepack pnpm typecheck      # tsc --noEmit dans chaque paquet
 corepack pnpm test           # Vitest dans chaque paquet
+corepack pnpm test:budget    # budgets de temps du moteur (CL-FAM-20), seuls
 corepack pnpm format:check   # vérifie la mise en forme (Prettier)
 corepack pnpm format         # corrige la mise en forme
 corepack pnpm check:forbidden-dependencies  # CON-12 : aucune bibliothèque de reconnaissance faciale (npm et natif)
@@ -68,6 +69,8 @@ Les budgets de temps du cahier des charges (TRD, « Performance et appareils cib
 - chaque mesure est écrite dans la sortie du test avec le budget et le plafond (lignes `[perf]`), pour suivre la tendance d'un build à l'autre.
 
 Les budgets eux-mêmes ne changent pas pour faire passer la CI ; seul le facteur absorbe la lenteur des runners.
+
+Les budgets du moteur de parenté sur l'Android de référence (CL-FAM-20, ADR 0026) tournent à part, seuls, pour que la charge des autres tests ne fausse pas les mesures : `corepack pnpm test:budget` (la CI le lance après les autres tests, et le job `cas-limites` échoue s'il ne tourne pas). Le facteur de ralentissement estimé du téléphone (30) se change avec `LIGNEE_DEVICE_SLOWDOWN`.
 
 Textes d'interface : jamais en dur (ACC-04). ESLint refuse le texte dans le JSX de `apps/mobile`, `apps/web`, `apps/admin` et `packages/ui` (règle `i18next/no-literal-string`) ; pour ajouter un texte, voir [packages/i18n/README.md](packages/i18n/README.md).
 
@@ -92,10 +95,10 @@ GitHub Actions, à chaque pull request et à chaque push sur `main` :
 
 | Workflow | Job | Contenu |
 | --- | --- | --- |
-| `.github/workflows/ci.yml` | `verifications` | CON-12, Prettier, ESLint, tsc, Vitest (unitaires et propriétés) et Jest (app mobile), commitlint sur les commits et sur le titre de la pull request |
+| `.github/workflows/ci.yml` | `verifications` | CON-12, Prettier, ESLint, tsc, Vitest (unitaires et propriétés) et Jest (app mobile), budgets de temps du moteur (`test:budget`, seuls), commitlint sur les commits et sur le titre de la pull request |
 | | `bundle-mobile` | App mobile : versions conformes au SDK Expo (`expo install --check`), bundle Hermes Android et iOS (`expo export`), taille relevée dans le résumé |
 | | `audit-dependances` | `pnpm audit --audit-level high` : échoue sur une faille haute ou critique |
-| | `cas-limites` | Scénarios `test/scenarios/*.yaml` : les tests tournent avec `LIGNEE_SCENARIOS_PLAYED_DIR` ; un scénario est joué si un test l'a réellement chargé (`loadScenario`, voir `test/scenarios/README.md`) ; le job échoue sur tout scénario non joué, sans liste d'exception. Ce qu'un test ne vérifie pas encore est déclaré dans le champ `couverture` du scénario |
+| | `cas-limites` | Scénarios `test/scenarios/*.yaml` : les tests (`test` puis `test:budget`) tournent avec `LIGNEE_SCENARIOS_PLAYED_DIR` ; un scénario est joué si un test l'a réellement chargé (`loadScenario`, voir `test/scenarios/README.md`) ; le job échoue sur tout scénario non joué, sans liste d'exception. Ce qu'un test ne vérifie pas encore est déclaré dans le champ `couverture` du scénario |
 | | `integration-postgresql` | Tests `*.integration.test.ts` sur PostgreSQL réel ; à brancher avec T-042 et T-043 |
 | | `taille-synchro` | Taille des réponses de synchronisation ; à brancher avec T-064 |
 | | `images-docker` | hadolint et construction des images de l'API et du worker (`apps/*/Dockerfile`), démarrage sous un utilisateur autre que root ; échoue si un Dockerfile n'est construit par aucun service de `compose.yaml`. Publication sur GitHub Container Registry : T-068 |
