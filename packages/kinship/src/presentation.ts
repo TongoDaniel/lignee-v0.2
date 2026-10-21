@@ -35,6 +35,7 @@ import {
   type SiblingSharing,
 } from './siblings';
 import {
+  HEAVY,
   NEVER_PAUSE,
   drain,
   runInSlices,
@@ -309,8 +310,8 @@ export function presentRelationshipsInSlices(
 }
 
 /**
- * `presentRelationships`, en calcul découpable : la recherche des chemins est découpée, la mise
- * en forme (au plus `maxRelationships` chemins) se fait d'un trait.
+ * `presentRelationships`, en calcul découpable : la recherche des chemins, puis la mise en forme
+ * de chaque chemin, avec un point de pause entre deux.
  */
 function* presentRelationshipSteps(
   graph: KinshipGraph,
@@ -321,12 +322,13 @@ function* presentRelationshipSteps(
 ): Steps<PresentationResult> {
   const result = yield* findRelationshipSteps(graph, aId, bId, options, pacer);
   if (result.status !== 'related') return result;
-  if (pacer.due()) yield;
+  if (pacer.due(HEAVY)) yield;
   const sibling = siblingLink(graph, aId, bId);
   const siblingPaths = result.relationships.filter(isSiblingPath);
   const entries: Omit<PresentedLink, 'rank'>[] = [];
   let siblingPlaced = false;
   for (const relationship of result.relationships) {
+    if (pacer.due(HEAVY)) yield;
     if (sibling?.kind === 'sibling' && isSiblingPath(relationship)) {
       if (!siblingPlaced) entries.push(presentSibling(sibling, siblingPaths));
       siblingPlaced = true;

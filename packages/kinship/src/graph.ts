@@ -27,6 +27,7 @@ import type {
 } from '@lignee/domain';
 
 import {
+  HEAVY,
   NEVER_PAUSE,
   drain,
   runInSlices,
@@ -152,9 +153,9 @@ interface GraphParts {
 
 /**
  * Tables d'un graphe déjà construites par tranches (`createKinshipGraphInSlices`). Classe à champ
- * privé : seul ce paquet en fabrique ; elle n'est pas exportée par le paquet.
+ * privé, non exportée : seul ce module en fabrique.
  */
-export class PreparedGraph {
+class PreparedGraph {
   /** Champ privé : rend la classe nominale pour TypeScript. */
   private readonly built: GraphParts;
 
@@ -181,7 +182,7 @@ function visitRange<T>(items: readonly T[], start: number, end: number, visit: (
 /** Visite chaque objet, avec un point de pause tous les `BUILD_CHUNK` objets. */
 function* inChunks<T>(items: readonly T[], pacer: Pacer, visit: (item: T) => void): Steps<void> {
   for (let start = 0; start < items.length; start += BUILD_CHUNK) {
-    if (pacer.due()) yield;
+    if (pacer.due(HEAVY)) yield;
     visitRange(items, start, Math.min(start + BUILD_CHUNK, items.length), visit);
   }
 }
@@ -394,11 +395,12 @@ export class KinshipGraph {
   private readonly ancestorCache = new Map<string, ReadonlyMap<number, number>>();
 
   /**
-   * Construit le graphe d'un trait. `prepared` : tables déjà construites par tranches à partir du
-   * même `input` (`createKinshipGraphInSlices`).
+   * `source` : les objets visibles du lecteur (graphe construit d'un trait), ou des tables déjà
+   * construites par tranches (`createKinshipGraphInSlices`).
    */
-  constructor(input: KinshipGraphInput, prepared?: PreparedGraph) {
-    const parts = prepared?.parts ?? drain(buildGraphParts(input, NEVER_PAUSE));
+  constructor(source: KinshipGraphInput | PreparedGraph) {
+    const parts =
+      source instanceof PreparedGraph ? source.parts : drain(buildGraphParts(source, NEVER_PAUSE));
     this.ids = parts.ids;
     this.parentEdges = parts.parentEdges;
     this.childEdges = parts.childEdges;
@@ -550,7 +552,16 @@ export async function createKinshipGraphInSlices(
   options: SliceOptions,
 ): Promise<KinshipGraph> {
   const parts = await runInSlices((pacer) => buildGraphParts(input, pacer), options);
-  return new KinshipGraph(input, new PreparedGraph(parts));
+  return new KinshipGraph(new PreparedGraph(parts));
+}
+
+/**
+ * Vide le cache des ensembles d'ancêtres d'un graphe, pour mesurer une question sur un graphe neuf
+ * (tests de budget, T-028). Interne au paquet : `index.ts` ne l'exporte pas.
+ */
+export function clearAncestorCacheForTest(graph: KinshipGraph): void {
+  // Accès voulu au champ privé (la notation entre crochets le permet en TypeScript).
+  graph['ancestorCache'].clear();
 }
 
 /** Comparaison d'identifiants en ordre de code (collation « C »), stable sur toute plateforme. */

@@ -8,17 +8,19 @@
 //   le graphe reste juste pour les calculs suivants ;
 // - deux calculs entrelacés sur le même graphe : chacun le sien ;
 // - tranches valides : plus de 0, au plus 50 ms (TRD, Performance).
+import { simultaneityResolver } from '@lignee/domain';
 import { referenceTree, type GeneratedTree } from '@lignee/domain/test-support';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
-import { createAllianceContext } from './alliance';
+import { createAllianceContext, createAllianceContextInSlices } from './alliance';
 import { createKinshipGraph, createKinshipGraphInSlices, type KinshipGraphInput } from './graph';
 import { findRelationships, findRelationshipsInSlices } from './kinship';
 import { presentRelationships, presentRelationshipsInSlices } from './presentation';
 import {
   CLOCK_EVERY,
   DEFAULT_SLICE_MS,
+  HEAVY,
   KinshipCancelledError,
   MAX_SLICE_MS,
   runInSlices,
@@ -73,6 +75,10 @@ describe('runInSlices', () => {
     const none = fakeScheduler(0);
     await runInSlices((pacer) => counting(10_000, pacer), { scheduler: none });
     expect(none.yields).toBe(0);
+  });
+
+  it('un pas lourd lit l’horloge à chaque fois', () => {
+    expect(HEAVY).toBe(CLOCK_EVERY);
   });
 
   it('refuse une tranche nulle, négative, non finie ou de plus de 50 ms', () => {
@@ -286,4 +292,68 @@ describe('calcul découpé : calculs entrelacés', () => {
     },
     TIMEOUT,
   );
+});
+
+describe('contexte de l’alliance par tranches', () => {
+  it(
+    'même contexte que le calcul direct, et même simultanéité que @lignee/domain sur l’arbre entier',
+    async () => {
+      let compared = 0;
+      let paused = 0;
+      await fc.assert(
+        fc.asyncProperty(
+          populatedTreeArbitrary({ minSize: 2, maxSize: 70 }),
+          fc.constantFrom(0.05, 0.5),
+          async (tree, tickMs) => {
+            const direct = createAllianceContext(tree);
+            const scheduler = fakeScheduler(tickMs);
+            const sliced = await createAllianceContextInSlices(tree, { scheduler, sliceMs: 1 });
+            expect(sliced).toEqual(direct);
+            if (scheduler.yields > 0) paused += 1;
+            // Référence : le résolveur du domaine, sur tous les faits et toutes les réponses.
+            const reference = simultaneityResolver(tree);
+            const graph = createKinshipGraph(inputOf(tree));
+            for (const person of tree.people) {
+              const unions = graph.unionsOf(person.id);
+              for (let i = 0; i < unions.length; i += 1) {
+                for (let j = i + 1; j < unions.length; j += 1) {
+                  const a = unions[i];
+                  const b = unions[j];
+                  if (a === undefined || b === undefined) continue;
+                  expect(sliced.simultaneity(a, b)).toEqual(reference(a, b));
+                  expect(sliced.simultaneity(b, a)).toEqual(reference(b, a));
+                  compared += 1;
+                }
+              }
+              const dead =
+                person.vitalStatus === 'deceased' ||
+                tree.facts.some(
+                  (fact) =>
+                    fact.type === 'death' &&
+                    fact.subject.kind === 'person' &&
+                    fact.subject.personId === person.id,
+                );
+              expect(sliced.isDeceased(person.id)).toBe(dead);
+            }
+          },
+        ),
+        { numRuns: RUNS },
+      );
+      expect(compared).toBeGreaterThan(RUNS);
+      expect(paused).toBeGreaterThan(0);
+    },
+    TIMEOUT,
+  );
+
+  it('annulé pendant la construction : rejet, sans contexte', async () => {
+    const tree = referenceTree(1000);
+    const signal = { aborted: false };
+    const scheduler = fakeScheduler(1, () => {
+      signal.aborted = true;
+    });
+    await expect(
+      createAllianceContextInSlices(tree, { scheduler, signal, sliceMs: 1 }),
+    ).rejects.toBeInstanceOf(KinshipCancelledError);
+    expect(scheduler.yields).toBe(1);
+  });
 });

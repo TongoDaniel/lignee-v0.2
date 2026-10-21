@@ -54,6 +54,7 @@ import {
   NEVER_PAUSE,
   drain,
   runInSlices,
+  HEAVY,
   type Pacer,
   type SliceOptions,
   type Steps,
@@ -398,7 +399,9 @@ function* bloodPaths(
   const { mask, pacer } = options;
   const ofA = new Set((yield* graph.ancestorGenerationSteps(a, mask, pacer)).keys()).add(a);
   const ofB = new Set((yield* graph.ancestorGenerationSteps(b, mask, pacer)).keys()).add(b);
+  if (pacer.due(HEAVY)) yield;
   const common = [...ofA].filter((node) => ofB.has(node));
+  if (pacer.due(HEAVY)) yield;
   if (common.length === 0) return { paths: [], truncated: false };
 
   const limitA = budget(options.maxChains);
@@ -411,6 +414,7 @@ function* bloodPaths(
   ]);
   const viable = yield* viableApexes(graph, a, b, reachable, common, mask, pacer);
   const apexes = viable === undefined ? common : [...viable];
+  if (pacer.due(HEAVY)) yield;
   if (apexes.length === 0) return { paths: [], truncated: false };
   const usefulA = yield* usefulAncestors(graph, a, ofA, apexes, mask, pacer);
   const usefulB = yield* usefulAncestors(graph, b, ofB, apexes, mask, pacer);
@@ -525,7 +529,10 @@ function* alliancePaths(
     return nearWalks(graph, node, mask, degree, limit, pacer);
   };
   const fromA = yield* walksFrom(a, reach);
-  const fromB = indexByEnd(yield* walksFrom(b, reach));
+  const walksB = yield* walksFrom(b, reach);
+  if (pacer.due(HEAVY)) yield;
+  const fromB = indexByEnd(walksB);
+  if (pacer.due(HEAVY)) yield;
   const paths: RawSegment[][] = [];
 
   // Segments du milieu, par personne et degré : calculés une fois (lus avant tout générateur,
@@ -655,7 +662,7 @@ function* groupApexes(
     const groups = new Map<string, GroupedSegment[]>();
     const order: string[] = [];
     for (const path of current) {
-      if (pacer.due()) yield;
+      if (pacer.due(HEAVY)) yield;
       const segment = path[index];
       const loose = segment?.kind === 'blood' && isCollateral(segment) ? index : -1;
       const key = `${String(path.length)}#${groupKey(path, loose)}`;
@@ -806,9 +813,10 @@ function* sortRelationships(
 ): Steps<Relationship[]> {
   const keyed: { relationship: Relationship; key: string }[] = [];
   for (const relationship of relationships) {
-    if (pacer.due()) yield;
+    if (pacer.due(HEAVY)) yield;
     keyed.push({ relationship, key: relationshipKey(relationship) });
   }
+  if (pacer.due(HEAVY)) yield;
   keyed.sort(
     (x, y) =>
       (x.relationship.kind === 'blood' ? 0 : 1) - (y.relationship.kind === 'blood' ? 0 : 1) ||
@@ -833,7 +841,9 @@ function* computeRelationships(
 ): Steps<KinshipResult> {
   const { pacer } = options;
   const blood = yield* bloodPaths(graph, a, b, options);
+  if (pacer.due(HEAVY)) yield;
   const alliance = yield* alliancePaths(graph, a, b, options);
+  if (pacer.due(HEAVY)) yield;
   const grouped = yield* groupApexes(
     [
       ...blood.paths.map((path) => [toGrouped(path)]),
@@ -847,14 +857,14 @@ function* computeRelationships(
     return limited ? { status: 'incomplete', truncated: true } : { status: 'none' };
   const found: Relationship[] = [];
   for (const path of grouped) {
-    if (pacer.due()) yield;
+    if (pacer.due(HEAVY)) yield;
     found.push(toPublic(graph, path));
   }
   const sorted = yield* sortRelationships(found, pacer);
   // Alliance nommée (T-021) sur les chemins rendus : elle ne change ni les chemins ni leur ordre.
   const relationships: Relationship[] = [];
   for (const relationship of sorted.slice(0, options.maxRelationships)) {
-    if (pacer.due()) yield;
+    if (pacer.due(HEAVY)) yield;
     const alliance = classifyAlliance(graph, relationship, options.allianceContext);
     relationships.push(alliance === undefined ? relationship : { ...relationship, alliance });
   }

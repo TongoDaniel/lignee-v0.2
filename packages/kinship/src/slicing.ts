@@ -15,10 +15,17 @@
 /** Un calcul découpable : il rend la main par `yield`, et finit par rendre son résultat. */
 export type Steps<T> = Generator<undefined, T, undefined>;
 
-/** Point de pause d'un calcul : `due()` dit si la tranche en cours est écoulée. */
+/**
+ * Point de pause d'un calcul : `due()` dit si la tranche en cours est écoulée. `weight` : poids du
+ * travail fait depuis le point précédent, 1 par défaut ; `HEAVY` pour un pas lourd (mise en forme
+ * d'un chemin, tri, lot d'objets), qui lit toujours l'horloge.
+ */
 export interface Pacer {
-  due(): boolean;
+  due(weight?: number): boolean;
 }
+
+/** Poids d'un pas lourd : l'horloge est lue à chaque fois. */
+export const HEAVY = 16;
 
 /** Le calcul direct : jamais de pause. */
 export const NEVER_PAUSE: Pacer = { due: () => false };
@@ -93,8 +100,8 @@ class SlicePacer implements Pacer {
 
   constructor(private readonly now: () => number) {}
 
-  due(): boolean {
-    this.count += 1;
+  due(weight = 1): boolean {
+    this.count += weight;
     if (this.count < CLOCK_EVERY) return false;
     this.count = 0;
     return this.now() >= this.deadline;

@@ -5,6 +5,7 @@ export {
   EMPTY_ALLIANCE_CONTEXT,
   classifyAlliance,
   createAllianceContext,
+  createAllianceContextInSlices,
   type AllianceContextInput,
 } from './alliance';
 export {

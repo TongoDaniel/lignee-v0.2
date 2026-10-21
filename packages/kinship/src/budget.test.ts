@@ -18,8 +18,14 @@ import {
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
-import { createAllianceContext, type AllianceContext } from './alliance';
 import {
+  createAllianceContext,
+  createAllianceContextInSlices,
+  type AllianceContext,
+  type AllianceContextInput,
+} from './alliance';
+import {
+  clearAncestorCacheForTest,
   createKinshipGraph,
   createKinshipGraphInSlices,
   type KinshipGraph,
@@ -96,17 +102,6 @@ function worstWarm(
   return worst;
 }
 
-/**
- * Vide le cache des ensembles d'ancêtres du graphe, son seul cache : la question suivante est
- * celle d'un graphe neuf. Un graphe reconstruit avant chaque mesure ferait mesurer le ramasse-
- * miettes de la construction plutôt que le calcul.
- */
-function emptyCaches(graph: KinshipGraph): void {
-  const cache = (graph as unknown as { ancestorCache?: unknown }).ancestorCache;
-  if (!(cache instanceof Map)) throw new Error('KinshipGraph has no ancestorCache any more');
-  cache.clear();
-}
-
 /** Pire temps de la première question, caches du graphe vides (médiane de 7). */
 function worstCold(
   input: KinshipGraphInput,
@@ -120,7 +115,7 @@ function worstCold(
       warmup: 1,
       runs: 7,
       setup: () => {
-        emptyCaches(graph);
+        clearAncestorCacheForTest(graph);
       },
     });
     worst = Math.max(worst, medianMs);
@@ -130,13 +125,13 @@ function worstCold(
 
 /**
  * Plus longue tranche du calcul découpé, avec la tranche du téléphone ramenée au poste : médiane,
- * sur 5 passages comptés, de la plus longue tranche de chaque passage (graphe, puis chaque
- * question).
+ * sur 5 passages comptés, de la plus longue tranche de chaque passage (graphe et contexte de
+ * l'alliance, comme à l'ouverture de l'arbre, puis chaque question).
  */
 async function longestSlice(
   input: KinshipGraphInput,
+  contextInput: AllianceContextInput,
   pairs: readonly Pair[],
-  allianceContext: AllianceContext,
 ): Promise<number> {
   const sliceMs = emulatedSliceMs();
   const maxima: number[] = [];
@@ -145,6 +140,12 @@ async function longestSlice(
     const scheduler = measuringScheduler();
     scheduler.begin();
     const graph = await createKinshipGraphInSlices(input, { scheduler, sliceMs });
+    scheduler.end();
+    scheduler.begin();
+    const allianceContext = await createAllianceContextInSlices(contextInput, {
+      scheduler,
+      sliceMs,
+    });
     scheduler.end();
     for (const [a, b] of pairs) {
       scheduler.begin();
@@ -196,17 +197,21 @@ describe('CL-FAM-20 — arbre de 5 000 personnes, budgets du moteur', () => {
       const graph = createKinshipGraph(input);
       const allianceContext = createAllianceContext(tree);
 
-      // Ouverture : graphe et contexte de l'alliance, une fois par arbre.
+      // Ouverture : graphe et contexte de l'alliance, une fois par arbre. Le plus court de 9 essais,
+      // et non leur médiane : chaque construction laisse au ramasse-miettes celle d'avant, ce
+      // qu'une ouverture unique sur le téléphone ne paie pas (ADR 0026).
       await expectWithin(
         'CL-FAM-20, ouverture du graphe',
         () =>
-          medianTime(
-            () => {
-              createKinshipGraph(input);
-              createAllianceContext(tree);
-            },
-            { warmup: 2, runs: 9 },
-          ).medianMs,
+          Math.min(
+            ...medianTime(
+              () => {
+                createKinshipGraph(input);
+                createAllianceContext(tree);
+              },
+              { warmup: 2, runs: 9 },
+            ).samplesMs,
+          ),
         attendu.ouverture_graphe_ms,
       );
 
@@ -233,7 +238,7 @@ describe('CL-FAM-20 — arbre de 5 000 personnes, budgets du moteur', () => {
       // Calcul découpé : jamais plus de 50 ms d'interface bloquée sur le téléphone.
       await expectWithin(
         'CL-FAM-20, plus longue tranche du calcul découpé',
-        () => longestSlice(input, slowest, allianceContext),
+        () => longestSlice(input, tree, slowest),
         attendu.tranche_max_ms,
       );
     },
