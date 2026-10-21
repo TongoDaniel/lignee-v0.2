@@ -11,6 +11,7 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
+    "test:budget": "turbo run test:budget --concurrency=1",
     "format": "turbo run //#format:write",
     "format:check": "turbo run //#format:verify",
     "format:write": "prettier --write .",

@@ -35,6 +35,14 @@ import type {
   UnionEnding,
   UnionLink,
 } from './relationship';
+import {
+  NEVER_PAUSE,
+  drain,
+  runInSlices,
+  type Pacer,
+  type SliceOptions,
+  type Steps,
+} from './slicing';
 
 /** Ce que lit l'alliance, en plus du graphe : l'arbre filtré du lecteur. */
 export interface AllianceContextInput {
@@ -47,47 +55,124 @@ export interface AllianceContextInput {
 }
 
 /**
+ * Tables du contexte, construites une fois (`buildAllianceParts`), directement ou par tranches :
+ * faits de chaque personne, réponses de chaque paire d'unions, personnes décédées.
+ */
+interface AllianceParts {
+  readonly factsByPerson: ReadonlyMap<Id, readonly SimultaneityFact[]>;
+  readonly answersByPair: ReadonlyMap<string, readonly SimultaneityAnswerItem[]>;
+  readonly deceased: ReadonlySet<Id>;
+}
+
+type SimultaneityFact = SimultaneityTree['facts'][number];
+type SimultaneityAnswerItem = SimultaneityTree['simultaneityAnswers'][number];
+
+/** Clé d'une paire d'unions, dans un ordre fixe. */
+function pairKey(a: Id, b: Id): string {
+  return compareIds(a, b) <= 0 ? `${a}|${b}` : `${b}|${a}`;
+}
+
+/** Tables d'un contexte construites par tranches (`createAllianceContextInSlices`). */
+class PreparedAllianceContext {
+  constructor(readonly parts: AllianceParts) {}
+}
+
+/** Construction des tables, un point de pause par objet lu (calcul découpé, `slicing.ts`). */
+function* buildAllianceParts(input: AllianceContextInput, pacer: Pacer): Steps<AllianceParts> {
+  const factsByPerson = new Map<Id, SimultaneityFact[]>();
+  const answersByPair = new Map<string, SimultaneityAnswerItem[]>();
+  const deceased = new Set<Id>();
+  for (const fact of input.facts ?? []) {
+    if (pacer.due()) yield;
+    if (fact.subject.kind !== 'person') continue;
+    const { personId } = fact.subject;
+    const list = factsByPerson.get(personId);
+    if (list === undefined) factsByPerson.set(personId, [fact]);
+    else list.push(fact);
+    if (fact.type === 'death') deceased.add(personId);
+  }
+  for (const answer of input.simultaneityAnswers ?? []) {
+    if (pacer.due()) yield;
+    const key = pairKey(...answer.unionIds);
+    const list = answersByPair.get(key);
+    if (list === undefined) answersByPair.set(key, [answer]);
+    else list.push(answer);
+  }
+  for (const person of input.people ?? []) {
+    if (pacer.due()) yield;
+    if (person.vitalStatus === 'deceased') deceased.add(person.id);
+  }
+  return { factsByPerson, answersByPair, deceased };
+}
+
+/**
  * Contexte de l'alliance, construit une fois par arbre (comme le graphe) : faits et réponses ne
  * sont lus qu'une fois. Il doit être construit à partir du **même arbre filtré** que le graphe
  * (ADR 0020, point 6) : le moteur ignore par construction une réponse qui cite une union absente
  * du graphe, ou un décès d'une personne absente, mais pas un fait de décès masqué (visibilité par
  * fait, CON-03, ADR 0008) d'une personne visible, que le filtre doit retirer.
+ *
+ * Faits et réponses sont rangés par personne et par paire d'unions (T-028) : la simultanéité de
+ * deux unions ne lit que les faits de leurs conjoints et la réponse de leur paire, ce que fait
+ * `resolveSimultaneity` de @lignee/domain sur l'arbre entier (même résultat, vérifié par
+ * `alliance-properties.test.ts`). La construction peut ainsi se faire par tranches.
  */
 export class AllianceContext {
-  private readonly resolver: ReturnType<typeof simultaneityResolver>;
-  private readonly deceased: ReadonlySet<Id>;
+  private readonly parts: AllianceParts;
+  /**
+   * Résolveurs déjà construits, par paire d'unions et conjoints : ils ne dépendent que des faits
+   * de ces conjoints et de la réponse de cette paire, lus dans les tables du contexte. Les dates
+   * des unions sont relues à chaque appel.
+   */
+  private readonly resolvers = new Map<string, ReturnType<typeof simultaneityResolver>>();
 
-  constructor(input: AllianceContextInput) {
-    const facts = input.facts ?? [];
-    this.resolver = simultaneityResolver({
-      facts,
-      simultaneityAnswers: input.simultaneityAnswers ?? [],
-    });
-    const deceased = new Set<Id>();
-    for (const fact of facts) {
-      if (fact.type === 'death' && fact.subject.kind === 'person') {
-        deceased.add(fact.subject.personId);
-      }
-    }
-    for (const person of input.people ?? []) {
-      if (person.vitalStatus === 'deceased') deceased.add(person.id);
-    }
-    this.deceased = deceased;
+  /** `source` : l'arbre filtré du lecteur, ou des tables déjà construites par tranches. */
+  constructor(source: AllianceContextInput | PreparedAllianceContext) {
+    this.parts =
+      source instanceof PreparedAllianceContext
+        ? source.parts
+        : drain(buildAllianceParts(source, NEVER_PAUSE));
   }
 
   /** Deux unions présentes : simultanées, successives, ou inconnues (ADR 0012). */
   simultaneity(a: KinshipUnion, b: KinshipUnion): SimultaneityResolution {
-    return this.resolver(a, b);
+    const people = [...new Set([...a.spouses, ...b.spouses].map((spouse) => spouse.personId))].sort(
+      compareIds,
+    );
+    const pair = pairKey(a.id, b.id);
+    const key = `${pair}#${people.join('|')}`;
+    let resolver = this.resolvers.get(key);
+    if (resolver === undefined) {
+      const facts: SimultaneityFact[] = [];
+      for (const personId of people) facts.push(...(this.parts.factsByPerson.get(personId) ?? []));
+      const simultaneityAnswers = this.parts.answersByPair.get(pair) ?? [];
+      resolver = simultaneityResolver({ facts, simultaneityAnswers });
+      this.resolvers.set(key, resolver);
+    }
+    return resolver(a, b);
   }
 
   isDeceased(personId: Id): boolean {
-    return this.deceased.has(personId);
+    return this.parts.deceased.has(personId);
   }
 }
 
 /** Contexte de l'alliance, à partir de l'arbre filtré du lecteur. */
 export function createAllianceContext(input: AllianceContextInput = {}): AllianceContext {
   return new AllianceContext(input);
+}
+
+/**
+ * Le même contexte, construit par tranches (TRD, Performance : jamais plus de 50 ms d'interface
+ * bloquée), à l'ouverture de l'arbre, à partir de la même vue filtrée que le graphe. Rejetée par
+ * `KinshipCancelledError` si le signal annule.
+ */
+export async function createAllianceContextInSlices(
+  input: AllianceContextInput,
+  options: SliceOptions,
+): Promise<AllianceContext> {
+  const parts = await runInSlices((pacer) => buildAllianceParts(input, pacer), options);
+  return new AllianceContext(new PreparedAllianceContext(parts));
 }
 
 /** Sans contexte : seules les dates des unions comptent ; ni décès, ni réponse. */

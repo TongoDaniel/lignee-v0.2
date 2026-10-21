@@ -22,10 +22,13 @@ const PLAYED_DIR_VARIABLE = 'LIGNEE_SCENARIOS_PLAYED_DIR';
  * sans que son attendu soit encore vérifié. `disposition` : générations et foyers calculés par
  * packages/layout et comparés à l'attendu (T-008). `lien` : le lien attendu (`attendu.lien`) est
  * vérifié sur la structure calculée par packages/kinship (fratrie, T-020) ; les mots restent à
- * T-026 et T-027.
+ * T-026 et T-027. `budget` : les budgets de temps du TRD, ramenés au poste par un facteur de
+ * ralentissement estimé, sont tenus (packages/kinship, T-028).
  */
 export const coverageSchema = z.strictObject({
-  teste: z.array(z.enum(['lecture', 'modele', 'disposition', 'lien', 'base_locale'])).min(1),
+  teste: z
+    .array(z.enum(['lecture', 'modele', 'disposition', 'lien', 'base_locale', 'budget']))
+    .min(1),
   reste: z.array(z.string().regex(/^T-\d{3}$/)),
 });
 

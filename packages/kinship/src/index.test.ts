@@ -15,5 +15,13 @@ describe('@lignee/kinship', () => {
     expect(typeof kinship.presentRelationships).toBe('function');
     expect(typeof kinship.invertPresentedLink).toBe('function');
     expect(typeof kinship.ascentSide).toBe('function');
+    // Calcul découpé (T-028).
+    expect(typeof kinship.createKinshipGraphInSlices).toBe('function');
+    expect(typeof kinship.createAllianceContextInSlices).toBe('function');
+    // Interne : jamais exporté par le paquet.
+    expect('clearAncestorCacheForTest' in kinship).toBe(false);
+    expect(typeof kinship.findRelationshipsInSlices).toBe('function');
+    expect(typeof kinship.presentRelationshipsInSlices).toBe('function');
+    expect(kinship.MAX_SLICE_MS).toBe(50);
   });
 });

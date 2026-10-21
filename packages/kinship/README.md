@@ -25,7 +25,7 @@ Un chemin (`Relationship`) est une suite de segments :
 
 Résumé : `kind` (`blood`, `alliance`), `degree`, `unionCount`, `certainty` (la plus faible du chemin), `filiationTypes`, `unionIds`, `personIds` (pour surligner le chemin).
 
-Ce qui se branche dessus : fratrie détaillée et « frère ou demi-frère » (T-020, `siblings.ts`, ci-dessous), alliance nommée et co-épouse selon la simultanéité des unions (T-021, `alliance.ts`, ci-dessous ; le graphe ne la transporte pas, ADR 0012), chemins multiples et liens non biologiques (T-022, `presentation.ts`, ci-dessous), mots (T-026, T-027), budget sur le téléphone (T-028).
+Ce qui se branche dessus : fratrie détaillée et « frère ou demi-frère » (T-020, `siblings.ts`, ci-dessous), alliance nommée et co-épouse selon la simultanéité des unions (T-021, `alliance.ts`, ci-dessous ; le graphe ne la transporte pas, ADR 0012), chemins multiples et liens non biologiques (T-022, `presentation.ts`, ci-dessous), mots (T-026, T-027), budget sur le téléphone et calcul découpé (T-028, ci-dessous).
 
 ## Fratrie (T-020)
 
@@ -69,6 +69,55 @@ Règles : ADR 0021 (proposée). Liste ordonnée : le premier lien `main`, les su
 
 Le moteur range la naissance avant un lien non biologique à égalité de distance, et garde le chemin par l'union quand le conjoint d'un parent a seulement élevé l'enfant (« l'a élevé », et aussi « mari de votre mère ») : ADR 0021, points 4 et 6.
 
+## Budget de temps et calcul découpé (T-028)
+
+| Fichier | Contenu |
+| --- | --- |
+| `slicing.ts` | `runInSlices`, `SliceScheduler` (horloge et main rendue, fournies par l'appelant), `SliceOptions` (`scheduler`, `sliceMs` : 8 ms par défaut, au plus 50, `signal`), `KinshipCancelledError` |
+| `graph.ts` | `createKinshipGraphInSlices(input, options)` : le même graphe, construit par tranches |
+| `alliance.ts` | `createAllianceContextInSlices(input, options)` : le même contexte de l'alliance, construit par tranches |
+| `kinship.ts`, `presentation.ts` | `findRelationshipsInSlices`, `presentRelationshipsInSlices` : le même résultat, par tranches |
+
+Règles : ADR 0026 (acceptée). Le moteur est écrit une fois, en générateurs, avec un point de pause dans chaque boucle : le calcul direct le mène d'un trait, le calcul découpé rend la main à la boucle d'événements quand la tranche est écoulée. Résultat identique par construction. Annulé (signal), un calcul rejette par `KinshipCancelledError`, sans résultat partiel ; le cache d'ancêtres d'un graphe n'est écrit qu'à la fin d'un parcours.
+
+Pour l'écran « Qui est-ce pour moi ? » (T-029) :
+
+```ts
+const scheduler = {
+  now: () => performance.now(),
+  yield: () => new Promise<void>((resolve) => setTimeout(resolve, 0)),
+};
+// À l'ouverture de l'arbre, puis à chaque changement : la vue filtrée du lecteur
+// (packages/domain), la même pour le graphe et pour le contexte de l'alliance (ADR 0020).
+const graph = await createKinshipGraphInSlices(visibleTree, { scheduler });
+const allianceContext = await createAllianceContextInSlices(
+  {
+    facts: visibleTree.facts,
+    simultaneityAnswers: visibleTree.simultaneityAnswers,
+    people: visibleTree.people,
+  },
+  { scheduler },
+);
+// Une question ; la suivante annule celle-ci (controller.abort()).
+const controller = new AbortController();
+const links = await presentRelationshipsInSlices(graph, me, them, {
+  allianceContext,
+  scheduler,
+  signal: controller.signal,
+});
+```
+
+Chaque changement de l'arbre reconstruit tout le graphe et tout le contexte, par tranches (0,3 à 1,9 s estimées sur le téléphone) ; une question posée pendant ce temps attend le nouveau graphe.
+
+Les budgets du TRD visent l'Android de référence ; les tests les ramènent au poste par un facteur de ralentissement estimé à 30 (`src/test-support/reference-device.ts`, `LIGNEE_DEVICE_SLOWDOWN`), à remplacer par la mesure sur le téléphone (T-105). Le test vérifie ce budget estimé ; il ne détecte pas une régression de 3 fois sur le lien (ADR 0026, point 8).
+
+Le test de budget tourne seul, hors de `test` :
+
+```sh
+corepack pnpm test:budget                          # depuis la racine (Turbo, une tâche à la fois)
+corepack pnpm --filter @lignee/kinship test:budget # ce paquet seulement
+```
+
 ## Tests
 
 ```sh
@@ -90,4 +139,6 @@ corepack pnpm --filter @lignee/kinship test
 - `src/presentation.test.ts` : lévirat (demi-frère par la mère, puis cousin par le père, côtés de chacun), fratrie réunie en une entrée, père de naissance qui a aussi élevé (« père » d'abord), cousin par la personne qui vous a élevé (le côté porte le type), adoption, enfant élevé par le mari de sa mère (et adopté : plus de « mari de votre mère »), co-mère adoptive (`birth_and_adoption`, demi-frères si les pères sont connus, adoption croisée), certitude la plus faible du lien affiché, personne masquée sur le seul chemin.
 - `src/presentation-scenarios.test.ts` : CL-POL-09, CL-POL-10, CL-POL-11, CL-FAM-02, CL-FAM-03, CL-FAM-04, CL-FAM-05, CL-FAM-09, CL-FAM-14 joués depuis `test/scenarios` (le principal puis `aussi`, dans l'ordre, et le sens inverse) ; mots ramenés à leur structure par `src/test-support/presentation-words.ts` (à remplacer par T-026 et T-027) ; santé sur la seule naissance (CL-POL-11, CL-FAM-05), adoption masquée (CL-FAM-03), projection exigée de T-052 pour la paternité révélée (CL-FAM-14).
 - `src/presentation-properties.test.ts` (fast-check, arbres peuplés de `src/test-support/populated-trees.ts`, certitudes tirées au hasard) : ordre stable, identique dans les deux sens et indépendant de l'ordre des objets ; aucune confusion naissance / non biologique ; certitude = minimum du lien affiché ; aucun chemin perdu ni dédoublé ; lévirat et sororat : demi-frère d'abord, et aussi cousin par l'autre parent (UNI-21) ; masqué équivaut à jamais saisi. Chaque propriété vérifie qu'elle a exercé ce qu'elle vise. `treeArbitrary` du domaine donne surtout des arbres sans union ni filiation (probabilités tirées par `fc.double`, ADR 0021, Conséquences).
+- `src/slicing.test.ts` (T-028) : calcul découpé identique au calcul direct (graphe, contexte de l'alliance, chemins, liens présentés ; simultanéité égale à celle de `simultaneityResolver` sur l'arbre entier) sur des arbres générés et sur l'arbre type de 5 000 personnes, quel que soit le pas de l'horloge simulée ; déterminisme (mêmes pauses, même résultat) ; annulation avant ou pendant le calcul, graphe resté juste ; calculs entrelacés sur le même graphe ; tranches valides.
+- `src/budget.test.ts` (CL-FAM-20, T-028) : budgets du téléphone ramenés au poste (÷ 30) : ouverture du graphe en moins de 1 s, lien présenté en moins de 50 ms (les 10 paires les plus lentes remesurées, à chaud et caches vides), chef de famille à 8 épouses et 40 enfants, plus longue tranche du calcul découpé en moins de 50 ms. Lancé seul par `test:budget` (exclu de `test`), et par la CI après les autres tests. Mesure du poste, `test:budget` seul, 5 passages à charge moyenne : ouverture 9,5 à 12,7 ms (budget ramené 33 ms), lien le plus lent 0,4 à 2,0 ms et plus longue tranche 0,4 à 2,0 ms (budget ramené 1,67 ms) ; poste saturé : ouverture 29 à 46 ms, lien jusqu'à 4,1 ms, 3 échecs sur 5 ; dans la suite complète, en CI, ouverture 30 à 63 ms et tranches 1,4 à 2,5 ms. L'ouverture et le lien sont à la limite du budget estimé (ADR 0026).
 - `src/performance.test.ts` (PAR-01, partie moteur) : arbre type de 5 000 personnes, chef de famille à 8 épouses et 40 enfants, deux lignées de 150 générations : moins de 200 ms par lien (paires d'une personne avec elle-même exclues) ; graphe en moins de 1 s (construit une fois, à l'ouverture de l'arbre). Mesure sur le poste de développement (Windows 11, Node 24), test lancé seul : graphe en 118 ms, lien en 0,53 ms en moyenne, 10,9 ms au pire sur 432 paires ; chef de famille, 2,2 ms au pire ; cas profond, 5 ms au premier appel (cache froid).

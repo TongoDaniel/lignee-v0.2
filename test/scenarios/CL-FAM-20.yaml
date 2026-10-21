@@ -1,0 +1,27 @@
+# Arbres générés (graine fixe), aucune famille réelle. Partie moteur de parenté (T-028,
+# packages/kinship, ADR 0026) : budgets du TRD sur l'Android de référence, ramenés au poste par un
+# facteur de ralentissement estimé (30, `LIGNEE_DEVICE_SLOWDOWN`), puis au garde-fou habituel
+# (× 1,5 sur un poste, × 3 en CI). Médianes après chauffe ; les paires les plus lentes sont
+# remesurées. Le calcul découpé rend la main entre deux tranches, et donne exactement le résultat
+# du calcul direct.
+# Reste : la mesure sur les téléphones de référence (T-105), et la disposition de l'arbre à
+# 5 000 personnes (T-105).
+id: CL-FAM-20
+titre: Arbre de 5 000 personnes
+couverture:
+  teste: [budget]
+  reste: [T-105]
+action:
+  arbre_type: 5000
+  paires_au_hasard: 300
+  paires_proches: 150
+  chef_de_famille: { epouses: 8, enfants: 40, petits_enfants_par_enfant: 3 }
+  question: lien_presente
+attendu:
+  # TRD, Performance et appareils cibles, sur l'Android de référence.
+  lien_ms: 50
+  ouverture_graphe_ms: 1000
+  tranche_max_ms: 50
+  # PAR-01, hors-ligne.
+  reponse_ms: 200
+  calcul_decoupe: identique_au_calcul_direct

@@ -76,6 +76,12 @@ jobs:
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm run test
 
+      # Budgets de temps (CL-FAM-20, ADR 0026) : lancés seuls, après les autres tests, pour que la
+      # charge des autres paquets ne fausse pas les mesures.
+      - name: Budgets de temps du moteur (Vitest, seuls)
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm run test:budget
+
       # Les messages de Dependabot ne suivent pas les conventions (lignes de plus de 100
       # caractères) : ils ne sont pas vérifiés.
       - name: Messages de commit (commitlint)
@@ -434,7 +440,7 @@ jobs:
       - name: Jouer les tests en relevant les scénarios chargés
         env:
           LIGNEE_SCENARIOS_PLAYED_DIR: ${{ runner.temp }}/scenarios-joues
-        run: pnpm run test --force
+        run: pnpm run test --force && pnpm run test:budget --force
 
       - name: Scénarios non joués
         env:
