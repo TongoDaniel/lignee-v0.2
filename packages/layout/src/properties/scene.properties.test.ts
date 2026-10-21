@@ -115,6 +115,13 @@ describe('propriétés de la scène à peindre (T-017)', { timeout: 120_000 }, (
           const index = indexScene(scene);
           const level = zoomLevelFor(scale, spec.zoom);
           const reach = spec.touchTarget / 2 / scale;
+          // En vue d'ensemble, une mention n'est pas peinte : elle ne se touche pas non plus.
+          if (level === 'overview') {
+            for (const mark of scene.marks) {
+              const hit = hitTest(index, { x: mark.x, y: mark.y }, { scale, level });
+              expect(hit?.kind).not.toBe('mark');
+            }
+          }
           for (const person of scene.people) {
             // Au centre de l'avatar, et au bord de la zone de 48 pixels : la fiche, ou une voisine
             // plus proche de ce point, est touchée ; jamais le vide.

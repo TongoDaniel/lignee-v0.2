@@ -105,14 +105,21 @@ export interface TreeScene {
 
 export interface SceneOptions {
   /**
-   * Enfants dont la filiation n'est pas certaine : le trait qui y mène est en pointillés
-   * (06-arbre.md, « lien supposé »). Une adoption est un trait plein.
+   * Filiations dont la certitude n'est pas « certain », par `supposedKey(parentId, childId)` : le
+   * trait qui y mène est en pointillés (06-arbre.md, « lien supposé »). Une adoption est un lien
+   * plein : elle n'y figure que si elle est elle-même incertaine. La décision se prend par
+   * filiation, jamais pour l'enfant en bloc, et un lien de couple n'est jamais en pointillés.
    */
-  readonly supposedChildren?: ReadonlySet<Id>;
+  readonly supposedFiliations?: ReadonlySet<string>;
+}
+
+/** Clé d'une filiation dans `SceneOptions.supposedFiliations`. */
+export function supposedKey(parentId: Id, childId: Id): string {
+  return `${parentId}|${childId}`;
 }
 
 const EPSILON = 1e-6;
-const NO_SUPPOSED: ReadonlySet<Id> = new Set();
+const NO_SUPPOSED: ReadonlySet<string> = new Set();
 
 /** Rectangle d'une fiche, au plus large (prénom sur deux lignes, ligne secondaire, mention). */
 export function cardRect(spec: SceneSpec, x: number, y: number): Rect {
@@ -397,7 +404,10 @@ export function buildScene(
   spec: SceneSpec,
   options: SceneOptions = {},
 ): TreeScene {
-  const supposed = options.supposedChildren ?? NO_SUPPOSED;
+  const supposed = options.supposedFiliations ?? NO_SUPPOSED;
+  /** Une filiation d'un des parents de la famille vers cet enfant est-elle incertaine ? */
+  const supposedFrom = (parentIds: readonly Id[], childId: Id) =>
+    parentIds.some((parentId) => supposed.has(supposedKey(parentId, childId)));
   const world = (point: GridPoint): Point => ({ x: point.x * spec.unitX, y: point.y * spec.unitY });
 
   const people: ScenePerson[] = [...layout.people.values()].map((person) => ({
@@ -525,7 +535,7 @@ export function buildScene(
       edges.push({
         kind: 'leg',
         points: entries[index] ?? [],
-        supposed: supposed.has(child.id),
+        supposed: supposedFrom(family.parentIds, child.id),
         familyKey: family.key,
         childId: child.id,
       });
@@ -551,7 +561,12 @@ export function buildScene(
     edges.push({
       kind: 'link',
       points: linkPoints(spec, layout, link, personById, world, parentsOf, obstacles),
-      supposed: supposed.has(link.toId),
+      supposed:
+        link.nature === 'couple'
+          ? false
+          : link.nature === 'secondary'
+            ? supposedFrom([link.fromId], link.toId)
+            : supposedFrom(layout.families.get(link.key)?.parentIds ?? [link.fromId], link.toId),
       familyKey: link.key,
       childId: undefined,
     });

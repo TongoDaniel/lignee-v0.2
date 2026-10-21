@@ -148,3 +148,33 @@ export function buildOutline(layout: TreeLayout): ReadonlyMap<Id, OutlineEntry> 
   }
   return entries;
 }
+
+/**
+ * Personne dessinée la plus proche de `personId` en suivant parents, conjoints, enfants et
+ * liens (parcours en largeur, dans l'ordre de la liste). Elle-même si elle est dessinée. Sert à
+ * revenir de la liste au dessin quand la personne choisie n'y est pas (foyer ou branche replié).
+ */
+export function nearestDrawn(outline: ReadonlyMap<Id, OutlineEntry>, personId: Id): Id | undefined {
+  const seen = new Set<Id>([personId]);
+  const queue: Id[] = [personId];
+  for (let id = queue.shift(); id !== undefined; id = queue.shift()) {
+    const entry = outline.get(id);
+    if (entry === undefined) continue;
+    if (entry.drawn) return id;
+    const next = [
+      ...entry.parents.flatMap((parents) => parents.parentIds),
+      ...entry.unions.flatMap((union) => [
+        ...(union.partnerId === undefined ? [] : [union.partnerId]),
+        ...union.childIds,
+      ]),
+      ...entry.links.map((link) => link.otherId),
+    ];
+    for (const other of next) {
+      if (!seen.has(other)) {
+        seen.add(other);
+        queue.push(other);
+      }
+    }
+  }
+  return undefined;
+}

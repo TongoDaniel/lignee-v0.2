@@ -205,7 +205,8 @@ export function hitTest(
 ): SceneHit | undefined {
   const reach = index.scene.spec.touchTarget / 2 / options.scale;
   const candidates = itemsIn(index, rectAround(world.x, world.y, reach, reach)).filter(
-    (item) => item.kind !== 'edge',
+    // En vue d'ensemble, les mentions ne sont pas peintes : elles ne se touchent pas non plus.
+    (item) => item.kind !== 'edge' && !(item.kind === 'mark' && options.level === 'overview'),
   );
   let best: { item: SceneItem; priority: number; distance: number } | undefined;
   for (const item of candidates) {
