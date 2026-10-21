@@ -55,16 +55,13 @@
     "missingFather": "Père non précisé",
     "missingParent": "Parent non précisé",
     "list": {
-      "title": "Parcourir l’arbre",
       "focus": "Personne choisie",
-      "parents": "Parents",
       "parentsOf": "Parents de {name}",
       "spouses": "Conjoints et enfants",
       "household": "Foyer avec {name}",
       "householdUnspecified": "Foyer avec {place}",
       "noChildren": "Aucun enfant noté",
       "children": "Enfants",
-      "ended": "union terminée",
       "otherLinks": "Autres liens",
       "seeAlsoEntry": "Voir aussi {name}",
       "secondaryEntry": "Autre lien avec {name}",
@@ -74,7 +71,9 @@
       "goTo": "Aller à {name}",
       "hiddenFromDrawing": "pas encore sur le dessin",
       "empty": "Aucune personne à afficher.",
-      "goToHint": "Affiche ses parents, ses conjoints et ses enfants."
+      "goToHint": "Affiche ses parents, ses conjoints et ses enfants.",
+      "householdEnded": "Foyer avec {name}, union terminée",
+      "focusHint": "Ses parents, ses conjoints et ses enfants sont listés ci-dessous."
     },
     "drawingHint": "Utilisez le bouton Parcourir en liste pour lire l’arbre personne par personne.",
     "noName": "Nom non renseigné"

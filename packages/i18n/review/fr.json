@@ -329,10 +329,10 @@
   "common:treeScreen.list.empty": {
     "status": "to-review"
   },
-  "common:treeScreen.list.ended": {
+  "common:treeScreen.list.focus": {
     "status": "to-review"
   },
-  "common:treeScreen.list.focus": {
+  "common:treeScreen.list.focusHint": {
     "status": "to-review"
   },
   "common:treeScreen.list.fold": {
@@ -350,6 +350,9 @@
   "common:treeScreen.list.household": {
     "status": "to-review"
   },
+  "common:treeScreen.list.householdEnded": {
+    "status": "to-review"
+  },
   "common:treeScreen.list.householdUnspecified": {
     "status": "to-review"
   },
@@ -357,9 +360,6 @@
     "status": "to-review"
   },
   "common:treeScreen.list.otherLinks": {
-    "status": "to-review"
-  },
-  "common:treeScreen.list.parents": {
     "status": "to-review"
   },
   "common:treeScreen.list.parentsOf": {
@@ -372,9 +372,6 @@
     "status": "to-review"
   },
   "common:treeScreen.list.spouses": {
-    "status": "to-review"
-  },
-  "common:treeScreen.list.title": {
     "status": "to-review"
   },
   "common:treeScreen.list.unfold": {

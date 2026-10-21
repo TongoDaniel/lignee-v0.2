@@ -55,16 +55,13 @@
     "missingFather": "Father not specified",
     "missingParent": "Parent not specified",
     "list": {
-      "title": "Browse the tree",
       "focus": "Chosen person",
-      "parents": "Parents",
       "parentsOf": "Parents of {name}",
       "spouses": "Spouses and children",
       "household": "Household with {name}",
       "householdUnspecified": "Household with {place}",
       "noChildren": "No children noted",
       "children": "Children",
-      "ended": "union ended",
       "otherLinks": "Other links",
       "seeAlsoEntry": "See also {name}",
       "secondaryEntry": "Other link with {name}",
@@ -74,7 +71,9 @@
       "goTo": "Go to {name}",
       "hiddenFromDrawing": "not on the drawing yet",
       "empty": "No one to show.",
-      "goToHint": "Shows their parents, spouses and children."
+      "goToHint": "Shows their parents, spouses and children.",
+      "householdEnded": "Household with {name}, union ended",
+      "focusHint": "Their parents, spouses and children are listed below."
     },
     "drawingHint": "Use the Browse as a list button to read the tree person by person.",
     "noName": "Name not entered"
