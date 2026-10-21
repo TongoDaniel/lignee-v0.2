@@ -18,7 +18,13 @@ import {
   readSchemaVersion,
   type LocalMigration,
 } from './migrate';
-import { readTreeSnapshot, replaceTreeSnapshot } from './snapshot';
+import { trees } from './schema';
+import {
+  COLLECTION_TABLES,
+  SNAPSHOT_COLLECTIONS,
+  readTreeSnapshot,
+  replaceTreeSnapshot,
+} from './snapshot';
 
 let cleanup: (() => void) | undefined;
 afterEach(() => {
@@ -191,7 +197,27 @@ describe('migration 2 : file de changements (T-030)', () => {
     connection.exec('PRAGMA foreign_keys = ON');
     const db = nodeDrizzle(connection);
     const { snapshot } = generatedSnapshot(45, 120);
-    replaceTreeSnapshot(db, snapshot, { now: 1 });
+    // Remplie comme le ferait l'app en version 1 : lignes écrites table par table
+    // (`replaceTreeSnapshot` touche aujourd'hui la file, absente de cette version).
+    db.insert(trees)
+      .values({
+        id: snapshot.tree.id,
+        readerAccountId: snapshot.readerAccountId,
+        loadedAt: 1,
+        body: snapshot.tree,
+      })
+      .run();
+    for (const collection of SNAPSHOT_COLLECTIONS) {
+      const { table, row } = COLLECTION_TABLES[collection] as unknown as {
+        table: typeof trees;
+        row: (object: unknown) => Record<string, unknown>;
+      };
+      for (const object of snapshot[collection]) {
+        db.insert(table)
+          .values({ id: object.id, treeId: object.treeId, ...row(object), body: object } as never)
+          .run();
+      }
+    }
     expect(tableNames(connection)).not.toContain('mutation_queue');
 
     expect(migrateLocalDatabase(connection)).toEqual([2]);

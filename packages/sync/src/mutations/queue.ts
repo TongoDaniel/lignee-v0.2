@@ -31,19 +31,21 @@ export interface QueuedBatch {
   readonly entries: readonly QueuedMutation[];
 }
 
-export interface QueueFilter {
+/**
+ * Quelle file lire : un arbre et un compte, toujours. On ne lit, ne compte et n'envoie que les
+ * saisies du compte connecté (T-067) ; celles d'un autre compte ne sortent jamais d'ici.
+ */
+export interface QueueScope {
+  readonly treeId: Id;
+  readonly authorAccountId: Id;
   readonly status?: QueueStatus;
-  /** Seules les saisies de ce compte (T-067 n'envoie que celles du compte connecté). */
-  readonly authorAccountId?: Id;
 }
 
-function where(treeId: Id, filter: QueueFilter) {
+function where(scope: QueueScope) {
   return and(
-    eq(mutationQueue.treeId, treeId),
-    filter.status === undefined ? undefined : eq(mutationQueue.status, filter.status),
-    filter.authorAccountId === undefined
-      ? undefined
-      : eq(mutationQueue.authorAccountId, filter.authorAccountId),
+    eq(mutationQueue.treeId, scope.treeId),
+    eq(mutationQueue.authorAccountId, scope.authorAccountId),
+    scope.status === undefined ? undefined : eq(mutationQueue.status, scope.status),
   );
 }
 
@@ -51,11 +53,7 @@ function where(treeId: Id, filter: QueueFilter) {
  * Mutations de la file d'un arbre, dans l'ordre de saisie. Chaque mutation repasse par son
  * schéma (une base écrite par une autre version de l'app ne donne jamais de mutation invalide).
  */
-export function listQueuedMutations(
-  db: LocalDatabase,
-  treeId: Id,
-  filter: QueueFilter = {},
-): QueuedMutation[] {
+export function listQueuedMutations(db: LocalDatabase, scope: QueueScope): QueuedMutation[] {
   return db
     .select({
       seq: mutationQueue.seq,
@@ -67,7 +65,7 @@ export function listQueuedMutations(
       body: sql<string>`${mutationQueue.body}`,
     })
     .from(mutationQueue)
-    .where(where(treeId, filter))
+    .where(where(scope))
     .orderBy(asc(mutationQueue.seq))
     .all()
     .map((row) => ({
@@ -82,13 +80,9 @@ export function listQueuedMutations(
 }
 
 /** Les lots de la file, dans l'ordre de leur première mutation. */
-export function listQueuedBatches(
-  db: LocalDatabase,
-  treeId: Id,
-  filter: QueueFilter = {},
-): QueuedBatch[] {
+export function listQueuedBatches(db: LocalDatabase, scope: QueueScope): QueuedBatch[] {
   const batches = new Map<Id, QueuedMutation[]>();
-  for (const entry of listQueuedMutations(db, treeId, filter)) {
+  for (const entry of listQueuedMutations(db, scope)) {
     const entries = batches.get(entry.batchId) ?? [];
     entries.push(entry);
     batches.set(entry.batchId, entries);
@@ -99,12 +93,15 @@ export function listQueuedBatches(
   });
 }
 
-/** Nombre de changements pas encore envoyés (indicateur discret, HOL-02). */
-export function countPendingMutations(db: LocalDatabase, treeId: Id): number {
+/** Nombre de changements de ce compte pas encore envoyés (indicateur discret, HOL-02). */
+export function countPendingMutations(
+  db: LocalDatabase,
+  scope: Omit<QueueScope, 'status'>,
+): number {
   const row = db
     .select({ count: sql<number>`count(*)` })
     .from(mutationQueue)
-    .where(where(treeId, { status: 'pending' }))
+    .where(where({ ...scope, status: 'pending' }))
     .get();
   return row?.count ?? 0;
 }
@@ -126,11 +123,13 @@ export type QueueOutcome =
 
 /**
  * Note la réponse du serveur pour des mutations de la file, en une transaction. Seule une
- * mutation en attente change d'état ; noter deux fois la même réponse ne change rien (un envoi
- * répété reçoit la même réponse). Toute autre transition, ou une mutation absente, est refusée
- * sans rien écrire.
+ * mutation en attente change d'état ; noter deux fois la même réponse, dans deux appels, ne
+ * change rien (un envoi répété reçoit la même réponse). Toute autre transition, une mutation
+ * absente, ou deux réponses pour la même mutation dans un appel : refus, sans rien écrire.
  */
 export function recordQueueOutcomes(db: LocalDatabase, outcomes: readonly QueueOutcome[]): void {
+  const distinct = new Set(outcomes.map((outcome) => outcome.id));
+  if (distinct.size !== outcomes.length) throw new QueueTransitionError(outcomes.length);
   for (const outcome of outcomes) {
     if (outcome.status === 'refused' && !REFUSAL_CODE.test(outcome.code)) {
       throw new QueueTransitionError(outcomes.length);

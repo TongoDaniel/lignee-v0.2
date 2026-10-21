@@ -15,6 +15,12 @@ import {
   recordQueueOutcomes,
 } from './queue';
 
+/** La file du lecteur de la copie. */
+const own = (fixture: { treeId: string; reader: string }) => ({
+  treeId: fixture.treeId,
+  authorAccountId: fixture.reader,
+});
+
 const tmp = temporaryDirectory();
 afterAll(() => {
   tmp.cleanup();
@@ -36,22 +42,22 @@ async function withQueue() {
       newId: fixture.nextId,
     });
   }
-  const ids = listQueuedMutations(opened.db, fixture.treeId).map((entry) => entry.mutation.id);
+  const ids = listQueuedMutations(opened.db, own(fixture)).map((entry) => entry.mutation.id);
   return { ...opened, fixture, ids };
 }
 
 describe('file de changements', () => {
   it('trois lots en attente, dans l’ordre de saisie (« 3 changements en attente »)', async () => {
     const { db, connection, fixture } = await withQueue();
-    expect(countPendingMutations(db, fixture.treeId)).toBe(3);
-    const batches = listQueuedBatches(db, fixture.treeId);
+    expect(countPendingMutations(db, own(fixture))).toBe(3);
+    const batches = listQueuedBatches(db, own(fixture));
     expect(batches.map((batch) => batch.entries[0]?.mutation.fields)).toEqual([
       { notes: 'Première note' },
       { notes: 'Deuxième note' },
       { notes: 'Troisième note' },
     ]);
     expect(
-      listQueuedBatches(db, fixture.treeId, { authorAccountId: fixture.otherAccount }),
+      listQueuedBatches(db, { treeId: fixture.treeId, authorAccountId: fixture.otherAccount }),
     ).toEqual([]);
     connection.close();
   });
@@ -64,14 +70,14 @@ describe('file de changements', () => {
       { id: second, status: 'refused', code: 'third_birth_parent' },
     ]);
     recordQueueOutcomes(db, [{ id: first, status: 'sent' }]);
-    const entries = listQueuedMutations(db, fixture.treeId);
+    const entries = listQueuedMutations(db, own(fixture));
     expect(entries.map((entry) => [entry.status, entry.refusalCode])).toEqual([
       ['sent', undefined],
       ['refused', 'third_birth_parent'],
       ['pending', undefined],
     ]);
-    expect(countPendingMutations(db, fixture.treeId)).toBe(1);
-    expect(listQueuedMutations(db, fixture.treeId, { status: 'pending' })).toHaveLength(1);
+    expect(countPendingMutations(db, own(fixture))).toBe(1);
+    expect(listQueuedMutations(db, { ...own(fixture), status: 'pending' })).toHaveLength(1);
     connection.close();
   });
 
@@ -79,7 +85,7 @@ describe('file de changements', () => {
     const { db, connection, fixture, ids } = await withQueue();
     const [first, , third] = ids as [string, string, string];
     recordQueueOutcomes(db, [{ id: first, status: 'sent' }]);
-    const before = listQueuedMutations(db, fixture.treeId);
+    const before = listQueuedMutations(db, own(fixture));
     expect(() => {
       recordQueueOutcomes(db, [
         { id: third, status: 'sent' },
@@ -92,7 +98,26 @@ describe('file de changements', () => {
     expect(() => {
       recordQueueOutcomes(db, [{ id: fixture.nextId(), status: 'sent' }]);
     }).toThrow(QueueTransitionError);
-    expect(listQueuedMutations(db, fixture.treeId)).toEqual(before);
+    expect(listQueuedMutations(db, own(fixture))).toEqual(before);
+    connection.close();
+  });
+});
+
+describe('réponses du serveur en double', () => {
+  it('deux réponses pour la même mutation dans un appel : refus, rien n’est écrit', async () => {
+    const { db, connection, fixture, ids } = await withQueue();
+    const [first] = ids as [string];
+    expect(() => {
+      recordQueueOutcomes(db, [
+        { id: first, status: 'sent' },
+        { id: first, status: 'refused', code: 'cycle' },
+      ]);
+    }).toThrow(QueueTransitionError);
+    expect(listQueuedMutations(db, own(fixture)).map((entry) => entry.status)).toEqual([
+      'pending',
+      'pending',
+      'pending',
+    ]);
     connection.close();
   });
 });

@@ -13,7 +13,7 @@ import { generatedSnapshot } from '../test-support/generated-snapshot';
 import { smallTree } from '../test-support/mutation-fixtures';
 import { openTestDatabase, temporaryDirectory } from '../test-support/node-database';
 import { applyMutationBatch, treeObjectsOf } from './apply';
-import { recordLocalChanges, type LocalChange } from './local-changes';
+import { MutationBatchRefusedError, recordLocalChanges, type LocalChange } from './local-changes';
 import { countPendingMutations, listQueuedMutations } from './queue';
 
 const tmp = temporaryDirectory();
@@ -196,7 +196,12 @@ describe('propriétés sur des arbres générés', () => {
           });
           expect(outcome).toMatchObject({ status: 'recorded', mutationCount: changes.length });
           expect(readTreeSnapshot(db, snapshot.tree.id)).toEqual(expected);
-          expect(countPendingMutations(db, snapshot.tree.id)).toBe(changes.length);
+          expect(
+            countPendingMutations(db, {
+              treeId: snapshot.tree.id,
+              authorAccountId: snapshot.readerAccountId,
+            }),
+          ).toBe(changes.length);
           eraseLocalTree(db, snapshot.tree.id);
         },
       ),
@@ -207,7 +212,15 @@ describe('propriétés sur des arbres générés', () => {
 
   it('un lot qui contient une mutation invalide laisse la base et la file inchangées', async () => {
     const { db, connection } = await openTestDatabase(nextPath());
-    const invalidKinds = ['dangling', 'unknown', 'distinct', 'cycle', 'author'] as const;
+    /** Chaque sorte de mutation invalide, et le code de refus attendu. */
+    const expectedCode = {
+      dangling: 'dangling_reference',
+      unknown: 'unknown_object',
+      distinct: 'dangling_reference',
+      cycle: 'coherence_refusal',
+      author: 'author_mismatch',
+    } as const;
+    const invalidKinds = Object.keys(expectedCode) as (keyof typeof expectedCode)[];
     fc.assert(
       fc.property(
         fc.integer(),
@@ -301,18 +314,39 @@ describe('propriétés sur des arbres générés', () => {
           const changes = [...valid];
           changes.splice(Math.min(position, changes.length), 0, invalid);
           const before = readTreeSnapshot(db, snapshot.tree.id);
-          const queued = listQueuedMutations(db, snapshot.tree.id);
-          expect(() =>
+          const queued = listQueuedMutations(db, {
+            treeId: snapshot.tree.id,
+            authorAccountId: snapshot.readerAccountId,
+          });
+          let caught: unknown;
+          try {
             recordLocalChanges(db, {
               treeId: snapshot.tree.id,
               authorAccountId: reader,
               changes,
               now: Date.UTC(2026, 9, 19),
               newId: ids,
-            }),
-          ).toThrow();
+            });
+          } catch (error) {
+            caught = error;
+          }
+          expect(caught).toBeInstanceOf(MutationBatchRefusedError);
+          const codes = (caught as MutationBatchRefusedError).issues.map((issue) => issue.code);
+          expect(codes).toContain(expectedCode[kind]);
+          // Le constat désigne le rang de la mutation fautive dans les changements reçus.
+          const rank = changes.indexOf(invalid);
+          expect(
+            (caught as MutationBatchRefusedError).issues.some((issue) =>
+              issue.path.startsWith(`mutations[${String(rank)}]`),
+            ),
+          ).toBe(true);
           expect(readTreeSnapshot(db, snapshot.tree.id)).toEqual(before);
-          expect(listQueuedMutations(db, snapshot.tree.id)).toEqual(queued);
+          expect(
+            listQueuedMutations(db, {
+              treeId: snapshot.tree.id,
+              authorAccountId: snapshot.readerAccountId,
+            }),
+          ).toEqual(queued);
           eraseLocalTree(db, snapshot.tree.id);
         },
       ),
@@ -320,4 +354,68 @@ describe('propriétés sur des arbres générés', () => {
     );
     connection.close();
   }, 60_000);
+});
+
+describe('objets créés dans le lot et visibilité du rédacteur', () => {
+  it('un objet créé plus tôt dans le lot est visible, même si canWriterSee ne le connaît pas', () => {
+    const fixture = smallTree();
+    const tree = treeObjectsOf(fixture.snapshot);
+    const personId = fixture.nextId();
+    const mutation = (fields: Record<string, unknown>) => ({
+      id: fixture.nextId(),
+      baseVersion: null,
+      createdAt,
+      ...fields,
+    });
+    const created = mutation({
+      entity: 'person',
+      entityId: personId,
+      operation: 'create',
+      fields: { nature: 'placeholder' },
+    });
+    const batch = mutationBatchSchema.parse({
+      id: fixture.nextId(),
+      treeId: fixture.treeId,
+      mutations: [
+        created,
+        mutation({
+          entity: 'person',
+          entityId: personId,
+          operation: 'update',
+          fields: { nature: 'known' },
+          baseVersion: 0,
+        }),
+        mutation({
+          entity: 'name',
+          entityId: fixture.nextId(),
+          operation: 'create',
+          fields: {
+            personId,
+            type: 'birth',
+            givenNames: 'Eyenga',
+            authorAccountId: fixture.reader,
+          },
+        }),
+        mutation({
+          entity: 'title_role',
+          entityId: fixture.nextId(),
+          operation: 'create',
+          fields: { personId, label: 'Notable', authorAccountId: fixture.reader },
+        }),
+      ],
+    });
+    // Le serveur ne connaît encore aucun de ces objets : canWriterSee les ignore.
+    const hidden = { authorAccountId: fixture.reader, canWriterSee: () => false };
+    expect(applyMutationBatch(tree, batch, hidden).ok).toBe(true);
+
+    const withDelete = mutationBatchSchema.parse({
+      id: fixture.nextId(),
+      treeId: fixture.treeId,
+      mutations: [
+        created,
+        mutation({ entity: 'person', entityId: personId, operation: 'delete', baseVersion: 0 }),
+      ],
+    });
+    expect(applyMutationBatch(tree, withDelete, hidden).ok).toBe(true);
+  });
 });

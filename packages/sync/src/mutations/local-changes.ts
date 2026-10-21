@@ -6,7 +6,10 @@
 // Deux entrées :
 // - `recordLocalChanges` : des changements décrits par l'écran (T-031 à T-033) ou par le plan
 //   vocal validé (T-079) ; identifiants, dates et versions de départ sont posés ici ;
-// - `applyLocalMutationBatch` : un lot déjà formé (rejeu, tests) ; idempotent.
+// - `applyLocalMutationBatch` : un lot déjà formé ailleurs (tests, outils) ; idempotent.
+// Le rejeu des saisies en attente sur un nouvel instantané (T-063, T-067) ne passe pas par
+// `applyLocalMutationBatch` : il aura sa propre fonction, qui garde la seconde barrière et ne
+// rejoue que les mutations du lecteur.
 import {
   mutationBatchSchema,
   type Id,
@@ -14,7 +17,7 @@ import {
   type MutationEntity,
   type MutationOperation,
 } from '@lignee/domain';
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 
 import { mutationQueue, people, trees } from '../local-db/schema';
 import {
@@ -26,6 +29,8 @@ import {
 import {
   applyMutationBatch,
   dropUnchangedFields,
+  formatIssuePath,
+  remapIssue,
   treeObjectsOf,
   type MutationIssue,
   type ObjectChange,
@@ -78,7 +83,9 @@ export interface RecordLocalChangesInput {
 function parseBatch(input: unknown): MutationBatch {
   const result = mutationBatchSchema.safeParse(input);
   if (!result.success) {
-    throw new InvalidMutationBatchError(result.error.issues.map((issue) => issue.path.join('.')));
+    throw new InvalidMutationBatchError(
+      result.error.issues.map((issue) => formatIssuePath(issue.path)),
+    );
   }
   return result.data;
 }
@@ -124,37 +131,68 @@ function writeChange(db: LocalDatabase, treeId: Id, change: ObjectChange): void 
   }
 }
 
-/** Applique un lot validé à la copie locale et l'ajoute à la file (transaction en cours). */
+/** Une mutation dont l'identifiant est déjà dans la file (contrainte d'unicité de SQLite). */
+function isDuplicateQueueId(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  // Drizzle enveloppe l'erreur du pilote : son message est dans `cause`.
+  const cause = error.cause instanceof Error ? error.cause.message : '';
+  const message = `${error.message} ${cause}`;
+  return /UNIQUE constraint failed: mutation_queue\.id/.test(message);
+}
+
+/**
+ * Applique un lot validé à la copie locale et l'ajoute à la file (transaction en cours).
+ * `origins` remet les constats au rang qu'avait chaque mutation dans les changements reçus.
+ */
 function applyAndEnqueue(
   db: LocalDatabase,
   tree: TreeObjects,
   batch: MutationBatch,
   authorAccountId: Id,
-  requireCurrentBaseVersion: boolean,
+  origins?: readonly number[],
 ): LocalBatchOutcome {
-  const result = applyMutationBatch(tree, batch, { authorAccountId, requireCurrentBaseVersion });
-  if (!result.ok) throw new MutationBatchRefusedError(result.issues);
+  const refuse = (issues: readonly MutationIssue[]) =>
+    new MutationBatchRefusedError(
+      origins === undefined ? issues : issues.map((issue) => remapIssue(issue, origins)),
+    );
+  const result = applyMutationBatch(tree, batch, {
+    authorAccountId,
+    requireCurrentBaseVersion: true,
+  });
+  if (!result.ok) throw refuse(result.issues);
   // Seconde barrière (ADR 0023) : la copie reste ce qu'un lecteur peut voir, après le lot aussi.
+  // Les contrôles du lot couvrent déjà ce qu'elle vérifie pour les objets touchés : elle n'arrête
+  // qu'une copie déjà abîmée (ligne écrite hors de ce paquet, version plus ancienne de l'app).
+  // Ses chemins désignent l'instantané (`facts[3]`), pas une mutation.
   const barrier = snapshotPrivacyIssues({ readerAccountId: authorAccountId, ...result.tree });
   if (barrier.length > 0) {
     throw new MutationBatchRefusedError(
       barrier.map((issue) => ({ code: 'privacy_barrier', path: issue.path })),
     );
   }
+  // Les écritures se font dans la transaction de l'appelant : toute erreur l'annule entière.
   for (const change of result.changes) writeChange(db, batch.treeId, change);
-  db.insert(mutationQueue)
-    .values(
-      batch.mutations.map((mutation) => ({
-        id: mutation.id,
-        batchId: batch.id,
-        treeId: batch.treeId,
-        authorAccountId,
-        entityId: mutation.entityId,
-        status: 'pending' as const,
-        body: mutation,
-      })),
-    )
-    .run();
+  try {
+    db.insert(mutationQueue)
+      .values(
+        batch.mutations.map((mutation) => ({
+          id: mutation.id,
+          batchId: batch.id,
+          treeId: batch.treeId,
+          authorAccountId,
+          entityId: mutation.entityId,
+          status: 'pending' as const,
+          body: mutation,
+        })),
+      )
+      .run();
+  } catch (error) {
+    // Identifiant de mutation déjà pris : refus du lot, arbre compris (la transaction l'annule).
+    if (isDuplicateQueueId(error)) {
+      throw new MutationBatchRefusedError([{ code: 'duplicate_mutation', path: 'mutations' }]);
+    }
+    throw error;
+  }
   return { status: 'recorded', batchId: batch.id, mutationCount: batch.mutations.length };
 }
 
@@ -172,11 +210,19 @@ export function applyLocalMutationBatch(
   const batch = parseBatch(input);
   return db.transaction((tx) => {
     const local = tx as unknown as LocalDatabase;
+    // Le contrôle d'auteur passe d'abord : un autre compte n'apprend rien de la file.
+    const tree = readOwnTree(local, batch.treeId, options.authorAccountId);
     const ids = batch.mutations.map((mutation) => mutation.id);
     const known = local
       .select({ id: mutationQueue.id, batchId: mutationQueue.batchId })
       .from(mutationQueue)
-      .where(inArray(mutationQueue.id, ids))
+      .where(
+        and(
+          inArray(mutationQueue.id, ids),
+          eq(mutationQueue.treeId, batch.treeId),
+          eq(mutationQueue.authorAccountId, options.authorAccountId),
+        ),
+      )
       .all();
     if (known.length > 0) {
       const sameBatch =
@@ -184,8 +230,7 @@ export function applyLocalMutationBatch(
       if (sameBatch) return { status: 'already_recorded', batchId: batch.id } as const;
       throw new MutationBatchRefusedError([{ code: 'duplicate_mutation', path: 'mutations' }]);
     }
-    const tree = readOwnTree(local, batch.treeId, options.authorAccountId);
-    return applyAndEnqueue(local, tree, batch, options.authorAccountId, true);
+    return applyAndEnqueue(local, tree, batch, options.authorAccountId);
   });
 }
 
@@ -236,7 +281,7 @@ export function recordLocalChanges(
       })),
     });
     const trimmed = dropUnchangedFields(tree, batch);
-    if (trimmed.mutations.length === 0) return { status: 'no_change' } as const;
-    return applyAndEnqueue(local, tree, trimmed, input.authorAccountId, true);
+    if (trimmed.batch.mutations.length === 0) return { status: 'no_change' } as const;
+    return applyAndEnqueue(local, tree, trimmed.batch, input.authorAccountId, trimmed.origins);
   });
 }

@@ -236,11 +236,31 @@ function ruleReferences(rule: VisibilityRule): Reference[] {
 
 const at = (index: number) => `mutations[${String(index)}]`;
 
+/**
+ * Chemin d'un constat, au même format partout (`mutations[2].fields.spouses[0]`) : constats d'un
+ * lot refusé comme erreurs de schéma (`InvalidMutationBatchError`).
+ */
+export function formatIssuePath(path: readonly PropertyKey[]): string {
+  return path.reduce<string>((text, key) => {
+    if (typeof key === 'number') return `${text}[${String(key)}]`;
+    return text === '' ? String(key) : `${text}.${String(key)}`;
+  }, '');
+}
+
 function zodPath(index: number, path: readonly PropertyKey[]): string {
-  return path.reduce<string>(
-    (text, key) => (typeof key === 'number' ? `${text}[${String(key)}]` : `${text}.${String(key)}`),
-    `${at(index)}.fields`,
-  );
+  return formatIssuePath(['mutations', index, 'fields', ...path]);
+}
+
+/**
+ * Remet un constat au rang qu'avait la mutation dans le lot d'origine (`origins[rang réduit]`),
+ * quand des changements sans effet ont été retirés avant l'application.
+ */
+export function remapIssue(issue: MutationIssue, origins: readonly number[]): MutationIssue {
+  const path = issue.path.replace(/^mutations\[(\d+)\]/, (whole, rank: string) => {
+    const origin = origins[Number(rank)];
+    return origin === undefined ? whole : at(origin);
+  });
+  return { ...issue, path };
 }
 
 /** Tri stable des clés, pour comparer deux valeurs JSON. */
@@ -263,9 +283,13 @@ function versionOf(entity: StoredEntity, object: TreeObject | undefined): number
 /**
  * Retire d'un lot ce qui ne change rien : dans une modification, les champs égaux à la valeur
  * courante (la file ne garde que ce que l'auteur a modifié, pas le reste de la fiche, qui peut
- * venir d'autres membres) ; puis les modifications devenues vides.
+ * venir d'autres membres) ; puis les modifications devenues vides. `origins[i]` est le rang,
+ * dans le lot reçu, de la i-ème mutation gardée (pour remettre les constats à leur rang).
  */
-export function dropUnchangedFields(tree: TreeObjects, batch: MutationBatch): MutationBatch {
+export function dropUnchangedFields(
+  tree: TreeObjects,
+  batch: MutationBatch,
+): { batch: MutationBatch; origins: number[] } {
   const working = new Map<Id, TreeObject>();
   const deleted = new Set<Id>();
   const lookup = (entity: StoredEntity, id: Id): TreeObject | undefined => {
@@ -276,16 +300,21 @@ export function dropUnchangedFields(tree: TreeObjects, batch: MutationBatch): Mu
     );
   };
   const mutations: Mutation[] = [];
-  for (const mutation of batch.mutations) {
+  const origins: number[] = [];
+  const keep = (mutation: Mutation, rank: number) => {
+    mutations.push(mutation);
+    origins.push(rank);
+  };
+  for (const [rank, mutation] of batch.mutations.entries()) {
     if (mutation.entity === 'visibility_rule') {
-      mutations.push(mutation);
+      keep(mutation, rank);
       continue;
     }
     const entity = mutation.entity;
     if (mutation.operation === 'delete') {
       working.delete(mutation.entityId);
       deleted.add(mutation.entityId);
-      mutations.push(mutation);
+      keep(mutation, rank);
       continue;
     }
     if (mutation.operation === 'create') {
@@ -294,12 +323,12 @@ export function dropUnchangedFields(tree: TreeObjects, batch: MutationBatch): Mu
         deleted.delete(mutation.entityId);
         working.set(mutation.entityId, created.data);
       }
-      mutations.push(mutation);
+      keep(mutation, rank);
       continue;
     }
     const current = lookup(entity, mutation.entityId) as Record<string, unknown> | undefined;
     if (current === undefined) {
-      mutations.push(mutation);
+      keep(mutation, rank);
       continue;
     }
     const fields = Object.fromEntries(
@@ -310,9 +339,9 @@ export function dropUnchangedFields(tree: TreeObjects, batch: MutationBatch): Mu
     if (Object.keys(fields).length === 0) continue;
     const updated = updatedObject(entity, current as never, fields);
     if (updated.success) working.set(mutation.entityId, updated.data);
-    mutations.push({ ...mutation, fields });
+    keep({ ...mutation, fields }, rank);
   }
-  return { ...batch, mutations };
+  return { batch: { ...batch, mutations }, origins };
 }
 
 /**
@@ -354,8 +383,11 @@ export function applyMutationBatch(
   const rules: { rule: VisibilityRule; index: number }[] = [];
   const baseVersions: (number | null)[] = [];
 
+  // Un objet créé plus tôt dans le lot est du rédacteur : visible sans consulter `canWriterSee`
+  // (la projection du serveur ne le connaît pas encore).
+  const seen = (entity: StoredEntity, id: Id) => createdIds.has(id) || canSee({ entity, id });
   const visible = (entity: StoredEntity, id: Id) =>
-    maps[ENTITY_COLLECTIONS[entity]].has(id) && canSee({ entity, id });
+    maps[ENTITY_COLLECTIONS[entity]].has(id) && seen(entity, id);
 
   batch.mutations.forEach((mutation, index) => {
     const fields = mutation.fields ?? {};
@@ -397,7 +429,7 @@ export function applyMutationBatch(
       lastTouch.set(id, { collection, index });
     } else {
       const current = map.get(id);
-      if (current === undefined || !canSee({ entity, id })) {
+      if (current === undefined || !seen(entity, id)) {
         baseVersions.push(null);
         issues.push({ code: 'unknown_object', path: `${at(index)}.entityId` });
         return;
@@ -503,8 +535,9 @@ export function applyMutationBatch(
     }
   }
 
-  // Une personne connue garde un nom autre qu'un ancien prénom (UNI-01, UNI-22). Une fiche dont
-  // la copie locale ne montre aucun nom (noms masqués) n'est pas refusée pour autant.
+  // Une personne connue garde un nom autre qu'un ancien prénom (UNI-01, UNI-22). Seule exception :
+  // une fiche déjà connue dont la copie locale ne montrait aucun nom (noms masqués) n'est pas
+  // refusée pour autant. Une place à compléter qui devient connue doit recevoir un nom.
   if (nameWatch.size > 0) {
     const hasName = (names: Iterable<TreeObjects['names'][number]>, personId: Id) => {
       for (const name of names) {
@@ -517,8 +550,10 @@ export function applyMutationBatch(
       const person = maps.people.get(personId) as TreeObjects['people'][number] | undefined;
       if (person === undefined || person.nature !== 'known') continue;
       if (hasName(finalNames, personId)) continue;
-      const before = initial.get(personId) === 'people';
-      if (!before || hasName(tree.names, personId)) {
+      const wasKnown = tree.people.some(
+        (entry) => entry.id === personId && entry.nature === 'known',
+      );
+      if (!wasKnown || hasName(tree.names, personId)) {
         issues.push({ code: 'person_without_name', path: at(index) });
       }
     }

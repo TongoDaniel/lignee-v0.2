@@ -23,7 +23,7 @@ import {
   type Fact,
   type Id,
 } from '@lignee/domain';
-import { asc, eq, sql } from 'drizzle-orm';
+import { and, asc, eq, ne, sql } from 'drizzle-orm';
 import type { BaseSQLiteDatabase, SQLiteTable } from 'drizzle-orm/sqlite-core';
 import { z } from 'zod';
 
@@ -315,8 +315,10 @@ export interface ReplaceTreeOptions {
 /**
  * Remplace, en une transaction, la copie locale d'un arbre par cet instantané (premier
  * chargement, ou arbre rechargé en entier). Rien n'est écrit si l'instantané est refusé.
- * La file de changements de l'arbre est gardée telle quelle : rejouer les saisies en attente
- * sur le nouvel instantané revient au tirage (T-063, T-067).
+ * La file de changements du lecteur est gardée : rejouer ses saisies en attente sur le nouvel
+ * instantané revient au tirage (T-063, T-067). Celle de tout autre compte, pour cet arbre, est
+ * vidée dans la même transaction (ADR 0027, point 9) : la copie et la file appartiennent au
+ * seul lecteur de l'instantané.
  */
 export function replaceTreeSnapshot(
   db: LocalDatabase,
@@ -327,6 +329,15 @@ export function replaceTreeSnapshot(
   return db.transaction((tx) => {
     const local = tx as unknown as LocalDatabase;
     deleteTree(local, snapshot.tree.id);
+    local
+      .delete(mutationQueue)
+      .where(
+        and(
+          eq(mutationQueue.treeId, snapshot.tree.id),
+          ne(mutationQueue.authorAccountId, snapshot.readerAccountId),
+        ),
+      )
+      .run();
     local
       .insert(trees)
       .values({

@@ -20,6 +20,12 @@ import {
 } from './local-changes';
 import { countPendingMutations, listQueuedBatches, listQueuedMutations } from './queue';
 
+/** La file du lecteur de la copie. */
+const own = (fixture: { treeId: string; reader: string }) => ({
+  treeId: fixture.treeId,
+  authorAccountId: fixture.reader,
+});
+
 const tmp = temporaryDirectory();
 afterAll(() => {
   tmp.cleanup();
@@ -48,7 +54,7 @@ function record(db: LocalDatabase, fixture: SmallTree, changes: LocalChange[]) {
 /** Le refus d'un lot : ses constats, et la preuve que rien n'a été écrit. */
 function refusal(db: LocalDatabase, fixture: SmallTree, changes: LocalChange[]) {
   const before = readTreeSnapshot(db, fixture.treeId);
-  const queued = listQueuedMutations(db, fixture.treeId);
+  const queued = listQueuedMutations(db, own(fixture));
   let caught: unknown;
   try {
     record(db, fixture, changes);
@@ -57,7 +63,7 @@ function refusal(db: LocalDatabase, fixture: SmallTree, changes: LocalChange[]) 
   }
   expect(caught).toBeInstanceOf(MutationBatchRefusedError);
   expect(readTreeSnapshot(db, fixture.treeId)).toEqual(before);
-  expect(listQueuedMutations(db, fixture.treeId)).toEqual(queued);
+  expect(listQueuedMutations(db, own(fixture))).toEqual(queued);
   return caught as MutationBatchRefusedError;
 }
 
@@ -93,7 +99,7 @@ describe('saisie locale', () => {
     });
     expect(tree?.names.at(-1)).toMatchObject({ personId, givenNames: 'Ateba' });
 
-    const queued = listQueuedMutations(db, fixture.treeId);
+    const queued = listQueuedMutations(db, own(fixture));
     expect(queued.map((entry) => [entry.mutation.entity, entry.status])).toEqual([
       ['person', 'pending'],
       ['name', 'pending'],
@@ -106,7 +112,7 @@ describe('saisie locale', () => {
       createdAt: '2026-10-19T08:30:00.000Z',
     });
     expect(queued[0]?.authorAccountId).toBe(fixture.reader);
-    expect(countPendingMutations(db, fixture.treeId)).toBe(2);
+    expect(countPendingMutations(db, own(fixture))).toBe(2);
     connection.close();
   });
 
@@ -124,13 +130,13 @@ describe('saisie locale', () => {
         fields: { notes: 'Née pendant la saison des pluies' },
       },
     ]);
-    const queued = listQueuedBatches(first.db, fixture.treeId);
+    const queued = listQueuedBatches(first.db, own(fixture));
     const tree = readTreeSnapshot(first.db, fixture.treeId);
     first.connection.close();
 
     const second = await openTestDatabase(path, first.keyStore);
     expect(second.opened.outcome).toBe('opened');
-    expect(listQueuedBatches(second.db, fixture.treeId)).toEqual(queued);
+    expect(listQueuedBatches(second.db, own(fixture))).toEqual(queued);
     expect(queued).toHaveLength(2);
     expect(readTreeSnapshot(second.db, fixture.treeId)).toEqual(tree);
     second.connection.close();
@@ -147,7 +153,7 @@ describe('saisie locale', () => {
         fields: { nature: 'known', gender: 'male', vitalStatus: 'deceased' },
       },
     ]);
-    const [entry] = listQueuedMutations(db, fixture.treeId);
+    const [entry] = listQueuedMutations(db, own(fixture));
     expect(entry?.mutation.fields).toEqual({ vitalStatus: 'deceased' });
     expect(entry?.mutation.baseVersion).toBe(4);
     const father = readTreeSnapshot(db, fixture.treeId)?.people[0];
@@ -164,7 +170,7 @@ describe('saisie locale', () => {
         },
       ]),
     ).toEqual({ status: 'no_change' });
-    expect(countPendingMutations(db, fixture.treeId)).toBe(1);
+    expect(countPendingMutations(db, own(fixture))).toBe(1);
     connection.close();
   });
 
@@ -249,10 +255,10 @@ describe('saisie locale', () => {
       caught = error;
     }
     expect(caught).toBeInstanceOf(InvalidMutationBatchError);
-    expect((caught as InvalidMutationBatchError).paths).toEqual(['mutations.2.fields.spouses']);
+    expect((caught as InvalidMutationBatchError).paths).toEqual(['mutations[2].fields.spouses']);
     expect((caught as Error).message).not.toMatch(/Ateba|[0-9a-f]{8}-/);
     expect(readTreeSnapshot(db, fixture.treeId)).toEqual(before);
-    expect(countPendingMutations(db, fixture.treeId)).toBe(0);
+    expect(countPendingMutations(db, own(fixture))).toBe(0);
     connection.close();
   });
 });
@@ -401,7 +407,7 @@ describe('contrôles avant écriture : le lot entier est refusé', () => {
         newId: fixture.nextId,
       }),
     ).toThrow(MutationBatchRefusedError);
-    expect(countPendingMutations(db, fixture.treeId)).toBe(0);
+    expect(countPendingMutations(db, own(fixture))).toBe(0);
     connection.close();
   });
 });
@@ -435,7 +441,7 @@ describe('règles de visibilité dans un lot', () => {
         },
       },
     ]);
-    const queued = listQueuedMutations(db, fixture.treeId).map((entry) => entry.mutation.entity);
+    const queued = listQueuedMutations(db, own(fixture)).map((entry) => entry.mutation.entity);
     expect(queued).toEqual(['person', 'name', 'filiation', 'visibility_rule']);
     // L'instantané local ne porte jamais de règle (ADR 0023) : la seconde barrière l'accepte.
     expect(readTreeSnapshot(db, fixture.treeId)).not.toHaveProperty('visibilityRules');
@@ -496,7 +502,7 @@ describe('lot déjà formé', () => {
       batchId: batch.id,
     });
     expect(readTreeSnapshot(db, fixture.treeId)).toEqual(tree);
-    expect(countPendingMutations(db, fixture.treeId)).toBe(1);
+    expect(countPendingMutations(db, own(fixture))).toBe(1);
     // Une mutation déjà dans la file, sous un autre lot : refusée.
     expect(() => applyLocalMutationBatch(db, { ...batch, id: fixture.nextId() }, options)).toThrow(
       MutationBatchRefusedError,
@@ -524,9 +530,9 @@ describe('file et vie de l’arbre', () => {
     const { db, connection, fixture } = await loaded();
     record(db, fixture, newPerson(fixture));
     replaceTreeSnapshot(db, fixture.snapshot, { now: 2 });
-    expect(countPendingMutations(db, fixture.treeId)).toBe(2);
+    expect(countPendingMutations(db, own(fixture))).toBe(2);
     eraseLocalTree(db, fixture.treeId);
-    expect(listQueuedMutations(db, fixture.treeId)).toEqual([]);
+    expect(listQueuedMutations(db, own(fixture))).toEqual([]);
     expect(
       connection.raw.prepare('SELECT count(*) AS n FROM mutation_queue').get() as { n: number },
     ).toEqual({ n: 0 });
@@ -542,6 +548,201 @@ describe('file et vie de l’arbre', () => {
       )
       .all();
     expect(JSON.stringify(rows)).not.toContain('Zanguetsin');
+    connection.close();
+  });
+});
+
+describe('corrections après relecture', () => {
+  it('un changement sans effet retiré ne décale pas le rang des constats', async () => {
+    const { db, connection, fixture } = await loaded();
+    const { issues } = refusal(db, fixture, [
+      // Sans effet (le père est déjà un homme) : retiré avant l'application.
+      {
+        entity: 'person',
+        entityId: fixture.father,
+        operation: 'update',
+        fields: { gender: 'male' },
+      },
+      {
+        entity: 'union',
+        entityId: fixture.nextId(),
+        operation: 'update',
+        fields: { type: 'civil' },
+      },
+    ]);
+    expect(issues).toEqual([{ code: 'unknown_object', path: 'mutations[1].entityId' }]);
+    connection.close();
+  });
+
+  it('une écriture qui échoue en cours de route annule tout le lot, arbre compris', async () => {
+    const { db, connection, fixture } = await loaded();
+    record(db, fixture, newPerson(fixture));
+    const taken = listQueuedMutations(db, own(fixture))[0]?.mutation.id;
+    if (taken === undefined) throw new Error('queue');
+    // Le générateur renvoie, pour la mutation, un identifiant déjà dans la file : l'arbre est
+    // écrit, puis l'insertion dans la file échoue.
+    let calls = 0;
+    const newId = () => (++calls === 2 ? taken : fixture.nextId());
+    const before = readTreeSnapshot(db, fixture.treeId);
+    const queued = listQueuedMutations(db, own(fixture));
+    let caught: unknown;
+    try {
+      recordLocalChanges(db, {
+        treeId: fixture.treeId,
+        authorAccountId: fixture.reader,
+        changes: [
+          {
+            entity: 'person',
+            entityId: fixture.child,
+            operation: 'update',
+            fields: { notes: 'Écrite puis annulée' },
+          },
+        ],
+        now: NOW,
+        newId,
+      });
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toBeInstanceOf(MutationBatchRefusedError);
+    expect((caught as MutationBatchRefusedError).issues).toEqual([
+      { code: 'duplicate_mutation', path: 'mutations' },
+    ]);
+    expect(readTreeSnapshot(db, fixture.treeId)).toEqual(before);
+    expect(listQueuedMutations(db, own(fixture))).toEqual(queued);
+    connection.close();
+  });
+
+  it('la seconde barrière arrête une copie abîmée hors de ce paquet (privacy_barrier)', async () => {
+    const { db, connection, fixture } = await loaded();
+    // Une cause de décès d'un autre auteur écrite directement dans la base (ancienne version).
+    const fact = {
+      id: fixture.nextId(),
+      treeId: fixture.treeId,
+      subject: { kind: 'person', personId: fixture.father },
+      type: 'death_cause',
+      value: 'Accident',
+      authorAccountId: fixture.otherAccount,
+    };
+    connection.raw
+      .prepare(
+        'INSERT INTO facts (id, tree_id, person_id, union_id, body) VALUES (?, ?, ?, NULL, ?)',
+      )
+      .run(fact.id, fixture.treeId, fixture.father, JSON.stringify(fact));
+    const error = refusal(db, fixture, newPerson(fixture));
+    expect(error.issues).toEqual([{ code: 'privacy_barrier', path: 'facts[0]' }]);
+    expect(JSON.stringify(error.issues)).not.toContain('Accident');
+    connection.close();
+  });
+
+  it('une place à compléter ne devient pas connue sans nom', async () => {
+    const { db, connection, fixture } = await loaded();
+    expect(
+      refusal(db, fixture, [
+        {
+          entity: 'person',
+          entityId: fixture.placeholder,
+          operation: 'update',
+          fields: { nature: 'known' },
+        },
+      ]).issues,
+    ).toEqual([{ code: 'person_without_name', path: 'mutations[0]' }]);
+    record(db, fixture, [
+      {
+        entity: 'person',
+        entityId: fixture.placeholder,
+        operation: 'update',
+        fields: { nature: 'known' },
+      },
+      {
+        entity: 'name',
+        entityId: fixture.nextId(),
+        operation: 'create',
+        fields: {
+          personId: fixture.placeholder,
+          type: 'birth',
+          givenNames: 'Biloa',
+          authorAccountId: fixture.reader,
+        },
+      },
+    ]);
+    expect(readTreeSnapshot(db, fixture.treeId)?.people[3]?.nature).toBe('known');
+    connection.close();
+  });
+
+  it('deux comptes sur un même téléphone : chacun sa file ; changer de lecteur vide celle de l’autre', async () => {
+    const { db, connection, fixture } = await loaded();
+    record(db, fixture, newPerson(fixture, 'Mvondo'));
+    const other = { treeId: fixture.treeId, authorAccountId: fixture.otherAccount };
+    expect(countPendingMutations(db, own(fixture))).toBe(2);
+    expect(countPendingMutations(db, other)).toBe(0);
+    expect(listQueuedMutations(db, other)).toEqual([]);
+    expect(listQueuedBatches(db, other)).toEqual([]);
+
+    // Le même arbre, rechargé pour l'autre compte.
+    replaceTreeSnapshot(
+      db,
+      { ...fixture.snapshot, readerAccountId: fixture.otherAccount },
+      { now: 2 },
+    );
+    expect(countPendingMutations(db, own(fixture))).toBe(0);
+    const raw = () =>
+      connection.raw
+        .prepare('SELECT author_account_id AS author, body FROM mutation_queue')
+        .all() as {
+        author: string;
+        body: string;
+      }[];
+    expect(raw()).toEqual([]);
+
+    recordLocalChanges(db, {
+      treeId: fixture.treeId,
+      authorAccountId: fixture.otherAccount,
+      changes: [
+        {
+          entity: 'person',
+          entityId: fixture.child,
+          operation: 'update',
+          fields: { notes: 'Saisie du second compte' },
+        },
+      ],
+      now: NOW,
+      newId: fixture.nextId,
+    });
+    expect(countPendingMutations(db, other)).toBe(1);
+    expect(countPendingMutations(db, own(fixture))).toBe(0);
+    expect(raw().map((row) => row.author)).toEqual([fixture.otherAccount]);
+    expect(raw().some((row) => row.body.includes('Mvondo'))).toBe(false);
+    connection.close();
+  });
+
+  it('un autre compte n’apprend rien de la file : le contrôle d’auteur passe avant l’idempotence', async () => {
+    const { db, connection, fixture } = await loaded();
+    const batch = {
+      id: fixture.nextId(),
+      treeId: fixture.treeId,
+      mutations: [
+        {
+          id: fixture.nextId(),
+          entity: 'person',
+          entityId: fixture.mother,
+          operation: 'update',
+          fields: { notes: 'Note du lecteur' },
+          baseVersion: 1,
+          createdAt: '2026-10-19T08:30:00.000Z',
+        },
+      ],
+    };
+    applyLocalMutationBatch(db, batch, { authorAccountId: fixture.reader });
+    let caught: unknown;
+    try {
+      applyLocalMutationBatch(db, batch, { authorAccountId: fixture.otherAccount });
+    } catch (error) {
+      caught = error;
+    }
+    expect((caught as MutationBatchRefusedError).issues).toEqual([
+      { code: 'foreign_author', path: 'authorAccountId' },
+    ]);
     connection.close();
   });
 });
