@@ -49,7 +49,9 @@ function pairTimes(graph: KinshipGraph, pairs: readonly (readonly [Id, Id])[]) {
   return { cold, warm };
 }
 
-describe('PAR-01 : temps de réponse du moteur', () => {
+// Arbre de 5 000 personnes, mesures répétées : le délai par défaut de vitest (5 s) ne suffit pas
+// quand la CI lance tous les paquets en parallèle.
+describe('PAR-01 : temps de réponse du moteur', { timeout: 60_000 }, () => {
   it('arbre de 5 000 personnes : chaque lien en moins de 200 ms, graphe en moins de 1 s', () => {
     // La copie de l'arbre type (environ 110 ms) est faite hors des mesures.
     const tree = referenceTree(5000);

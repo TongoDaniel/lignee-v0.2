@@ -29,7 +29,9 @@ function readGenerated(path: string): string {
   return readFileSync(path, 'utf8').replace(/\r\n/g, '\n');
 }
 
-describe('fichiers générés', () => {
+// Régénérer les fichiers lit les JSON de la charte et formate le résultat : plus de 5 s (délai par
+// défaut de vitest) quand la CI lance tous les paquets en parallèle.
+describe('fichiers générés', { timeout: 30_000 }, () => {
   it.each([tokensOutputPath, fontFilesOutputPath])('%s est à jour avec la charte', async (path) => {
     const expected = (await generateTokensFiles()).get(path);
     expect(

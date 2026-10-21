@@ -129,7 +129,9 @@ function yearOf(date: FuzzyDate): number | undefined {
   return 'date' in date ? date.date.year : 'from' in date ? date.from.year : undefined;
 }
 
-describe('générateur d’arbres', () => {
+// Propriétés de 200 à 300 arbres générés, arbre type de 1 000 personnes : le délai par défaut de
+// vitest (5 s) est trop court sous la charge de la CI.
+describe('générateur d’arbres', { timeout: 60_000 }, () => {
   it('donne le même arbre pour la même graine, et un autre pour une autre graine', () => {
     const first = generateTree({ seed: 42, size: 300 });
     expect(generateTree({ seed: 42, size: 300 })).toEqual(first);

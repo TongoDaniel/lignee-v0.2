@@ -27,7 +27,9 @@ function expectAll(layout: TreeLayout) {
   expectLinkInvariants(layout, MAX_LINE_ROW_SPAN, MAX_LINE_CROSSINGS);
 }
 
-describe('CL-FAM-09 — mariage entre cousins germains', () => {
+// Dispositions avec implexe et descendance (plusieurs secondes sous charge) : le délai par défaut
+// de vitest (5 s) est trop court sous la charge de la CI.
+describe('CL-FAM-09 — mariage entre cousins germains', { timeout: 30_000 }, () => {
   it('chaque ancêtre une seule fois, le couple relié aux deux branches, aussi dans la descendance', () => {
     const scenario = loadScenario('CL-FAM-09', layoutScenarioSchema('CL-FAM-09'));
     const tree = buildLayoutScenarioTree(scenario);
@@ -62,7 +64,7 @@ describe('CL-FAM-09 — mariage entre cousins germains', () => {
   });
 });
 
-describe('CL-FAM-10 — union entre deux générations', () => {
+describe('CL-FAM-10 — union entre deux générations', { timeout: 30_000 }, () => {
   it('Nadia garde la rangée de sa sœur, son union avec Gaston devient un trait long', () => {
     const scenario = loadScenario('CL-FAM-10', layoutScenarioSchema('CL-FAM-10'));
     const tree = buildLayoutScenarioTree(scenario);
