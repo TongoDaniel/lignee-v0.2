@@ -13,8 +13,8 @@ Protocole de synchronisation, côté téléphone et côté serveur. Agent : sync
 | `src/local-db/key.ts`, `open.ts` | Clé aléatoire de 256 bits en clé brute SQLCipher, trousseau, ouverture, rotation, effacement |
 | `src/local-db/snapshot.ts` | Instantané d'un arbre pour un lecteur : validation, seconde barrière de confidentialité, écriture, relecture, effacement d'un arbre |
 | `src/mutations/apply.ts` | Application pure d'un lot de mutations à un arbre (T-030, ADR 0027) : contrôles sur l'état final, refus du lot entier, point d'extension `canWriterSee` (visibilité du rédacteur, ADR 0017) |
-| `src/mutations/local-changes.ts` | Saisie locale : `recordLocalChanges` (changements de l'écran ou du plan vocal) et `applyLocalMutationBatch` (lot déjà formé, idempotent), arbre et file écrits dans la même transaction |
-| `src/mutations/queue.ts` | File de changements (`mutation_queue`) : ordre de saisie, lots, « N changements en attente », états en attente, envoyée, refusée |
+| `src/mutations/local-changes.ts` | Saisie locale : `recordLocalChanges` (changements de l'écran ou du plan vocal) et `applyLocalMutationBatch` (lot déjà formé ailleurs, tests et outils ; idempotent), arbre et file écrits dans la même transaction. Le rejeu des saisies en attente sur un nouvel instantané (T-063, T-067) aura sa propre fonction, qui garde la seconde barrière |
+| `src/mutations/queue.ts` | File de changements (`mutation_queue`), toujours lue pour un arbre et un compte : ordre de saisie, lots, « N changements en attente », états en attente, envoyée, refusée |
 | `src/dev-seed/` | `@lignee/sync/dev-seed` : arbre généré de 500 personnes, projeté prudemment, chargé en développement seulement |
 | `src/test-support/` | Base chiffrée sur le poste (better-sqlite3-multiple-ciphers au format SQLCipher 4), trousseau en mémoire |
 | `src/tooling/` | Production du module des migrations |
@@ -35,7 +35,7 @@ corepack pnpm --filter @lignee/sync test                                 # sché
 ### Confidentialité
 
 - Le téléphone ne reçoit que ce que son utilisateur voit (TRD, « Confidentialité appliquée ») : le filtrage est fait par le serveur (T-052, T-056). `replaceTreeSnapshot` refuse, sans rien écrire, un instantané qui porte la trace d'un filtrage incomplet : règle de visibilité, référence vers un objet absent (dont `distinctFrom`, ADR 0017), source, cause de décès ou ancien prénom d'un autre auteur. Erreurs et constats ne contiennent que des chemins.
-- La file de changements ne garde que ce que l'auteur a saisi : une modification ne porte que les champs réellement changés, une suppression aucun champ. Elle vit dans la base chiffrée (dossier `SQLite`, exclu des sauvegardes Android) ; recharger un instantané la garde, effacer l'arbre la vide. Les constats d'un lot refusé ne portent qu'un code et un chemin.
+- La file de changements ne garde que ce que l'auteur a saisi : une modification ne porte que les champs réellement changés, une suppression aucun champ. Elle vit dans la base chiffrée (dossier `SQLite`, exclu des sauvegardes Android ; sur iOS, dans la sauvegarde iCloud, chiffrée : risque accepté par l'ADR 0023). Elle se lit, se compte et s'envoie pour le seul compte connecté ; recharger un instantané garde la file de son lecteur et vide celle des autres comptes ; effacer l'arbre la vide. Les constats d'un lot refusé ne portent qu'un code et un chemin (`mutations[2].fields.parentId`), au rang du changement reçu.
 - Aucune valeur saisie n'est journalisée ; l'issue de l'ouverture (`OpenOutcome`) et les nombres d'objets peuvent l'être.
 
 ## Tests
