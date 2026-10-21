@@ -23,7 +23,7 @@ import {
   type Fact,
   type Id,
 } from '@lignee/domain';
-import { asc, eq, sql } from 'drizzle-orm';
+import { and, asc, eq, ne, sql } from 'drizzle-orm';
 import type { BaseSQLiteDatabase, SQLiteTable } from 'drizzle-orm/sqlite-core';
 import { z } from 'zod';
 
@@ -32,6 +32,7 @@ import {
   filiations,
   localSchema,
   multipleBirths,
+  mutationQueue,
   names,
   parentCandidates,
   people,
@@ -232,12 +233,12 @@ export type SnapshotCounts = Record<SnapshotCollection, number>;
 type Row = Record<string, unknown>;
 
 /** Une table de l'arbre et la façon d'y ranger un objet : colonnes de relation, objet entier. */
-interface CollectionTable<K extends SnapshotCollection> {
+export interface CollectionTable<K extends SnapshotCollection> {
   readonly table: SQLiteTable & { treeId: unknown; id: unknown };
   readonly row: (object: LocalTreeSnapshot[K][number]) => Row;
 }
 
-const COLLECTION_TABLES: { readonly [K in SnapshotCollection]: CollectionTable<K> } = {
+export const COLLECTION_TABLES: { readonly [K in SnapshotCollection]: CollectionTable<K> } = {
   people: { table: people, row: () => ({}) },
   names: { table: names, row: (name) => ({ personId: name.personId }) },
   unions: {
@@ -314,6 +315,10 @@ export interface ReplaceTreeOptions {
 /**
  * Remplace, en une transaction, la copie locale d'un arbre par cet instantané (premier
  * chargement, ou arbre rechargé en entier). Rien n'est écrit si l'instantané est refusé.
+ * La file de changements du lecteur est gardée : rejouer ses saisies en attente sur le nouvel
+ * instantané revient au tirage (T-063, T-067). Celle de tout autre compte, pour cet arbre, est
+ * vidée dans la même transaction (ADR 0027, point 9) : la copie et la file appartiennent au
+ * seul lecteur de l'instantané.
  */
 export function replaceTreeSnapshot(
   db: LocalDatabase,
@@ -324,6 +329,15 @@ export function replaceTreeSnapshot(
   return db.transaction((tx) => {
     const local = tx as unknown as LocalDatabase;
     deleteTree(local, snapshot.tree.id);
+    local
+      .delete(mutationQueue)
+      .where(
+        and(
+          eq(mutationQueue.treeId, snapshot.tree.id),
+          ne(mutationQueue.authorAccountId, snapshot.readerAccountId),
+        ),
+      )
+      .run();
     local
       .insert(trees)
       .values({
@@ -342,10 +356,16 @@ export function replaceTreeSnapshot(
   });
 }
 
-/** Efface un arbre de la base du téléphone (arbre retiré, exclusion : CL-SEC-08, T-063). */
+/**
+ * Efface un arbre de la base du téléphone (arbre retiré, exclusion : CL-SEC-08, T-063), file de
+ * changements comprise (TRD : « ses mutations sont refusées et ses données locales de l'arbre
+ * sont effacées »). La file n'a pas de clé étrangère vers l'arbre (un rechargement de
+ * l'instantané la garde) : elle est vidée ici, explicitement.
+ */
 export function eraseLocalTree(db: LocalDatabase, treeId: Id): void {
   db.transaction((tx) => {
     deleteTree(tx, treeId);
+    tx.delete(mutationQueue).where(eq(mutationQueue.treeId, treeId)).run();
   });
 }
 

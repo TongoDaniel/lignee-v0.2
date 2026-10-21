@@ -56,11 +56,14 @@ describe('colonnes et index de la base migrée', () => {
       );
       expect(columns).toContain('body');
       for (const column of columns) {
+        // File de changements (ADR 0027) : son ordre, son état et le code d'un refus du serveur,
+        // jamais une valeur saisie (la mutation entière est dans le corps).
         const allowed =
           column === 'id' ||
           column === 'body' ||
           column.endsWith('_id') ||
-          (table === 'trees' && column === 'loaded_at');
+          (table === 'trees' && column === 'loaded_at') ||
+          (table === 'mutation_queue' && ['seq', 'status', 'refusal_code'].includes(column));
         expect(allowed, `${table}.${column}`).toBe(true);
       }
     }
