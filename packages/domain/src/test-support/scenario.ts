@@ -23,11 +23,12 @@ const PLAYED_DIR_VARIABLE = 'LIGNEE_SCENARIOS_PLAYED_DIR';
  * packages/layout et comparés à l'attendu (T-008). `lien` : le lien attendu (`attendu.lien`) est
  * vérifié sur la structure calculée par packages/kinship (fratrie, T-020) ; les mots restent à
  * T-026 et T-027. `budget` : les budgets de temps du TRD, ramenés au poste par un facteur de
- * ralentissement estimé, sont tenus (packages/kinship, T-028).
+ * ralentissement estimé, sont tenus (packages/kinship, T-028). `fiche` : la fiche d'une personne
+ * (`buildProfile`, packages/domain, T-024) est celle de `attendu.fiche`, lecteur par lecteur.
  */
 export const coverageSchema = z.strictObject({
   teste: z
-    .array(z.enum(['lecture', 'modele', 'disposition', 'lien', 'base_locale', 'budget']))
+    .array(z.enum(['lecture', 'modele', 'disposition', 'lien', 'base_locale', 'budget', 'fiche']))
     .min(1),
   reste: z.array(z.string().regex(/^T-\d{3}$/)),
 });
@@ -70,6 +71,7 @@ export const scenarioPartKeys = {
     ],
   },
   lien: { racine: [], attendu: ['liens'] },
+  fiche: { racine: [], attendu: ['fiche'] },
 } as const satisfies Partial<
   Record<ScenarioPart, { racine: readonly string[]; attendu: readonly string[] }>
 >;

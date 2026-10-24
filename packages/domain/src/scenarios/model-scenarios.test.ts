@@ -7,7 +7,12 @@ import { z } from 'zod';
 import { findMultipleBirth, multipleBirthSchema } from '../fact';
 import { fuzzyDateFromText } from '../fuzzy-date';
 import { formatName, personRecordSchema } from '../person';
-import { loadScenario, scenarioSchema } from '../test-support/scenario';
+import {
+  loadScenario,
+  otherPartsShape,
+  requireScenarioParts,
+  scenarioSchema,
+} from '../test-support/scenario';
 import {
   buildScenarioTree,
   multipleBirthInput,
@@ -58,8 +63,9 @@ describe('CL-DON-01 — nom donné dans l’ordre NOM Prénom', () => {
             nom_puis_prenoms: z.string(),
             prenoms_puis_nom: z.string(),
           }),
+          ...otherPartsShape(['fiche'], 'attendu'),
         }),
-      }),
+      }).superRefine(requireScenarioParts('modele', ['fiche'])),
     );
     const [name] = buildScenarioTree(scenario.arbre).data.names;
     if (name === undefined) throw new Error('missing name');
@@ -100,8 +106,9 @@ describe('CL-FAM-11 — jumeaux', () => {
       valide: z.literal(true),
       meme_naissance: z.record(z.string(), z.array(z.string())),
       refuse: z.array(scenarioMultipleBirthSchema),
+      ...otherPartsShape(['fiche'], 'attendu'),
     }),
-  });
+  }).superRefine(requireScenarioParts('modele', ['fiche']));
 
   it('modèle : une même naissance, ordre facultatif, retrouvée depuis chaque fiche ; les naissances impossibles sont refusées', () => {
     const scenario = loadScenario('CL-FAM-11', schema);
@@ -130,8 +137,9 @@ describe('CL-FAM-17 — personne connue seulement par un surnom', () => {
           nature: z.literal('connue'),
           nom_affiche: z.string(),
           nom_de_naissance: z.literal('absent'),
+          ...otherPartsShape(['fiche'], 'attendu'),
         }),
-      }),
+      }).superRefine(requireScenarioParts('modele', ['fiche'])),
     );
     const built = buildScenarioTree(scenario.arbre);
     const [line] = scenario.arbre.personnes;
@@ -196,8 +204,9 @@ describe('CL-FAM-19 — titre traditionnel', () => {
         attendu: z.strictObject({
           valide: z.literal(true),
           titres_par_personne: z.record(z.string(), z.array(titleLine)),
+          ...otherPartsShape(['fiche'], 'attendu'),
         }),
-      }),
+      }).superRefine(requireScenarioParts('modele', ['fiche'])),
     );
     const built = buildScenarioTree(scenario.arbre);
     const titles = built.data.titleRoles;
