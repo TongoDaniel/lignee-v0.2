@@ -39,6 +39,16 @@ const expoCli = resolvePackage(expo.dir, '@expo/cli');
 /** Paquets d'Expo dont les dépendances fixent la plage admise. */
 const requesters = [expo.pkg, expoCli.pkg];
 
+/**
+ * Overrides volontairement hors de la plage demandée (avis de sécurité sans correctif dans cette
+ * plage). Clé : l'override ; valeur : la plage qu'Expo demande aujourd'hui. Si Expo change sa
+ * plage, le test échoue : l'override est alors à réexaminer ou à retirer (voir le README, Outillage).
+ */
+const intentionallyOutOfRange: Record<string, string> = {
+  // GHSA-mrhx-c7xc-m3w5 : pas de correctif en zod 3.x.
+  '@expo/cli>zod': '^3.25.76',
+};
+
 describe('overrides pnpm des paquets d’Expo', () => {
   it('existent (sinon ce test ne vérifie rien)', () => {
     expect(Object.keys(overrides).length).toBeGreaterThan(0);
@@ -47,22 +57,38 @@ describe('overrides pnpm des paquets d’Expo', () => {
   it.each(Object.entries(overrides))(
     '%s %s reste dans la plage demandée par Expo',
     (name, version) => {
+      // Un sélecteur « parent>enfant » cible la dépendance de ce seul parent.
+      const [parentName, childName] = name.includes('>')
+        ? (name.split('>') as [string, string])
+        : [undefined, name];
       const ranges = requesters
-        .map((pkg) => ({ by: `${pkg.name}@${pkg.version}`, range: pkg.dependencies?.[name] }))
+        .filter((pkg) => parentName === undefined || pkg.name === parentName)
+        .map((pkg) => ({
+          by: `${pkg.name}@${pkg.version}`,
+          range: pkg.dependencies?.[childName],
+        }))
         .filter((entry): entry is { by: string; range: string } => entry.range !== undefined);
 
       expect(
         ranges,
         `${name} n'est demandé ni par expo ni par @expo/cli : override à retirer`,
       ).not.toEqual([]);
+      const expectedOutOfRange = intentionallyOutOfRange[name];
       for (const { by, range } of ranges) {
+        if (expectedOutOfRange !== undefined) {
+          expect(
+            range,
+            `${by} ne demande plus ${expectedOutOfRange} pour ${name} : réexaminer l'override`,
+          ).toBe(expectedOutOfRange);
+          continue;
+        }
         expect(
           semver.satisfies(version, range),
           `${name}@${version} hors de la plage ${range} demandée par ${by}`,
         ).toBe(true);
       }
 
-      const pinned = mobile.dependencies?.[name] ?? mobile.devDependencies?.[name];
+      const pinned = mobile.dependencies?.[childName] ?? mobile.devDependencies?.[childName];
       if (pinned !== undefined) expect(pinned).toBe(version);
     },
   );
