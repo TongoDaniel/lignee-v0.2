@@ -746,3 +746,62 @@ describe('corrections après relecture', () => {
     connection.close();
   });
 });
+
+describe('rang de la mutation fautive quand le même objet est modifié plus loin dans le lot', () => {
+  // Contre-exemple trouvé par la CI (graine 928809746) : la mutation fautive écrit `distinctFrom`,
+  // une mutation valide plus loin modifie les notes de la même fiche. Le constat désignait la
+  // dernière mutation qui avait touché l'objet (rang 2) au lieu de celle qui a écrit le champ.
+  it('« distincte de » vers une personne absente, puis les notes de la même fiche : rang 0', async () => {
+    const { db, connection, fixture } = await loaded();
+    const { issues } = refusal(db, fixture, [
+      {
+        entity: 'person',
+        entityId: fixture.placeholder,
+        operation: 'update',
+        fields: { distinctFrom: [fixture.nextId()] },
+      },
+      {
+        entity: 'person',
+        entityId: fixture.nextId(),
+        operation: 'create',
+        fields: { nature: 'placeholder' },
+      },
+      {
+        entity: 'person',
+        entityId: fixture.placeholder,
+        operation: 'update',
+        fields: { notes: 'Note ajoutée hors-ligne' },
+      },
+    ]);
+    expect(issues).toEqual([
+      { code: 'dangling_reference', path: 'mutations[0].fields.distinctFrom[0]' },
+    ]);
+    connection.close();
+  });
+
+  it('un lien créé vers une personne absente, puis sa certitude modifiée : rang de la création', async () => {
+    const { db, connection, fixture } = await loaded();
+    const filiationId = fixture.nextId();
+    const { issues } = refusal(db, fixture, [
+      {
+        entity: 'filiation',
+        entityId: filiationId,
+        operation: 'create',
+        fields: {
+          parentId: fixture.nextId(),
+          childId: fixture.child,
+          type: 'raised',
+          certainty: 'certain',
+        },
+      },
+      {
+        entity: 'filiation',
+        entityId: filiationId,
+        operation: 'update',
+        fields: { certainty: 'probable' },
+      },
+    ]);
+    expect(issues).toEqual([{ code: 'dangling_reference', path: 'mutations[0].fields.parentId' }]);
+    connection.close();
+  });
+});
