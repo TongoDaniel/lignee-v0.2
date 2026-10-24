@@ -60,6 +60,10 @@ corepack pnpm check:forbidden-dependencies  # CON-12 : aucune bibliothèque de r
 
 Pour un seul paquet : `corepack pnpm --filter @lignee/kinship test`.
 
+### Surcharges de dépendances (`pnpm.overrides`)
+
+- `@expo/cli>zod` = 4.6.6 : `@expo/cli` 57.0.27 déclare `zod ^3.25.76`, et l'avis GHSA-mrhx-c7xc-m3w5 (épuisement mémoire, zod < 4.6.6) n'a pas de correctif en 3.x. La surcharge force 4.6.6 pour ce seul paquet (outil de développement : schémas des extensions DevTools, qui n'emploient que `z.object`, `string`, `enum`, `union` et `array`, identiques en 4). À retirer dès qu'une version d'`@expo/cli` dépend de zod 4.6.6 ou plus, à la mise à jour d'Expo ; relancer alors `corepack pnpm audit --audit-level high`.
+
 ### Tests de performance
 
 Les budgets de temps du cahier des charges (TRD, « Performance et appareils cibles » ; par exemple 100 ms de disposition pour 500 personnes visibles, PAR-01) visent l'Android de référence et y sont vérifiés (T-028, T-105). Dans Vitest, sur un poste ou un runner partagé, un test de temps n'est qu'un garde-fou contre une régression grossière. Règle commune, outillée par `@lignee/domain/test-support` (`medianTime`, `reportBudget`) :
