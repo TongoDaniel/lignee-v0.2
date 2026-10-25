@@ -205,10 +205,10 @@ describe('T-023 — jeu de 200 paires annotées (PAR-02)', () => {
       ...['1/0', '0/1', '2/0', '0/2', '3/0', '0/3', '2/1', '1/2', '3/1', '2/2', '3/3'].flatMap(
         (line) => both(`ligne ${line}`),
       ),
-      'ligne 1/3 F', // petite-nièce
-      'ligne 3/2 F', // « à la mode de Bretagne »
-      'ligne 2/3 F',
-      'ligne 4/4 F', // degré civil
+      ...both('ligne 1/3'), // petit-neveu, petite-nièce
+      ...both('ligne 3/2'), // oncle « à la mode de Bretagne » (PAR-02)
+      ...both('ligne 2/3'), // neveu « à la mode de Bretagne »
+      ...both('ligne 4/4'), // « cousin au 8e degré » (PAR-02)
       ...['full', 'half', 'full_or_half'].flatMap((sharing) => both(`fratrie ${sharing}`)),
       ...[
         'spouse',

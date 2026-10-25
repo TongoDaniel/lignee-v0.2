@@ -245,14 +245,14 @@ paires:
         fr: à rédiger
         en: à rédiger
   - id: F05-20
-    de: biwiou
-    vers: viia
+    de: viia
+    vers: soou
     categorie: degres_civils
-    pourquoi: "Générations décalées : 4 et 3 (7e degré civil)."
+    pourquoi: "3 et 2 vers un homme : oncle « à la mode de Bretagne », cousin germain de la mère (TRD, PAR-02)."
     attendu:
-      - chemin: "4/3[lie+nehae]"
-        cote_de: { par: yon, cote: father }
-        cote_vers: { par: nesoine, cote: mother }
+      - chemin: "3/2[lie+nehae]"
+        cote_de: { par: nesoine, cote: mother }
+        cote_vers: { par: seloi, cote: father }
         fr: à rédiger
         en: à rédiger
   - id: F05-21
@@ -308,13 +308,14 @@ paires:
         fr: à rédiger
         en: à rédiger
   - id: F05-26
-    de: ndonaine
-    vers: nesoine
+    de: nesoine
+    vers: yon
     categorie: degres_civils
-    pourquoi: "Arrière-grand-mère maternelle : trois générations, par la mère."
+    pourquoi: "2 et 3 vers un homme : neveu « à la mode de Bretagne », fils du cousin germain Soou (inverse de F05-16)."
     attendu:
-      - chemin: "3/0[nesoine]"
-        cote_de: { par: tchetea, cote: mother }
+      - chemin: "2/3[lie+nehae]"
+        cote_de: { par: vie, cote: mother }
+        cote_vers: { par: soou, cote: father }
         fr: à rédiger
         en: à rédiger
   - id: F05-27
@@ -375,23 +376,24 @@ paires:
     pourquoi: "Une personne avec elle-même : « same_person », aucun chemin (ADR 0010)."
     attendu: meme_personne
   - id: F05-33
-    de: tchetea
-    vers: nehae
+    de: vie
+    vers: yon
     categorie: degres_civils
-    pourquoi: "Quatre générations par la lignée des mères."
+    pourquoi: "Petit-fils du frère : petit-neveu (1 et 3) ; Vie atteint ses deux parents, Yon monte par son père."
     attendu:
-      - chemin: "4/0[nehae]"
-        cote_de: { par: viia, cote: mother }
+      - chemin: "1/3[lie+nehae]"
+        cote_vers: { par: soou, cote: father }
         fr: à rédiger
         en: à rédiger
   - id: F05-34
-    de: kegee
-    vers: toui
+    de: tchetea
+    vers: biwiou
     categorie: degres_civils
-    pourquoi: "Frère du trisaïeul : 5 et 1."
+    pourquoi: "4 et 4 vers un homme : au-delà des issus de germains, le degré civil (« cousin au 8e degré », PAR-02 ; TRD, question 2)."
     attendu:
-      - chemin: "5/1[lie+nehae]"
-        cote_de: { par: biwiou, cote: father }
+      - chemin: "4/4[lie+nehae]"
+        cote_de: { par: viia, cote: mother }
+        cote_vers: { par: yon, cote: father }
         fr: à rédiger
         en: à rédiger
   - id: F05-35
