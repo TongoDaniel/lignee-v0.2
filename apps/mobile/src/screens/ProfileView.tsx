@@ -159,7 +159,7 @@ export function ProfileView({ profile, treeName, onBack }: ProfileViewProps) {
                 <Row
                   key={fact.id}
                   label={dateText(fact.date)}
-                  value={fact.place ?? t('common:profile.fields.unknownDate')}
+                  value={fact.place ?? t('common:profile.fields.unknownPlace')}
                 />
               ))}
             </Rows>
@@ -172,7 +172,11 @@ export function ProfileView({ profile, treeName, onBack }: ProfileViewProps) {
             testID="profile-occupations"
             title={t('common:profile.sections.occupations')}
           >
-            <Rows>{profile.occupations.map((fact) => occupationRow(fact))}</Rows>
+            <Rows>
+              {profile.occupations
+                .filter((fact) => fact.value !== undefined)
+                .map((fact) => occupationRow(fact))}
+            </Rows>
           </Card>
         );
       case 'names':

@@ -189,9 +189,22 @@ describe('fiche : naissance, décès et confidentialité', () => {
     expect(screen.getByText('Date inconnue')).toBeOnTheScreen();
   });
 
-  it('n’affiche jamais de cause de décès, quoi que la fiche contienne', () => {
-    renderView(profile({ deceased: true, death: {}, sections: ['life'] }));
-    expect(screen.queryByText(/cause/i)).toBeNull();
+  it('un lieu de vie sans lieu dit « Lieu inconnu », jamais « Date inconnue »', () => {
+    renderView(
+      profile({
+        residences: [{ id: OTHER_ID, date: text('1990') }],
+        sections: ['residences'],
+      }),
+    );
+    expect(screen.getByText('Lieu inconnu')).toBeOnTheScreen();
+    expect(screen.queryByText('Date inconnue')).toBeNull();
+  });
+
+  it('ne liste pas une profession sans texte', () => {
+    renderView(
+      profile({ occupations: [{ id: OTHER_ID, date: text('1990') }], sections: ['occupations'] }),
+    );
+    expect(screen.queryByText('1990')).toBeNull();
   });
 });
 

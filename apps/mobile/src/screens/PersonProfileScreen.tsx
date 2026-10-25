@@ -73,6 +73,8 @@ export function PersonProfileScreen({ personId, treeId }: PersonProfileScreenPro
   const [state, setState] = useState<ProfileState>({ status: 'loading' });
 
   useEffect(() => {
+    // Une autre personne : on repart de l'attente, jamais la fiche précédente.
+    setState({ status: 'loading' });
     if (database.status === 'opening') return;
     if (database.status === 'failed') {
       setState({ status: 'failed' });

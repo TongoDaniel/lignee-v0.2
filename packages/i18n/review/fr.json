@@ -332,6 +332,9 @@
   "common:profile.fields.unknownDate": {
     "status": "to-review"
   },
+  "common:profile.fields.unknownPlace": {
+    "status": "to-review"
+  },
   "common:profile.genders.female": {
     "status": "to-review"
   },

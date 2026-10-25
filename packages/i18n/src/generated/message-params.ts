@@ -113,6 +113,7 @@ export interface MessageParams {
   'common:profile.fields.gender': null;
   'common:profile.fields.place': { readonly place: string | number };
   'common:profile.fields.unknownDate': null;
+  'common:profile.fields.unknownPlace': null;
   'common:profile.genders.female': null;
   'common:profile.genders.male': null;
   'common:profile.genders.other': null;

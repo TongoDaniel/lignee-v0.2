@@ -148,7 +148,8 @@
       "death": "Décès",
       "place": "Lieu : {place}",
       "birthNameToComplete": "À compléter",
-      "unknownDate": "Date inconnue"
+      "unknownDate": "Date inconnue",
+      "unknownPlace": "Lieu inconnu"
     },
     "genders": {
       "female": "Femme",
