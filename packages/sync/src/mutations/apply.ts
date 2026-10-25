@@ -375,6 +375,14 @@ export function applyMutationBatch(
 
   /** Dernière mutation qui a créé ou modifié chaque objet encore présent. */
   const lastTouch = new Map<Id, { collection: SnapshotCollection; index: number }>();
+  /**
+   * Pour chaque objet, la dernière mutation qui a écrit chacun de ses champs (premier niveau) :
+   * un constat sur un champ désigne la mutation qui l'a écrit, pas une modification ultérieure
+   * du même objet qui ne l'a pas touché.
+   */
+  const fieldTouch = new Map<Id, Map<string, number>>();
+  const culprit = (id: Id, field: string, fallback: number) =>
+    fieldTouch.get(id)?.get(field.split(/[.[]/)[0] ?? field) ?? fallback;
   /** Mutation qui a supprimé chaque objet. */
   const deletions = new Map<Id, number>();
   const createdIds = new Set<Id>();
@@ -427,6 +435,7 @@ export function applyMutationBatch(
       map.set(id, created.data);
       createdIds.add(id);
       lastTouch.set(id, { collection, index });
+      fieldTouch.set(id, new Map(Object.keys(created.data).map((key) => [key, index])));
     } else {
       const current = map.get(id);
       if (current === undefined || !seen(entity, id)) {
@@ -445,9 +454,13 @@ export function applyMutationBatch(
         }
         map.set(id, updated.data);
         lastTouch.set(id, { collection, index });
+        const written = fieldTouch.get(id) ?? new Map<string, number>();
+        for (const key of Object.keys(fields)) written.set(key, index);
+        fieldTouch.set(id, written);
       } else {
         map.delete(id);
         lastTouch.delete(id);
+        fieldTouch.delete(id);
         deletions.set(id, index);
       }
     }
@@ -479,11 +492,12 @@ export function applyMutationBatch(
     const object = maps[collection].get(id);
     if (object === undefined) continue;
     for (const ref of referencesOf(collection, object)) {
+      const path = `${at(culprit(id, ref.field, index))}.fields.${ref.field}`;
       if (ref.entity === 'source') {
         // Les sources arrivent avec les médias : aucune n'est encore synchronisée (ADR 0023).
-        issues.push({ code: 'unsupported_reference', path: `${at(index)}.fields.${ref.field}` });
+        issues.push({ code: 'unsupported_reference', path });
       } else if (!visible(ref.entity, ref.id)) {
-        issues.push({ code: 'dangling_reference', path: `${at(index)}.fields.${ref.field}` });
+        issues.push({ code: 'dangling_reference', path });
       }
     }
     // Données qui n'appartiennent qu'à leur auteur : on ne crée rien au nom d'un autre, et une
@@ -497,7 +511,13 @@ export function applyMutationBatch(
       owned.authorAccountId !== author &&
       (createdIds.has(id) || sensitive)
     ) {
-      issues.push({ code: 'author_mismatch', path: `${at(index)}.fields.authorAccountId` });
+      // Création au nom d'un autre : la mutation qui a écrit l'auteur ; donnée devenue sensible
+      // (type changé en cause de décès ou en ancien prénom) : celle qui a écrit le type.
+      const field = createdIds.has(id) ? 'authorAccountId' : 'type';
+      issues.push({
+        code: 'author_mismatch',
+        path: `${at(culprit(id, field, index))}.fields.authorAccountId`,
+      });
     }
   }
 
