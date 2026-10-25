@@ -5,8 +5,10 @@
 // peints (culling par l'index spatial de `packages/layout`).
 //
 // Chaque geste a son équivalent en bouton (ACC-06) : le parent envoie une `command` (zoom des
-// boutons « + » et « − », ajustement) que ce composant applique, sans animation quand le
-// téléphone demande de réduire les animations (07-mouvement.md).
+// boutons « + » et « − », ajustement, retour à « Vous ») que ce composant applique, sans animation
+// quand le téléphone demande de réduire les animations (07-mouvement.md). La pousse de l'arbre
+// (T-018) est un temps écoulé que ce composant fait avancer ; ce que chaque élément en fait est
+// décidé par le plan de `treeMotion.ts`.
 import { Canvas, Group, useFont } from '@shopify/react-native-skia';
 import type { Id } from '@lignee/domain';
 import {
@@ -25,8 +27,8 @@ import {
   type ZoomLevel,
 } from '@lignee/layout';
 import { fontFiles } from '@lignee/ui/fontFiles';
-import { componentMetrics, motion, typography, useTheme } from '@lignee/ui';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { componentMetrics, typography, useTheme } from '@lignee/ui';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { scheduleOnRN } from 'react-native-worklets';
@@ -41,6 +43,7 @@ import Animated, {
 import { useTranslator } from '../i18n/I18nProvider';
 import { SkiaTree } from './SkiaTree';
 import type { PersonCard } from './personCards';
+import { framePlan, type GrowthPlan } from './treeMotion';
 
 /** Une fenêtre de plus de chaque côté est préparée : le doigt ne voit jamais le bord du dessin. */
 export const CULL_MARGIN = 1;
@@ -49,6 +52,8 @@ export const CULL_MARGIN = 1;
 export interface ViewportCommand {
   readonly id: number;
   readonly viewport: Viewport;
+  /** Le dessin vient de changer (recentrage) : le cadre arrive d'un coup, sans trajet animé. */
+  readonly instant?: boolean;
 }
 
 export interface TreeCanvasProps {
@@ -57,9 +62,15 @@ export interface TreeCanvasProps {
   readonly size: ScreenSize;
   readonly cards: ReadonlyMap<Id, PersonCard>;
   readonly missingOf: ReadonlyMap<string, 'mother' | 'father' | 'parent'>;
+  /** « Vous » : l'avatar doré, même quand l'arbre est centré sur une autre personne. */
+  readonly youId: Id;
   readonly selectedId: Id | undefined;
   readonly initialViewport: Viewport;
   readonly command: ViewportCommand | undefined;
+  /** Pousse à jouer (ouverture, nouveau centre, foyer ouvert) ; absente : tout paraît d'un coup. */
+  readonly growth?: GrowthPlan | undefined;
+  /** La pousse `id` est terminée : l'écran n'a plus à la rejouer. */
+  readonly onGrowthEnd?: ((id: number) => void) | undefined;
   /** Cadre au repos : après un geste ou un ordre. */
   readonly onSettle: (viewport: Viewport) => void;
   readonly onActivate: (hit: SceneHit) => void;
@@ -76,9 +87,12 @@ export function TreeCanvas({
   size,
   cards,
   missingOf,
+  youId,
   selectedId,
   initialViewport,
   command,
+  growth,
+  onGrowthEnd,
   onSettle,
   onActivate,
   testID,
@@ -134,17 +148,15 @@ export function TreeCanvas({
 
   // Déplace le cadre : animé, ou immédiat si le téléphone demande de réduire les animations.
   const moveTo = useCallback(
-    (viewport: Viewport) => {
-      if (theme.reduceMotion) {
+    (viewport: Viewport, instant = false) => {
+      const plan = framePlan(theme.reduceMotion, instant);
+      if (!plan.animated) {
         scale.value = viewport.scale;
         translateX.value = viewport.x;
         translateY.value = viewport.y;
         return;
       }
-      const timing = {
-        duration: motion.duration.transition,
-        easing: Easing.bezier(...motion.easing.entreeSortie),
-      };
+      const timing = { duration: plan.duration, easing: Easing.bezier(...plan.easing) };
       scale.value = withTiming(viewport.scale, timing);
       translateX.value = withTiming(viewport.x, timing);
       translateY.value = withTiming(viewport.y, timing);
@@ -169,9 +181,35 @@ export function TreeCanvas({
   useEffect(() => {
     if (command === undefined || command.id === lastCommand.current) return;
     lastCommand.current = command.id;
-    moveTo(command.viewport);
+    moveTo(command.viewport, command.instant === true);
     settle(command.viewport);
   }, [command, moveTo, settle]);
+
+  // La pousse : un temps écoulé qui avance de 0 à la durée totale du plan. Tant qu'il est à 0, rien
+  // n'est encore sorti : on y est dès le premier rendu pour que l'arbre ne clignote pas.
+  const elapsed = useSharedValue(0);
+  const [active, setActive] = useState<GrowthPlan | undefined>(growth);
+  const lastGrowth = useRef<number | undefined>(undefined);
+  const endGrowth = useCallback(
+    (id: number) => {
+      setActive((current) => (current?.id === id ? undefined : current));
+      onGrowthEnd?.(id);
+    },
+    [onGrowthEnd],
+  );
+  useLayoutEffect(() => {
+    if (growth === undefined || growth.id === lastGrowth.current) return;
+    lastGrowth.current = growth.id;
+    elapsed.value = 0;
+    setActive(growth);
+    elapsed.value = withTiming(
+      growth.total,
+      { duration: growth.total, easing: Easing.linear },
+      (finished) => {
+        if (finished === true) scheduleOnRN(endGrowth, growth.id);
+      },
+    );
+  }, [growth, elapsed, endGrowth]);
 
   // À chaque image : l'écran sort-il de la zone préparée, ou change-t-il de niveau ?
   const { overviewBelow, detailFrom, min, max } = zoom;
@@ -293,7 +331,7 @@ export function TreeCanvas({
                 <SkiaTree
                   culled={state.culled}
                   cards={cards}
-                  centerId={scene.centerId}
+                  youId={youId}
                   selectedId={selectedId}
                   missingOf={missingOf}
                   spec={spec}
@@ -301,6 +339,7 @@ export function TreeCanvas({
                   fonts={{ name: nameFont, secondary: secondaryFont, initial: initialFont }}
                   level={state.level}
                   t={t}
+                  growth={active === undefined ? undefined : { elapsed, plan: active }}
                 />
               </Group>
             ) : null}

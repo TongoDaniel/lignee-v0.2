@@ -279,6 +279,7 @@ describe('TreeCanvas — cadre au repos', () => {
           size={size}
           cards={built.cards}
           missingOf={new Map()}
+          youId={built.centerId}
           selectedId={undefined}
           initialViewport={{ scale: 1, x: 0, y: 0 }}
           command={{ id: 1, viewport: far }}
@@ -304,5 +305,164 @@ describe('TreeView — « Vous »', () => {
       .getAllByTestId('skia-Text')
       .map((node) => (node.props as { accessibilityLabel?: string }).accessibilityLabel);
     expect(labels).toContain('"Vous"');
+  });
+});
+
+/** Premier bouton « Aller à … » de la liste dont la personne a un nom : sa personne et son nom. */
+function firstNamedInList(built: ReturnType<typeof model>) {
+  const button = screen
+    .queryAllByTestId(/^outline-go-/)
+    .find(
+      (candidate) =>
+        (built.cards.get(String(candidate.props.testID).replace('outline-go-', ''))?.fullName ??
+          '') !== '',
+    );
+  if (button === undefined) throw new Error('no named person in the list');
+  const id = String(button.props.testID).replace('outline-go-', '');
+  return { button, id, name: built.cards.get(id)?.fullName ?? '' };
+}
+
+describe('TreeView — retour à « Vous » et recentrage (ARB-09)', () => {
+  it('« Revenir à Vous » est un bouton nommé pour le lecteur d’écran, au dessin comme en liste', async () => {
+    await renderTree();
+    layOut();
+    expect(screen.getByLabelText('Revenir à Vous, au centre de l’arbre')).toBeTruthy();
+    act(() => {
+      fireEvent.press(screen.getByTestId('tree-show-list'));
+    });
+    expect(screen.getByTestId('tree-go-you')).toBeTruthy();
+    expect(screen.getByLabelText('Revenir à Vous, au centre de l’arbre')).toBeTruthy();
+  });
+
+  it('recentrer sur une personne choisie ouvre le fil d’Ariane ; « Vous » le referme en une touche', async () => {
+    const built = await renderTree();
+    layOut();
+    expect(screen.queryByTestId('tree-recenter')).toBeNull();
+    expect(screen.queryByTestId('tree-trail')).toBeNull();
+    act(() => {
+      fireEvent.press(screen.getByTestId('tree-show-list'));
+    });
+    const { button, name } = firstNamedInList(built);
+    act(() => {
+      fireEvent.press(button);
+    });
+    // Le bouton dit sur qui l'arbre sera centré.
+    expect(screen.getByLabelText(`Recentrer l’arbre sur ${name}`)).toBeTruthy();
+    act(() => {
+      fireEvent.press(screen.getByTestId('tree-recenter'));
+    });
+    expect(screen.getByTestId('tree-trail')).toBeTruthy();
+    expect(screen.getByTestId('tree-trail-current')).toHaveTextContent(name);
+    expect(screen.queryByTestId('tree-recenter')).toBeNull();
+    // Une seule touche ramène à « Vous » : le fil disparaît.
+    act(() => {
+      fireEvent.press(screen.getByTestId('tree-go-you'));
+    });
+    expect(screen.queryByTestId('tree-trail')).toBeNull();
+  });
+
+  it('une étape du fil ramène à cette personne', async () => {
+    const built = await renderTree();
+    layOut();
+    act(() => {
+      fireEvent.press(screen.getByTestId('tree-show-list'));
+    });
+    const first = firstNamedInList(built);
+    act(() => {
+      fireEvent.press(first.button);
+    });
+    act(() => {
+      fireEvent.press(screen.getByTestId('tree-recenter'));
+    });
+    // Du centre actuel, une autre personne nommée de la liste, puis on revient à la première étape.
+    const next = screen
+      .queryAllByTestId(/^outline-go-/)
+      .map((candidate) => String(candidate.props.testID).replace('outline-go-', ''))
+      .find(
+        (id) =>
+          id !== first.id && id !== built.centerId && (built.cards.get(id)?.fullName ?? '') !== '',
+      );
+    if (next === undefined) throw new Error('no second person to recenter on');
+    act(() => {
+      fireEvent.press(screen.getByTestId(`outline-go-${next}`));
+    });
+    act(() => {
+      fireEvent.press(screen.getByTestId('tree-recenter'));
+    });
+    expect(screen.getByTestId(`tree-trail-${first.id}`)).toBeTruthy();
+    act(() => {
+      fireEvent.press(screen.getByTestId(`tree-trail-${first.id}`));
+    });
+    expect(screen.getByTestId('tree-trail-current')).toHaveTextContent(first.name);
+  });
+});
+
+describe('TreeView — l’arbre pousse (ARB-13)', () => {
+  it('à l’ouverture, l’arbre pousse sur la durée du plan quand les animations sont permises', async () => {
+    await renderTree({ reduceMotion: false });
+    layOut();
+    const calls = jest.mocked(withTiming).mock.calls;
+    const growth = calls.find(([, options]) => options?.duration !== undefined);
+    expect(growth).toBeDefined();
+    // Durée totale = au moins le temps d'un trait (jeton « arbre »), jamais une valeur en dur.
+    expect(growth?.[1]?.duration).toBeGreaterThanOrEqual(600);
+    expect(growth?.[0]).toBe(growth?.[1]?.duration);
+  });
+
+  it('réglage « Réduire les animations » : ni pousse, ni recentrage, ni retour animés', async () => {
+    const built = await renderTree({ reduceMotion: true });
+    layOut();
+    act(() => {
+      fireEvent.press(screen.getByTestId('tree-show-list'));
+    });
+    const { button } = firstNamedInList(built);
+    act(() => {
+      fireEvent.press(button);
+    });
+    act(() => {
+      fireEvent.press(screen.getByTestId('tree-recenter'));
+    });
+    act(() => {
+      fireEvent.press(screen.getByTestId('tree-show-drawing'));
+    });
+    act(() => {
+      fireEvent.press(screen.getByTestId('tree-go-you'));
+      fireEvent.press(screen.getByTestId('tree-zoom-in'));
+      fireEvent.press(screen.getByTestId('tree-go-you'));
+    });
+    expect(withTiming).not.toHaveBeenCalled();
+  });
+
+  it('un recentrage fait pousser l’arbre sans animer le trajet du cadre', async () => {
+    const built = await renderTree({ reduceMotion: false });
+    layOut();
+    act(() => {
+      fireEvent.press(screen.getByTestId('tree-show-list'));
+    });
+    const { button } = firstNamedInList(built);
+    act(() => {
+      fireEvent.press(button);
+    });
+    act(() => {
+      fireEvent.press(screen.getByTestId('tree-show-drawing'));
+    });
+    jest.mocked(withTiming).mockClear();
+    act(() => {
+      fireEvent.press(screen.getByTestId('tree-recenter'));
+    });
+    const calls = jest.mocked(withTiming).mock.calls;
+    // Une seule animation : la pousse. Les trois du cadre (échelle, x, y) n'ont pas lieu.
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.[1]?.duration).toBeGreaterThanOrEqual(600);
+  });
+
+  it('le retour à « Vous » depuis un cadre déplacé anime le cadre, tel que le prévoit la charte', async () => {
+    await renderTree({ reduceMotion: false });
+    layOut();
+    jest.mocked(withTiming).mockClear();
+    act(() => {
+      fireEvent.press(screen.getByTestId('tree-go-you'));
+    });
+    expect(withTiming).toHaveBeenCalledTimes(3);
   });
 });

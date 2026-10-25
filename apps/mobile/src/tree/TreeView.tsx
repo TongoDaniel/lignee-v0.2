@@ -5,6 +5,11 @@
 // Chaque geste a son bouton (ACC-06) : « + » et « − » pour le zoom, « Voir tout l'arbre » pour
 // l'ensemble, et la liste pour parcourir l'arbre personne par personne sans pincer ni glisser. La
 // liste est proposée d'office quand un lecteur d'écran est actif.
+//
+// T-018 : « Revenir à Vous » (ARB-09) est à une touche, au dessin comme en liste. « Recentrer »
+// refait la disposition autour de la personne choisie ; un fil d'Ariane ramène aux étapes. L'arbre
+// pousse à l'ouverture, au recentrage et quand un foyer s'ouvre, sauf si le téléphone demande de
+// réduire les animations (ARB-13) : il s'affiche alors directement.
 import type { Id } from '@lignee/domain';
 import {
   buildOutline,
@@ -25,15 +30,25 @@ import {
   type Viewport,
 } from '@lignee/layout';
 import { Button, space, useTheme } from '@lignee/ui';
-import { useCallback, useMemo, useRef, useState } from 'react';
-import { Text, useWindowDimensions, View, type LayoutChangeEvent } from 'react-native';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  AccessibilityInfo,
+  Text,
+  useWindowDimensions,
+  View,
+  type LayoutChangeEvent,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTranslator } from '../i18n/I18nProvider';
+import { fullName } from './labels';
 import { sceneSpecFor } from './sceneSpec';
 import { TreeCanvas, type ViewportCommand } from './TreeCanvas';
+import { bottomCenterFrame } from './treeFrames';
+import { planGrowth, type GrowthTrigger } from './treeMotion';
 import { TreeOutlineList } from './TreeOutlineList';
 import type { TreeModel } from './treeModel';
+import { recenterTrail, startTrail } from './trail';
 import { useScreenReader } from './useScreenReader';
 
 export interface TreeViewProps {
@@ -72,15 +87,24 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
   const [focusId, setFocusId] = useState<Id>(model.centerId);
   const [command, setCommand] = useState<ViewportCommand | undefined>(undefined);
   const [scaleNow, setScaleNow] = useState(1);
+  // Personne au centre de la disposition : « Vous » au départ, puis celle sur laquelle on recentre.
+  const [centerId, setCenterId] = useState<Id>(model.centerId);
+  const [trail, setTrail] = useState<readonly Id[]>(() => startTrail(model.centerId));
+  // Pousse demandée (l'ouverture d'abord) et dernière pousse terminée.
+  const [trigger, setTrigger] = useState<GrowthTrigger>({ id: 1, kind: 'opening' });
+  const [growthDone, setGrowthDone] = useState(0);
   const current = useRef<Viewport | undefined>(undefined);
   const commandId = useRef(0);
+  const triggerId = useRef(1);
+  // Après un recentrage, le cadre se règle quand la nouvelle disposition est prête.
+  const reframe = useRef(false);
 
   const showList = listChoice === undefined ? screenReader : listChoice === 'list';
 
   const cache = useRef(createTreeLayoutCache()).current;
   const layout = useMemo(
-    () => cache.layout(model.graph, model.centerId, folds),
-    [cache, model, folds],
+    () => cache.layout(model.graph, centerId, folds),
+    [cache, model, centerId, folds],
   );
   const spec = useMemo(
     () =>
@@ -99,22 +123,29 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
   const outline = useMemo(() => buildOutline(layout), [layout]);
   const missingOf = useMemo(() => missingKinds(layout), [layout]);
 
-  const initialViewport = useMemo<Viewport | undefined>(() => {
-    if (size === undefined) return undefined;
-    const you = scene.personById.get(model.centerId);
-    // « Vous » en bas au centre, toujours visible au lancement (06-arbre.md).
-    return placeAt(
-      1,
-      { x: you?.x ?? 0, y: you?.y ?? 0 },
-      { x: size.width / 2, y: size.height - space[6] - spec.cardBottom },
-    );
-    // Le cadre de départ ne dépend que de la taille : replier ne le fait pas sauter.
-  }, [size?.width, size?.height, spec]);
+  // « Vous » en bas au centre, toujours visible au lancement (06-arbre.md) ; après un recentrage,
+  // la personne au centre prend cette place. Le canevas ne lit ce cadre qu'à son ouverture.
+  const initialViewport = useMemo<Viewport | undefined>(
+    () => (size === undefined ? undefined : bottomCenterFrame(scene, centerId, size, space[6])),
+    [scene, centerId, size],
+  );
 
-  const send = useCallback((viewport: Viewport) => {
+  const send = useCallback((viewport: Viewport, instant = false) => {
     commandId.current += 1;
-    setCommand({ id: commandId.current, viewport });
+    setCommand({ id: commandId.current, viewport, instant });
   }, []);
+
+  const growth = useMemo(
+    () => (trigger.id === growthDone ? undefined : planGrowth(scene, trigger, theme.reduceMotion)),
+    [scene, trigger, growthDone, theme.reduceMotion],
+  );
+
+  // Nouvelle disposition prête : la personne au centre reprend sa place, d'un coup.
+  useEffect(() => {
+    if (!reframe.current || size === undefined) return;
+    reframe.current = false;
+    send(bottomCenterFrame(scene, centerId, size, space[6]), true);
+  }, [scene, size, centerId, send]);
 
   const centerOf = (screen: ScreenSize) => ({ x: screen.width / 2, y: screen.height / 2 });
 
@@ -141,10 +172,52 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
     setSelectedId(shown);
     const now = current.current ?? initialViewport;
     if (target === undefined || now === undefined || size === undefined) return;
-    send(placeAt(now.scale, { x: target.x, y: target.y }, centerOf(size)));
+    send(
+      shown === centerId
+        ? bottomCenterFrame(scene, centerId, size, space[6])
+        : placeAt(now.scale, { x: target.x, y: target.y }, centerOf(size)),
+    );
   };
 
+  const nameOf = (id: Id) =>
+    id === model.centerId ? t('common:treeScreen.you') : fullName(model.cards.get(id), t);
+
+  /**
+   * Refait la disposition autour d'une personne : elle prend la place de « Vous » au lancement
+   * (bas, au centre) et l'arbre pousse depuis elle. Les foyers repartent des choix par défaut.
+   * Le retour à « Vous » (ARB-09) est ce même geste, vers `model.centerId`.
+   */
+  const recenter = (personId: Id) => {
+    setFocusId(personId);
+    setSelectedId(personId);
+    setTrail((previous) => recenterTrail(previous, personId, model.centerId));
+    AccessibilityInfo.announceForAccessibility(
+      t('common:treeScreen.recentered', { name: nameOf(personId) }),
+    );
+    if (personId === centerId) {
+      // Déjà au centre de la disposition : seul le cadre revient, animé ou non selon le réglage.
+      if (size !== undefined) send(bottomCenterFrame(scene, centerId, size, space[6]));
+      return;
+    }
+    reframe.current = true;
+    setFolds(NO_FOLDS);
+    setCenterId(personId);
+    triggerId.current += 1;
+    setTrigger({ id: triggerId.current, kind: 'opening' });
+  };
+
+  const canRecenter = focusId !== centerId && model.cards.get(focusId)?.placeholder === false;
+
   const toggle = (familyKey: string) => {
+    // Un foyer qui s'ouvre pousse depuis sa pastille ; un foyer qui se replie disparaît d'un coup.
+    const anchor =
+      scene.counters.find((counter) => counter.familyKey === familyKey) ??
+      scene.marks.find((mark) => mark.kind === 'parents' && mark.familyKey === familyKey) ??
+      scene.missing.find((place) => place.familyKey === familyKey);
+    if (layout.families.get(familyKey)?.folded === true && anchor !== undefined) {
+      triggerId.current += 1;
+      setTrigger({ id: triggerId.current, kind: 'unfold', previous: scene, anchorY: anchor.y });
+    }
     setFolds(toggleFamily(layout, familyKey));
   };
 
@@ -187,6 +260,30 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
           {t('common:treeScreen.title')}
         </Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space[2] }}>
+          <Button
+            testID="tree-go-you"
+            label={t('common:treeScreen.goToYou')}
+            accessibilityLabel={t('common:treeScreen.goToYouLabel')}
+            accessibilityHint={t('common:treeScreen.goToYouHint')}
+            variant="secondary"
+            compact
+            onPress={() => {
+              recenter(model.centerId);
+            }}
+          />
+          {canRecenter ? (
+            <Button
+              testID="tree-recenter"
+              label={t('common:treeScreen.recenter')}
+              accessibilityLabel={t('common:treeScreen.recenterLabel', { name: nameOf(focusId) })}
+              accessibilityHint={t('common:treeScreen.recenterHint')}
+              variant="secondary"
+              compact
+              onPress={() => {
+                recenter(focusId);
+              }}
+            />
+          ) : null}
           {showList ? (
             <Button
               testID="tree-show-drawing"
@@ -240,6 +337,40 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
             </>
           )}
         </View>
+        {trail.length > 1 ? (
+          <View
+            accessibilityRole="toolbar"
+            accessibilityLabel={t('common:treeScreen.trailLabel')}
+            accessibilityHint={t('common:treeScreen.trailHint')}
+            testID="tree-trail"
+            style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space[1] }}
+          >
+            {trail.map((id, position) =>
+              position === trail.length - 1 ? (
+                <Text
+                  key={id}
+                  testID="tree-trail-current"
+                  style={[typography.titreCarte, { color: colors.texte }]}
+                >
+                  {nameOf(id)}
+                </Text>
+              ) : (
+                <Button
+                  key={id}
+                  testID={`tree-trail-${id}`}
+                  label={nameOf(id)}
+                  accessibilityLabel={t('common:treeScreen.trailGo', { name: nameOf(id) })}
+                  accessibilityHint={t('common:treeScreen.trailGoHint')}
+                  variant="quiet"
+                  compact
+                  onPress={() => {
+                    recenter(id);
+                  }}
+                />
+              ),
+            )}
+          </View>
+        ) : null}
       </View>
       <View style={{ flex: 1 }} onLayout={onLayout} testID="tree-area">
         {showList ? (
@@ -269,9 +400,12 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
               size={size}
               cards={model.cards}
               missingOf={missingOf}
+              youId={model.centerId}
               selectedId={selectedId}
               initialViewport={initialViewport}
               command={command}
+              growth={growth}
+              onGrowthEnd={setGrowthDone}
               onSettle={(viewport) => {
                 current.current = viewport;
                 setScaleNow(viewport.scale);
