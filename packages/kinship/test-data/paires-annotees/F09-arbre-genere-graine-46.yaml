@@ -1,0 +1,428 @@
+# Arbre généré par generateTree({ seed: 46, size: 40 }) de @lignee/domain (graine figée,
+# noms générés), figé ici par freezeGeneratedFamily (src/test-support/generated-family.ts) : le jeu
+# ne dépend plus du générateur. Toutes les personnes sont visibles du lecteur.
+famille: F09
+titre: Arbre généré, graine 46, 40 personnes
+origine: { generateur: generateTree, graine: 46, taille: 40, commit: 71c5170 }
+arbre:
+  personnes:
+    - nyouvui/M
+    - tchudjoette/F
+    - njonyem/M
+    - inconnu/M
+    - inconnue/F
+    - mbaine/F
+    - loa/F
+    - tsoun/M
+    - djonoia/F
+    - mboe/M
+    - inconnue_2/F
+    - piwoue/F
+    - tchoo/M
+    - soou/M
+    - nyouou/M
+    - vilae/F
+    - boum/M
+    - inconnu_2/M
+    - inconnue_3/F
+    - kangaou/M
+    - vie/M
+    - njeyoia/F
+    - zayaa/F
+    - ndae/F
+    - feou/M
+    - nopei/M
+    - tchidjoui/M
+    - zouette/F
+    - sans_prenom/F
+    - soe/F
+    - muo/M
+    - nyoe/M
+    - botsee/F
+    - sea/F
+    - tsoulouia/F
+    - mbedjaette/F
+    - vee/F
+    - djiwia/F
+    - ndozea/F
+    - mesoou/F
+  a_completer: [inconnu, inconnue, inconnue_2, inconnu_2, inconnue_3]
+  distinctes:
+    - { place: inconnu, de: [nopei] }
+    - { place: inconnu_2, de: [muo] }
+    - { place: inconnue_3, de: [sea] }
+  unions:
+    - conjoints: [nyouvui, tchudjoette]
+      rang_nyouvui: 1
+      rang_tchudjoette: 1
+      debut: { qualificatif: exacte, date: "1908" }
+      fin: { qualificatif: exacte, date: "1937" }
+      motif: deces
+    - conjoints: [nyouvui, mbaine]
+      rang_nyouvui: 2
+      rang_mbaine: 1
+      debut: { qualificatif: exacte, date: "1905" }
+      fin: { qualificatif: vers, date: "1937", texte: vers 1937 }
+      motif: deces
+    - conjoints: [nyouvui, inconnue_2]
+      rang_nyouvui: 3
+      rang_inconnue_2: 1
+      debut: { qualificatif: entre, de: "1904", a: "1905", texte: entre 1904 et 1905 }
+    - conjoints: [njonyem, piwoue]
+      rang_njonyem: 1
+      rang_piwoue: 1
+      debut: { qualificatif: exacte, date: "1932" }
+      fin: { qualificatif: exacte, date: "1973" }
+      motif: deces
+    - conjoints: [piwoue, boum]
+      rang_piwoue: 2
+      rang_boum: 1
+      debut: { qualificatif: exacte, date: "1968" }
+    - conjoints: [loa, kangaou]
+      rang_loa: 1
+      rang_kangaou: 1
+      debut: { qualificatif: texte, texte: "vers 1925, d'après la famille" }
+    - { conjoints: [tsoun, ndae], rang_tsoun: 1, rang_ndae: 1 }
+    - conjoints: [djonoia, tchidjoui]
+      rang_djonoia: 1
+      rang_tchidjoui: 1
+      fin: { qualificatif: exacte, date: "1954" }
+      motif: deces
+    - conjoints: [mboe, zouette]
+      rang_mboe: 1
+      rang_zouette: 1
+      debut: { qualificatif: texte, texte: "vers 1939, d'après la famille" }
+      fin: { qualificatif: vers, date: "1997", texte: vers 1997 }
+      motif: deces
+    - conjoints: [tchoo, botsee]
+      rang_tchoo: 1
+      rang_botsee: 1
+      debut: { qualificatif: vers, date: "1969", texte: vers 1969 }
+    - { conjoints: [soou, soe], rang_soou: 1, rang_soe: 1 }
+    - conjoints: [nyouou, mbedjaette]
+      rang_nyouou: 1
+      rang_mbedjaette: 1
+      debut: { qualificatif: exacte, date: "1969" }
+      fin: { qualificatif: exacte, date: "1972" }
+      motif: deces
+    - conjoints: [nyouou, ndozea]
+      rang_nyouou: 2
+      rang_ndozea: 1
+      debut: { qualificatif: vers, date: "1965", texte: vers 1965 }
+      fin: { qualificatif: entre, de: "1972", a: "1973", texte: entre 1972 et 1973 }
+      motif: deces
+    - { conjoints: [ndozea, soou], rang_ndozea: 2, rang_soou: 2 }
+  filiations:
+    - { parents: [nyouvui, tchudjoette], enfant: njonyem }
+    - { parents: [inconnu, inconnue], enfant: mbaine }
+    - { parents: [nyouvui, mbaine], enfant: loa }
+    - { parents: [tchudjoette], enfant: loa, type: adoptive }
+    - { parents: [nyouvui, mbaine], enfant: tsoun }
+    - { parents: [nyouvui, mbaine], enfant: djonoia }
+    - { parents: [nyouvui, mbaine], enfant: mboe }
+    - { parents: [njonyem, piwoue], enfant: tchoo }
+    - { parents: [njonyem, piwoue], enfant: soou }
+    - { parents: [njonyem], enfant: nyouou, certitude: probable }
+    - { parents: [piwoue], enfant: nyouou }
+    - { parents: [njonyem, piwoue], enfant: vilae }
+    - { parents: [inconnu_2, inconnue_3], enfant: kangaou }
+    - { parents: [loa, kangaou], enfant: vie }
+    - { parents: [loa, kangaou], enfant: njeyoia }
+    - { parents: [loa, kangaou], enfant: zayaa }
+    - { parents: [tsoun, ndae], enfant: feou }
+    - { parents: [tsoun, ndae], enfant: nopei }
+    - { parents: [loa], enfant: nopei, type: adoptive }
+    - { parents: [mboe, zouette], enfant: sans_prenom }
+    - { parents: [tsoun], enfant: sans_prenom, type: a_eleve }
+    - { parents: [mboe, zouette], enfant: soe }
+    - { parents: [mboe, zouette], enfant: muo }
+    - { parents: [mboe], enfant: nyoe }
+    - { parents: [zouette], enfant: nyoe, certitude: probable }
+    - { parents: [tchoo, botsee], enfant: sea }
+    - { parents: [tchoo, botsee], enfant: tsoulouia }
+    - { parents: [nyouou, mbedjaette], enfant: vee }
+    - { parents: [nyouou, mbedjaette], enfant: djiwia }
+    - { parents: [nyouou], enfant: mesoou, certitude: probable }
+    - { parents: [ndozea], enfant: mesoou }
+  simultaneites:
+    - { unions: [[nyouvui, tchudjoette], [nyouvui, mbaine]], reponse: simultanees }
+    - { unions: [[nyouvui, tchudjoette], [nyouvui, inconnue_2]], reponse: simultanees }
+    - { unions: [[nyouvui, mbaine], [nyouvui, inconnue_2]], reponse: simultanees }
+    - { unions: [[soou, soe], [ndozea, soou]], reponse: simultanees }
+    - { unions: [[nyouou, mbedjaette], [nyouou, ndozea]], reponse: simultanees }
+    - { unions: [[nyouou, ndozea], [ndozea, soou]], reponse: successives }
+  faits:
+    - { personne: njonyem, type: deces, date: { qualificatif: exacte, date: 1973-06-17 } }
+    - personne: mbaine
+      type: deces
+      date: { qualificatif: vers, date: "1952", texte: vers 1952 }
+    - { personne: loa, type: deces, date: { qualificatif: exacte, date: "1965" } }
+    - personne: tsoun
+      type: deces
+      date: { qualificatif: texte, texte: "vers 1990, d'après la famille" }
+    - personne: djonoia
+      type: deces
+      date: { qualificatif: vers, date: "1954", texte: vers 1954 }
+    - { personne: mboe, type: deces, date: { qualificatif: exacte, date: "1997" } }
+    - personne: piwoue
+      type: deces
+      date: { qualificatif: vers, date: "2002", texte: vers 2002 }
+    - personne: nyouou
+      type: deces
+      date: { qualificatif: texte, texte: "vers 1972, d'après la famille" }
+    - { personne: vilae, type: deces, date: { qualificatif: exacte, date: 1998-10-02 } }
+    - { personne: boum, type: deces, date: { qualificatif: exacte, date: "1968" } }
+    - personne: ndae
+      type: deces
+      date: { qualificatif: vers, date: "1983", texte: vers 1983 }
+    - { personne: feou, type: deces, date: { qualificatif: exacte, date: 1960-03-18 } }
+    - { personne: tchidjoui, type: deces, date: { qualificatif: exacte, date: "1996" } }
+    - personne: zouette
+      type: deces
+      date: { qualificatif: texte, texte: "vers 1999, d'après la famille" }
+    - { personne: nyoe, type: deces, date: { qualificatif: exacte, date: "2000" } }
+    - { personne: mbedjaette, type: deces, date: { qualificatif: exacte, date: 2024-01-16 } }
+paires:
+  - id: F09-01
+    de: tchudjoette
+    vers: mbaine
+    categorie: polygamie
+    pourquoi: "Deux épouses de Nyouvui, simultanées (réponse gardée) : co-épouses ; et aussi grand-mère de la bru de son fils (Soe, épouse de Soou) : une union, quatre générations, limite de l'ADR 0010."
+    attendu:
+      - chemin: "=nyouvui =mbaine"
+        alliance: { type: co_spouse, simultaneite: simultaneous }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "0/2[tchudjoette] =soe 2/0[mbaine]"
+        alliance: { type: other }
+        fr: à rédiger
+        en: à rédiger
+  - id: F09-02
+    de: tchudjoette
+    vers: inconnue_2
+    categorie: polygamie
+    pourquoi: "Co-épouse à compléter : une place à compléter est une épouse comme une autre (réponse gardée : simultanées, ADR 0020, point 4)."
+    attendu:
+      - chemin: "=nyouvui =inconnue_2"
+        alliance: { type: co_spouse, simultaneite: simultaneous }
+        fr: à rédiger
+        en: à rédiger
+  - id: F09-03
+    de: njonyem
+    vers: loa
+    categorie: non_biologique_certitude
+    pourquoi: "Seul Nyouvui est commun par la naissance, les mères sont connues et différentes : demi-sœur, même père ; Tchudjoette, mère de Njonyem et mère adoptive de Loa, est réunie dans la fratrie sans la changer (ADR 0021, choix « birth_and_adoption » : réservé à l'absence d'autre parent de naissance) ; et aussi tante de sa bru (une union, quatre générations)."
+    attendu:
+      - chemin: "1/1[nyouvui] | 1/1[tchudjoette]"
+        fratrie: { type: birth, partage: half, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "0/1[njonyem] =soe 2/1[mbaine+nyouvui]"
+        alliance: { type: other }
+        fr: à rédiger
+        en: à rédiger
+  - id: F09-04
+    de: njonyem
+    vers: mboe
+    categorie: polygamie
+    pourquoi: "Fils d'une co-épouse : demi-frère, même père ; et aussi père de sa bru Soe (cousins mariés, une union, deux générations)."
+    attendu:
+      - chemin: "1/1[nyouvui]"
+        fratrie: { type: birth, partage: half, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "0/1[njonyem] =soe 1/0[mboe]"
+        alliance: { type: other }
+        fr: à rédiger
+        en: à rédiger
+  - id: F09-05
+    de: njonyem
+    vers: boum
+    categorie: polygamie
+    pourquoi: "Deux maris de Piwoue dont les unions se chevauchent par les dates (1932-1973 et 1968) : co-époux, sans règle de genre (ADR 0020, point 4). Données du générateur (graine 46) : une polyandrie apparente, que le moteur nomme comme toute paire d'unions simultanées."
+    attendu:
+      - chemin: "=piwoue =boum"
+        alliance: { type: co_spouse, simultaneite: simultaneous }
+        fr: à rédiger
+        en: à rédiger
+  - id: F09-06
+    de: soou
+    vers: soe
+    categorie: implexe
+    pourquoi: "Demi-cousins germains (un seul grand-parent commun, Nyouvui) mariés : la cousine par le père d'abord, et aussi l'épouse (le sang avant l'alliance, CL-FAM-09)."
+    attendu:
+      - chemin: "2/2[nyouvui]"
+        cote_de: { par: njonyem, cote: father }
+        cote_vers: { par: mboe, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=soe"
+        alliance: { type: spouse }
+        fr: à rédiger
+        en: à rédiger
+  - id: F09-07
+    de: soou
+    vers: nyouou
+    categorie: levirat_sororat
+    pourquoi: "Frères, la paternité de Nyouou étant probable (« Peut-être son frère », UNI-10) ; et aussi deux maris successifs de Ndozea (« autre mari de votre épouse ») ; et aussi demi-cousin de son épouse Soe."
+    attendu:
+      - chemin: "1/1[njonyem+piwoue]"
+        fratrie: { type: birth, partage: full }
+        certitude: probable
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=ndozea =nyouou"
+        alliance: { type: spouse_of_spouse, simultaneite: successive }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=soe 2/2[nyouvui]"
+        alliance: { type: other }
+        certitude: probable
+        cote_vers: { par: njonyem, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F09-08
+    de: mbedjaette
+    vers: ndozea
+    categorie: polygamie
+    pourquoi: "Deux épouses de Nyouou, simultanées : co-épouses ; et aussi épouse du frère du mari (deux unions, deux générations), probable par la paternité de Nyouou."
+    attendu:
+      - chemin: "=nyouou =ndozea"
+        alliance: { type: co_spouse, simultaneite: simultaneous }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=nyouou 1/1[njonyem+piwoue] =ndozea"
+        alliance: { type: spouse_of_sibling_of_spouse }
+        certitude: probable
+        fr: à rédiger
+        en: à rédiger
+  - id: F09-09
+    de: vie
+    vers: nopei
+    categorie: non_biologique_certitude
+    pourquoi: "Nopei adopté par Loa, mère de Vie : fratrie par adoption seulement, sans autre parent adoptif connu (« frère ou demi-frère » par adoption, ADR 0017, point 2) ; côté « parent », Nopei ayant aussi une mère de naissance ; et aussi cousin germain par la naissance (Loa et Tsoun frère et sœur)."
+    attendu:
+      - chemin: "1/1[loa]"
+        fratrie: { type: adoption, partage: full_or_half, cote: parent }
+        base: [adoptive]
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "2/2[mbaine+nyouvui]"
+        cote_de: { par: loa, cote: mother }
+        cote_vers: { par: tsoun, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F09-10
+    de: feou
+    vers: nopei
+    categorie: non_biologique_certitude
+    pourquoi: "Frères (Tsoun et Ndae), et aussi cousins par l'adoption : la tante Loa a adopté Nopei ; le type est signalé (PAR-06)."
+    attendu:
+      - chemin: "1/1[ndae+tsoun]"
+        fratrie: { type: birth, partage: full }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "2/2[mbaine+nyouvui]"
+        base: [adoptive]
+        cote_de: { par: tsoun, cote: father }
+        cote_vers: { par: loa, cote: parent, type: adoptive }
+        fr: à rédiger
+        en: à rédiger
+  - id: F09-11
+    de: sans_prenom
+    vers: soe
+    categorie: non_biologique_certitude
+    pourquoi: "Sœurs ; et aussi cousines par Tsoun, qui l'a élevée (base « raised ») ; et aussi épouse du demi-cousin Soou, par le père puis par celui qui l'a élevée : chaque chemin affiché, le sang avant l'alliance, la naissance avant l'élevage à distance égale (ADR 0021, point 4)."
+    attendu:
+      - chemin: "1/1[mboe+zouette]"
+        fratrie: { type: birth, partage: full }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "2/2[mbaine+nyouvui]"
+        base: [raised]
+        cote_de: { par: tsoun, cote: parent, type: raised }
+        cote_vers: { par: mboe, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "2/2[nyouvui] =soe"
+        alliance: { type: other }
+        cote_de: { par: mboe, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "2/2[nyouvui] =soe"
+        alliance: { type: other }
+        base: [raised]
+        cote_de: { par: tsoun, cote: parent, type: raised }
+        fr: à rédiger
+        en: à rédiger
+  - id: F09-12
+    de: soe
+    vers: mesoou
+    categorie: levirat_sororat
+    pourquoi: "Nièce « à la mode de Bretagne » (2 et 3 : fille du demi-cousin germain Nyouou), par une paternité probable ; et aussi fille de la co-épouse Ndozea (deux unions, une génération), certaine ; et aussi nièce du mari, probable : le sang d'abord, puis le plus court."
+    attendu:
+      - chemin: "2/3[nyouvui]"
+        certitude: probable
+        cote_de: { par: mboe, cote: father }
+        cote_vers: { par: nyouou, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=soou =ndozea 0/1[ndozea]"
+        alliance: { type: other, simultaneite: simultaneous, autre_parent: [successive] }
+        cote_vers: { par: ndozea, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=soou 1/2[njonyem+piwoue]"
+        alliance: { type: other }
+        certitude: probable
+        cote_vers: { par: nyouou, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F09-13
+    de: vee
+    vers: mesoou
+    categorie: levirat_sororat
+    pourquoi: "Demi-sœur, même père (paternité probable) ; et aussi fille de l'épouse de l'oncle Soou : Ndozea a épousé les deux frères, union successive à celle avec Nyouou."
+    attendu:
+      - chemin: "1/1[nyouou]"
+        fratrie: { type: birth, partage: half, cote: father }
+        certitude: probable
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "2/1[njonyem+piwoue] =ndozea 0/1[ndozea]"
+        alliance: { type: other, autre_parent: [successive] }
+        certitude: probable
+        cote_de: { par: nyouou, cote: father }
+        cote_vers: { par: ndozea, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F09-14
+    de: tsoun
+    vers: sans_prenom
+    categorie: non_biologique_certitude
+    pourquoi: "Il l'a élevée (base « raised », jamais « fille ») d'abord, et aussi nièce par la naissance (fille du demi-frère Mboe) ; côté « parent », elle a un père de naissance."
+    attendu:
+      - chemin: "0/1[tsoun]"
+        base: [raised]
+        cote_vers: { par: tsoun, cote: parent, type: raised }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "1/2[mbaine+nyouvui]"
+        cote_vers: { par: mboe, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F09-15
+    de: loa
+    vers: nopei
+    categorie: non_biologique_certitude
+    pourquoi: "Fils adoptif, et aussi neveu par la naissance (fils du frère Tsoun) : l'adoption au sein de la famille garde les deux liens (PAR-06, PAR-05)."
+    attendu:
+      - chemin: "0/1[loa]"
+        base: [adoptive]
+        cote_vers: { par: loa, cote: parent, type: adoptive }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "1/2[mbaine+nyouvui]"
+        cote_vers: { par: tsoun, cote: father }
+        fr: à rédiger
+        en: à rédiger

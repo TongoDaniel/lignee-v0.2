@@ -21,6 +21,7 @@ Sections de `arbre` (une section absente vaut une liste vide, une clé inconnue 
 | --- | --- | --- |
 | `personnes` | `pierre/M` : nom court et genre (`M`, `F`, `A` autre, `N` non renseigné) ; chaque nom court une seule fois | `Person` connue. Sans ligne dans `noms`, la personne porte son nom court comme prénom (« Pierre ») |
 | `a_completer` | Noms courts de `personnes` qui sont des places à compléter (UNI-02, UNI-12) | `Person` de nature `placeholder`, sans nom par défaut |
+| `distinctes` | `{ place, de: [a, b…] }` : une place de `a_completer` dite distincte de ces personnes (ADR 0017, « la mère de Bruno n'est pas Irène ») ; une place une seule fois | `Person.distinctFrom` (refusé sur une personne connue) |
 | `noms` | `{ personne, type, prenoms?, nom?, forme?, debut?, fin? }` ; `type` : `naissance`, `usage`, `surnom`, `titre`, `variante`, `ancien` | `Name` |
 | `unions` | `{ conjoints: [a, b], rang_a?, rang_b?, debut?, fin?, motif? }` ; `debut` et `fin` au format `scenarioFuzzyDateSchema` ; `motif` : `deces`, `divorce`, `separation`, `non_renseigne` | `Union`. Un rang absent est le rang suivant de ce conjoint dans l'ordre des lignes (UNI-07) : dans CL-POL-03, Rose a le rang 1. Un rang déjà pris par la même personne, écrit ou déduit, est refusé |
 | `filiations` | `{ parents: [a, b?], enfant, type?, certitude? }` ; `type` : `naissance` (par défaut), `adoptive`, `a_eleve`, `confie`, `tuteur`, `donneur`, `gpa` ; `certitude` : `certain` (par défaut), `probable`, `hypothetique` | Une `Filiation` par parent |
