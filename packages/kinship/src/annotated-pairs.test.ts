@@ -25,6 +25,7 @@ import {
   pairSetHeaderSchema,
   pairSetIssues,
   resultSignature,
+  vocabularyKeys,
   wordFields,
   type AnnotatedPair,
   type LoadedFamily,
@@ -70,8 +71,15 @@ describe('T-023 — jeu de 200 paires annotées (PAR-02)', () => {
       const count = counts.get(category) ?? 0;
       const quota = header.quotas[category];
       expect(count, category).toBeGreaterThanOrEqual(quota);
-      const row = `| \`${category}\` | ${String(quota)} | ${String(count)} |`;
-      expect(readme, `README : ${row}`).toContain(row);
+      // Ligne de la table, colonnes alignées ou non.
+      const row = new RegExp(
+        `^\\| \`${category}\` +\\| ${String(quota)} +\\| ${String(count)} +\\|$`,
+        'm',
+      );
+      expect(
+        readme,
+        `README : ${category}, quota ${String(quota)}, ${String(count)} paires`,
+      ).toMatch(row);
       lines.push(`${category} ${String(count)}/${String(quota)}`);
     }
     console.log(`[paires] répartition (paires/quota) : ${lines.join(', ')}`);
@@ -179,12 +187,54 @@ describe('T-023 — jeu de 200 paires annotées (PAR-02)', () => {
     );
     // Aucun dictionnaire n'existe encore (T-026, T-027) : un mot écrit ne serait vérifié par rien.
     // Le ticket qui remplit ces champs branche ici son dictionnaire et compare chaque mot écrit.
+    // T-026 vient avant T-027 : la vérification devra alors accepter `en` encore « à rédiger », et
+    // le schéma des mots porter la forme courte et la forme expliquée (PAR-11).
     const written = fields.filter((field) => field.words !== TO_WRITE);
     expect(
       written.map((field) => `${field.pair}[${String(field.index)}].${field.language}`),
       'mots écrits sans dictionnaire pour les vérifier',
     ).toEqual([]);
     expect(total).toBeGreaterThanOrEqual(200);
+  });
+
+  it('le jeu couvre le vocabulaire minimal de PAR-02, pour chaque genre visé', () => {
+    // Forme de base du lien et genre de la personne visée (B) : ce que les mots devront dire. Une
+    // paire retirée ou remplacée ne doit pas faire disparaître l'un de ces mots.
+    const both = (key: string) => [`${key} M`, `${key} F`];
+    const required = [
+      ...['1/0', '0/1', '2/0', '0/2', '3/0', '0/3', '2/1', '1/2', '3/1', '2/2', '3/3'].flatMap(
+        (line) => both(`ligne ${line}`),
+      ),
+      'ligne 1/3 F', // petite-nièce
+      'ligne 3/2 F', // « à la mode de Bretagne »
+      'ligne 2/3 F',
+      'ligne 4/4 F', // degré civil
+      ...['full', 'half', 'full_or_half'].flatMap((sharing) => both(`fratrie ${sharing}`)),
+      ...[
+        'spouse',
+        'parent_of_spouse',
+        'child_of_spouse',
+        'spouse_of_child',
+        'spouse_of_parent',
+        'sibling_of_spouse',
+        'spouse_of_sibling',
+        'spouse_of_sibling_of_spouse',
+        'spouse_of_spouse',
+        'step_sibling',
+      ].flatMap(both),
+      'co_spouse F',
+      'genre A', // une personne visée de genre « autre »
+      'ligne 1/0 M adoptive',
+      'ligne 0/1 F adoptive',
+      'ligne 1/0 M raised',
+      'ligne 1/0 M fostered',
+      'ligne 0/1 F guardian',
+      'ligne 1/0 M donor',
+      'ligne 1/0 F surrogacy',
+      'fratrie full F adoptive', // « sœur par adoption »
+    ];
+    const covered = vocabularyKeys(loadPairSet().families.map(({ family }) => family));
+    expect(required.filter((key) => !covered.has(key))).toEqual([]);
   });
 });
 
@@ -222,14 +272,22 @@ describe('T-023 — une paire mal formée est refusée', () => {
   });
 
   it.each([
-    ['une clé inconnue', { ...good, commentaire: 'x' }],
-    ['une catégorie inconnue', { ...good, categorie: 'divers' }],
-    ['une justification absente', { ...good, pourquoi: '' }],
-    ['des mots vides', { ...good, attendu: [{ ...good.attendu[0], fr: '' }] }],
-    ['un attendu vide', { ...good, attendu: [] }],
-    ['une personne hors de la famille', { ...good, vers: 'samuel' }],
-    ['un segment illisible', { ...good, attendu: [{ ...good.attendu[0], chemin: '1-0 ben' }] }],
-    ['un ancêtre inconnu', { ...good, attendu: [{ ...good.attendu[0], chemin: '1/0[pierre]' }] }],
+    ['une clé inconnue', { ...good, commentaire: 'x' }, /Unrecognized key/],
+    ['une catégorie inconnue', { ...good, categorie: 'divers' }, /Invalid option/],
+    ['une justification absente', { ...good, pourquoi: '' }, /Too small/],
+    ['des mots vides', { ...good, attendu: [{ ...good.attendu[0], fr: '' }] }, /Too small/],
+    ['un attendu vide', { ...good, attendu: [] }, /expected array to have >=1/],
+    ['une personne hors de la famille', { ...good, vers: 'samuel' }, /samuel is not in F99/],
+    [
+      'un segment illisible',
+      { ...good, attendu: [{ ...good.attendu[0], chemin: '1-0 ben' }] },
+      /bad segment/,
+    ],
+    [
+      'un ancêtre inconnu',
+      { ...good, attendu: [{ ...good.attendu[0], chemin: '1/0[pierre]' }] },
+      /pierre is not in F99/,
+    ],
     [
       'des ancêtres non triés',
       {
@@ -238,6 +296,7 @@ describe('T-023 — une paire mal formée est refusée', () => {
         de: 'kwoa',
         attendu: [{ chemin: '0/1[kwoa+ben]', fr: TO_WRITE, en: TO_WRITE }],
       },
+      /not sorted/,
     ],
     [
       'une fratrie sur un chemin qui n’en est pas une',
@@ -245,20 +304,29 @@ describe('T-023 — une paire mal formée est refusée', () => {
         ...good,
         attendu: [{ ...good.attendu[0], fratrie: { type: 'birth', partage: 'full' } }],
       },
+      /fratrie exactly/,
     ],
     [
       'une alliance sans union traversée',
       { ...good, attendu: [{ ...good.attendu[0], alliance: { type: 'spouse' } }] },
+      /alliance exactly/,
     ],
     [
       'une union traversée sans alliance',
       { ...good, vers: 'kwoa', attendu: [{ chemin: '=kwoa', fr: TO_WRITE, en: TO_WRITE }] },
+      /alliance exactly/,
     ],
-    ['A et B identiques sans meme_personne', { ...good, vers: 'finae' }],
-    ['une paire de visibilité sans personne masquée', { ...good, categorie: 'visibilite' }],
-    ['A masqué', { ...good, masques: ['finae'] }],
-  ])('refuse %s', (_label, pair) => {
-    expect(issuesOf(pair).length).toBeGreaterThan(0);
+    ['A et B identiques sans meme_personne', { ...good, vers: 'finae' }, /meme_personne/],
+    [
+      'une paire de visibilité sans personne masquée',
+      { ...good, categorie: 'visibilite' },
+      /hides someone/,
+    ],
+    ['A masqué', { ...good, masques: ['finae'] }, /is A or B/],
+  ] as const)('refuse %s', (_label, pair, reason) => {
+    const issues = issuesOf(pair);
+    expect(issues.length).toBeGreaterThan(0);
+    expect(issues.join(' ; ')).toMatch(reason);
   });
 
   it('refuse un jeu dont une catégorie tombe sous son quota, ou dont le total diffère', () => {

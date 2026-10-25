@@ -2,7 +2,8 @@
 # Lignée de six générations depuis Nehae et Lie. Trois branches : Seloi (avec Yekaa : Soou et
 # Pasoe ; puis Yon, Biwiou, Kegee, de père en fils), Vie (Nesoine, Viia, Tchetea, Ndonaine, de
 # mère en fille) et Toui (Veo, de genre non renseigné, puis Fea). Sous la première génération,
-# chaque enfant n'a qu'un parent saisi : les sommets des cousins sont Nehae et Lie.
+# chaque enfant n'a qu'un parent saisi : les sommets des cousins sont Nehae et Lie. Ndei, de genre
+# « autre », est l'enfant de Pasoe.
 famille: F05
 titre: Degrés civils, oncles à la mode de Bretagne et générations décalées
 origine: composee
@@ -25,6 +26,7 @@ arbre:
     - ndonaine/F
     - veo/N
     - fea/F
+    - ndei/A
   unions:
     - { conjoints: [nehae, lie] }
     - { conjoints: [seloi, yekaa] }
@@ -43,6 +45,7 @@ arbre:
     - { parents: [tchetea], enfant: ndonaine }
     - { parents: [toui], enfant: veo }
     - { parents: [veo], enfant: fea }
+    - { parents: [pasoe], enfant: ndei }
 paires:
   - id: F05-01
     de: soou
@@ -136,22 +139,22 @@ paires:
         en: à rédiger
   - id: F05-10
     de: vie
-    vers: soou
+    vers: viia
     categorie: degres_civils
-    pourquoi: "Fils du frère : neveu (1 et 2) ; elle atteint ses deux parents, lui monte par son père."
+    pourquoi: "Petite-fille : deux générations descendantes, par sa fille Nesoine."
     attendu:
-      - chemin: "1/2[lie+nehae]"
-        cote_vers: { par: seloi, cote: father }
+      - chemin: "0/2[vie]"
+        cote_vers: { par: nesoine, cote: mother }
         fr: à rédiger
         en: à rédiger
   - id: F05-11
     de: vie
-    vers: yon
+    vers: tchetea
     categorie: degres_civils
-    pourquoi: "Petit-fils du frère : petit-neveu (1 et 3)."
+    pourquoi: "Arrière-petite-fille : trois générations descendantes."
     attendu:
-      - chemin: "1/3[lie+nehae]"
-        cote_vers: { par: soou, cote: father }
+      - chemin: "0/3[vie]"
+        cote_vers: { par: viia, cote: mother }
         fr: à rédiger
         en: à rédiger
   - id: F05-12
@@ -210,14 +213,13 @@ paires:
         fr: à rédiger
         en: à rédiger
   - id: F05-17
-    de: nesoine
-    vers: yon
+    de: seloi
+    vers: viia
     categorie: degres_civils
-    pourquoi: "2 et 3 : neveu « à la mode de Bretagne », inverse du précédent."
+    pourquoi: "Petite-fille de la sœur : petite-nièce (1 et 3) ; Seloi atteint ses deux parents, Viia monte par sa mère."
     attendu:
-      - chemin: "2/3[lie+nehae]"
-        cote_de: { par: vie, cote: mother }
-        cote_vers: { par: soou, cote: father }
+      - chemin: "1/3[lie+nehae]"
+        cote_vers: { par: nesoine, cote: mother }
         fr: à rédiger
         en: à rédiger
   - id: F05-18
@@ -316,13 +318,14 @@ paires:
         fr: à rédiger
         en: à rédiger
   - id: F05-27
-    de: viia
-    vers: nehae
+    de: yon
+    vers: ndei
     categorie: degres_civils
-    pourquoi: "Arrière-grand-père par la mère."
+    pourquoi: "Cousin germain de genre « autre » (Yon est le fils de Soou, Ndei l’enfant de sa sœur Pasoe) : mêmes générations, le genre ne change que les mots (PAR-11, CL-FAM-08)."
     attendu:
-      - chemin: "3/0[nehae]"
-        cote_de: { par: nesoine, cote: mother }
+      - chemin: "2/2[seloi+yekaa]"
+        cote_de: { par: soou, cote: father }
+        cote_vers: { par: pasoe, cote: mother }
         fr: à rédiger
         en: à rédiger
   - id: F05-28

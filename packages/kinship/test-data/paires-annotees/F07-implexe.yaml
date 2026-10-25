@@ -227,17 +227,22 @@ paires:
         fr: à rédiger
         en: à rédiger
   - id: F07-12
-    de: nyoe
-    vers: foou
+    de: genei
+    vers: kuvae
     categorie: implexe
-    pourquoi: "Oncle par le père, et aussi mari : inverse exact du précédent."
+    pourquoi: "Arrière-petit-fils par ses deux enfants Tchenon et Nyeneou (implexe) : deux chemins de trois générations descendantes, tous deux affichés, dans l'ordre des identifiants (CL-FAM-09) ; et aussi neveu de sa bru Nyoe (une union, quatre générations, limite de l'ADR 0010)."
     attendu:
-      - chemin: "2/1[genei+gim]"
-        cote_de: { par: tchenon, cote: father }
+      - chemin: "0/3[genei]"
+        cote_vers: { par: ngen, cote: father }
         fr: à rédiger
         en: à rédiger
-      - chemin: "=foou"
-        alliance: { type: spouse }
+      - chemin: "0/3[genei]"
+        cote_vers: { par: yue, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "0/1[genei] =nyoe 1/2[honjuia+tchenon]"
+        alliance: { type: other }
+        cote_vers: { par: ngen, cote: father }
         fr: à rédiger
         en: à rédiger
   - id: F07-13

@@ -376,7 +376,7 @@ paires:
     de: panuo
     vers: mbiette
     categorie: implexe
-    pourquoi: "Cousine germaine (paternité de la mère probable) puis épouse : le sang avant l'alliance."
+    pourquoi: "Cousine germaine, probable par la filiation de Boumbon (père de Panuo) envers sa mère Tsenee, puis épouse : le sang avant l'alliance."
     attendu:
       - chemin: "2/2[meluo+tsenee]"
         certitude: probable

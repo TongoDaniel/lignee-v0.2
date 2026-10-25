@@ -214,9 +214,9 @@ paires:
         en: à rédiger
   - id: F02-17
     de: tengoua
-    vers: djuvai
+    vers: sondoou
     categorie: alliance
-    pourquoi: "Fils de son mari, né d'une épouse décédée avant son mariage : union successive (ADR 0020, points 2 et 5)."
+    pourquoi: "Fille de son mari, née d'une épouse décédée avant son mariage : « child_of_spouse » au féminin, union successive (ADR 0020, points 2 et 5)."
     attendu:
       - chemin: "=djon 0/1[djon]"
         alliance: { type: child_of_spouse, autre_parent: [successive] }

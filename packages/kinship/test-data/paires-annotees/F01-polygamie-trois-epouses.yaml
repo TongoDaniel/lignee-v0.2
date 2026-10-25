@@ -228,11 +228,11 @@ paires:
         en: à rédiger
   - id: F01-18
     de: paine
-    vers: ben
+    vers: kwoa
     categorie: alliance
-    pourquoi: "Père du conjoint (ADR 0020, point 2, « parent_of_spouse » ; PAR-02, beau-père)."
+    pourquoi: "Mère du mari : « parent_of_spouse » au féminin (PAR-02, belle-mère au sens du parent du conjoint) ; le chemin par Ben est redondant, Kwoa étant la mère de Finae (ADR 0010, point 4)."
     attendu:
-      - chemin: "=finae 1/0[ben]"
+      - chemin: "=finae 1/0[kwoa]"
         alliance: { type: parent_of_spouse }
         fr: à rédiger
         en: à rédiger

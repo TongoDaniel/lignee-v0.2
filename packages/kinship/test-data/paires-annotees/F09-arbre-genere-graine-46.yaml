@@ -359,7 +359,7 @@ paires:
     de: soe
     vers: mesoou
     categorie: levirat_sororat
-    pourquoi: "Petite-cousine par une paternité probable (2 et 3) ; et aussi fille de la co-épouse Ndozea (deux unions, une génération), certaine ; et aussi nièce du mari, probable : le sang d'abord, puis le plus court."
+    pourquoi: "Nièce « à la mode de Bretagne » (2 et 3 : fille du demi-cousin germain Nyouou), par une paternité probable ; et aussi fille de la co-épouse Ndozea (deux unions, une génération), certaine ; et aussi nièce du mari, probable : le sang d'abord, puis le plus court."
     attendu:
       - chemin: "2/3[nyouvui]"
         certitude: probable

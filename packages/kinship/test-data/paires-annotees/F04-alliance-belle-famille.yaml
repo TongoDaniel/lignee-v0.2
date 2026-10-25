@@ -54,12 +54,12 @@ arbre:
     - { parents: [ham], enfant: pee }
 paires:
   - id: F04-01
-    de: moutsun
-    vers: houou
+    de: houou
+    vers: moutsun
     categorie: alliance
-    pourquoi: "Conjoint : une union, aucune génération (ADR 0020, « spouse »)."
+    pourquoi: "Conjoint, vu de l'épouse : « mari » (ADR 0020, « spouse »)."
     attendu:
-      - chemin: "=houou"
+      - chemin: "=moutsun"
         alliance: { type: spouse }
         fr: à rédiger
         en: à rédiger
@@ -104,13 +104,13 @@ paires:
         fr: à rédiger
         en: à rédiger
   - id: F04-06
-    de: yayoia
-    vers: moutsun
-    categorie: alliance
-    pourquoi: "Mari de la sœur : beau-frère, deuxième sens (« spouse_of_sibling »), inverse exact du précédent."
+    de: moutsun
+    vers: tsoe
+    categorie: degres_civils
+    pourquoi: "Fille : ligne directe descendante d'une génération, vers une femme (TRD, question 1)."
     attendu:
-      - chemin: "1/1[saine+wui] =moutsun"
-        alliance: { type: spouse_of_sibling }
+      - chemin: "0/1[moutsun]"
+        cote_vers: { par: moutsun, cote: father }
         fr: à rédiger
         en: à rédiger
   - id: F04-07
@@ -144,13 +144,13 @@ paires:
         fr: à rédiger
         en: à rédiger
   - id: F04-10
-    de: kwoniou
-    vers: houou
+    de: houou
+    vers: seine
     categorie: alliance
-    pourquoi: "Épouse du frère : belle-sœur (« spouse_of_sibling »)."
+    pourquoi: "Mère du mari : « parent_of_spouse » au féminin (PAR-02)."
     attendu:
-      - chemin: "1/1[mbosei+seine] =houou"
-        alliance: { type: spouse_of_sibling }
+      - chemin: "=moutsun 1/0[seine]"
+        alliance: { type: parent_of_spouse }
         fr: à rédiger
         en: à rédiger
   - id: F04-11
@@ -264,12 +264,12 @@ paires:
         fr: à rédiger
         en: à rédiger
   - id: F04-22
-    de: vevoe
-    vers: houou
+    de: houou
+    vers: pee
     categorie: alliance
-    pourquoi: "Épouse du frère (« spouse_of_sibling ») ; aucun chemin par la nièce Tsoe, qui n'est pas une union."
+    pourquoi: "Mari de la sœur : beau-frère au masculin (« spouse_of_sibling »)."
     attendu:
-      - chemin: "1/1[mbosei+seine] =houou"
+      - chemin: "1/1[saine+wui] =pee"
         alliance: { type: spouse_of_sibling }
         fr: à rédiger
         en: à rédiger

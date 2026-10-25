@@ -274,7 +274,9 @@ export function pairSetIssues(header: PairSetHeader, families: readonly Annotate
     for (const pair of family.paires) {
       if (ids.has(pair.id)) issues.push(`pair ${pair.id} twice`);
       ids.add(pair.id);
-      const key = [family.famille, pair.de, pair.vers, ...(pair.masques ?? []).sort()].join(' ');
+      const key = [family.famille, pair.de, pair.vers, ...[...(pair.masques ?? [])].sort()].join(
+        ' ',
+      );
       if (pairs.has(key)) issues.push(`pair ${pair.id} repeats ${key}`);
       pairs.add(key);
       counts.set(pair.categorie, (counts.get(pair.categorie) ?? 0) + 1);
@@ -396,4 +398,36 @@ export function wordFields(families: readonly AnnotatedFamily[]) {
           ]),
     ),
   );
+}
+
+const GENDER_LETTERS = { male: 'M', female: 'F', other: 'A', unspecified: 'N' } as const;
+
+/**
+ * Vocabulaire couvert par le jeu : pour chaque lien attendu, sa forme de base et le genre de la
+ * personne visée (B), qui commandent les mots (PAR-02, PAR-11). `ligne 0/2 F` : petite-fille, par
+ * la naissance ; `fratrie half M` : demi-frère ; `parent_of_spouse F` : mère du conjoint ;
+ * `genre A` : une personne visée de genre « autre ». Les liens non biologiques comptent à part
+ * (`ligne 1/0 M adoptive`).
+ */
+export function vocabularyKeys(families: readonly AnnotatedFamily[]): Set<string> {
+  const keys = new Set<string>();
+  for (const family of families) {
+    const genders = new Map(family.arbre.personnes.map(({ key, gender }) => [key, gender]));
+    for (const pair of family.paires) {
+      if (typeof pair.attendu === 'string') continue;
+      const gender = GENDER_LETTERS[genders.get(pair.vers) ?? 'unspecified'];
+      if (gender === 'A') keys.add('genre A');
+      for (const link of pair.attendu) {
+        const base = link.base === undefined ? '' : ` ${link.base.join('+')}`;
+        if (link.fratrie !== undefined)
+          keys.add(`fratrie ${link.fratrie.partage} ${gender}${base}`);
+        else if (link.alliance !== undefined) keys.add(`${link.alliance.type} ${gender}${base}`);
+        else {
+          const line = /^(\d+\/\d+)\[/.exec(link.chemin)?.[1];
+          if (line !== undefined) keys.add(`ligne ${line} ${gender}${base}`);
+        }
+      }
+    }
+  }
+  return keys;
 }
