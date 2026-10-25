@@ -1,13 +1,15 @@
 # Noms générés. Partie disposition (T-008, packages/layout) : générations et foyers calculés
 # depuis Oumar, puis comparés à l'attendu. Les unions sont saisies dans le désordre : seul le rang
 # de Moussa compte. Ordre, placement et repli (T-012) : les épouses sur la demi-rangée dans
-# l'ordre des rangs, seul le foyer de Fatou ouvert, les autres repliés avec leur compteur. Reste :
-# revue visuelle (T-017).
+# l'ordre des rangs, seul le foyer de Fatou ouvert, les autres repliés avec leur compteur. Dessin
+# (T-017) : la scène à peindre en pixels (cinq fiches, trois traits d'union, une descente, deux
+# pastilles « + 2 ») et le parcours accessible, qui atteint les enfants des foyers repliés. Reste :
+# revue visuelle sur l'Android de référence (issue #34).
 id: CL-POL-01
 titre: Un homme a trois épouses en même temps
 couverture:
   teste: [disposition]
-  reste: [T-017]
+  reste: []
 arbre:
   personnes: [moussa/M, awa/F, fatou/F, mariam/F, ali/M, binta/F, oumar/M, kadi/F, issa/M]
   unions:
@@ -44,3 +46,20 @@ attendu:
       - { famille: [moussa, awa], replie: true, enfants: 2 }
       - { famille: [moussa, fatou], replie: false, enfants: 1 }
       - { famille: [moussa, mariam], replie: true, enfants: 2 }
+  dessin:
+    noeuds: 5
+    unions: [[moussa, awa], [moussa, fatou], [moussa, mariam]]
+    pastilles:
+      - { famille: [moussa, awa], enfants: 2 }
+      - { famille: [moussa, mariam], enfants: 2 }
+    descentes:
+      - { famille: [moussa, fatou], enfants: [oumar] }
+    renvois: 0
+    parcours:
+      - personne: moussa
+        conjoints:
+          - { conjoint: awa, enfants: [ali, binta] }
+          - { conjoint: fatou, enfants: [oumar] }
+          - { conjoint: mariam, enfants: [kadi, issa] }
+      - personne: oumar
+        parents: [[moussa, fatou]]

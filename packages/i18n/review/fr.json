@@ -434,10 +434,139 @@
   "common:tree.personJoined": {
     "status": "to-review"
   },
+  "common:treeScreen.bornIn": {
+    "status": "to-review"
+  },
+  "common:treeScreen.counterText": {
+    "status": "to-review"
+  },
+  "common:treeScreen.deceasedLabel": {
+    "status": "to-review"
+  },
+  "common:treeScreen.drawingHint": {
+    "status": "to-review"
+  },
+  "common:treeScreen.drawingLabel": {
+    "status": "to-review"
+  },
   "common:treeScreen.empty": {
     "status": "to-review"
   },
+  "common:treeScreen.failed": {
+    "status": "to-review"
+  },
+  "common:treeScreen.fit": {
+    "status": "to-review"
+  },
+  "common:treeScreen.lifespan": {
+    "status": "to-review"
+  },
+  "common:treeScreen.lifespanUnknownStart": {
+    "status": "to-review"
+  },
+  "common:treeScreen.list.children": {
+    "status": "to-review"
+  },
+  "common:treeScreen.list.empty": {
+    "status": "to-review"
+  },
+  "common:treeScreen.list.focus": {
+    "status": "to-review"
+  },
+  "common:treeScreen.list.focusHint": {
+    "status": "to-review"
+  },
+  "common:treeScreen.list.fold": {
+    "status": "to-review"
+  },
+  "common:treeScreen.list.goTo": {
+    "status": "to-review"
+  },
+  "common:treeScreen.list.goToHint": {
+    "status": "to-review"
+  },
+  "common:treeScreen.list.hiddenFromDrawing": {
+    "status": "to-review"
+  },
+  "common:treeScreen.list.household": {
+    "status": "to-review"
+  },
+  "common:treeScreen.list.householdEnded": {
+    "status": "to-review"
+  },
+  "common:treeScreen.list.householdUnspecified": {
+    "status": "to-review"
+  },
+  "common:treeScreen.list.noChildren": {
+    "status": "to-review"
+  },
+  "common:treeScreen.list.otherLinks": {
+    "status": "to-review"
+  },
+  "common:treeScreen.list.parentsOf": {
+    "status": "to-review"
+  },
+  "common:treeScreen.list.secondaryEntry": {
+    "status": "to-review"
+  },
+  "common:treeScreen.list.seeAlsoEntry": {
+    "status": "to-review"
+  },
+  "common:treeScreen.list.spouses": {
+    "status": "to-review"
+  },
+  "common:treeScreen.list.unfold": {
+    "status": "to-review"
+  },
+  "common:treeScreen.list.unfoldParents": {
+    "status": "to-review"
+  },
+  "common:treeScreen.livingLabel": {
+    "status": "to-review"
+  },
+  "common:treeScreen.loading": {
+    "status": "to-review"
+  },
+  "common:treeScreen.missingFather": {
+    "status": "to-review"
+  },
+  "common:treeScreen.missingMother": {
+    "status": "to-review"
+  },
+  "common:treeScreen.missingParent": {
+    "status": "to-review"
+  },
+  "common:treeScreen.noName": {
+    "status": "to-review"
+  },
+  "common:treeScreen.parentsMark": {
+    "status": "to-review"
+  },
+  "common:treeScreen.seeAlso": {
+    "status": "to-review"
+  },
+  "common:treeScreen.showDrawing": {
+    "status": "to-review"
+  },
+  "common:treeScreen.showList": {
+    "status": "to-review"
+  },
   "common:treeScreen.title": {
+    "status": "to-review"
+  },
+  "common:treeScreen.unknownPerson": {
+    "status": "to-review"
+  },
+  "common:treeScreen.you": {
+    "status": "to-review"
+  },
+  "common:treeScreen.youLabel": {
+    "status": "to-review"
+  },
+  "common:treeScreen.zoomIn": {
+    "status": "to-review"
+  },
+  "common:treeScreen.zoomOut": {
     "status": "to-review"
   }
 }
