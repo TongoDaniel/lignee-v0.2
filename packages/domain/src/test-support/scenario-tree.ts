@@ -154,6 +154,7 @@ export function buildScenarioTree(
   for (const key of placeholders) id(key);
   const distinct = new Map<string, Id[]>();
   for (const line of section.distinctes ?? []) {
+    id(line.place);
     if (distinct.has(line.place))
       throw new Error(`Place ${line.place} is listed twice in distinctes`);
     distinct.set(line.place, line.de.map(id));

@@ -322,6 +322,11 @@ describe('le format refuse ce qui est mal formé', () => {
       distinctes: [{ place: 'x', de: ['kofi'] }],
     });
     expect(() => buildScenarioTree(unknown)).toThrow(/kofi/);
+    const unknownPlace = scenarioTreeSchema.parse({
+      personnes: ['ama/F'],
+      distinctes: [{ place: 'samuel', de: ['ama'] }],
+    });
+    expect(() => buildScenarioTree(unknownPlace)).toThrow(/samuel/);
     const twice = scenarioTreeSchema.parse({
       personnes: ['ama/F', 'x/F'],
       a_completer: ['x'],
