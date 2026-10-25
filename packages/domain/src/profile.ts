@@ -150,8 +150,9 @@ export interface Profile {
   /** Premier prénom pour l'initiale de l'avatar (jamais un ancien prénom). */
   readonly firstName: string | undefined;
   /**
-   * Nom qui donne sa teinte à l'avatar (charte : nom de naissance). Un nom de famille, jamais un
-   * prénom : l'ancien prénom d'une personne trans ne doit pas colorer sa fiche.
+   * Nom qui donne sa teinte à l'avatar (charte : nom de naissance). Le nom de famille, sinon la forme
+   * d'affichage (« Tonton Bobo »), sinon les prénoms du nom retenu ; jamais un ancien prénom, qui
+   * n'est pas retenu : il ne colore pas la fiche.
    */
   readonly tintName: string;
   readonly titles: readonly ProfileTitle[];
