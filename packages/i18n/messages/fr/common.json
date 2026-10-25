@@ -49,7 +49,7 @@
     "trailGo": "Revenir à {name}",
     "goToYouHint": "Remet l’arbre autour de votre fiche.",
     "recenterHint": "Refait l’arbre autour de cette personne.",
-    "trailHint": "Les étapes sont des boutons : l’une d’elles vous y ramène.",
+    "trailHint": "Chaque étape est un bouton : elle vous y ramène.",
     "trailGoHint": "Refait l’arbre autour de cette personne.",
     "seeAlso": "Voir aussi",
     "parentsMark": "Parents",

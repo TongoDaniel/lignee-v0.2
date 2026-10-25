@@ -49,7 +49,7 @@
     "trailGo": "Go back to {name}",
     "goToYouHint": "Puts the tree back around your own card.",
     "recenterHint": "Redraws the tree around this person.",
-    "trailHint": "The steps are buttons: each one takes you back there.",
+    "trailHint": "Each step is a button: it takes you back there.",
     "trailGoHint": "Redraws the tree around this person.",
     "seeAlso": "See also",
     "parentsMark": "Parents",
