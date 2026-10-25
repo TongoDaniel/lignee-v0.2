@@ -1,0 +1,216 @@
+# Prénoms générés (generateGivenName, graine 2300) ; famille composée, jamais une vraie famille.
+# Places à compléter (UNI-02, UNI-12). Nii a des enfants avec plusieurs mères : Biou et Nyeloe
+# d'une même mère à compléter (inconnue1), Ngum d'une autre (inconnue2), Wozen de Galea (connue,
+# son épouse), Ngie d'une mère à compléter dite distincte de Galea (inconnue3), Kweyuette d'un
+# parent à compléter de genre non renseigné (place1). Bumbei est la fille de Taou et d'un père à
+# compléter (inconnu4), Tindon le fils de Taou et de Ndongem. Min et Tchio sont enfants de deux
+# parents à compléter (inconnu5, inconnue6) ; Nem, fils de Min, a une épouse à compléter
+# (inconnue7) ; Nyeo est la fille de Tchio.
+famille: F08
+titre: Places à compléter, jamais supposées identiques
+origine: composee
+arbre:
+  personnes:
+    - nii/M
+    - inconnue1/F
+    - inconnue2/F
+    - galea/F
+    - inconnue3/F
+    - place1/N
+    - biou/M
+    - nyeloe/F
+    - ngum/M
+    - wozen/M
+    - ngie/M
+    - kweyuette/F
+    - taou/F
+    - inconnu4/M
+    - ndongem/M
+    - bumbei/F
+    - tindon/M
+    - inconnu5/M
+    - inconnue6/F
+    - min/M
+    - tchio/F
+    - nem/M
+    - inconnue7/F
+    - nyeo/F
+  a_completer: [inconnue1, inconnue2, inconnue3, place1, inconnu4, inconnu5, inconnue6, inconnue7]
+  distinctes:
+    - { place: inconnue3, de: [galea] }
+  unions:
+    - { conjoints: [nii, galea] }
+    - { conjoints: [taou, ndongem] }
+    - { conjoints: [nem, inconnue7] }
+  filiations:
+    - { parents: [nii, inconnue1], enfant: biou }
+    - { parents: [nii, inconnue1], enfant: nyeloe }
+    - { parents: [nii, inconnue2], enfant: ngum }
+    - { parents: [nii, galea], enfant: wozen }
+    - { parents: [nii, inconnue3], enfant: ngie }
+    - { parents: [nii, place1], enfant: kweyuette }
+    - { parents: [taou, inconnu4], enfant: bumbei }
+    - { parents: [taou, ndongem], enfant: tindon }
+    - { parents: [inconnu5, inconnue6], enfant: min }
+    - { parents: [inconnu5, inconnue6], enfant: tchio }
+    - { parents: [min], enfant: nem }
+    - { parents: [tchio], enfant: nyeo }
+paires:
+  - id: F08-01
+    de: biou
+    vers: nyeloe
+    categorie: places_a_completer
+    pourquoi: "Une même place à compléter partagée compte comme parent commun : sœur (ADR 0017, point 3 ; UNI-12, CL-GEN-07)."
+    attendu:
+      - chemin: "1/1[inconnue1+nii]"
+        fratrie: { type: birth, partage: full }
+        fr: à rédiger
+        en: à rédiger
+  - id: F08-02
+    de: biou
+    vers: ngum
+    categorie: places_a_completer
+    pourquoi: "Deux places à compléter différentes ne sont jamais supposées identiques ni différentes : « frère ou demi-frère » (TRD, question 1)."
+    attendu:
+      - chemin: "1/1[nii]"
+        fratrie: { type: birth, partage: full_or_half, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F08-03
+    de: biou
+    vers: wozen
+    categorie: places_a_completer
+    pourquoi: "Une place à compléter face à une mère connue peut se révéler être elle : « frère ou demi-frère » (ADR 0017, point 3, choix laissé à Daniel)."
+    attendu:
+      - chemin: "1/1[nii]"
+        fratrie: { type: birth, partage: full_or_half, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F08-04
+    de: ngie
+    vers: wozen
+    categorie: places_a_completer
+    pourquoi: "Mère à compléter dite distincte de Galea : demi-frère, même père (ADR 0017, point 4 ; CL-VOI-08)."
+    attendu:
+      - chemin: "1/1[nii]"
+        fratrie: { type: birth, partage: half, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F08-05
+    de: ngie
+    vers: biou
+    categorie: places_a_completer
+    pourquoi: "La mention « distincte de » ne vise que Galea, pas l'autre place à compléter : « frère ou demi-frère » (ADR 0017, point 4)."
+    attendu:
+      - chemin: "1/1[nii]"
+        fratrie: { type: birth, partage: full_or_half, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F08-06
+    de: bumbei
+    vers: tindon
+    categorie: places_a_completer
+    pourquoi: "Même mère, père de Bumbei à compléter face au père connu de Tindon : « frère ou demi-frère », côté mère."
+    attendu:
+      - chemin: "1/1[taou]"
+        fratrie: { type: birth, partage: full_or_half, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F08-07
+    de: nem
+    vers: nyeo
+    categorie: places_a_completer
+    pourquoi: "Cousins germains par deux grands-parents à compléter, partagés : 2 et 2, deux sommets (UNI-12)."
+    attendu:
+      - chemin: "2/2[inconnu5+inconnue6]"
+        cote_de: { par: min, cote: father }
+        cote_vers: { par: tchio, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F08-08
+    de: min
+    vers: tchio
+    categorie: places_a_completer
+    pourquoi: "Deux parents à compléter partagés : frère et sœur (TRD, « ma sœur » sans parents connus : deux parents à compléter partagés)."
+    attendu:
+      - chemin: "1/1[inconnu5+inconnue6]"
+        fratrie: { type: birth, partage: full }
+        fr: à rédiger
+        en: à rédiger
+  - id: F08-09
+    de: nem
+    vers: tchio
+    categorie: places_a_completer
+    pourquoi: "Sœur du père, par des grands-parents à compléter : tante (2 et 1)."
+    attendu:
+      - chemin: "2/1[inconnu5+inconnue6]"
+        cote_de: { par: min, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F08-10
+    de: nem
+    vers: inconnue7
+    categorie: places_a_completer
+    pourquoi: "Épouse à compléter : un conjoint comme un autre (« spouse »), les mots disent « Inconnue » à l'écran."
+    attendu:
+      - chemin: "=inconnue7"
+        alliance: { type: spouse }
+        fr: à rédiger
+        en: à rédiger
+  - id: F08-11
+    de: biou
+    vers: inconnue1
+    categorie: places_a_completer
+    pourquoi: "Mère à compléter : « mère », ligne directe (UNI-02)."
+    attendu:
+      - chemin: "1/0[inconnue1]"
+        cote_de: { par: inconnue1, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F08-12
+    de: biou
+    vers: galea
+    categorie: places_a_completer
+    pourquoi: "Épouse du père, pas sa mère (une place à compléter n'est jamais supposée être Galea) ; aucune union visible du père avec la mère de Biou (« none »)."
+    attendu:
+      - chemin: "1/0[nii] =galea"
+        alliance: { type: spouse_of_parent, autre_parent: [none] }
+        cote_de: { par: nii, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F08-13
+    de: kweyuette
+    vers: biou
+    categorie: places_a_completer
+    pourquoi: "Deux places à compléter différentes, l'une de genre non renseigné : « frère ou demi-frère », par le père."
+    attendu:
+      - chemin: "1/1[nii]"
+        fratrie: { type: birth, partage: full_or_half, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F08-14
+    de: nyeo
+    vers: inconnu5
+    categorie: places_a_completer
+    pourquoi: "Grand-père à compléter, par la mère."
+    attendu:
+      - chemin: "2/0[inconnu5]"
+        cote_de: { par: tchio, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F08-15
+    de: inconnue7
+    vers: min
+    categorie: places_a_completer
+    pourquoi: "Père du mari, vu d'une épouse à compléter (« parent_of_spouse »)."
+    attendu:
+      - chemin: "=nem 1/0[min]"
+        alliance: { type: parent_of_spouse }
+        fr: à rédiger
+        en: à rédiger
+  - id: F08-16
+    de: tindon
+    vers: inconnu4
+    categorie: places_a_completer
+    pourquoi: "Père à compléter de la demi-sœur, sans union saisie avec la mère : ni ancêtre commun, ni union, aucun lien (ADR 0010, point 4 : l'alliance passe par les unions)."
+    attendu: aucun
