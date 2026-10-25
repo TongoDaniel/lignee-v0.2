@@ -13,7 +13,7 @@ import {
 import { devReaderSnapshot } from '@lignee/sync/dev-seed';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { AccessibilityInfo } from 'react-native';
-import { withTiming } from 'react-native-reanimated';
+import { cancelAnimation, withTiming } from 'react-native-reanimated';
 
 import { AppProviders } from '../AppProviders';
 import { sceneSpecFor } from '../tree/sceneSpec';
@@ -459,10 +459,44 @@ describe('TreeView — l’arbre pousse (ARB-13)', () => {
   it('le retour à « Vous » depuis un cadre déplacé anime le cadre, tel que le prévoit la charte', async () => {
     await renderTree({ reduceMotion: false });
     layOut();
+    // Le cadre est d'abord déplacé (zoom), puis le retour le ramène.
+    act(() => {
+      fireEvent.press(screen.getByTestId('tree-zoom-in'));
+    });
     jest.mocked(withTiming).mockClear();
     act(() => {
       fireEvent.press(screen.getByTestId('tree-go-you'));
     });
     expect(withTiming).toHaveBeenCalledTimes(3);
+  });
+
+  function inTree(reduceMotion: boolean, built: ReturnType<typeof model>) {
+    return (
+      <AppProviders theme={{ reduceMotion, seniorMode: false }}>
+        <TreeView model={built} />
+      </AppProviders>
+    );
+  }
+
+  it('le réglage qui passe de « réduire » à « permettre » ne rejoue pas une pousse ancienne', async () => {
+    const built = model();
+    const view = render(inTree(true, built));
+    await act(() => Promise.resolve());
+    layOut();
+    view.rerender(inTree(false, built));
+    await act(() => Promise.resolve());
+    expect(withTiming).not.toHaveBeenCalled();
+  });
+
+  it('le réglage qui passe à « réduire » en pleine pousse l’arrête', async () => {
+    const built = model();
+    const view = render(inTree(false, built));
+    await act(() => Promise.resolve());
+    layOut();
+    expect(withTiming).toHaveBeenCalled();
+    jest.mocked(cancelAnimation).mockClear();
+    view.rerender(inTree(true, built));
+    await act(() => Promise.resolve());
+    expect(cancelAnimation).toHaveBeenCalled();
   });
 });

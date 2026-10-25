@@ -19,6 +19,9 @@ T-018 (plan V1) ajoute à l'arbre dessiné par T-017 le retour à « Vous » en 
 
 ## Conséquences
 
+- La personne centrale (`centerId` local de `TreeView`) et le fil d'Ariane ne sont pas remis à jour si `model.centerId` change pendant que l'écran est ouvert. **T-048 et T-050**, qui remplacent `chooseCenter` par le vrai lien compte-fiche, doivent alors remonter l'écran avec une clé (`key={model.centerId}`) ou réinitialiser ces états.
+- Avec les animations réduites, le recentrage affiche une image avec l'ancien cadre avant que le nouveau ne soit appliqué (commande appliquée après le rendu de la nouvelle scène) ; à mesurer sur téléphone.
+
 - T-048 et T-050 remplacent `chooseCenter` : rien à changer ici, `model.centerId` est la seule source de « Vous ».
 - T-024 et T-025 branchent `onOpenPerson` ; le bouton « Recentrer » pourra aussi figurer sur la fiche.
 - Mesures sur l'Android de référence à faire par Daniel (issue #34) : fluidité de la pousse sur 500 personnes, absence de clignotement au recentrage, rendu des traits qui se tracent (y compris les pointillés d'un lien supposé).

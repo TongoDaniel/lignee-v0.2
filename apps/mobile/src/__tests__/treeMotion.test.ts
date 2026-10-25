@@ -128,12 +128,11 @@ describe('pousse de l’arbre (07-mouvement.md)', () => {
   it('à l’ouverture, chaque personne et chaque trait a un retard, « Vous » d’abord', () => {
     const plan = planGrowth(scene, open, false);
     if (plan === undefined) throw new Error('no plan');
-    expect(plan.persons.size).toBe(scene.people.length);
+    expect(plan.persons.size).toBe(scene.people.length - 1);
     expect(plan.edges.size).toBe(scene.edges.length);
-    expect(plan.persons.get(built.centerId)).toBe(0);
-    for (const [id, delay] of plan.persons) {
-      if (id !== built.centerId) expect(delay).toBeGreaterThan(0);
-    }
+    // « Vous » est là d'emblée : pas de fondu depuis zéro, donc rien à planifier pour lui.
+    expect(plan.persons.has(built.centerId)).toBe(false);
+    for (const delay of plan.persons.values()) expect(delay).toBeGreaterThan(0);
   });
 
   it('les générations se décalent de la valeur du jeton, les traits avant les personnes', () => {

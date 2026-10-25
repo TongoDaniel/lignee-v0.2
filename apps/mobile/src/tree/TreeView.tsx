@@ -140,6 +140,13 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
     [scene, trigger, growthDone, theme.reduceMotion],
   );
 
+  // Sans plan à jouer (animations réduites, rien de nouveau), le déclencheur est consommé : si le
+  // réglage change ensuite, ou si la réponse du système arrive tard, une pousse ancienne ne
+  // repart pas.
+  useEffect(() => {
+    if (growth === undefined && trigger.id !== growthDone) setGrowthDone(trigger.id);
+  }, [growth, trigger.id, growthDone]);
+
   // Nouvelle disposition prête : la personne au centre reprend sa place, d'un coup.
   useEffect(() => {
     if (!reframe.current || size === undefined) return;

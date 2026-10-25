@@ -133,11 +133,10 @@ export function planGrowth(
 
   const personDelays = new Map<Id, number>();
   for (const person of people) {
+    // L'origine est là d'emblée : elle n'a pas de fondu, donc pas de retard à planifier.
+    if (person.id === origin) continue;
     const generation = rowsOf(gapTo(person, anchorY)) - firstRow;
-    personDelays.set(
-      person.id,
-      person.id === origin ? 0 : generation * timing.stagger + timing.edge / 2,
-    );
+    personDelays.set(person.id, generation * timing.stagger + timing.edge / 2);
   }
   const edgeGrowth = new Map<SceneEdge, EdgeGrowth>();
   for (const edge of edges) {

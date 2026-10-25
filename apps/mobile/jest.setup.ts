@@ -66,6 +66,7 @@ jest.mock('react-native-reanimated', () => {
     useSharedValue: sharedValue,
     useDerivedValue: (compute: () => unknown) => ({ value: compute() }),
     useAnimatedReaction: () => undefined,
+    cancelAnimation: jest.fn(),
     withTiming: jest.fn((value: number) => value),
   };
 });

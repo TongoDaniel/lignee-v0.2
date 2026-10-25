@@ -33,6 +33,7 @@ import { View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { scheduleOnRN } from 'react-native-worklets';
 import Animated, {
+  cancelAnimation,
   Easing,
   useAnimatedReaction,
   useDerivedValue,
@@ -197,6 +198,13 @@ export function TreeCanvas({
     },
     [onGrowthEnd],
   );
+  // Les animations deviennent réduites en pleine pousse : elle s'arrête, l'arbre est entier.
+  useLayoutEffect(() => {
+    if (growth !== undefined || !theme.reduceMotion || active === undefined) return;
+    cancelAnimation(elapsed);
+    setActive(undefined);
+    onGrowthEnd?.(active.id);
+  }, [growth, theme.reduceMotion, active, elapsed, onGrowthEnd]);
   useLayoutEffect(() => {
     if (growth === undefined || growth.id === lastGrowth.current) return;
     lastGrowth.current = growth.id;
