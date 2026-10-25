@@ -1,0 +1,294 @@
+# Prénoms générés (generateGivenName, graine 2300) ; famille composée, jamais une vraie famille.
+# Ben a trois épouses en même temps (réponse gardée : simultanées), Kwoa, Mbuou et Kaou. Kwoa a
+# d'abord été mariée à Bapouou (divorce, avant son mariage avec Ben) : leur fille Lepae. Fiwai est
+# un fils de Ben dont la mère n'est pas précisée (candidates : les trois épouses, UNI-11).
+famille: F01
+titre: Polygamie, trois co-épouses, une mère non précisée
+origine: composee
+arbre:
+  personnes:
+    - ben/M
+    - kwoa/F
+    - mbuou/F
+    - kaou/F
+    - bapouou/M
+    - lepae/F
+    - finae/M
+    - ndanoa/F
+    - ngembuo/M
+    - lugoine/F
+    - tsao/M
+    - fiwai/M
+    - paine/F
+    - poe/F
+    - tcheou/M
+    - nosoette/F
+  unions:
+    - conjoints: [kwoa, bapouou]
+      debut: { qualificatif: exacte, date: "1958" }
+      fin: { qualificatif: exacte, date: "1963" }
+      motif: divorce
+    - { conjoints: [ben, kwoa], rang_ben: 1, debut: { qualificatif: exacte, date: "1965" } }
+    - { conjoints: [ben, mbuou], rang_ben: 2 }
+    - { conjoints: [ben, kaou], rang_ben: 3 }
+    - { conjoints: [finae, paine] }
+    - { conjoints: [ngembuo, poe] }
+  filiations:
+    - { parents: [kwoa, bapouou], enfant: lepae }
+    - { parents: [ben, kwoa], enfant: finae }
+    - { parents: [ben, kwoa], enfant: ndanoa }
+    - { parents: [ben, mbuou], enfant: ngembuo }
+    - { parents: [ben, mbuou], enfant: lugoine }
+    - { parents: [ben, kaou], enfant: tsao }
+    - { parents: [ben], enfant: fiwai }
+    - { parents: [finae, paine], enfant: tcheou }
+    - { parents: [ngembuo, poe], enfant: nosoette }
+  candidats:
+    - { enfant: fiwai, candidates: [kwoa, mbuou, kaou] }
+  simultaneites:
+    - { unions: [[ben, kwoa], [ben, mbuou], [ben, kaou]], reponse: simultanees }
+paires:
+  - id: F01-01
+    de: finae
+    vers: ndanoa
+    categorie: degres_civils
+    pourquoi: "Mêmes père et mère, deux parents communs au sommet (TRD, question 1 ; ADR 0017, point 3)."
+    attendu:
+      - chemin: "1/1[ben+kwoa]"
+        fratrie: { type: birth, partage: full }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-02
+    de: finae
+    vers: ngembuo
+    categorie: polygamie
+    pourquoi: "Seul Ben est commun, les mères sont deux personnes connues (PAR-03, ADR 0017, point 3) ; aucun chemin par l'épouse du père, redondant avec le sang (ADR 0010, point 4)."
+    attendu:
+      - chemin: "1/1[ben]"
+        fratrie: { type: birth, partage: half, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-03
+    de: finae
+    vers: lepae
+    categorie: polygamie
+    pourquoi: "Seule Kwoa est commune (pères Ben et Bapouou) ; le chemin par le premier mari de la mère est redondant avec le sang (ADR 0010, point 4)."
+    attendu:
+      - chemin: "1/1[kwoa]"
+        fratrie: { type: birth, partage: half, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-04
+    de: finae
+    vers: fiwai
+    categorie: polygamie
+    pourquoi: "La mère de Fiwai n'est pas précisée, Kwoa est parmi les candidates ; la liste n'est pas fermée, d'où « frère ou demi-frère » (PAR-03, ADR 0017, points 3 et 5, CL-POL-03)."
+    attendu:
+      - chemin: "1/1[ben]"
+        fratrie: { type: birth, partage: full_or_half, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-05
+    de: tsao
+    vers: fiwai
+    categorie: polygamie
+    pourquoi: "Même règle vu du fils de la troisième épouse, elle aussi candidate (ADR 0017, point 5)."
+    attendu:
+      - chemin: "1/1[ben]"
+        fratrie: { type: birth, partage: full_or_half, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-06
+    de: ndanoa
+    vers: lugoine
+    categorie: polygamie
+    pourquoi: "Filles de deux co-épouses : demi-sœurs par le père (PAR-03)."
+    attendu:
+      - chemin: "1/1[ben]"
+        fratrie: { type: birth, partage: half, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-07
+    de: finae
+    vers: mbuou
+    categorie: polygamie
+    pourquoi: "Épouse du père qui n'est pas la mère, union simultanée avec celle de la mère (réponse gardée) ; jamais « belle-mère » (PAR-04, ADR 0020, point 5, CL-POL-08)."
+    attendu:
+      - chemin: "1/0[ben] =mbuou"
+        alliance: { type: spouse_of_parent, autre_parent: [simultaneous] }
+        cote_de: { par: ben, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-08
+    de: kwoa
+    vers: mbuou
+    categorie: polygamie
+    pourquoi: "Deux épouses de Ben, unions établies simultanées par la réponse gardée (TRD, co-épouse ; ADR 0020, point 4)."
+    attendu:
+      - chemin: "=ben =mbuou"
+        alliance: { type: co_spouse, simultaneite: simultaneous }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-09
+    de: mbuou
+    vers: kaou
+    categorie: polygamie
+    pourquoi: "Deuxième et troisième épouses, même réponse gardée pour les trois unions (ADR 0012)."
+    attendu:
+      - chemin: "=ben =kaou"
+        alliance: { type: co_spouse, simultaneite: simultaneous }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-10
+    de: bapouou
+    vers: ben
+    categorie: alliance
+    pourquoi: "Premier et second maris de Kwoa ; le divorce (1963) précède le mariage (1965) : successifs par les dates, jamais co-époux (ADR 0020, point 4)."
+    attendu:
+      - chemin: "=kwoa =ben"
+        alliance: { type: spouse_of_spouse, simultaneite: successive }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-11
+    de: lepae
+    vers: ngembuo
+    categorie: polygamie
+    pourquoi: "Aucun parent commun ; Ngembuo est le fils du mari de la mère de Lepae, jamais « demi-frère » (CL-FAM-01, ADR 0020, point 2). Côté Lepae, l'union de sa mère avec Ben suit son divorce ; côté Ngembuo, celle de son père avec Kwoa est simultanée avec celle de sa mère."
+    attendu:
+      - chemin: "1/0[kwoa] =ben 0/1[ben]"
+        alliance: { type: step_sibling, autre_parent: [successive, simultaneous] }
+        cote_de: { par: kwoa, cote: mother }
+        cote_vers: { par: ben, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-12
+    de: fiwai
+    vers: kwoa
+    categorie: polygamie
+    pourquoi: "Kwoa n'est que candidate : épouse du père, sans union avec un autre parent de Fiwai (« none ») ; jamais supposée mère (ADR 0017, point 5 ; ADR 0020, point 5)."
+    attendu:
+      - chemin: "1/0[ben] =kwoa"
+        alliance: { type: spouse_of_parent, autre_parent: [none] }
+        cote_de: { par: ben, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-13
+    de: kaou
+    vers: finae
+    categorie: polygamie
+    pourquoi: "Fils de son mari et d'une co-épouse (ADR 0020, point 2) ; union simultanée avec celle de la mère de Finae."
+    attendu:
+      - chemin: "=ben 0/1[ben]"
+        alliance: { type: child_of_spouse, autre_parent: [simultaneous] }
+        cote_vers: { par: ben, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-14
+    de: tcheou
+    vers: nosoette
+    categorie: polygamie
+    pourquoi: "Cousins germains par deux demi-frères : un seul grand-parent commun, Ben, à deux générations de chaque côté (TRD, 2 et 2 ; ADR 0021, demi-cousins)."
+    attendu:
+      - chemin: "2/2[ben]"
+        cote_de: { par: finae, cote: father }
+        cote_vers: { par: ngembuo, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-15
+    de: tcheou
+    vers: ngembuo
+    categorie: polygamie
+    pourquoi: "Demi-frère du père : oncle, 2 et 1 générations, par le seul Ben (TRD, question 1)."
+    attendu:
+      - chemin: "2/1[ben]"
+        cote_de: { par: finae, cote: father }
+        cote_vers: { par: ben, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-16
+    de: tcheou
+    vers: ben
+    categorie: degres_civils
+    pourquoi: "Grand-père, ligne directe à deux générations, par le père (TRD, question 1)."
+    attendu:
+      - chemin: "2/0[ben]"
+        cote_de: { par: finae, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-17
+    de: tcheou
+    vers: mbuou
+    categorie: polygamie
+    pourquoi: "Épouse du grand-père, qui n'est pas la grand-mère : une union et deux générations, forme « other » (ADR 0020, point 2 ; « la 2e femme de mon grand-père », TRD) ; union simultanée avec celle de Kwoa."
+    attendu:
+      - chemin: "2/0[ben] =mbuou"
+        alliance: { type: other, autre_parent: [simultaneous] }
+        cote_de: { par: finae, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-18
+    de: paine
+    vers: ben
+    categorie: alliance
+    pourquoi: "Père du conjoint (ADR 0020, point 2, « parent_of_spouse » ; PAR-02, beau-père)."
+    attendu:
+      - chemin: "=finae 1/0[ben]"
+        alliance: { type: parent_of_spouse }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-19
+    de: ben
+    vers: paine
+    categorie: alliance
+    pourquoi: "Épouse du fils : bru (PAR-02 ; ADR 0020, « spouse_of_child »)."
+    attendu:
+      - chemin: "0/1[ben] =paine"
+        alliance: { type: spouse_of_child }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-20
+    de: paine
+    vers: ngembuo
+    categorie: alliance
+    pourquoi: "Demi-frère du conjoint (ADR 0020, « sibling_of_spouse », un des trois sens de « beau-frère »)."
+    attendu:
+      - chemin: "=finae 1/1[ben]"
+        alliance: { type: sibling_of_spouse }
+        cote_vers: { par: ben, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-21
+    de: paine
+    vers: poe
+    categorie: alliance
+    pourquoi: "Épouse du demi-frère du mari : deux unions et deux générations de sang, dans la limite de l'ADR 0010, point 4 (« spouse_of_sibling_of_spouse »)."
+    attendu:
+      - chemin: "=finae 1/1[ben] =poe"
+        alliance: { type: spouse_of_sibling_of_spouse }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-22
+    de: finae
+    vers: ngembuo
+    masques: [ben]
+    categorie: visibilite
+    pourquoi: "Ben masqué pour le lecteur, seul parent commun et seul pivot : « Lien non disponible », sans autre indice (PAR-09, CL-SEC-02)."
+    attendu: aucun
+  - id: F01-23
+    de: finae
+    vers: ndanoa
+    masques: [kwoa]
+    categorie: visibilite
+    pourquoi: "Kwoa masquée : comme jamais saisie, la mère n'est plus précisée et Ndanoa n'a pas de candidates : « sœur ou demi-sœur » par le père, sans trace de Kwoa (PAR-09 ; ADR 0017, point 1)."
+    attendu:
+      - chemin: "1/1[ben]"
+        fratrie: { type: birth, partage: full_or_half, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F01-24
+    de: kwoa
+    vers: mbuou
+    masques: [ben]
+    categorie: visibilite
+    pourquoi: "Co-épouses reliées par Ben seul : Ben masqué, aucun lien, et rien ne trahit leur mari commun (PAR-09)."
+    attendu: aucun

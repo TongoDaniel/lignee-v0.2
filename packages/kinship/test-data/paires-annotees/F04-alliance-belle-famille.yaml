@@ -1,0 +1,296 @@
+# Prénoms générés (generateGivenName, graine 2300) ; famille composée, jamais une vraie famille.
+# Deux familles alliées : Mbosei et Seine (enfants Moutsun, Kwoniou, Vevoe), Wui et Saine (enfants
+# Houou, Yayoia, Toe). Moutsun épouse Houou (fille Tsoe) ; Yayoia épouse Pee, fils de Ham, lui-même
+# fils de Kofoi ; Kwoniou a épousé Hem (1975-1978, divorce), puis Nom (1980) : fille Nonyoette.
+# Toe a épousé Tsia deux fois (1980-1985, divorce ; puis 1990).
+famille: F04
+titre: Alliance, belle-famille et limites de l'alliance
+origine: composee
+arbre:
+  personnes:
+    - mbosei/M
+    - seine/F
+    - moutsun/M
+    - kwoniou/F
+    - vevoe/M
+    - wui/M
+    - saine/F
+    - houou/F
+    - yayoia/F
+    - toe/M
+    - tsia/F
+    - pee/M
+    - ham/M
+    - kofoi/M
+    - nom/M
+    - hem/M
+    - tsoe/F
+    - nonyoette/F
+  unions:
+    - { conjoints: [mbosei, seine] }
+    - { conjoints: [wui, saine] }
+    - { conjoints: [moutsun, houou] }
+    - { conjoints: [yayoia, pee] }
+    - conjoints: [kwoniou, hem]
+      debut: { qualificatif: exacte, date: "1975" }
+      fin: { qualificatif: exacte, date: "1978" }
+      motif: divorce
+    - { conjoints: [kwoniou, nom], debut: { qualificatif: exacte, date: "1980" } }
+    - conjoints: [toe, tsia]
+      debut: { qualificatif: exacte, date: "1980" }
+      fin: { qualificatif: exacte, date: "1985" }
+      motif: divorce
+    - { conjoints: [toe, tsia], debut: { qualificatif: exacte, date: "1990" } }
+  filiations:
+    - { parents: [mbosei, seine], enfant: moutsun }
+    - { parents: [mbosei, seine], enfant: kwoniou }
+    - { parents: [mbosei, seine], enfant: vevoe }
+    - { parents: [wui, saine], enfant: houou }
+    - { parents: [wui, saine], enfant: yayoia }
+    - { parents: [wui, saine], enfant: toe }
+    - { parents: [moutsun, houou], enfant: tsoe }
+    - { parents: [kwoniou, nom], enfant: nonyoette }
+    - { parents: [kofoi], enfant: ham }
+    - { parents: [ham], enfant: pee }
+paires:
+  - id: F04-01
+    de: moutsun
+    vers: houou
+    categorie: alliance
+    pourquoi: "Conjoint : une union, aucune génération (ADR 0020, « spouse »)."
+    attendu:
+      - chemin: "=houou"
+        alliance: { type: spouse }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-02
+    de: moutsun
+    vers: wui
+    categorie: alliance
+    pourquoi: "Père de l'épouse : beau-père au sens de PAR-02 (« parent_of_spouse », ADR 0020)."
+    attendu:
+      - chemin: "=houou 1/0[wui]"
+        alliance: { type: parent_of_spouse }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-03
+    de: saine
+    vers: moutsun
+    categorie: alliance
+    pourquoi: "Mari de la fille : gendre (PAR-02) ; le chemin par son propre mari est redondant (Houou est aussi sa fille, ADR 0010, point 4)."
+    attendu:
+      - chemin: "0/1[saine] =moutsun"
+        alliance: { type: spouse_of_child }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-04
+    de: seine
+    vers: houou
+    categorie: alliance
+    pourquoi: "Épouse du fils : bru (PAR-02, « spouse_of_child »)."
+    attendu:
+      - chemin: "0/1[seine] =houou"
+        alliance: { type: spouse_of_child }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-05
+    de: moutsun
+    vers: yayoia
+    categorie: alliance
+    pourquoi: "Sœur de l'épouse : belle-sœur, premier des trois sens (« sibling_of_spouse », CL-VOI-05)."
+    attendu:
+      - chemin: "=houou 1/1[saine+wui]"
+        alliance: { type: sibling_of_spouse }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-06
+    de: yayoia
+    vers: moutsun
+    categorie: alliance
+    pourquoi: "Mari de la sœur : beau-frère, deuxième sens (« spouse_of_sibling »), inverse exact du précédent."
+    attendu:
+      - chemin: "1/1[saine+wui] =moutsun"
+        alliance: { type: spouse_of_sibling }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-07
+    de: moutsun
+    vers: pee
+    categorie: alliance
+    pourquoi: "Mari de la sœur de l'épouse : beau-frère, troisième sens (deux unions, deux générations, ADR 0010, point 4)."
+    attendu:
+      - chemin: "=houou 1/1[saine+wui] =pee"
+        alliance: { type: spouse_of_sibling_of_spouse }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-08
+    de: houou
+    vers: kwoniou
+    categorie: alliance
+    pourquoi: "Sœur du mari : belle-sœur (« sibling_of_spouse »)."
+    attendu:
+      - chemin: "=moutsun 1/1[mbosei+seine]"
+        alliance: { type: sibling_of_spouse }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-09
+    de: houou
+    vers: nom
+    categorie: alliance
+    pourquoi: "Mari de la sœur du mari (« spouse_of_sibling_of_spouse »)."
+    attendu:
+      - chemin: "=moutsun 1/1[mbosei+seine] =nom"
+        alliance: { type: spouse_of_sibling_of_spouse }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-10
+    de: kwoniou
+    vers: houou
+    categorie: alliance
+    pourquoi: "Épouse du frère : belle-sœur (« spouse_of_sibling »)."
+    attendu:
+      - chemin: "1/1[mbosei+seine] =houou"
+        alliance: { type: spouse_of_sibling }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-11
+    de: moutsun
+    vers: toe
+    categorie: alliance
+    pourquoi: "Frère de l'épouse : beau-frère (« sibling_of_spouse »)."
+    attendu:
+      - chemin: "=houou 1/1[saine+wui]"
+        alliance: { type: sibling_of_spouse }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-12
+    de: toe
+    vers: tsia
+    categorie: alliance
+    pourquoi: "Mariés deux fois : un seul passage, qui porte les deux unions, le chemin n'est pas dédoublé (ADR 0010, point 4)."
+    attendu:
+      - chemin: "=tsia"
+        alliance: { type: spouse }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-13
+    de: moutsun
+    vers: tsia
+    categorie: alliance
+    pourquoi: "Épouse du frère de l'épouse, remariés : un seul lien (« spouse_of_sibling_of_spouse »)."
+    attendu:
+      - chemin: "=houou 1/1[saine+wui] =tsia"
+        alliance: { type: spouse_of_sibling_of_spouse }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-14
+    de: tsoe
+    vers: pee
+    categorie: alliance
+    pourquoi: "Mari de la tante maternelle (TRD : « ma tante » P.Fr.S, ici au masculin) : une union, trois générations, forme « other »."
+    attendu:
+      - chemin: "2/1[saine+wui] =pee"
+        alliance: { type: other }
+        cote_de: { par: houou, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-15
+    de: tsoe
+    vers: ham
+    categorie: alliance
+    pourquoi: "Père du mari de la tante : quatre générations de sang et une union, exactement la limite de l'ADR 0010 (point 4)."
+    attendu:
+      - chemin: "2/1[saine+wui] =pee 1/0[ham]"
+        alliance: { type: other }
+        cote_de: { par: houou, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-16
+    de: tsoe
+    vers: kofoi
+    categorie: alliance
+    pourquoi: "Grand-père du mari de la tante : cinq générations de sang, au-delà de la limite de l'alliance (ADR 0010, point 4) : aucun lien, « Lien non disponible »."
+    attendu: aucun
+  - id: F04-17
+    de: nom
+    vers: hem
+    categorie: alliance
+    pourquoi: "Premier mari de son épouse, divorce (1978) avant leur mariage (1980) : successifs, « autre mari de votre épouse » sans rien supposer (ADR 0020, point 4)."
+    attendu:
+      - chemin: "=kwoniou =hem"
+        alliance: { type: spouse_of_spouse, simultaneite: successive }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-18
+    de: nonyoette
+    vers: hem
+    categorie: alliance
+    pourquoi: "Premier mari de la mère, avant le père : « mari de votre mère » (successif), jamais « beau-père » (PAR-04)."
+    attendu:
+      - chemin: "1/0[kwoniou] =hem"
+        alliance: { type: spouse_of_parent, autre_parent: [successive] }
+        cote_de: { par: kwoniou, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-19
+    de: tsoe
+    vers: kwoniou
+    categorie: degres_civils
+    pourquoi: "Sœur du père : tante (2 et 1), par le père (TRD, question 1)."
+    attendu:
+      - chemin: "2/1[mbosei+seine]"
+        cote_de: { par: moutsun, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-20
+    de: tsoe
+    vers: nom
+    categorie: alliance
+    pourquoi: "Mari de la tante paternelle : une union, trois générations (« other » ; TRD, P.Fr.S)."
+    attendu:
+      - chemin: "2/1[mbosei+seine] =nom"
+        alliance: { type: other }
+        cote_de: { par: moutsun, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-21
+    de: tsoe
+    vers: vevoe
+    categorie: degres_civils
+    pourquoi: "Frère du père : oncle (2 et 1)."
+    attendu:
+      - chemin: "2/1[mbosei+seine]"
+        cote_de: { par: moutsun, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-22
+    de: vevoe
+    vers: houou
+    categorie: alliance
+    pourquoi: "Épouse du frère (« spouse_of_sibling ») ; aucun chemin par la nièce Tsoe, qui n'est pas une union."
+    attendu:
+      - chemin: "1/1[mbosei+seine] =houou"
+        alliance: { type: spouse_of_sibling }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-23
+    de: wui
+    vers: mbosei
+    categorie: alliance
+    pourquoi: "Père du gendre : deux générations et une union (« other ») ; le chemin par son épouse Saine est redondant (Houou est aussi sa fille)."
+    attendu:
+      - chemin: "0/1[wui] =moutsun 1/0[mbosei]"
+        alliance: { type: other }
+        fr: à rédiger
+        en: à rédiger
+  - id: F04-24
+    de: tsoe
+    vers: tsia
+    categorie: alliance
+    pourquoi: "Épouse de l'oncle maternel, remariés : un seul lien malgré les deux unions (ADR 0010, point 4)."
+    attendu:
+      - chemin: "2/1[saine+wui] =tsia"
+        alliance: { type: other }
+        cote_de: { par: houou, cote: mother }
+        fr: à rédiger
+        en: à rédiger

@@ -1,0 +1,364 @@
+# Prénoms générés (generateGivenName, graine 2300) ; famille composée, jamais une vraie famille.
+# Kie et Gae : fils de naissance Nayoun et Pawoum (paternité de Kie « probable » pour Pawoum),
+# fille adoptive Tsouette (mère de naissance Muine). Gae a d'abord eu Tilei avec Pungom (union
+# 1980-1984, divorce) ; Kie, qu'elle épouse en 1986, a élevé Tilei. Djoe (parents Yetchao et Noia)
+# est confié à Kie (confiage, kafala). Hun est le tuteur de Moudjoia. Zeine est née de Wafuou,
+# avec Pei pour donneur ; Djodjeou est née de Mbao et Fakae, portée par Njinouia (gestation pour
+# autrui). Le père de Kie, Mbanyam, est « probable » ; la mère de Gae, Zofouou, « hypothétique ».
+# Maette a mis au monde Tsukaine, Takweette et Mbupea ; sa conjointe Leette a adopté les deux
+# premières.
+famille: F06
+titre: Liens non biologiques et certitude
+origine: composee
+arbre:
+  personnes:
+    - kie/M
+    - gae/F
+    - nayoun/M
+    - pawoum/M
+    - tsouette/F
+    - muine/F
+    - pungom/M
+    - tilei/M
+    - djoe/M
+    - yetchao/M
+    - noia/F
+    - hun/M
+    - moudjoia/F
+    - zeine/F
+    - wafuou/F
+    - pei/M
+    - djodjeou/F
+    - mbao/M
+    - fakae/F
+    - njinouia/F
+    - mbanyam/M
+    - zofouou/F
+    - maette/F
+    - leette/F
+    - tsukaine/F
+    - takweette/F
+    - mbupea/M
+  unions:
+    - conjoints: [gae, pungom]
+      debut: { qualificatif: exacte, date: "1980" }
+      fin: { qualificatif: exacte, date: "1984" }
+      motif: divorce
+    - { conjoints: [kie, gae], debut: { qualificatif: exacte, date: "1986" } }
+    - { conjoints: [mbao, fakae] }
+    - { conjoints: [maette, leette] }
+  filiations:
+    - { parents: [kie, gae], enfant: nayoun }
+    - { parents: [gae], enfant: pawoum }
+    - { parents: [kie], enfant: pawoum, certitude: probable }
+    - { parents: [kie, gae], enfant: tsouette, type: adoptive }
+    - { parents: [muine], enfant: tsouette }
+    - { parents: [gae, pungom], enfant: tilei }
+    - { parents: [kie], enfant: tilei, type: a_eleve }
+    - { parents: [yetchao, noia], enfant: djoe }
+    - { parents: [kie], enfant: djoe, type: confie }
+    - { parents: [hun], enfant: moudjoia, type: tuteur }
+    - { parents: [wafuou], enfant: zeine }
+    - { parents: [pei], enfant: zeine, type: donneur }
+    - { parents: [mbao, fakae], enfant: djodjeou }
+    - { parents: [njinouia], enfant: djodjeou, type: gpa }
+    - { parents: [mbanyam], enfant: kie, certitude: probable }
+    - { parents: [zofouou], enfant: gae, certitude: hypothetique }
+    - { parents: [maette], enfant: tsukaine }
+    - { parents: [maette], enfant: takweette }
+    - { parents: [maette], enfant: mbupea }
+    - { parents: [leette], enfant: tsukaine, type: adoptive }
+    - { parents: [leette], enfant: takweette, type: adoptive }
+paires:
+  - id: F06-01
+    de: nayoun
+    vers: tsouette
+    categorie: non_biologique_certitude
+    pourquoi: "Fille adoptive de ses parents : aucun parent commun par la naissance, deux par la naissance ou l'adoption, d'où « sœur par adoption », jamais « sœur » (PAR-06 ; ADR 0021, point 5)."
+    attendu:
+      - chemin: "1/1[gae+kie]"
+        fratrie: { type: adoption, partage: full }
+        base: [adoptive]
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-02
+    de: tsouette
+    vers: kie
+    categorie: non_biologique_certitude
+    pourquoi: "Père adoptif (PAR-06) ; aucun « mari de votre mère », un parent adoptif est un autre parent (ADR 0021, point 6)."
+    attendu:
+      - chemin: "1/0[kie]"
+        base: [adoptive]
+        cote_de: { par: kie, cote: father, type: adoptive }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-03
+    de: kie
+    vers: tsouette
+    categorie: non_biologique_certitude
+    pourquoi: "Fille adoptive (PAR-06, « fils adoptif ») ; elle monte vers lui par l'adoption."
+    attendu:
+      - chemin: "0/1[kie]"
+        base: [adoptive]
+        cote_vers: { par: kie, cote: father, type: adoptive }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-04
+    de: tsouette
+    vers: muine
+    categorie: non_biologique_certitude
+    pourquoi: "Mère de naissance d'une enfant adoptée : lien de naissance, gardé à côté de l'adoption (PAR-06) ; côté « parent », car Tsouette a aussi une mère adoptive (deux mères, ADR 0017, point 6 ; CL-FAM-08)."
+    attendu:
+      - chemin: "1/0[muine]"
+        cote_de: { par: muine, cote: parent }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-05
+    de: nayoun
+    vers: muine
+    categorie: non_biologique_certitude
+    pourquoi: "Mère de naissance de la sœur adoptive : ni ancêtre commun, ni union ; une adoption ne crée pas d'alliance (ADR 0010, point 4) : aucun lien."
+    attendu: aucun
+  - id: F06-06
+    de: tilei
+    vers: kie
+    categorie: non_biologique_certitude
+    pourquoi: "L'a élevé (PAR-06) d'abord, et aussi mari de la mère, union successive à celle du père : celui qui a élevé n'est pas un autre parent (ADR 0021, point 6 ; CL-FAM-02). Côté « parent » pour Kie, Tilei ayant aussi un père de naissance (ADR 0017, point 6) : les mots disent le type, jamais « père »."
+    attendu:
+      - chemin: "1/0[kie]"
+        base: [raised]
+        cote_de: { par: kie, cote: parent, type: raised }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "1/0[gae] =kie"
+        alliance: { type: spouse_of_parent, autre_parent: [successive] }
+        cote_de: { par: gae, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-07
+    de: tilei
+    vers: pungom
+    categorie: non_biologique_certitude
+    pourquoi: "Père de naissance d'un enfant élevé par un autre : « père », jamais confondu avec « l'a élevé » (PAR-06)."
+    attendu:
+      - chemin: "1/0[pungom]"
+        cote_de: { par: pungom, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-08
+    de: tilei
+    vers: nayoun
+    categorie: non_biologique_certitude
+    pourquoi: "Seule Gae est commune par la naissance, les pères sont connus et différents : demi-frère, même mère ; le chemin par Kie (« a élevé ») est réuni dans la fratrie, après la naissance, sans changer la base (ADR 0021, points 2 à 4)."
+    attendu:
+      - chemin: "1/1[gae] | 1/1[kie]"
+        fratrie: { type: birth, partage: half, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-09
+    de: djoe
+    vers: kie
+    categorie: non_biologique_certitude
+    pourquoi: "Confié à Kie (kafala, CL-FAM-05) : « personne à qui vous êtes confié », jamais « père » (PAR-06 ; ADR 0021, point 7) ; côté « parent », Djoe ayant un père de naissance (ADR 0017, point 6)."
+    attendu:
+      - chemin: "1/0[kie]"
+        base: [fostered]
+        cote_de: { par: kie, cote: parent, type: fostered }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-10
+    de: kie
+    vers: djoe
+    categorie: non_biologique_certitude
+    pourquoi: "Enfant qui lui est confié (PAR-06, « confié à ») ; côté « parent » vu de Djoe, qui a un père de naissance."
+    attendu:
+      - chemin: "0/1[kie]"
+        base: [fostered]
+        cote_vers: { par: kie, cote: parent, type: fostered }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-11
+    de: djoe
+    vers: nayoun
+    categorie: non_biologique_certitude
+    pourquoi: "Parent commun par le confiage seulement : jamais « frère », fratrie « other » (« enfant confié à votre père », ADR 0021, point 5) ; aucun autre parent par le confiage, d'où le partage non précisé ; côté « parent », Djoe ayant un père de naissance (le côté est le même vu des deux, ADR 0017, point 6)."
+    attendu:
+      - chemin: "1/1[kie]"
+        fratrie: { type: other, partage: full_or_half, cote: parent }
+        base: [fostered]
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-12
+    de: djoe
+    vers: yetchao
+    categorie: non_biologique_certitude
+    pourquoi: "Père de naissance d'un enfant confié : le confiage ne crée aucune filiation (CL-FAM-05)."
+    attendu:
+      - chemin: "1/0[yetchao]"
+        cote_de: { par: yetchao, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-13
+    de: djoe
+    vers: gae
+    categorie: non_biologique_certitude
+    pourquoi: "Épouse de la personne à qui il est confié : alliance par un lien non biologique, signalé (base « fostered ») ; Kie n'a aucune union avec les parents de naissance de Djoe (« none ») ; côté « parent » (père de naissance connu)."
+    attendu:
+      - chemin: "1/0[kie] =gae"
+        alliance: { type: spouse_of_parent, autre_parent: [none] }
+        base: [fostered]
+        cote_de: { par: kie, cote: parent, type: fostered }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-14
+    de: hun
+    vers: moudjoia
+    categorie: non_biologique_certitude
+    pourquoi: "Tutelle : filiation de type « guardian », signalée, jamais « fille » (PAR-06)."
+    attendu:
+      - chemin: "0/1[hun]"
+        base: [guardian]
+        cote_vers: { par: hun, cote: father, type: guardian }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-15
+    de: zeine
+    vers: pei
+    categorie: non_biologique_certitude
+    pourquoi: "Donneur : filiation « donor », jamais « père » (PAR-06)."
+    attendu:
+      - chemin: "1/0[pei]"
+        base: [donor]
+        cote_de: { par: pei, cote: father, type: donor }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-16
+    de: zeine
+    vers: wafuou
+    categorie: non_biologique_certitude
+    pourquoi: "Mère de naissance, à côté du donneur : « mère »."
+    attendu:
+      - chemin: "1/0[wafuou]"
+        cote_de: { par: wafuou, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-17
+    de: djodjeou
+    vers: njinouia
+    categorie: non_biologique_certitude
+    pourquoi: "Gestation pour autrui : filiation « surrogacy », signalée ; côté « parent », Djodjeou ayant une mère de naissance (deux femmes parentes, ADR 0017, point 6)."
+    attendu:
+      - chemin: "1/0[njinouia]"
+        base: [surrogacy]
+        cote_de: { par: njinouia, cote: parent, type: surrogacy }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-18
+    de: nayoun
+    vers: mbanyam
+    categorie: non_biologique_certitude
+    pourquoi: "Grand-père par une filiation probable : la certitude la plus faible du chemin (PAR-08)."
+    attendu:
+      - chemin: "2/0[mbanyam]"
+        certitude: probable
+        cote_de: { par: kie, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-19
+    de: kie
+    vers: mbanyam
+    categorie: non_biologique_certitude
+    pourquoi: "Père probable : « Peut-être son père » (PAR-08, UNI-10)."
+    attendu:
+      - chemin: "1/0[mbanyam]"
+        certitude: probable
+        cote_de: { par: mbanyam, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-20
+    de: nayoun
+    vers: zofouou
+    categorie: non_biologique_certitude
+    pourquoi: "Grand-mère par une filiation hypothétique : certitude « hypothetical » (PAR-08)."
+    attendu:
+      - chemin: "2/0[zofouou]"
+        certitude: hypothetical
+        cote_de: { par: gae, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-21
+    de: nayoun
+    vers: pawoum
+    categorie: non_biologique_certitude
+    pourquoi: "Deux parents communs, dont Kie par une filiation probable : frère, certitude la plus faible du lien affiché (« Peut-être son frère », UNI-10, PAR-08)."
+    attendu:
+      - chemin: "1/1[gae+kie]"
+        fratrie: { type: birth, partage: full }
+        certitude: probable
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-22
+    de: tsukaine
+    vers: takweette
+    categorie: non_biologique_certitude
+    pourquoi: "Même mère de naissance, aucun autre parent de naissance, adoptées toutes deux par la conjointe de leur mère : « sœur (par adoption) », jamais « sœur » tout court (ADR 0021, point 5, « birth_and_adoption »)."
+    attendu:
+      - chemin: "1/1[maette] | 1/1[leette]"
+        fratrie: { type: birth_and_adoption, partage: full }
+        base: [adoptive]
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-23
+    de: tsukaine
+    vers: mbupea
+    categorie: non_biologique_certitude
+    pourquoi: "Même mère de naissance, autres parents non précisés : « frère ou demi-frère » ; côté « parent », Tsukaine ayant deux mères (ADR 0017, point 6 ; CL-FAM-08)."
+    attendu:
+      - chemin: "1/1[maette]"
+        fratrie: { type: birth, partage: full_or_half, cote: parent }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-24
+    de: tsukaine
+    vers: leette
+    categorie: non_biologique_certitude
+    pourquoi: "Mère adoptive, côté « parent » (deux mères, CL-FAM-08) ; aucun « épouse de votre mère », un parent adoptif est un autre parent (ADR 0021, point 6)."
+    attendu:
+      - chemin: "1/0[leette]"
+        base: [adoptive]
+        cote_de: { par: leette, cote: parent, type: adoptive }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-25
+    de: mbupea
+    vers: leette
+    categorie: non_biologique_certitude
+    pourquoi: "Conjointe de la mère, qui ne l'a pas adopté : « épouse de votre mère », sans union avec un autre parent (« none ») ; aucune règle de genre (ADR 0020, point 4)."
+    attendu:
+      - chemin: "1/0[maette] =leette"
+        alliance: { type: spouse_of_parent, autre_parent: [none] }
+        cote_de: { par: maette, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-26
+    de: tilei
+    vers: gae
+    categorie: non_biologique_certitude
+    pourquoi: "Mère de naissance ; aucun chemin par Kie ou Pungom, Gae étant son autre parent par la naissance (ADR 0010, point 4)."
+    attendu:
+      - chemin: "1/0[gae]"
+        cote_de: { par: gae, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F06-27
+    de: tilei
+    vers: kie
+    masques: [gae]
+    categorie: visibilite
+    pourquoi: "Gae masquée : seul reste « l'a élevé » ; « mari de votre mère » disparaît sans indice (PAR-09). Côté « parent », comme sans masque (père de naissance connu)."
+    attendu:
+      - chemin: "1/0[kie]"
+        base: [raised]
+        cote_de: { par: kie, cote: parent, type: raised }
+        fr: à rédiger
+        en: à rédiger

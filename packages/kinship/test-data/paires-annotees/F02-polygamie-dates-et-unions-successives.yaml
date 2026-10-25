@@ -1,0 +1,235 @@
+# Prénoms générés (generateGivenName, graine 2300) ; famille composée, jamais une vraie famille.
+# Djon épouse Djaine (1970, jusqu'au décès de Djaine en 1992) et Zongeia (1975-2000, divorce) :
+# unions simultanées par les dates. Ngoungoe est aussi son épouse, sans date ni réponse : rien
+# n'est supposé (ADR 0012, point 5). Après 2000, Djon épouse Tengoua (2001) et Zongeia épouse
+# Djao (2001). Ndofoe est un fils de Djon dont la mère n'est pas précisée, sans candidate.
+famille: F02
+titre: Polygamie datée, unions successives, épouse sans date
+origine: composee
+arbre:
+  personnes:
+    - djon/M
+    - djaine/F
+    - zongeia/F
+    - ngoungoe/F
+    - tengoua/F
+    - djao/M
+    - djuvai/M
+    - sondoou/F
+    - zee/M
+    - djoum/M
+    - koette/F
+    - gezuou/F
+    - ndofoe/M
+  unions:
+    - conjoints: [djon, djaine]
+      debut: { qualificatif: exacte, date: "1970" }
+      fin: { qualificatif: exacte, date: "1992" }
+      motif: deces
+    - conjoints: [djon, zongeia]
+      debut: { qualificatif: exacte, date: "1975" }
+      fin: { qualificatif: exacte, date: "2000" }
+      motif: divorce
+    - { conjoints: [djon, ngoungoe] }
+    - { conjoints: [djon, tengoua], debut: { qualificatif: exacte, date: "2001" } }
+    - { conjoints: [zongeia, djao], debut: { qualificatif: exacte, date: "2001" } }
+  filiations:
+    - { parents: [djon, djaine], enfant: djuvai }
+    - { parents: [djon, djaine], enfant: sondoou }
+    - { parents: [djon, zongeia], enfant: zee }
+    - { parents: [djon, ngoungoe], enfant: djoum }
+    - { parents: [djon, tengoua], enfant: koette }
+    - { parents: [zongeia, djao], enfant: gezuou }
+    - { parents: [djon], enfant: ndofoe }
+  faits:
+    - { personne: djaine, type: deces, date: { qualificatif: exacte, date: "1992" } }
+paires:
+  - id: F02-01
+    de: djaine
+    vers: zongeia
+    categorie: polygamie
+    pourquoi: "Unions 1970-1992 et 1975-2000 : chacune a commencé avant la fin de l'autre, simultanées par les dates, sans réponse gardée (ADR 0012 ; ADR 0020, point 4)."
+    attendu:
+      - chemin: "=djon =zongeia"
+        alliance: { type: co_spouse, simultaneite: simultaneous }
+        fr: à rédiger
+        en: à rédiger
+  - id: F02-02
+    de: djaine
+    vers: ngoungoe
+    categorie: polygamie
+    pourquoi: "Union de Ngoungoe sans date ni réponse : jamais co-épouse supposée, « autre épouse de votre mari » (ADR 0020, point 4 ; ADR 0012, point 5)."
+    attendu:
+      - chemin: "=djon =ngoungoe"
+        alliance: { type: spouse_of_spouse, simultaneite: unknown }
+        fr: à rédiger
+        en: à rédiger
+  - id: F02-03
+    de: djaine
+    vers: tengoua
+    categorie: polygamie
+    pourquoi: "Union de Djaine finie en 1992, celle de Tengoua commencée en 2001 : successives par les dates (ADR 0020, point 4)."
+    attendu:
+      - chemin: "=djon =tengoua"
+        alliance: { type: spouse_of_spouse, simultaneite: successive }
+        fr: à rédiger
+        en: à rédiger
+  - id: F02-04
+    de: zongeia
+    vers: tengoua
+    categorie: polygamie
+    pourquoi: "Divorce de Zongeia en 2000, mariage de Tengoua en 2001 : successives (ADR 0012)."
+    attendu:
+      - chemin: "=djon =tengoua"
+        alliance: { type: spouse_of_spouse, simultaneite: successive }
+        fr: à rédiger
+        en: à rédiger
+  - id: F02-05
+    de: djuvai
+    vers: zongeia
+    categorie: polygamie
+    pourquoi: "Épouse du père, union simultanée par les dates avec celle de la mère (co-épouse de la mère) ; jamais « belle-mère » (PAR-04, ADR 0020, point 5)."
+    attendu:
+      - chemin: "1/0[djon] =zongeia"
+        alliance: { type: spouse_of_parent, autre_parent: [simultaneous] }
+        cote_de: { par: djon, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F02-06
+    de: djuvai
+    vers: tengoua
+    categorie: polygamie
+    pourquoi: "Épouse du père après la mort de la mère : union successive à celle de la mère (ADR 0020, point 5 ; « stepmother » possible en forme secondaire)."
+    attendu:
+      - chemin: "1/0[djon] =tengoua"
+        alliance: { type: spouse_of_parent, autre_parent: [successive] }
+        cote_de: { par: djon, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F02-07
+    de: djuvai
+    vers: ngoungoe
+    categorie: polygamie
+    pourquoi: "Épouse du père, rien ne dit si son union chevauche celle de la mère : « unknown », jamais supposé (ADR 0020, point 5)."
+    attendu:
+      - chemin: "1/0[djon] =ngoungoe"
+        alliance: { type: spouse_of_parent, autre_parent: [unknown] }
+        cote_de: { par: djon, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F02-08
+    de: djuvai
+    vers: zee
+    categorie: polygamie
+    pourquoi: "Fils de la co-épouse de la mère : demi-frère, même père (PAR-03)."
+    attendu:
+      - chemin: "1/1[djon]"
+        fratrie: { type: birth, partage: half, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F02-09
+    de: djuvai
+    vers: koette
+    categorie: polygamie
+    pourquoi: "Fille de la dernière épouse du père, unions successives : demi-sœur, même père, comme pour une co-épouse (PAR-03)."
+    attendu:
+      - chemin: "1/1[djon]"
+        fratrie: { type: birth, partage: half, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F02-10
+    de: zee
+    vers: gezuou
+    categorie: polygamie
+    pourquoi: "Fille du second mari de la mère : demi-sœur, même mère ; le chemin par l'union est redondant avec le sang (ADR 0010, point 4)."
+    attendu:
+      - chemin: "1/1[zongeia]"
+        fratrie: { type: birth, partage: half, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F02-11
+    de: djuvai
+    vers: gezuou
+    categorie: polygamie
+    pourquoi: "Aucun parent commun : fille de l'ancienne épouse du père, jamais « demi-sœur » (CL-FAM-01) ; union du père avec Zongeia simultanée avec celle de la mère, union de Zongeia avec Djao successive à celle avec Djon (dates)."
+    attendu:
+      - chemin: "1/0[djon] =zongeia 0/1[zongeia]"
+        alliance: { type: step_sibling, autre_parent: [simultaneous, successive] }
+        cote_de: { par: djon, cote: father }
+        cote_vers: { par: zongeia, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F02-12
+    de: djuvai
+    vers: djao
+    categorie: alliance
+    pourquoi: "Mari de l'ancienne épouse du père : deux unions, une génération, dans la limite de l'ADR 0010 (point 4) ; forme « other », nommée d'après ses segments (ADR 0020, point 2)."
+    attendu:
+      - chemin: "1/0[djon] =zongeia =djao"
+        alliance: { type: other, simultaneite: successive, autre_parent: [simultaneous] }
+        cote_de: { par: djon, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F02-13
+    de: djuvai
+    vers: ndofoe
+    categorie: polygamie
+    pourquoi: "Mère de Ndofoe non précisée, sans candidate : « frère ou demi-frère », par le père (PAR-03, ADR 0017, point 3)."
+    attendu:
+      - chemin: "1/1[djon]"
+        fratrie: { type: birth, partage: full_or_half, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F02-14
+    de: sondoou
+    vers: djoum
+    categorie: polygamie
+    pourquoi: "Fils de l'épouse sans date : demi-frère, même père ; la simultanéité des unions ne change rien à la fratrie (ADR 0017)."
+    attendu:
+      - chemin: "1/1[djon]"
+        fratrie: { type: birth, partage: half, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F02-15
+    de: zongeia
+    vers: djoum
+    categorie: polygamie
+    pourquoi: "Fils de son (ancien) mari et d'une autre épouse ; simultanéité inconnue avec l'union de la mère de Djoum (ADR 0020, points 2 et 5)."
+    attendu:
+      - chemin: "=djon 0/1[djon]"
+        alliance: { type: child_of_spouse, autre_parent: [unknown] }
+        cote_vers: { par: djon, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F02-16
+    de: gezuou
+    vers: djon
+    categorie: alliance
+    pourquoi: "Premier mari de la mère, avant le père (union finie en 2000, celle du père commence en 2001) : « mari de votre mère », successif, jamais « beau-père » (PAR-04, ADR 0020, point 5)."
+    attendu:
+      - chemin: "1/0[zongeia] =djon"
+        alliance: { type: spouse_of_parent, autre_parent: [successive] }
+        cote_de: { par: zongeia, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F02-17
+    de: tengoua
+    vers: djuvai
+    categorie: alliance
+    pourquoi: "Fils de son mari, né d'une épouse décédée avant son mariage : union successive (ADR 0020, points 2 et 5)."
+    attendu:
+      - chemin: "=djon 0/1[djon]"
+        alliance: { type: child_of_spouse, autre_parent: [successive] }
+        cote_vers: { par: djon, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F02-18
+    de: koette
+    vers: ndofoe
+    categorie: polygamie
+    pourquoi: "Même père, mère de Ndofoe non précisée : « frère ou demi-frère », vu d'une fille (accord : T-026)."
+    attendu:
+      - chemin: "1/1[djon]"
+        fratrie: { type: birth, partage: full_or_half, cote: father }
+        fr: à rédiger
+        en: à rédiger

@@ -1,0 +1,313 @@
+# Prénoms générés (generateGivenName, graine 2300) ; famille composée, jamais une vraie famille.
+# Lévirat : Yemui et Yalom sont frères (parents Kwengim et Noe). Zolae épouse Yemui (1960-1968,
+# décès de Yemui), puis son frère Yalom (1970), déjà marié à Lefeou (unions simultanées, réponse
+# gardée). Sororat : Tasao épouse les sœurs Ndohoette et Njovoou en même temps (réponse gardée).
+famille: F03
+titre: Lévirat et sororat
+origine: composee
+arbre:
+  personnes:
+    - kwengim/M
+    - noe/F
+    - yemui/M
+    - yalom/M
+    - zolae/F
+    - lefeou/F
+    - nugeou/M
+    - gaine/F
+    - sovee/M
+    - noa/F
+    - sam/M
+    - kwio/M
+    - haette/F
+    - ndohoette/F
+    - njovoou/F
+    - tasao/M
+    - mboutim/M
+    - ziou/F
+  unions:
+    - { conjoints: [kwengim, noe] }
+    - conjoints: [yemui, zolae]
+      debut: { qualificatif: exacte, date: "1960" }
+      fin: { qualificatif: exacte, date: "1968" }
+      motif: deces
+    - { conjoints: [yalom, lefeou], rang_yalom: 1 }
+    - conjoints: [yalom, zolae]
+      rang_yalom: 2
+      debut: { qualificatif: exacte, date: "1970" }
+    - { conjoints: [kwio, haette] }
+    - { conjoints: [tasao, ndohoette], rang_tasao: 1 }
+    - { conjoints: [tasao, njovoou], rang_tasao: 2 }
+  filiations:
+    - { parents: [kwengim, noe], enfant: yemui }
+    - { parents: [kwengim, noe], enfant: yalom }
+    - { parents: [yemui, zolae], enfant: nugeou }
+    - { parents: [yemui, zolae], enfant: gaine }
+    - { parents: [yalom, zolae], enfant: sovee }
+    - { parents: [yalom, zolae], enfant: noa }
+    - { parents: [yalom, lefeou], enfant: sam }
+    - { parents: [kwio, haette], enfant: ndohoette }
+    - { parents: [kwio, haette], enfant: njovoou }
+    - { parents: [tasao, ndohoette], enfant: mboutim }
+    - { parents: [tasao, njovoou], enfant: ziou }
+  simultaneites:
+    - { unions: [[yalom, lefeou], [yalom, zolae]], reponse: simultanees }
+    - { unions: [[tasao, ndohoette], [tasao, njovoou]], reponse: simultanees }
+  faits:
+    - { personne: yemui, type: deces, date: { qualificatif: exacte, date: "1968" } }
+paires:
+  - id: F03-01
+    de: nugeou
+    vers: sovee
+    categorie: levirat_sororat
+    pourquoi: "Enfant du lévirat : demi-frère par la mère d'abord, et aussi cousin germain par les pères, deux frères (UNI-21, PAR-05, CL-POL-09)."
+    attendu:
+      - chemin: "1/1[zolae]"
+        fratrie: { type: birth, partage: half, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "2/2[kwengim+noe]"
+        cote_de: { par: yemui, cote: father }
+        cote_vers: { par: yalom, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F03-02
+    de: gaine
+    vers: noa
+    categorie: levirat_sororat
+    pourquoi: "Même double lien entre deux filles des deux lits : demi-sœur, même mère, et aussi cousine par le père (UNI-21)."
+    attendu:
+      - chemin: "1/1[zolae]"
+        fratrie: { type: birth, partage: half, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "2/2[kwengim+noe]"
+        cote_de: { par: yemui, cote: father }
+        cote_vers: { par: yalom, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F03-03
+    de: nugeou
+    vers: yalom
+    categorie: levirat_sororat
+    pourquoi: "Frère du père, donc oncle (2 et 1), d'abord ; et aussi second mari de la mère, union successive à celle du père : le sang avant l'alliance (TRD ; ADR 0010, point 5)."
+    attendu:
+      - chemin: "2/1[kwengim+noe]"
+        cote_de: { par: yemui, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "1/0[zolae] =yalom"
+        alliance: { type: spouse_of_parent, autre_parent: [successive] }
+        cote_de: { par: zolae, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F03-04
+    de: sovee
+    vers: yemui
+    categorie: levirat_sororat
+    pourquoi: "Frère du père, oncle, et aussi premier mari de la mère (union successive) : le sang d'abord."
+    attendu:
+      - chemin: "2/1[kwengim+noe]"
+        cote_de: { par: yalom, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "1/0[zolae] =yemui"
+        alliance: { type: spouse_of_parent, autre_parent: [successive] }
+        cote_de: { par: zolae, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F03-05
+    de: sam
+    vers: nugeou
+    categorie: levirat_sororat
+    pourquoi: "Fils de l'oncle paternel : cousin germain (2 et 2) ; et aussi fils de l'épouse du père, sans parent commun (CL-FAM-01) ; union du père avec Zolae simultanée avec celle de la mère de Sam, successive à celle de Zolae avec Yemui."
+    attendu:
+      - chemin: "2/2[kwengim+noe]"
+        cote_de: { par: yalom, cote: father }
+        cote_vers: { par: yemui, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "1/0[yalom] =zolae 0/1[zolae]"
+        alliance: { type: step_sibling, autre_parent: [simultaneous, successive] }
+        cote_de: { par: yalom, cote: father }
+        cote_vers: { par: zolae, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F03-06
+    de: sam
+    vers: sovee
+    categorie: levirat_sororat
+    pourquoi: "Même père, mères connues et différentes : demi-frère, même père (le chemin par la co-épouse est redondant, ADR 0010, point 4) ; et aussi fils de la veuve de l'oncle Yemui (une union, quatre générations : la limite de l'ADR 0010), union de Zolae avec Yemui successive à celle avec Yalom."
+    attendu:
+      - chemin: "1/1[yalom]"
+        fratrie: { type: birth, partage: half, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "2/1[kwengim+noe] =zolae 0/1[zolae]"
+        alliance: { type: other, autre_parent: [successive] }
+        cote_de: { par: yalom, cote: father }
+        cote_vers: { par: zolae, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F03-07
+    de: lefeou
+    vers: zolae
+    categorie: levirat_sororat
+    pourquoi: "Épouse héritée par lévirat et première épouse : unions simultanées (réponse gardée), co-épouses (ADR 0020, point 4) ; et aussi veuve du frère du mari (deux unions, deux générations, limite de l'ADR 0010, point 4)."
+    attendu:
+      - chemin: "=yalom =zolae"
+        alliance: { type: co_spouse, simultaneite: simultaneous }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=yalom 1/1[kwengim+noe] =zolae"
+        alliance: { type: spouse_of_sibling_of_spouse }
+        fr: à rédiger
+        en: à rédiger
+  - id: F03-08
+    de: lefeou
+    vers: nugeou
+    categorie: levirat_sororat
+    pourquoi: "Fils de la co-épouse (deux unions, une génération : 3) avant neveu du mari (une union, trois générations : 4) : le plus court d'abord (ADR 0010, point 5) ; deux formes « other »."
+    attendu:
+      - chemin: "=yalom =zolae 0/1[zolae]"
+        alliance: { type: other, simultaneite: simultaneous, autre_parent: [successive] }
+        cote_vers: { par: zolae, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=yalom 1/2[kwengim+noe]"
+        alliance: { type: other }
+        cote_vers: { par: yemui, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F03-09
+    de: nugeou
+    vers: kwengim
+    categorie: levirat_sororat
+    pourquoi: "Grand-père par le père ; et aussi père du second mari de la mère (une union, deux générations), le sang d'abord."
+    attendu:
+      - chemin: "2/0[kwengim]"
+        cote_de: { par: yemui, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "1/0[zolae] =yalom 1/0[kwengim]"
+        alliance: { type: other, autre_parent: [successive] }
+        cote_de: { par: zolae, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F03-10
+    de: zolae
+    vers: kwengim
+    categorie: levirat_sororat
+    pourquoi: "Père de ses deux maris successifs : deux fois « parent_of_spouse », un lien par mari ; à égalité, l'ordre est celui des identifiants (ADR 0010, point 5)."
+    attendu:
+      - chemin: "=yemui 1/0[kwengim]"
+        alliance: { type: parent_of_spouse }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=yalom 1/0[kwengim]"
+        alliance: { type: parent_of_spouse }
+        fr: à rédiger
+        en: à rédiger
+  - id: F03-11
+    de: mboutim
+    vers: ziou
+    categorie: levirat_sororat
+    pourquoi: "Sororat : demi-sœur, même père, et aussi cousine par la mère, les mères étant sœurs (PAR-05, CL-POL-10)."
+    attendu:
+      - chemin: "1/1[tasao]"
+        fratrie: { type: birth, partage: half, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "2/2[haette+kwio]"
+        cote_de: { par: ndohoette, cote: mother }
+        cote_vers: { par: njovoou, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F03-12
+    de: mboutim
+    vers: njovoou
+    categorie: levirat_sororat
+    pourquoi: "Sœur de la mère, tante, d'abord ; et aussi épouse du père, co-épouse de la mère : le sang avant l'alliance (CL-POL-10)."
+    attendu:
+      - chemin: "2/1[haette+kwio]"
+        cote_de: { par: ndohoette, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "1/0[tasao] =njovoou"
+        alliance: { type: spouse_of_parent, autre_parent: [simultaneous] }
+        cote_de: { par: tasao, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F03-13
+    de: ndohoette
+    vers: njovoou
+    categorie: levirat_sororat
+    pourquoi: "Sœurs (deux parents communs), et aussi co-épouses : le sang d'abord."
+    attendu:
+      - chemin: "1/1[haette+kwio]"
+        fratrie: { type: birth, partage: full }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=tasao =njovoou"
+        alliance: { type: co_spouse, simultaneite: simultaneous }
+        fr: à rédiger
+        en: à rédiger
+  - id: F03-14
+    de: tasao
+    vers: njovoou
+    categorie: levirat_sororat
+    pourquoi: "Son épouse d'abord (une union), et aussi sœur de son autre épouse (une union et deux générations)."
+    attendu:
+      - chemin: "=njovoou"
+        alliance: { type: spouse }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=ndohoette 1/1[haette+kwio]"
+        alliance: { type: sibling_of_spouse }
+        fr: à rédiger
+        en: à rédiger
+  - id: F03-15
+    de: kwio
+    vers: mboutim
+    categorie: levirat_sororat
+    pourquoi: "Petit-fils par sa fille Ndohoette ; et aussi fils du mari de son autre fille (une union, deux générations, forme « other »), union simultanée avec celle de la mère de Mboutim."
+    attendu:
+      - chemin: "0/2[kwio]"
+        cote_vers: { par: ndohoette, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "0/1[kwio] =tasao 0/1[tasao]"
+        alliance: { type: other, autre_parent: [simultaneous] }
+        cote_vers: { par: tasao, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F03-16
+    de: noa
+    vers: lefeou
+    categorie: levirat_sororat
+    pourquoi: "Première épouse du père, co-épouse de la mère (réponse gardée) : épouse du père, jamais « belle-mère » (PAR-04)."
+    attendu:
+      - chemin: "1/0[yalom] =lefeou"
+        alliance: { type: spouse_of_parent, autre_parent: [simultaneous] }
+        cote_de: { par: yalom, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F03-17
+    de: nugeou
+    vers: sovee
+    masques: [zolae]
+    categorie: visibilite
+    pourquoi: "Zolae masquée : la fratrie par la mère disparaît, seul reste le cousinage par les pères, sans indice d'une mère commune (PAR-09)."
+    attendu:
+      - chemin: "2/2[kwengim+noe]"
+        cote_de: { par: yemui, cote: father }
+        cote_vers: { par: yalom, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F03-18
+    de: sam
+    vers: nugeou
+    masques: [yalom]
+    categorie: visibilite
+    pourquoi: "Yalom masqué, père de Sam et pivot de tous les chemins (cousinage et alliance) : « Lien non disponible » (PAR-09)."
+    attendu: aucun

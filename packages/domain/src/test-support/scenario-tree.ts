@@ -62,6 +62,16 @@ export const scenarioFactSchema = z.strictObject({
 export type ScenarioFact = z.infer<typeof scenarioFactSchema>;
 
 /**
+ * Place à compléter dite distincte d'autres personnes (`Person.distinctFrom`, ADR 0017) : « la
+ * mère de Bruno n'est pas Irène ». Seulement sur une place de `a_completer` (le schéma de la
+ * personne le vérifie à la construction).
+ */
+export const scenarioDistinctSchema = z.strictObject({
+  place: z.string(),
+  de: z.array(z.string()).min(1),
+});
+
+/**
  * Section `arbre` complète. Une section absente vaut une liste vide ; une clé inconnue est
  * refusée ; chaque personne n'est déclarée qu'une fois. Une section nouvelle s'ajoute ici et dans
  * `buildScenarioTree`, pas dans un test.
@@ -71,6 +81,8 @@ export const scenarioTreeSchema = z
     personnes: z.array(scenarioPersonSchema).min(1),
     /** Personnes de `personnes` qui sont « à compléter » (UNI-02, UNI-12) : sans nom par défaut. */
     a_completer: z.array(z.string()).optional(),
+    /** Places à compléter dites distinctes d'autres personnes (ADR 0017). */
+    distinctes: z.array(scenarioDistinctSchema).optional(),
     noms: z.array(scenarioNameSchema).optional(),
     unions: z.array(scenarioUnionSchema).optional(),
     filiations: z.array(scenarioFiliationSchema).optional(),
@@ -140,14 +152,22 @@ export function buildScenarioTree(
   // Un nom absent de `personnes` est une erreur, comme ailleurs.
   const placeholders = new Set(section.a_completer ?? []);
   for (const key of placeholders) id(key);
-  data.people = section.personnes.map(({ key, gender }) =>
-    personSchema.parse({
+  const distinct = new Map<string, Id[]>();
+  for (const line of section.distinctes ?? []) {
+    if (distinct.has(line.place))
+      throw new Error(`Place ${line.place} is listed twice in distinctes`);
+    distinct.set(line.place, line.de.map(id));
+  }
+  data.people = section.personnes.map(({ key, gender }) => {
+    const distinctFrom = distinct.get(key);
+    return personSchema.parse({
       id: id(key),
       treeId: context.treeId,
       nature: placeholders.has(key) ? 'placeholder' : 'known',
       gender,
-    }),
-  );
+      ...(distinctFrom === undefined ? {} : { distinctFrom }),
+    });
+  });
   data.names = (section.noms ?? []).map((line) => {
     id(line.personne);
     return nameSchema.parse(nameFromScenario(context, line));

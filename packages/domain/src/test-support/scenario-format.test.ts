@@ -299,6 +299,40 @@ describe('le format refuse ce qui est mal formé', () => {
     expect(() => buildScenarioTree(unknown)).toThrow(/kofi/);
   });
 
+  it('la section distinctes dit une place à compléter distincte d’autres personnes', () => {
+    const tree = buildScenarioTree(
+      scenarioTreeSchema.parse({
+        personnes: ['ama/F', 'x/F'],
+        a_completer: ['x'],
+        distinctes: [{ place: 'x', de: ['ama'] }],
+      }),
+    );
+    expect(treeDataIssues(tree.data)).toEqual([]);
+    const x = tree.data.people.find((person) => person.id === tree.id('x'));
+    expect(x?.distinctFrom).toEqual([tree.id('ama')]);
+    // Une personne connue ne peut pas l'être (schéma de la personne), ni une inconnue citée.
+    const known = scenarioTreeSchema.parse({
+      personnes: ['ama/F', 'x/F'],
+      distinctes: [{ place: 'x', de: ['ama'] }],
+    });
+    expect(() => buildScenarioTree(known)).toThrow(/placeholder/);
+    const unknown = scenarioTreeSchema.parse({
+      personnes: ['x/F'],
+      a_completer: ['x'],
+      distinctes: [{ place: 'x', de: ['kofi'] }],
+    });
+    expect(() => buildScenarioTree(unknown)).toThrow(/kofi/);
+    const twice = scenarioTreeSchema.parse({
+      personnes: ['ama/F', 'x/F'],
+      a_completer: ['x'],
+      distinctes: [
+        { place: 'x', de: ['ama'] },
+        { place: 'x', de: ['ama'] },
+      ],
+    });
+    expect(() => buildScenarioTree(twice)).toThrow(/twice/);
+  });
+
   it('un plan crée une place à compléter, puis la précise : ses filiations passent à la personne', () => {
     const tree = buildScenarioTree(
       scenarioTreeSchema.parse({
