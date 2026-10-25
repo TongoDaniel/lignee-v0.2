@@ -62,6 +62,18 @@ corepack pnpm exec expo run:android                   # compile, installe sur l'
 
 Il faut le JDK 17 (celui d'Android Studio convient) dans `JAVA_HOME`, et `ANDROID_HOME` vers le SDK Android. Essai du 16 octobre 2026 avec le JDK 25 d'Adoptium : échec après 13 minutes, à la configuration CMake de `react-native-screens` et `react-native-worklets` (« A restricted method in java.lang.System has been called ») ; le JDK 25 ne convient pas à React Native 0.86. Le dossier `android/` se régénère à chaque `prebuild` : on ne le modifie jamais à la main, on passe par `app.config.ts` ou un plugin de configuration.
 
+## Vérifier l'arbre sur le téléphone (T-017, issue #34)
+
+Skia est un module natif : après la fusion de T-017, reconstruisez le build de développement (`eas build --profile development --platform android`, ou le build local ci-dessus). Sur l'Android de référence, avec l'arbre généré de développement (500 personnes), vérifiez et notez :
+
+1. **ARB-01** : de la touche de l'icône à l'arbre dessiné, moins de 1 s ; « Vous » est visible en bas au centre, avatar doré.
+2. **ARB-02** : pincer et déplacer ; 30 images par seconde au moins (idéalement 60) ; les trois niveaux apparaissent (points, prénoms, noms entiers et années) ; les boutons « Agrandir l'arbre » et « Réduire l'arbre » font le même parcours ; avec « Réduire les animations » activé dans le téléphone, ils changent le cadre sans glisser.
+3. **ARB-03 / CL-POL-12** : trouvez le chef de famille à plusieurs épouses (ou chargez l'arbre de test) : ses foyers repliés montrent « + n », un toucher les déplie, rien ne se chevauche, les traits restent lisibles au niveau standard.
+4. **ACC-06** : avec TalkBack, la liste s'ouvre d'office, chaque nom se touche et mène à la personne ; sans TalkBack, « Parcourir en liste » donne le même parcours ; tout l'arbre se parcourt sans pincer ni glisser.
+5. **Mode Aînés et texte à 200 %** : fiches plus larges, aucune troncature du prénom au-delà de deux lignes, zones touchables de 56.
+6. **Jour et Nuit** : lisibilité des traits, des pastilles et des mentions « Voir aussi ».
+7. **Liens** : repérez un trait long, un renvoi « Voir aussi » (le toucher mène à l'autre fiche) et un trait en pointillés ; dites si `MAX_LINE_CROSSINGS` (ADR 0024 / 0025) est trop bas ou trop haut.
+
 ## Changer de SDK Expo
 
 Une seule pull request, quand la nouvelle version a au moins deux semaines :

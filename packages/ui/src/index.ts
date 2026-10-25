@@ -60,3 +60,4 @@ export { PrivacyNote, type PrivacyCircle, type PrivacyNoteProps } from './compon
 export { ProfileTabs, type ProfileTab, type ProfileTabsProps } from './components/ProfileTabs';
 export { TabBar, type TabBarIcon, type TabBarItem, type TabBarProps } from './components/TabBar';
 export { Notification, type NotificationProps } from './components/Notification';
+export { metrics as componentMetrics } from './components/metrics';

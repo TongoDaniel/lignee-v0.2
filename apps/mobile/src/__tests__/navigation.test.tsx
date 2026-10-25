@@ -138,7 +138,7 @@ describe('Écrans traduits', () => {
   it('affiche le titre d’écran (en-tête) et le texte d’attente en français, en 17 au moins', async () => {
     await renderApp();
     expect(screen.getByRole('header')).toHaveTextContent('Arbre');
-    const body = screen.getByText(/Votre arbre apparaîtra ici/);
+    const body = screen.getByText(/Ouverture de votre arbre/);
     expect(flat(body.props.style).fontSize).toBeGreaterThanOrEqual(17);
   });
 
@@ -146,19 +146,19 @@ describe('Écrans traduits', () => {
     deviceLanguages('en-GB', 'fr-FR');
     await renderApp();
     expect(tabLabels()).toEqual(['Tree', 'Family']);
-    expect(screen.getByText(/Your tree will appear here/)).toBeOnTheScreen();
+    expect(screen.getByText(/Opening your tree/)).toBeOnTheScreen();
   });
 
   it('change de langue à chaud quand la personne change celle du téléphone', async () => {
     await renderApp();
-    expect(screen.getByText(/Votre arbre apparaîtra ici/)).toBeOnTheScreen();
+    expect(screen.getByText(/Ouverture de votre arbre/)).toBeOnTheScreen();
 
     await act(async () => {
       deviceLanguages('en-US');
       await Promise.resolve();
     });
 
-    expect(await screen.findByText(/Your tree will appear here/)).toBeOnTheScreen();
+    expect(await screen.findByText(/Opening your tree/)).toBeOnTheScreen();
     expect(tabLabels()).toEqual(['Tree', 'Family']);
   });
 

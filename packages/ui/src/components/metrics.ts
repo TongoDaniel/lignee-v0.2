@@ -132,6 +132,19 @@ export const metrics = {
     /** L'anneau d'anniversaire respire en 2 s : 1 s pour chaque sens (06-arbre.md). */
     breathHalfCycle: 1000,
     breathLowOpacity: 0.45,
+    /**
+     * Dessin de l'arbre (T-017, Skia), qui ne passe pas par le composant. Pointillés d'un lien
+     * supposé : 6 et 7 (06-arbre.md). Doigt déplacé de 8 pixels avant que le déplacement ne démarre.
+     * Le signe « + » d'une place à compléter fait le tiers du rayon de chaque côté. Lignes de base
+     * du texte, en fraction de la hauteur de ligne ou de la taille de la police : centré sur un
+     * point, bas d'un prénom, haut d'une ligne secondaire, mention.
+     */
+    drawing: {
+      supposedDash: [6, 7],
+      panMinDistance: 8,
+      plusRadiusRatio: 1 / 3,
+      baseline: { centered: 0.35, name: 0.25, secondary: 0.8, mark: 0.3 },
+    },
   },
   privacyNote: {
     /** Icône de 16 px à gauche du texte (README de MentionPrivee). */
