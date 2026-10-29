@@ -171,5 +171,72 @@
       "unknownRelation": "To complete"
     },
     "backHint": "Returns to the previous screen."
+  },
+  "profile": {
+    "title": "Profile",
+    "loading": "Opening the profile…",
+    "notFound": "This profile is not available on this phone.",
+    "failed": "The profile cannot open right now. Go back, then try again.",
+    "unknownName": "Unknown",
+    "placeholderNote": "This person is part of the family, but their identity is not known yet.",
+    "sections": {
+      "identity": "Identity",
+      "life": "Life",
+      "residences": "Places lived",
+      "occupations": "Occupation",
+      "names": "Names",
+      "notes": "Notes"
+    },
+    "fields": {
+      "gender": "Gender",
+      "birth": "Birth",
+      "death": "Death",
+      "place": "Place: {place}",
+      "birthNameToComplete": "To complete",
+      "unknownDate": "Date unknown",
+      "unknownPlace": "Place unknown"
+    },
+    "genders": {
+      "female": "Woman",
+      "male": "Man",
+      "other": "Other"
+    },
+    "nameTypes": {
+      "birth": "Birth name",
+      "usage": "Name in use",
+      "nickname": "Nickname",
+      "variant": "Spelling variant",
+      "title": "Title",
+      "former": "Former first name"
+    },
+    "multipleBirth": {
+      "twins": "Twins",
+      "triplets": "Triplets",
+      "quadruplets": "Quadruplets",
+      "multiple": "Multiple birth",
+      "with": "With {names}",
+      "order": "Birth order: {order}"
+    },
+    "list": {
+      "and": "{list} and {last}"
+    },
+    "period": {
+      "range": "from {start} to {end}",
+      "since": "since {start}",
+      "until": "until {end}"
+    },
+    "titleWithPeriod": "{label}, {period}",
+    "dates": {
+      "about": "around {date}",
+      "before": "before {date}",
+      "after": "after {date}",
+      "between": "between {from} and {to}",
+      "decade": "the {year}s",
+      "hijri": "{year} (Hijri calendar)"
+    },
+    "privacy": {
+      "family": "Visible to the “{tree}” tree"
+    },
+    "backHint": "Returns to the previous screen."
   }
 }

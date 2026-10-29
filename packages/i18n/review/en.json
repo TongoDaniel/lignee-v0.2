@@ -290,6 +290,147 @@
   "common:privacy.onlyYou": {
     "status": "to-review"
   },
+  "common:profile.backHint": {
+    "status": "to-review"
+  },
+  "common:profile.dates.about": {
+    "status": "to-review"
+  },
+  "common:profile.dates.after": {
+    "status": "to-review"
+  },
+  "common:profile.dates.before": {
+    "status": "to-review"
+  },
+  "common:profile.dates.between": {
+    "status": "to-review"
+  },
+  "common:profile.dates.decade": {
+    "status": "to-review"
+  },
+  "common:profile.dates.hijri": {
+    "status": "to-review"
+  },
+  "common:profile.failed": {
+    "status": "to-review"
+  },
+  "common:profile.fields.birth": {
+    "status": "to-review"
+  },
+  "common:profile.fields.birthNameToComplete": {
+    "status": "to-review"
+  },
+  "common:profile.fields.death": {
+    "status": "to-review"
+  },
+  "common:profile.fields.gender": {
+    "status": "to-review"
+  },
+  "common:profile.fields.place": {
+    "status": "to-review"
+  },
+  "common:profile.fields.unknownDate": {
+    "status": "to-review"
+  },
+  "common:profile.fields.unknownPlace": {
+    "status": "to-review"
+  },
+  "common:profile.genders.female": {
+    "status": "to-review"
+  },
+  "common:profile.genders.male": {
+    "status": "to-review"
+  },
+  "common:profile.genders.other": {
+    "status": "to-review"
+  },
+  "common:profile.list.and": {
+    "status": "to-review"
+  },
+  "common:profile.loading": {
+    "status": "to-review"
+  },
+  "common:profile.multipleBirth.multiple": {
+    "status": "to-review"
+  },
+  "common:profile.multipleBirth.order": {
+    "status": "to-review"
+  },
+  "common:profile.multipleBirth.quadruplets": {
+    "status": "to-review"
+  },
+  "common:profile.multipleBirth.triplets": {
+    "status": "to-review"
+  },
+  "common:profile.multipleBirth.twins": {
+    "status": "to-review"
+  },
+  "common:profile.multipleBirth.with": {
+    "status": "to-review"
+  },
+  "common:profile.nameTypes.birth": {
+    "status": "to-review"
+  },
+  "common:profile.nameTypes.former": {
+    "status": "to-review"
+  },
+  "common:profile.nameTypes.nickname": {
+    "status": "to-review"
+  },
+  "common:profile.nameTypes.title": {
+    "status": "to-review"
+  },
+  "common:profile.nameTypes.usage": {
+    "status": "to-review"
+  },
+  "common:profile.nameTypes.variant": {
+    "status": "to-review"
+  },
+  "common:profile.notFound": {
+    "status": "to-review"
+  },
+  "common:profile.period.range": {
+    "status": "to-review"
+  },
+  "common:profile.period.since": {
+    "status": "to-review"
+  },
+  "common:profile.period.until": {
+    "status": "to-review"
+  },
+  "common:profile.placeholderNote": {
+    "status": "to-review"
+  },
+  "common:profile.privacy.family": {
+    "status": "to-review"
+  },
+  "common:profile.sections.identity": {
+    "status": "to-review"
+  },
+  "common:profile.sections.life": {
+    "status": "to-review"
+  },
+  "common:profile.sections.names": {
+    "status": "to-review"
+  },
+  "common:profile.sections.notes": {
+    "status": "to-review"
+  },
+  "common:profile.sections.occupations": {
+    "status": "to-review"
+  },
+  "common:profile.sections.residences": {
+    "status": "to-review"
+  },
+  "common:profile.title": {
+    "status": "to-review"
+  },
+  "common:profile.titleWithPeriod": {
+    "status": "to-review"
+  },
+  "common:profile.unknownName": {
+    "status": "to-review"
+  },
   "common:tree.personJoined": {
     "status": "to-review"
   },

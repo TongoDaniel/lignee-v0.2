@@ -171,5 +171,72 @@
       "unknownRelation": "À compléter"
     },
     "backHint": "Revient à l’écran précédent."
+  },
+  "profile": {
+    "title": "Fiche",
+    "loading": "Ouverture de la fiche…",
+    "notFound": "Cette fiche n’est pas disponible sur ce téléphone.",
+    "failed": "La fiche ne s’ouvre pas pour le moment. Revenez en arrière, puis réessayez.",
+    "unknownName": "Inconnu",
+    "placeholderNote": "Cette personne fait partie de la famille, mais son identité n’est pas encore connue.",
+    "sections": {
+      "identity": "Identité",
+      "life": "Vie",
+      "residences": "Lieux de vie",
+      "occupations": "Profession",
+      "names": "Noms",
+      "notes": "Notes"
+    },
+    "fields": {
+      "gender": "Genre",
+      "birth": "Naissance",
+      "death": "Décès",
+      "place": "Lieu : {place}",
+      "birthNameToComplete": "À compléter",
+      "unknownDate": "Date inconnue",
+      "unknownPlace": "Lieu inconnu"
+    },
+    "genders": {
+      "female": "Femme",
+      "male": "Homme",
+      "other": "Autre"
+    },
+    "nameTypes": {
+      "birth": "Nom de naissance",
+      "usage": "Nom d’usage",
+      "nickname": "Surnom",
+      "variant": "Variante d’écriture",
+      "title": "Titre",
+      "former": "Ancien prénom"
+    },
+    "multipleBirth": {
+      "twins": "Jumeaux",
+      "triplets": "Triplés",
+      "quadruplets": "Quadruplés",
+      "multiple": "Naissance multiple",
+      "with": "Avec {names}",
+      "order": "Ordre de naissance : {order}"
+    },
+    "list": {
+      "and": "{list} et {last}"
+    },
+    "period": {
+      "range": "de {start} à {end}",
+      "since": "depuis {start}",
+      "until": "jusqu’à {end}"
+    },
+    "titleWithPeriod": "{label}, {period}",
+    "dates": {
+      "about": "vers {date}",
+      "before": "avant {date}",
+      "after": "après {date}",
+      "between": "entre {from} et {to}",
+      "decade": "années {year}",
+      "hijri": "{year} (calendrier hégirien)"
+    },
+    "privacy": {
+      "family": "Visible par l’arbre « {tree} »"
+    },
+    "backHint": "Revient à l’écran précédent."
   }
 }

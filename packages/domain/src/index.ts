@@ -7,6 +7,7 @@ export * from './fuzzy-date';
 export * from './ids';
 export * from './mutation';
 export * from './person';
+export * from './profile';
 export * from './place';
 export * from './schemas';
 export * from './tree';
