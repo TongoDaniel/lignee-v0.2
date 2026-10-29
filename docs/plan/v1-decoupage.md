@@ -573,6 +573,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - PAR-10 (partie : choix des deux fiches dans l'arbre ; la recherche arrive avec T-038) : « Choisir deux fiches dans la recherche suffit »
   - Chemin surligné en or (`chemin`).
   - Obligations reçues des relectures : ADR 0020 (le contexte d'alliance vient de l'arbre filtré).
+  - Obligations reçues des relectures (T-026, ADR 0031, Conséquences) : les noms passés aux mots des liens (`nameOf` de `describeLink`) viennent de `chooseDisplayName` de `@lignee/domain`, appliqué aux seuls noms de l'instantané du lecteur : jamais un ancien prénom, jamais une personne qu'il ne voit pas. Un texte de lien construit avec le nom d'usage « moi seul » d'un auteur ne sert qu'à cet auteur (jamais une notification, un export partagé, le contexte de la voix d'un autre lecteur, un journal). Le contexte d'alliance se construit depuis le même arbre filtré que le graphe, pas comme les tests de `packages/kinship/src/words.test.ts` (arbre non filtré).
 - Cas limites : aucun en propre.
 - Dépend de : T-017, T-024, T-027, T-028.
 - Agent : ecrans-lignee.
@@ -864,6 +865,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
     - Question de produit pour Daniel (CL-FAM-03) : une adoption tenue secrète se projette-t-elle en « naissance » pour l'enfant (comme CL-FAM-14) ou en « lien non disponible », ou une autre règle de visibilité au choix (ligne CL-FAM-03 du cahier) ? T-052 fournira `test/scenarios/CL-FAM-03.yaml` (relecture gardien-confidentialite de T-022, hors ADR).
     - Si la certitude ou le type non biologique d'une filiation visible deviennent masquables à part (CON-03), la projection les réécrit avant de construire le graphe (relecture gardien-confidentialite de T-022, hors ADR).
     - Exports, notifications et contexte voix construits depuis la présentation d'un auteur (« moi seul ») ne partent jamais vers un autre lecteur (relecture gardien-confidentialite de T-022, hors ADR).
+    - Mots des liens (T-026, ADR 0031, Conséquences) : la forme expliquée rend lisibles la mention « distincte de » (« fils de votre père et d'un autre parent »), la fin d'une union (« union terminée », y compris par un décès masqué lu dans le statut vital), son motif et sa date, la nature non biologique et la certitude d'une filiation. Ce qui est masquable pour un lecteur est réécrit par la projection avant le calcul.
     - ADR 0017, Conséquences, dernier point : la mention « distincte de » sur la mère à compléter d'un enfant peut trahir une paternité ou maternité tenue secrète. À trancher en T-052.
     - ADR 0021, point 8 : le modèle garde le type antérieur de la filiation (champ de la filiation, ou entrée d'historique UNI-19 rattachée au test ADN). À trancher en T-052 ; c'est la condition de l'obligation CL-FAM-14.
     - ADR 0017, synchronisation montante : une mention reçue vers une personne que le rédacteur ne voit pas est refusée comme inexistante (appliquée côté serveur par T-060).
@@ -1338,6 +1340,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - VOX-17 : « Une personne masquée n'est jamais comptée ni nommée »
   - VOX-24 : « Fonctionne sans réseau »
   - PAR-07 (partie voix ; voir doute section 4) : « « Ajoute un souvenir avec Maman Fatou » trouve la bonne fiche »
+  - Obligations reçues des relectures (T-026, ADR 0031, Conséquences) : lecture à voix haute, réponses et contexte de la voix utilisent le même résolveur de noms que T-029 ; les noms passés aux mots des liens (`nameOf` de `describeLink`) viennent de `chooseDisplayName` de `@lignee/domain`, appliqué aux seuls noms de l'instantané du lecteur : jamais un ancien prénom, jamais une personne qu'il ne voit pas. Un texte de lien construit avec le nom d'usage « moi seul » d'un auteur ne sert qu'à cet auteur (jamais une notification, un export partagé, le contexte de la voix d'un autre lecteur, un journal).
 - Cas limites : CL-VOI-24.
 - Dépend de : T-029, T-041, T-079.
 - Agent : pipeline-vocal, avec ecrans-lignee ; relecture gardien-confidentialite.
