@@ -96,3 +96,29 @@ export function foyerMembers(centerId: Id, union: OutlineUnion): ReadonlySet<Id>
   if (union.partnerId !== undefined) members.add(union.partnerId);
   return members;
 }
+
+/**
+ * Ancêtres de naissance de la personne au centre sur `depth` générations (2 : parents puis
+ * grands-parents), les parents d'abord, chacun une fois. Ce sont les branches que l'on propose :
+ * pas les oncles, ni les conjoints des parents.
+ */
+export function ancestorRoots(graph: LayoutGraph, centerId: Id, depth: number): readonly Id[] {
+  const { parentsOf } = birthLinks(graph);
+  const roots: Id[] = [];
+  const seen = new Set<Id>([centerId]);
+  let generation: readonly Id[] = [centerId];
+  for (let step = 0; step < depth; step += 1) {
+    const next: Id[] = [];
+    for (const id of generation) {
+      for (const parent of parentsOf.get(id) ?? []) {
+        if (!seen.has(parent)) {
+          seen.add(parent);
+          next.push(parent);
+        }
+      }
+    }
+    roots.push(...next);
+    generation = next;
+  }
+  return roots;
+}

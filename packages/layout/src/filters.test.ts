@@ -9,7 +9,7 @@ import {
 } from '@lignee/domain/test-support';
 import { describe, expect, it } from 'vitest';
 
-import { branchMembers, foyerMembers, sideMembers, sideRoots } from './filters';
+import { ancestorRoots, branchMembers, foyerMembers, sideMembers, sideRoots } from './filters';
 import { buildOutline } from './scene/outline';
 import { withoutPeople } from './test-support/layout-scenario';
 import { layoutTree } from './tree-layout';
@@ -151,5 +151,35 @@ describe('branche et foyer (ARB-11)', () => {
     expect(union).toBeDefined();
     if (union === undefined) return;
     expect(keys(scenario, foyerMembers(me, union))).toEqual(['maman', 'moi', 'papa', 'soeur']);
+  });
+});
+
+describe('ancêtres proposés comme branches', () => {
+  it('parents puis grands-parents de naissance, chacun une fois, sans oncles ni conjoints', () => {
+    const scenario = tree(FAMILY);
+    const roots = (depth: number) =>
+      ancestorRoots(scenario.data, scenario.id('moi'), depth).map((id) => scenario.keyOf(id));
+    expect(roots(1)).toEqual(['papa', 'maman']);
+    expect(roots(2)).toEqual(['papa', 'maman', 'gpp', 'gmp', 'gpm', 'gmm']);
+    expect(roots(0)).toEqual([]);
+  });
+
+  it('un ancêtre atteint par deux chemins n’est proposé qu’une fois, un masqué jamais', () => {
+    const scenario = tree({
+      personnes: ['moi/N', 'a/M', 'b/F', 'g/M'],
+      filiations: [
+        { parents: ['a', 'b'], enfant: 'moi' },
+        { parents: ['g'], enfant: 'a' },
+        { parents: ['g'], enfant: 'b' },
+      ],
+    });
+    const me = scenario.id('moi');
+    expect(ancestorRoots(scenario.data, me, 2).map((id) => scenario.keyOf(id))).toEqual([
+      'a',
+      'b',
+      'g',
+    ]);
+    const reader = withoutPeople(scenario.data, new Set([scenario.id('g')]));
+    expect(ancestorRoots(reader, me, 2).map((id) => scenario.keyOf(id))).toEqual(['a', 'b']);
   });
 });
