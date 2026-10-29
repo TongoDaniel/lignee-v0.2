@@ -163,7 +163,7 @@ paires:
         cote_de: { par: min, cote: father }
         fr:
           court: "tante par votre père"
-          explique: "sœur de votre père, Min"
+          explique: "sœur de Min, votre père"
         en: à rédiger
   - id: F08-10
     de: nem
@@ -200,7 +200,7 @@ paires:
         cote_de: { par: nii, cote: father }
         fr:
           court: "épouse de votre père"
-          explique: "épouse de votre père, Nii"
+          explique: "épouse de Nii, votre père"
         en: à rédiger
   - id: F08-13
     de: kweyuette
@@ -224,7 +224,7 @@ paires:
         cote_de: { par: tchio, cote: mother }
         fr:
           court: "grand-père par votre mère"
-          explique: "père de votre mère, Tchio"
+          explique: "père de Tchio, votre mère"
         en: à rédiger
   - id: F08-15
     de: inconnue7
@@ -236,7 +236,7 @@ paires:
         alliance: { type: parent_of_spouse }
         fr:
           court: "beau-père"
-          explique: "père de votre mari, Nem"
+          explique: "père de Nem, votre mari"
         en: à rédiger
   - id: F08-16
     de: tindon

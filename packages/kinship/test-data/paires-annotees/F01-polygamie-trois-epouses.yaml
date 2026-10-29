@@ -131,7 +131,7 @@ paires:
         cote_de: { par: ben, cote: father }
         fr:
           court: "épouse de votre père"
-          explique: "épouse de votre père, Ben, en même temps que votre mère"
+          explique: "épouse de Ben, votre père, en même temps que votre mère"
         en: à rédiger
   - id: F01-08
     de: kwoa
@@ -143,7 +143,7 @@ paires:
         alliance: { type: co_spouse, simultaneite: simultaneous }
         fr:
           court: "co-épouse"
-          explique: "autre épouse de votre mari, Ben, en même temps que vous"
+          explique: "autre épouse de Ben, votre mari, en même temps que vous"
         en: à rédiger
   - id: F01-09
     de: mbuou
@@ -155,7 +155,7 @@ paires:
         alliance: { type: co_spouse, simultaneite: simultaneous }
         fr:
           court: "co-épouse"
-          explique: "autre épouse de votre mari, Ben, en même temps que vous"
+          explique: "autre épouse de Ben, votre mari, en même temps que vous"
         en: à rédiger
   - id: F01-10
     de: bapouou
@@ -167,7 +167,7 @@ paires:
         alliance: { type: spouse_of_spouse, simultaneite: successive }
         fr:
           court: "autre mari de votre épouse"
-          explique: "autre mari de votre épouse, Kwoa, à une autre période que vous"
+          explique: "autre mari de Kwoa, votre épouse, à une autre période que vous"
         en: à rédiger
   - id: F01-11
     de: lepae
@@ -194,7 +194,7 @@ paires:
         cote_de: { par: ben, cote: father }
         fr:
           court: "épouse de votre père"
-          explique: "épouse de votre père, Ben"
+          explique: "épouse de Ben, votre père"
         en: à rédiger
   - id: F01-13
     de: kaou
@@ -245,7 +245,7 @@ paires:
         cote_de: { par: finae, cote: father }
         fr:
           court: "grand-père par votre père"
-          explique: "père de votre père, Finae"
+          explique: "père de Finae, votre père"
         en: à rédiger
   - id: F01-17
     de: tcheou
@@ -270,7 +270,7 @@ paires:
         alliance: { type: parent_of_spouse }
         fr:
           court: "belle-mère"
-          explique: "mère de votre mari, Finae"
+          explique: "mère de Finae, votre mari"
         en: à rédiger
   - id: F01-19
     de: ben
@@ -282,7 +282,7 @@ paires:
         alliance: { type: spouse_of_child }
         fr:
           court: "bru"
-          explique: "épouse de votre fils, Finae"
+          explique: "épouse de Finae, votre fils"
         en: à rédiger
   - id: F01-20
     de: paine

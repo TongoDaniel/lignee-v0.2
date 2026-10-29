@@ -57,7 +57,7 @@
       "of": "{gender, select, male {adoptive father {of}} female {adoptive mother {of}} other {adoptive parent {of}}}",
       "theOf": "{gender, select, male {the adoptive father {of}} female {the adoptive mother {of}} other {the adoptive parent {of}}}",
       "ofOf": "{gender, select, male {of the adoptive father {of}} female {of the adoptive mother {of}} other {of the adoptive parent {of}}}",
-      "explained": "{youGender, select, female {person who adopted you} other {person who adopted you}}"
+      "explained": "{gender, select, male {your adoptive father, by adoption} female {your adoptive mother, by adoption} other {your adoptive parent, by adoption}}"
     },
     "adoptiveChild": {
       "you": "{gender, select, male {adopted son} female {adopted daughter} other {adopted child}}",
@@ -66,7 +66,7 @@
       "of": "{gender, select, male {adopted son {of}} female {adopted daughter {of}} other {adopted child {of}}}",
       "theOf": "{gender, select, male {the adopted son {of}} female {the adopted daughter {of}} other {the adopted child {of}}}",
       "ofOf": "{gender, select, male {of the adopted son {of}} female {of the adopted daughter {of}} other {of the adopted child {of}}}",
-      "explained": "{gender, select, female {child you adopted} other {child you adopted}}"
+      "explained": "{gender, select, male {your adopted son, by adoption} female {your adopted daughter, by adoption} other {your adopted child, by adoption}}"
     },
     "raisedBy": {
       "you": "{youGender, select, female {person who raised you} other {person who raised you}}",
@@ -161,14 +161,14 @@
   },
   "term": {
     "uncle": {
-      "you": "{generations, plural, =1 {{gender, select, female {aunt} other {uncle}}} =2 {{gender, select, female {great-aunt} other {great-uncle}}} other {{gender, select, female {great-great-aunt} other {great-great-uncle}}}}",
-      "yourThe": "{generations, plural, =1 {{gender, select, female {your aunt} other {your uncle}}} =2 {{gender, select, female {your great-aunt} other {your great-uncle}}} other {{gender, select, female {your great-great-aunt} other {your great-great-uncle}}}}",
-      "yourOf": "{generations, plural, =1 {{gender, select, female {of your aunt} other {of your uncle}}} =2 {{gender, select, female {of your great-aunt} other {of your great-uncle}}} other {{gender, select, female {of your great-great-aunt} other {of your great-great-uncle}}}}"
+      "you": "{generations, plural, =1 {{gender, select, female {aunt} other {uncle}}} =2 {{gender, select, female {great-aunt} other {great-uncle}}} =3 {{gender, select, female {great-great-aunt} other {great-great-uncle}}} other {{gender, select, female {great-great-great-aunt} other {great-great-great-uncle}}}}",
+      "yourThe": "{generations, plural, =1 {{gender, select, female {your aunt} other {your uncle}}} =2 {{gender, select, female {your great-aunt} other {your great-uncle}}} =3 {{gender, select, female {your great-great-aunt} other {your great-great-uncle}}} other {{gender, select, female {your great-great-great-aunt} other {your great-great-great-uncle}}}}",
+      "yourOf": "{generations, plural, =1 {{gender, select, female {of your aunt} other {of your uncle}}} =2 {{gender, select, female {of your great-aunt} other {of your great-uncle}}} =3 {{gender, select, female {of your great-great-aunt} other {of your great-great-uncle}}} other {{gender, select, female {of your great-great-great-aunt} other {of your great-great-great-uncle}}}}"
     },
     "nephew": {
-      "you": "{generations, plural, =1 {{gender, select, female {niece} other {nephew}}} =2 {{gender, select, female {grandniece} other {grandnephew}}} other {{gender, select, female {great-grandniece} other {great-grandnephew}}}}",
-      "yourThe": "{generations, plural, =1 {{gender, select, female {your niece} other {your nephew}}} =2 {{gender, select, female {your grandniece} other {your grandnephew}}} other {{gender, select, female {your great-grandniece} other {your great-grandnephew}}}}",
-      "yourOf": "{generations, plural, =1 {{gender, select, female {of your niece} other {of your nephew}}} =2 {{gender, select, female {of your grandniece} other {of your grandnephew}}} other {{gender, select, female {of your great-grandniece} other {of your great-grandnephew}}}}"
+      "you": "{generations, plural, =1 {{gender, select, female {niece} other {nephew}}} =2 {{gender, select, female {grandniece} other {grandnephew}}} =3 {{gender, select, female {great-grandniece} other {great-grandnephew}}} other {{gender, select, female {great-great-grandniece} other {great-great-grandnephew}}}}",
+      "yourThe": "{generations, plural, =1 {{gender, select, female {your niece} other {your nephew}}} =2 {{gender, select, female {your grandniece} other {your grandnephew}}} =3 {{gender, select, female {your great-grandniece} other {your great-grandnephew}}} other {{gender, select, female {your great-great-grandniece} other {your great-great-grandnephew}}}}",
+      "yourOf": "{generations, plural, =1 {{gender, select, female {of your niece} other {of your nephew}}} =2 {{gender, select, female {of your grandniece} other {of your grandnephew}}} =3 {{gender, select, female {of your great-grandniece} other {of your great-grandnephew}}} other {{gender, select, female {of your great-great-grandniece} other {of your great-great-grandnephew}}}}"
     },
     "firstCousin": {
       "you": "{gender, select, female {first cousin} other {first cousin}}",
@@ -287,7 +287,7 @@
     "samePerson": "Same person"
   },
   "withSide": "{term} {side}",
-  "named": "{phrase}, {name}",
+  "parentNamed": "{parent} {name}",
   "nameOf": "{initial, select, vowel {of {name}} other {of {name}}}",
   "also": "also: {link}"
 }

@@ -226,8 +226,8 @@ export interface MessageParams {
   'kinship:explained.spouseEnded': { readonly reason: string | number; readonly spouse: string | number };
   'kinship:explained.spouseNoEnd': { readonly spouse: string | number };
   'kinship:explained.whoNamed': { readonly name: string | number; readonly rest: string | number };
-  'kinship:named': { readonly name: string | number; readonly phrase: string | number };
   'kinship:nameOf': { readonly initial: string | number; readonly name: string | number };
+  'kinship:parentNamed': { readonly name: string | number; readonly parent: string | number };
   'kinship:result.incomplete': null;
   'kinship:result.none': null;
   'kinship:result.samePerson': null;
@@ -240,7 +240,7 @@ export interface MessageParams {
   'kinship:step.adoptiveChild.you': { readonly gender: string | number };
   'kinship:step.adoptiveChild.yourOf': { readonly gender: string | number };
   'kinship:step.adoptiveChild.yourThe': { readonly gender: string | number };
-  'kinship:step.adoptiveParent.explained': { readonly youGender: string | number };
+  'kinship:step.adoptiveParent.explained': { readonly gender: string | number };
   'kinship:step.adoptiveParent.of': { readonly gender: string | number; readonly of: string | number };
   'kinship:step.adoptiveParent.ofOf': { readonly gender: string | number; readonly of: string | number };
   'kinship:step.adoptiveParent.theOf': { readonly gender: string | number; readonly of: string | number };

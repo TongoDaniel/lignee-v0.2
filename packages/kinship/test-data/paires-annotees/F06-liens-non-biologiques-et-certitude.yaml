@@ -94,7 +94,7 @@ paires:
         cote_de: { par: kie, cote: father, type: adoptive }
         fr:
           court: "père adoptif"
-          explique: "personne qui vous a adoptée"
+          explique: "votre père adoptif, par adoption"
         en: à rédiger
   - id: F06-03
     de: kie
@@ -107,7 +107,7 @@ paires:
         cote_vers: { par: kie, cote: father, type: adoptive }
         fr:
           court: "fille adoptive"
-          explique: "enfant que vous avez adoptée"
+          explique: "votre fille adoptive, par adoption"
         en: à rédiger
   - id: F06-04
     de: tsouette
@@ -145,7 +145,7 @@ paires:
         cote_de: { par: gae, cote: mother }
         fr:
           court: "mari de votre mère"
-          explique: "mari de votre mère, Gae, à une autre période que votre père"
+          explique: "mari de Gae, votre mère, à une autre période que votre père"
         en: à rédiger
   - id: F06-07
     de: tilei
@@ -208,7 +208,7 @@ paires:
         base: [fostered]
         fr:
           court: "fils de la personne à qui vous êtes confié"
-          explique: "fils de la personne à qui vous êtes confié, Kie"
+          explique: "fils de Kie, la personne à qui vous êtes confié"
         en: à rédiger
   - id: F06-12
     de: djoe
@@ -234,7 +234,7 @@ paires:
         cote_de: { par: kie, cote: parent, type: fostered }
         fr:
           court: "épouse de la personne à qui vous êtes confié"
-          explique: "épouse de la personne à qui vous êtes confié, Kie"
+          explique: "épouse de Kie, la personne à qui vous êtes confié"
         en: à rédiger
   - id: F06-14
     de: hun
@@ -298,7 +298,7 @@ paires:
         cote_de: { par: kie, cote: father }
         fr:
           court: "Peut-être votre grand-père par votre père"
-          explique: "père de votre père, Kie (lien probable, à confirmer)"
+          explique: "père de Kie, votre père (lien probable, à confirmer)"
         en: à rédiger
   - id: F06-19
     de: kie
@@ -324,7 +324,7 @@ paires:
         cote_de: { par: gae, cote: mother }
         fr:
           court: "Hypothèse : votre grand-mère par votre mère"
-          explique: "mère de votre mère, Gae (hypothèse, à vérifier)"
+          explique: "mère de Gae, votre mère (hypothèse, à vérifier)"
         en: à rédiger
   - id: F06-21
     de: nayoun
@@ -375,7 +375,7 @@ paires:
         cote_de: { par: leette, cote: parent, type: adoptive }
         fr:
           court: "mère adoptive"
-          explique: "personne qui vous a adoptée"
+          explique: "votre mère adoptive, par adoption"
         en: à rédiger
   - id: F06-25
     de: mbupea
@@ -388,7 +388,7 @@ paires:
         cote_de: { par: maette, cote: mother }
         fr:
           court: "épouse de votre mère"
-          explique: "épouse de votre mère, Maette"
+          explique: "épouse de Maette, votre mère"
         en: à rédiger
   - id: F06-26
     de: tilei

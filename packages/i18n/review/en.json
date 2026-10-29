@@ -671,10 +671,10 @@
   "kinship:explained.whoNamed": {
     "status": "to-review"
   },
-  "kinship:named": {
+  "kinship:nameOf": {
     "status": "to-review"
   },
-  "kinship:nameOf": {
+  "kinship:parentNamed": {
     "status": "to-review"
   },
   "kinship:result.incomplete": {

@@ -31,9 +31,13 @@ export interface WordsContext {
   graph: KinshipGraph;
   t: Translate;
   /**
-   * Nom affiché d'une personne pour le lecteur (nom d'usage compris, PAR-07), s'il en a un ;
-   * `undefined` pour une place à compléter ou une personne sans nom. Sert à la forme expliquée
-   * (« fils de votre père et de Mama Rose ») et au côté « par votre parent Veo ».
+   * Nom affiché d'une personne pour le lecteur, s'il en a un ; `undefined` pour une place à
+   * compléter ou une personne sans nom. Sert à la forme expliquée (« fils de votre père et de
+   * Mama Rose ») et au côté « par votre parent Veo ». Obligation de l'appelant (relecture
+   * gardien-confidentialite, ADR 0031) : le nom vient de `chooseDisplayName` de @lignee/domain,
+   * appliqué aux seuls noms de l'instantané du lecteur (nom d'usage compris, PAR-07) ; jamais un
+   * ancien prénom, jamais un nom que le lecteur ne voit pas. Un texte construit avec le nom
+   * d'usage « moi seul » d'un auteur ne sert qu'à cet auteur.
    */
   nameOf?: (personId: Id) => string | undefined;
 }
@@ -205,12 +209,20 @@ function nameOfPhrase(context: WordsContext, name: string): string {
 
 function sideText(context: WordsContext, side: LineSide, you: WordGender): string {
   if (side.type !== 'birth') {
+    // Un parent adoptif a le côté de l'ADR 0017 (point 6 : « parent » pour deux mères) ; les
+    // autres liens se disent par « la personne qui… », ou tuteur, donneur, selon son genre.
     const parent = say(context, `kinship:step.${UP[side.type]}.yourThe` as const, {
-      gender: genderOf(context, side.parentId),
+      gender: side.type === 'adoptive' ? SIDE_GENDER[side.side] : genderOf(context, side.parentId),
       youGender: you,
       generations: 1,
     });
-    return say(context, 'kinship:side.plain', { parent });
+    const adoptiveName =
+      side.type === 'adoptive' && side.side === 'parent'
+        ? context.nameOf?.(side.parentId)
+        : undefined;
+    return adoptiveName === undefined
+      ? say(context, 'kinship:side.plain', { parent })
+      : say(context, 'kinship:side.named', { parent, name: adoptiveName });
   }
   const parent = say(context, 'kinship:step.ancestor.yourThe', {
     generations: 1,
@@ -261,9 +273,14 @@ function chainText(
     of = chainText(context, rest, 'of', you);
     who = chainText(context, rest, 'the', you);
   } else if (rest.length === 1) {
-    // « fille de votre fille, Nesoine »
-    of = say(context, 'kinship:named', { phrase: renderYou(context, previous, 'of', you), name });
-    who = say(context, 'kinship:named', { phrase: renderYou(context, previous, 'the', you), name });
+    // « fille de Nesoine, votre fille » : le nom avant la chaîne, jamais après (« père de votre
+    // père, Seloi » se lirait comme si le grand-père s'appelait Seloi).
+    const anchor = renderYou(context, previous, 'the', you);
+    of = say(context, 'kinship:explained.ofNamed', {
+      nameOf: nameOfPhrase(context, name),
+      rest: anchor,
+    });
+    who = say(context, 'kinship:explained.whoNamed', { name, rest: anchor });
   } else {
     // « fille de Vie, sœur de votre père »
     const restBare = chainText(context, rest, 'bare', you);
@@ -374,8 +391,8 @@ function compoundTerm(
   if (!birthAfterFirst || genderOf(context, segment.toId) === 'other') return undefined;
   const term = (name: Term, generations = 1): Element =>
     withSide({ kind: 'term', name, personId: segment.toId, generations });
-  if (down === 1 && up <= 4) return term('uncle', up - 1);
-  if (up === 1 && down <= 4) return term('nephew', down - 1);
+  if (down === 1 && up <= 5) return term('uncle', up - 1);
+  if (up === 1 && down <= 5) return term('nephew', down - 1);
   if (up === 2 && down === 2) {
     return term(segment.commonAncestors.length >= 2 ? 'firstCousin' : 'cousin');
   }
@@ -467,7 +484,7 @@ function yourParent(
     youGender: you,
   });
   const name = side === 'parent' ? context.nameOf?.(parentId) : undefined;
-  return name === undefined ? parent : `${parent} ${name}`;
+  return name === undefined ? parent : say(context, 'kinship:parentNamed', { parent, name });
 }
 
 function siblingShort(context: WordsContext, link: PresentedLink, slot: Slot): string {
@@ -626,7 +643,7 @@ function otherParentOfYou(context: WordsContext, childId: Id, parentId: Id): str
     gender: SIDE_GENDER[side],
   });
   const name = side === 'parent' ? context.nameOf?.(parentId) : undefined;
-  return name === undefined ? parent : `${parent} ${name}`;
+  return name === undefined ? parent : say(context, 'kinship:parentNamed', { parent, name });
 }
 
 const TIMING_KEYS = {

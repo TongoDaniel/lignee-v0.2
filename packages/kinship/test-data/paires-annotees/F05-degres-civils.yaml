@@ -57,7 +57,7 @@ paires:
         cote_de: { par: seloi, cote: father }
         fr:
           court: "grand-père par votre père"
-          explique: "père de votre père, Seloi"
+          explique: "père de Seloi, votre père"
         en: à rédiger
   - id: F05-02
     de: yon
@@ -117,7 +117,7 @@ paires:
         cote_de: { par: seloi, cote: father }
         fr:
           court: "tante par votre père"
-          explique: "sœur de votre père, Seloi"
+          explique: "sœur de Seloi, votre père"
         en: à rédiger
   - id: F05-07
     de: nesoine
@@ -129,7 +129,7 @@ paires:
         cote_de: { par: vie, cote: mother }
         fr:
           court: "oncle par votre mère"
-          explique: "frère de votre mère, Vie"
+          explique: "frère de Vie, votre mère"
         en: à rédiger
   - id: F05-08
     de: yon
@@ -165,7 +165,7 @@ paires:
         cote_vers: { par: nesoine, cote: mother }
         fr:
           court: "petite-fille"
-          explique: "fille de votre fille, Nesoine"
+          explique: "fille de Nesoine, votre fille"
         en: à rédiger
   - id: F05-11
     de: vie
@@ -254,7 +254,7 @@ paires:
         cote_vers: { par: nesoine, cote: mother }
         fr:
           court: "petite-nièce"
-          explique: "petite-fille de votre sœur, Vie"
+          explique: "petite-fille de Vie, votre sœur"
         en: à rédiger
   - id: F05-18
     de: biwiou
@@ -318,7 +318,7 @@ paires:
         cote_de: { par: veo, cote: parent }
         fr:
           court: "grand-père par votre parent Veo"
-          explique: "père de votre parent, Veo"
+          explique: "père de Veo, votre parent"
         en: à rédiger
   - id: F05-23
     de: yon
@@ -429,7 +429,7 @@ paires:
         cote_vers: { par: soou, cote: father }
         fr:
           court: "neveu"
-          explique: "fils de votre frère, Soou"
+          explique: "fils de Soou, votre frère"
         en: à rédiger
   - id: F05-32
     de: soou
@@ -447,7 +447,7 @@ paires:
         cote_vers: { par: soou, cote: father }
         fr:
           court: "petit-neveu"
-          explique: "petit-fils de votre frère, Seloi"
+          explique: "petit-fils de Seloi, votre frère"
         en: à rédiger
   - id: F05-34
     de: tchetea

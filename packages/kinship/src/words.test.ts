@@ -7,14 +7,14 @@
 // - la certitude est dite : « Peut-être » pour un lien probable, « Hypothèse » pour un lien
 //   hypothétique, rien pour un lien certain (PAR-08, UNI-10) ;
 // - une personne visée de genre autre ou non renseigné n'est jamais dite par un nom genré.
-import type { Gender, Id } from '@lignee/domain';
-import type { GeneratedTree } from '@lignee/domain/test-support';
+import type { Gender, Id, Union } from '@lignee/domain';
+import type { GeneratedTree, TreeData } from '@lignee/domain/test-support';
 import { createTranslator } from '@lignee/i18n';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 
 import { createAllianceContext } from './alliance';
-import { createKinshipGraph } from './graph';
+import { createKinshipGraph, type KinshipGraph } from './graph';
 import { presentRelationships, type PresentationResult } from './presentation';
 import { fixture, type Fixture } from './test-support/fixtures';
 import { populatedTreeArbitrary } from './test-support/populated-trees';
@@ -101,14 +101,14 @@ describe('T-026 — alliance (PAR-04, ADR 0020)', () => {
     expect(wordsOf(f, 'aicha', 'fatou')).toEqual([
       {
         short: 'épouse de votre père',
-        explained: 'épouse de votre père, Moussa, en même temps que votre mère',
+        explained: 'épouse de Moussa, votre père, en même temps que votre mère',
       },
     ]);
   });
 
   it('la mère du conjoint : « belle-mère », expliqué « mère de votre mari »', () => {
     expect(wordsOf(f, 'aicha', 'rose')).toEqual([
-      { short: 'belle-mère', explained: 'mère de votre mari, Paul' },
+      { short: 'belle-mère', explained: 'mère de Paul, votre mari' },
     ]);
   });
 
@@ -122,7 +122,7 @@ describe('T-026 — alliance (PAR-04, ADR 0020)', () => {
       {
         short: 'autre épouse de votre mari',
         explained:
-          'autre épouse de votre mari, Moussa\u202f; on ne sait pas encore si c’était en même temps que vous',
+          'autre épouse de Moussa, votre mari\u202f; on ne sait pas encore si c’était en même temps que vous',
       },
     ]);
   });
@@ -191,10 +191,11 @@ describe('T-026 — degré civil et générations décalées (PAR-02)', () => {
     ['a2', 'b1', 'tante par votre père'],
     ['a3', 'b1', 'grand-tante par votre père'],
     ['a4', 'b1', 'arrière-grand-tante par votre père'],
-    ['a5', 'b1', 'cousine au 6e degré par votre père'],
+    ['a5', 'b1', 'arrière-arrière-grand-tante par votre père'],
     ['a1', 'b2', 'nièce'],
     ['a1', 'b3', 'petite-nièce'],
     ['a1', 'b4', 'arrière-petite-nièce'],
+    ['a1', 'b5', 'arrière-arrière-petite-nièce'],
     ['a2', 'b2', 'cousine germaine par votre père'],
     ['a3', 'b2', 'tante à la mode de Bretagne par votre père'],
     ['a2', 'b3', 'nièce à la mode de Bretagne par votre père'],
@@ -247,6 +248,114 @@ describe('T-026 — liens non biologiques et certitude (PAR-06, PAR-08)', () => 
   });
 });
 
+describe('T-026 — genre neutre au-delà de quatre générations, nom avant la chaîne', () => {
+  const f = fixture({
+    personnes: ['g0/M', 'g1/M', 'g2/M', 'g3/M', 'g4/M', 'g5/A'],
+    filiations: [
+      { parents: ['g0'], enfant: 'g1' },
+      { parents: ['g1'], enfant: 'g2' },
+      { parents: ['g2'], enfant: 'g3' },
+      { parents: ['g3'], enfant: 'g4' },
+      { parents: ['g4'], enfant: 'g5' },
+    ],
+  });
+
+  it('« la personne qui descend de vous à la 5e génération », jamais « votre personne… »', () => {
+    expect(short(f, 'g0', 'g5')).toEqual(['personne qui descend de vous à la 5e génération']);
+    const graph = f.graph;
+    const result = presentRelationships(graph, f.id('g0'), f.id('g5'));
+    if (result.status !== 'related') throw new Error('Expected a link');
+    const [link] = result.links;
+    if (link === undefined) throw new Error('Expected a link');
+    // Forme avec déterminant (certitude) : « Peut-être la personne qui descend de vous… ».
+    const probable = { ...link, certainty: 'probable' as const };
+    expect(describeLink(probable, { graph, t: fr.t }).short).toBe(
+      'Peut-être la personne qui descend de vous à la 5e génération',
+    );
+  });
+
+  it('forme expliquée : « père de G1, votre père », le nom avant la chaîne (pas après)', () => {
+    expect(wordsOf(f, 'g2', 'g0')).toEqual([
+      { short: 'grand-père par votre père', explained: 'père de G1, votre père' },
+    ]);
+  });
+});
+
+describe('T-026 — union masquée : mêmes mots que si elle n’avait jamais existé (PAR-09)', () => {
+  // Moussa : Fanta (rang 1), Awa (rang 2, union masquée pour le lecteur), Binta (rang 3), unions
+  // simultanées par réponse gardée ; Ali, fils de Moussa et Fanta.
+  const f = fixture({
+    personnes: ['moussa/M', 'fanta/F', 'awa/F', 'binta/F', 'ali/M'],
+    unions: [
+      { conjoints: ['moussa', 'fanta'], rang_moussa: 1 },
+      { conjoints: ['moussa', 'awa'], rang_moussa: 2 },
+      { conjoints: ['moussa', 'binta'], rang_moussa: 3 },
+    ],
+    filiations: [{ parents: ['moussa', 'fanta'], enfant: 'ali' }],
+    simultaneites: [
+      {
+        unions: [
+          ['moussa', 'fanta'],
+          ['moussa', 'awa'],
+          ['moussa', 'binta'],
+        ],
+        reponse: 'simultanees',
+      },
+    ],
+  });
+  const hidden = f.data.unions.find((u) => u.spouses.some((sp) => sp.personId === f.id('awa')));
+  if (hidden === undefined) throw new Error('Expected the union with Awa');
+  // Le filtre : l'union retirée, et les réponses qui la citent (ADR 0012, point 3).
+  const masked: TreeData = {
+    ...f.data,
+    unions: f.data.unions.filter((u) => u !== hidden),
+    simultaneityAnswers: f.data.simultaneityAnswers.filter(
+      (answer) => !answer.unionIds.includes(hidden.id),
+    ),
+  };
+  // Le même arbre où cette union n'a jamais existé : Binta y est la 2e épouse.
+  const never: TreeData = {
+    ...masked,
+    unions: masked.unions.map((u) =>
+      u.spouses.some((sp) => sp.personId === f.id('binta'))
+        ? {
+            ...u,
+            spouses: u.spouses.map((sp) =>
+              sp.personId === f.id('moussa') ? { ...sp, rank: 2 } : sp,
+            ) as Union['spouses'],
+          }
+        : u,
+    ),
+  };
+  const words = (data: TreeData, a: string, b: string) => {
+    const graph = createKinshipGraph(data);
+    const result = presentRelationships(graph, f.id(a), f.id(b), {
+      allianceContext: createAllianceContext(data),
+    });
+    return describeResult(result, { graph, t: fr.t, nameOf: spyNameOf(graph) });
+  };
+
+  it('forme courte et forme expliquée identiques, sans « 2e épouse » ni trace d’Awa', () => {
+    const people = ['moussa', 'fanta', 'awa', 'binta', 'ali'];
+    let related = 0;
+    for (const a of people) {
+      for (const b of people) {
+        const fromMasked = words(masked, a, b);
+        expect(fromMasked, `${a} → ${b}`).toEqual(words(never, a, b));
+        if (fromMasked.status === 'related') related += 1;
+        const all = JSON.stringify(fromMasked);
+        expect(all).not.toMatch(/2e|rang/u);
+      }
+    }
+    expect(related).toBeGreaterThan(10);
+    // Fanta et Binta restent co-épouses ; Awa n'a plus aucun lien d'alliance visible.
+    expect(words(masked, 'fanta', 'binta')).toMatchObject({
+      links: [{ short: 'co-épouse' }],
+    });
+    expect(words(masked, 'ali', 'awa')).toEqual({ status: 'none', text: 'Lien non disponible' });
+  });
+});
+
 describe('T-026 — réponses sans lien', () => {
   const f = fixture({ personnes: ['a/M', 'b/F'] });
   const words = (result: PresentationResult) => describeResult(result, { graph: f.graph, t: fr.t });
@@ -295,6 +404,20 @@ interface Checked {
   gender: Gender | undefined;
 }
 
+/**
+ * Nom d'une personne, qui échoue si on lui demande une personne absente du graphe du lecteur :
+ * les mots ne demandent jamais le nom d'une personne masquée (PAR-09, relecture
+ * gardien-confidentialite de T-026).
+ */
+function spyNameOf(graph: KinshipGraph) {
+  return (personId: Id): string => {
+    if (graph.person(personId) === undefined) {
+      throw new Error(`nameOf asked for a person outside the reader's graph: ${personId}`);
+    }
+    return 'Awa';
+  };
+}
+
 function play(tree: GeneratedTree, picks: readonly (readonly [number, number])[]): Checked[] {
   const graph = createKinshipGraph(tree);
   const allianceContext = createAllianceContext(tree);
@@ -307,8 +430,8 @@ function play(tree: GeneratedTree, picks: readonly (readonly [number, number])[]
     return [
       {
         link,
-        frWords: describeResult(link, { graph, t: fr.t, nameOf: () => 'Awa' }),
-        enWords: describeResult(link, { graph, t: en.t, nameOf: () => 'Awa' }),
+        frWords: describeResult(link, { graph, t: fr.t, nameOf: spyNameOf(graph) }),
+        enWords: describeResult(link, { graph, t: en.t, nameOf: spyNameOf(graph) }),
         gender: graph.person(b)?.gender,
       },
     ];
@@ -335,6 +458,7 @@ describe('T-026 — propriétés des mots sur des arbres générés', () => {
               expect(text.trim()).toBe(text);
               expect(text).not.toBe('');
               expect(text).not.toMatch(/ {2}/u);
+              expect(text).not.toMatch(/votre personne|votre une /u);
             }
           }
         }),

@@ -265,13 +265,13 @@ paires:
         alliance: { type: co_spouse, simultaneite: simultaneous }
         fr:
           court: "co-épouse"
-          explique: "autre épouse de votre mari, Fouyee, en même temps que vous"
+          explique: "autre épouse de Fouyee, votre mari, en même temps que vous"
         en: à rédiger
       - chemin: "=sondom =ndoufeine"
         alliance: { type: co_spouse, simultaneite: simultaneous }
         fr:
           court: "co-épouse"
-          explique: "autre épouse de votre mari, Sondom, en même temps que vous"
+          explique: "autre épouse de Sondom, votre mari, en même temps que vous"
         en: à rédiger
       - chemin: "=fouyee 1/1[meluo+tsenee] =ndoufeine"
         alliance: { type: spouse_of_sibling_of_spouse }
@@ -298,7 +298,7 @@ paires:
         cote_vers: { par: sondom, cote: father }
         fr:
           court: "Peut-être votre neveu"
-          explique: "fils de votre frère, Sondom (lien probable, à confirmer)"
+          explique: "fils de Sondom, votre frère (lien probable, à confirmer)"
         en: à rédiger
       - chemin: "=yaou 0/1[yaou]"
         alliance: { type: child_of_spouse, autre_parent: [successive] }
@@ -325,14 +325,14 @@ paires:
         cote_vers: { par: sondom, cote: parent, type: adoptive }
         fr:
           court: "fils adoptif"
-          explique: "enfant que vous avez adopté"
+          explique: "votre fils adoptif, par adoption"
         en: à rédiger
       - chemin: "1/2[meluo+tsenee]"
         certitude: probable
         cote_vers: { par: fouyee, cote: parent }
         fr:
           court: "Peut-être votre neveu"
-          explique: "fils de votre frère, Fouyee (lien probable, à confirmer)"
+          explique: "fils de Fouyee, votre frère (lien probable, à confirmer)"
         en: à rédiger
       - chemin: "=ndoufeine =fouyee 0/1[fouyee]"
         alliance: { type: other, simultaneite: successive, autre_parent: [simultaneous] }
@@ -366,7 +366,7 @@ paires:
         alliance: { type: spouse_of_spouse, simultaneite: successive }
         fr:
           court: "autre mari de votre épouse"
-          explique: "autre mari de votre épouse, Tsemoou, à une autre période que vous"
+          explique: "autre mari de Tsemoou, votre épouse, à une autre période que vous"
         en: à rédiger
       - chemin: "1/0[fouyee] =ndoufeine =sondom 0/1[sondom]"
         alliance:
@@ -405,7 +405,7 @@ paires:
         certitude: probable
         cote_de: { par: sondom, cote: parent, type: adoptive }
         fr:
-          court: "Peut-être l’épouse de votre cousin germain par votre père adoptif"
+          court: "Peut-être l’épouse de votre cousin germain par votre parent adoptif Sondom"
           explique: "épouse de Livee, fils du frère de votre père adoptif (lien probable, à confirmer)"
         en: à rédiger
   - id: F10-09

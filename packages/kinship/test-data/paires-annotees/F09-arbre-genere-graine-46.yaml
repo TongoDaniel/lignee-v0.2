@@ -193,7 +193,7 @@ paires:
         alliance: { type: co_spouse, simultaneite: simultaneous }
         fr:
           court: "co-épouse"
-          explique: "autre épouse de votre mari, Nyouvui, en même temps que vous"
+          explique: "autre épouse de Nyouvui, votre mari, en même temps que vous"
         en: à rédiger
       - chemin: "0/2[tchudjoette] =soe 2/0[mbaine]"
         alliance: { type: other }
@@ -211,7 +211,7 @@ paires:
         alliance: { type: co_spouse, simultaneite: simultaneous }
         fr:
           court: "co-épouse"
-          explique: "autre épouse de votre mari, Nyouvui, en même temps que vous"
+          explique: "autre épouse de Nyouvui, votre mari, en même temps que vous"
         en: à rédiger
   - id: F09-03
     de: njonyem
@@ -259,7 +259,7 @@ paires:
         alliance: { type: co_spouse, simultaneite: simultaneous }
         fr:
           court: "co-époux"
-          explique: "autre mari de votre épouse, Piwoue, en même temps que vous"
+          explique: "autre mari de Piwoue, votre épouse, en même temps que vous"
         en: à rédiger
   - id: F09-06
     de: soou
@@ -297,7 +297,7 @@ paires:
         alliance: { type: spouse_of_spouse, simultaneite: successive }
         fr:
           court: "autre mari de votre épouse"
-          explique: "autre mari de votre épouse, Ndozea, à une autre période que vous"
+          explique: "autre mari de Ndozea, votre épouse, à une autre période que vous"
         en: à rédiger
       - chemin: "=soe 2/2[nyouvui]"
         alliance: { type: other }
@@ -317,7 +317,7 @@ paires:
         alliance: { type: co_spouse, simultaneite: simultaneous }
         fr:
           court: "co-épouse"
-          explique: "autre épouse de votre mari, Nyouou, en même temps que vous"
+          explique: "autre épouse de Nyouou, votre mari, en même temps que vous"
         en: à rédiger
       - chemin: "=nyouou 1/1[njonyem+piwoue] =ndozea"
         alliance: { type: spouse_of_sibling_of_spouse }
@@ -469,7 +469,7 @@ paires:
         cote_vers: { par: mboe, cote: father }
         fr:
           court: "nièce"
-          explique: "fille de votre frère, Mboe"
+          explique: "fille de Mboe, votre frère"
         en: à rédiger
   - id: F09-15
     de: loa
@@ -482,11 +482,11 @@ paires:
         cote_vers: { par: loa, cote: parent, type: adoptive }
         fr:
           court: "fils adoptif"
-          explique: "enfant que vous avez adopté"
+          explique: "votre fils adoptif, par adoption"
         en: à rédiger
       - chemin: "1/2[mbaine+nyouvui]"
         cote_vers: { par: tsoun, cote: father }
         fr:
           court: "neveu"
-          explique: "fils de votre frère, Tsoun"
+          explique: "fils de Tsoun, votre frère"
         en: à rédiger

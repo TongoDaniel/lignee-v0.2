@@ -92,7 +92,7 @@ paires:
         cote_de: { par: ngen, cote: father }
         fr:
           court: "grand-père par votre père"
-          explique: "père de votre père, Ngen"
+          explique: "père de Ngen, votre père"
         en: à rédiger
       - chemin: "3/1[genei+gim]"
         cote_de: { par: yue, cote: mother }
@@ -129,7 +129,7 @@ paires:
         cote_de: { par: yue, cote: mother }
         fr:
           court: "grand-mère par votre mère"
-          explique: "mère de votre mère, Yue"
+          explique: "mère de Yue, votre mère"
         en: à rédiger
       - chemin: "3/1[genei+gim]"
         cote_de: { par: ngen, cote: father }
@@ -167,13 +167,13 @@ paires:
         alliance: { type: sibling_of_spouse }
         fr:
           court: "belle-sœur"
-          explique: "sœur de votre épouse, Zea"
+          explique: "sœur de Zea, votre épouse"
         en: à rédiger
       - chemin: "1/1[budjouo+yeyiette] =kwakaa"
         alliance: { type: spouse_of_sibling }
         fr:
           court: "belle-sœur"
-          explique: "épouse de votre frère, Mbie"
+          explique: "épouse de Mbie, votre frère"
         en: à rédiger
   - id: F07-07
     de: sun
@@ -185,7 +185,7 @@ paires:
         cote_de: { par: tchue, cote: father }
         fr:
           court: "oncle par votre père"
-          explique: "frère de votre père, Tchue"
+          explique: "frère de Tchue, votre père"
         en: à rédiger
       - chemin: "2/1[fovouo+vakwaette] =mbie"
         alliance: { type: other }
@@ -204,7 +204,7 @@ paires:
         cote_de: { par: nyoe, cote: mother }
         fr:
           court: "oncle par votre mère"
-          explique: "frère de votre mère, Nyoe"
+          explique: "frère de Nyoe, votre mère"
         en: à rédiger
       - chemin: "2/2[genei+gim]"
         cote_de: { par: foou, cote: father }
@@ -230,13 +230,13 @@ paires:
         cote_de: { par: nyoe, cote: mother }
         fr:
           court: "grand-père par votre mère"
-          explique: "père de votre mère, Nyoe"
+          explique: "père de Nyoe, votre mère"
         en: à rédiger
       - chemin: "2/1[genei+gim]"
         cote_de: { par: foou, cote: father }
         fr:
           court: "oncle par votre père"
-          explique: "frère de votre père, Foou"
+          explique: "frère de Foou, votre père"
         en: à rédiger
   - id: F07-10
     de: kwitchoui
@@ -248,7 +248,7 @@ paires:
         cote_de: { par: foou, cote: father }
         fr:
           court: "grand-père par votre père"
-          explique: "père de votre père, Foou"
+          explique: "père de Foou, votre père"
         en: à rédiger
       - chemin: "3/0[gim]"
         cote_de: { par: nyoe, cote: mother }
@@ -266,7 +266,7 @@ paires:
         cote_vers: { par: tchenon, cote: father }
         fr:
           court: "nièce"
-          explique: "fille de votre frère, Tchenon"
+          explique: "fille de Tchenon, votre frère"
         en: à rédiger
       - chemin: "=nyoe"
         alliance: { type: spouse }
@@ -309,13 +309,13 @@ paires:
         alliance: { type: spouse_of_child }
         fr:
           court: "gendre"
-          explique: "mari de votre fille, Nyoe"
+          explique: "mari de Nyoe, votre fille"
         en: à rédiger
       - chemin: "=tchenon 1/1[genei+gim]"
         alliance: { type: sibling_of_spouse }
         fr:
           court: "beau-frère"
-          explique: "frère de votre mari, Tchenon"
+          explique: "frère de Tchenon, votre mari"
         en: à rédiger
       - chemin: "0/1[honjuia] =yue 2/1[genei+gim]"
         alliance: { type: other }

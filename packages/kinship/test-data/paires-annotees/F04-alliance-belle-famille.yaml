@@ -75,7 +75,7 @@ paires:
         alliance: { type: parent_of_spouse }
         fr:
           court: "beau-père"
-          explique: "père de votre épouse, Houou"
+          explique: "père de Houou, votre épouse"
         en: à rédiger
   - id: F04-03
     de: saine
@@ -87,7 +87,7 @@ paires:
         alliance: { type: spouse_of_child }
         fr:
           court: "gendre"
-          explique: "mari de votre fille, Houou"
+          explique: "mari de Houou, votre fille"
         en: à rédiger
   - id: F04-04
     de: seine
@@ -99,7 +99,7 @@ paires:
         alliance: { type: spouse_of_child }
         fr:
           court: "bru"
-          explique: "épouse de votre fils, Moutsun"
+          explique: "épouse de Moutsun, votre fils"
         en: à rédiger
   - id: F04-05
     de: moutsun
@@ -111,7 +111,7 @@ paires:
         alliance: { type: sibling_of_spouse }
         fr:
           court: "belle-sœur"
-          explique: "sœur de votre épouse, Houou"
+          explique: "sœur de Houou, votre épouse"
         en: à rédiger
   - id: F04-06
     de: moutsun
@@ -147,7 +147,7 @@ paires:
         alliance: { type: sibling_of_spouse }
         fr:
           court: "belle-sœur"
-          explique: "sœur de votre mari, Moutsun"
+          explique: "sœur de Moutsun, votre mari"
         en: à rédiger
   - id: F04-09
     de: houou
@@ -171,7 +171,7 @@ paires:
         alliance: { type: parent_of_spouse }
         fr:
           court: "belle-mère"
-          explique: "mère de votre mari, Moutsun"
+          explique: "mère de Moutsun, votre mari"
         en: à rédiger
   - id: F04-11
     de: moutsun
@@ -183,7 +183,7 @@ paires:
         alliance: { type: sibling_of_spouse }
         fr:
           court: "beau-frère"
-          explique: "frère de votre épouse, Houou"
+          explique: "frère de Houou, votre épouse"
         en: à rédiger
   - id: F04-12
     de: toe
@@ -251,7 +251,7 @@ paires:
         alliance: { type: spouse_of_spouse, simultaneite: successive }
         fr:
           court: "autre mari de votre épouse"
-          explique: "autre mari de votre épouse, Kwoniou, à une autre période que vous"
+          explique: "autre mari de Kwoniou, votre épouse, à une autre période que vous"
         en: à rédiger
   - id: F04-18
     de: nonyoette
@@ -264,7 +264,7 @@ paires:
         cote_de: { par: kwoniou, cote: mother }
         fr:
           court: "mari de votre mère"
-          explique: "mari de votre mère, Kwoniou, à une autre période que votre père"
+          explique: "mari de Kwoniou, votre mère, à une autre période que votre père"
         en: à rédiger
   - id: F04-19
     de: tsoe
@@ -276,7 +276,7 @@ paires:
         cote_de: { par: moutsun, cote: father }
         fr:
           court: "tante par votre père"
-          explique: "sœur de votre père, Moutsun"
+          explique: "sœur de Moutsun, votre père"
         en: à rédiger
   - id: F04-20
     de: tsoe
@@ -301,7 +301,7 @@ paires:
         cote_de: { par: moutsun, cote: father }
         fr:
           court: "oncle par votre père"
-          explique: "frère de votre père, Moutsun"
+          explique: "frère de Moutsun, votre père"
         en: à rédiger
   - id: F04-22
     de: houou
@@ -313,7 +313,7 @@ paires:
         alliance: { type: spouse_of_sibling }
         fr:
           court: "beau-frère"
-          explique: "mari de votre sœur, Yayoia"
+          explique: "mari de Yayoia, votre sœur"
         en: à rédiger
   - id: F04-23
     de: wui

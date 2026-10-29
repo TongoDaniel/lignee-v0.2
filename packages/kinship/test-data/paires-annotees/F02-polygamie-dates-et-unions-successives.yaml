@@ -54,7 +54,7 @@ paires:
         alliance: { type: co_spouse, simultaneite: simultaneous }
         fr:
           court: "co-épouse"
-          explique: "autre épouse de votre mari, Djon, en même temps que vous"
+          explique: "autre épouse de Djon, votre mari, en même temps que vous"
         en: à rédiger
   - id: F02-02
     de: djaine
@@ -66,7 +66,7 @@ paires:
         alliance: { type: spouse_of_spouse, simultaneite: unknown }
         fr:
           court: "autre épouse de votre mari"
-          explique: "autre épouse de votre mari, Djon ; on ne sait pas encore si c’était en même temps que vous"
+          explique: "autre épouse de Djon, votre mari ; on ne sait pas encore si c’était en même temps que vous"
         en: à rédiger
   - id: F02-03
     de: djaine
@@ -78,7 +78,7 @@ paires:
         alliance: { type: spouse_of_spouse, simultaneite: successive }
         fr:
           court: "autre épouse de votre mari"
-          explique: "autre épouse de votre mari, Djon, à une autre période que vous"
+          explique: "autre épouse de Djon, votre mari, à une autre période que vous"
         en: à rédiger
   - id: F02-04
     de: zongeia
@@ -90,7 +90,7 @@ paires:
         alliance: { type: spouse_of_spouse, simultaneite: successive }
         fr:
           court: "autre épouse de votre mari"
-          explique: "autre épouse de votre mari, Djon, à une autre période que vous"
+          explique: "autre épouse de Djon, votre mari, à une autre période que vous"
         en: à rédiger
   - id: F02-05
     de: djuvai
@@ -103,7 +103,7 @@ paires:
         cote_de: { par: djon, cote: father }
         fr:
           court: "épouse de votre père"
-          explique: "épouse de votre père, Djon, en même temps que votre mère"
+          explique: "épouse de Djon, votre père, en même temps que votre mère"
         en: à rédiger
   - id: F02-06
     de: djuvai
@@ -116,7 +116,7 @@ paires:
         cote_de: { par: djon, cote: father }
         fr:
           court: "épouse de votre père"
-          explique: "épouse de votre père, Djon, à une autre période que votre mère"
+          explique: "épouse de Djon, votre père, à une autre période que votre mère"
         en: à rédiger
   - id: F02-07
     de: djuvai
@@ -129,7 +129,7 @@ paires:
         cote_de: { par: djon, cote: father }
         fr:
           court: "épouse de votre père"
-          explique: "épouse de votre père, Djon ; on ne sait pas encore si c’était en même temps que votre mère"
+          explique: "épouse de Djon, votre père ; on ne sait pas encore si c’était en même temps que votre mère"
         en: à rédiger
   - id: F02-08
     de: djuvai
@@ -242,7 +242,7 @@ paires:
         cote_de: { par: zongeia, cote: mother }
         fr:
           court: "mari de votre mère"
-          explique: "mari de votre mère, Zongeia, à une autre période que votre père"
+          explique: "mari de Zongeia, votre mère, à une autre période que votre père"
         en: à rédiger
   - id: F02-17
     de: tengoua
