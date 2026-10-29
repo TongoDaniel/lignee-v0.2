@@ -20,6 +20,12 @@ export interface ChipProps {
   readonly tone?: ChipTone;
   /** Icône de 16 avant le libellé ; `sante` d'office pour la teinte santé. */
   readonly icon?: IconName;
+  /**
+   * Puce de choix (un seul choix parmi plusieurs) : vrai si elle est choisie. Elle prend la teinte
+   * verte et la coche (jamais la couleur seule) et se lit comme un choix « sélectionné ». Sans
+   * `onPress`, ce réglage est ignoré.
+   */
+  readonly selected?: boolean;
   /** Rend la puce touchable : elle devient un bouton. */
   readonly onPress?: () => void;
   /** Libellé complet pour le lecteur d'écran, si la puce se touche ; par défaut le libellé. */
@@ -51,14 +57,18 @@ export function Chip({
   label,
   tone = 'neutral',
   icon,
+  selected,
   onPress,
   accessibilityLabel,
   accessibilityHint,
   testID,
 }: ChipProps) {
   const theme = useTheme();
-  const tint: { background: string; text: string; outline?: string } = toneColors(tone, theme);
-  const shownIcon = icon ?? (tone === 'health' ? 'sante' : undefined);
+  const choice = onPress !== undefined && selected !== undefined;
+  const shownTone: ChipTone = choice ? (selected ? 'green' : 'neutral') : tone;
+  const tint: { background: string; text: string; outline?: string } = toneColors(shownTone, theme);
+  const shownIcon =
+    choice && selected ? 'valider' : (icon ?? (tone === 'health' ? 'sante' : undefined));
   const { scale, onPressIn, onPressOut } = usePressScale();
   const { onFocus, onBlur, focusStyle } = useFocusRing(theme.colors);
   // Libellé de la puce : graisse 600, en 14 (bundle.css), avec la taille du mode Aînés.
@@ -116,7 +126,8 @@ export function Chip({
       onFocus={onFocus}
       onBlur={onBlur}
       hitSlop={hitSlopFor(metrics.chip.minHeight, theme.touchTarget)}
-      accessibilityRole="button"
+      accessibilityRole={choice ? 'radio' : 'button'}
+      accessibilityState={choice ? { selected } : undefined}
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityHint={accessibilityHint}
       style={[styles.wrapper, { minWidth: theme.touchTarget }]}

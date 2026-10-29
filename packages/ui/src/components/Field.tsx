@@ -48,7 +48,7 @@ export interface FieldProps {
   /** Texte d'exemple (`texte-discret`), jamais une information. */
   readonly placeholder?: string;
   /** Une phrase qui dit quoi corriger (« Indiquez un prénom. »). */
-  readonly error?: string;
+  readonly error?: string | undefined;
   /** Indication pour le lecteur d'écran, hors erreur. */
   readonly accessibilityHint?: string;
   readonly voiceInput?: FieldVoiceInput;

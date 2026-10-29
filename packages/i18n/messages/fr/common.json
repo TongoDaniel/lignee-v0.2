@@ -76,7 +76,9 @@
       "focusHint": "Ses parents, ses conjoints et ses enfants sont listés ci-dessous."
     },
     "drawingHint": "Utilisez le bouton Parcourir en liste pour lire l’arbre personne par personne.",
-    "noName": "Nom non renseigné"
+    "noName": "Nom non renseigné",
+    "addPerson": "Ajouter une personne",
+    "addPersonHint": "Ouvre un formulaire pour ajouter une personne à votre arbre."
   },
   "familyScreen": {
     "title": "Famille",
@@ -232,11 +234,200 @@
       "after": "après {date}",
       "between": "entre {from} et {to}",
       "decade": "années {year}",
-      "hijri": "{year} (calendrier hégirien)"
+      "aboutDecade": "vers les années {year}",
+      "beforeDecade": "avant les années {year}",
+      "afterDecade": "après les années {year}",
+      "betweenDecades": "entre les années {from} et les années {to}",
+      "hijri": "{date} (calendrier hégirien)"
     },
     "privacy": {
       "family": "Visible par l’arbre « {tree} »"
     },
-    "backHint": "Revient à l’écran précédent."
+    "backHint": "Revient à l’écran précédent.",
+    "edit": "Modifier la fiche",
+    "editHint": "Ouvre le formulaire de cette fiche."
+  },
+  "personForm": {
+    "titleNew": "Ajouter une personne",
+    "titleEdit": "Modifier la fiche",
+    "loading": "Ouverture du formulaire…",
+    "failed": "Le formulaire ne s’ouvre pas pour le moment. Revenez en arrière, puis réessayez.",
+    "notFound": "Cette fiche n’est pas disponible sur ce téléphone.",
+    "noTree": "Votre arbre n’est pas encore sur ce téléphone. Vous pourrez ajouter des personnes dès qu’il sera là.",
+    "backHint": "Revient à l’écran précédent sans enregistrer.",
+    "saveNew": "Ajouter la personne",
+    "saveNewLabel": "Ajouter la personne à l’arbre",
+    "saveEdit": "Enregistrer les changements",
+    "saveAnyway": "Enregistrer malgré tout",
+    "saveHint": "Enregistre sur ce téléphone, même sans connexion.",
+    "problems": "Corrigez les champs signalés avant d’enregistrer.",
+    "saveFailed": "L’enregistrement a échoué. Rien n’a été modifié. Réessayez.",
+    "unknown": {
+      "label": "Je ne connais pas son nom",
+      "description": "La fiche s’appellera « Inconnu ». Vous pourrez la compléter plus tard."
+    },
+    "names": {
+      "title": "Noms",
+      "rowTitle": "Nom {number}",
+      "type": "Type de nom",
+      "givenNames": "Prénoms",
+      "surname": "Nom de famille",
+      "singleForm": "Une seule forme, sans nom de famille",
+      "singleFormDescription": "Par exemple « Kossivi » ou « Tonton Bobo ».",
+      "displayForm": "Nom tel qu’on le dit",
+      "formerNote": "Visible par vous seul. Cet ancien prénom n’apparaît ni dans la recherche ni pour les autres membres.",
+      "split": "Séparer le prénom et le nom",
+      "splitHintSurnameFirst": "Le premier mot sera le nom de famille, les suivants les prénoms.",
+      "splitHintGivenFirst": "Le dernier mot sera le nom de famille, les précédents les prénoms.",
+      "add": "Ajouter un autre nom",
+      "remove": "Retirer ce nom",
+      "removeLabel": "Retirer le nom {number}",
+      "dated": "Dater ce nom",
+      "start": "Début de ce nom",
+      "end": "Fin de ce nom"
+    },
+    "suggestFormer": {
+      "title": "Ce prénom est-il un ancien prénom ?",
+      "body": "Le prénom de naissance saisi diffère du prénom actuel. Si cette personne ne l’utilise plus, rangez-le comme ancien prénom : vous seul le verrez.",
+      "accept": "Le ranger comme ancien prénom",
+      "keep": "Non, le laisser tel quel"
+    },
+    "identity": {
+      "title": "Identité",
+      "gender": "Genre",
+      "unspecified": "Non renseigné",
+      "alive": "Cette personne est-elle en vie ?",
+      "yes": "Oui, en vie",
+      "no": "Non, décédée"
+    },
+    "notes": {
+      "label": "Notes"
+    },
+    "birth": {
+      "title": "Naissance",
+      "date": "Date de naissance",
+      "place": "Lieu de naissance",
+      "placeHint": "Écrivez le lieu comme vous le connaissez. La position du téléphone n’est jamais utilisée."
+    },
+    "death": {
+      "title": "Décès",
+      "date": "Date du décès",
+      "place": "Lieu du décès",
+      "cause": "Cause du décès (facultatif)",
+      "causeNote": "La cause du décès reste privée : elle n’apparaît ni dans l’arbre, ni dans les notifications, ni dans les exports."
+    },
+    "residences": {
+      "title": "Lieux de vie",
+      "add": "Ajouter un lieu de vie",
+      "place": "Lieu",
+      "date": "Quand",
+      "remove": "Retirer ce lieu",
+      "removeLabel": "Retirer le lieu de vie {number}"
+    },
+    "occupations": {
+      "title": "Profession",
+      "add": "Ajouter une profession",
+      "value": "Profession",
+      "place": "Lieu de travail",
+      "date": "Quand",
+      "remove": "Retirer cette profession",
+      "removeLabel": "Retirer la profession {number}"
+    },
+    "titles": {
+      "title": "Titres",
+      "add": "Ajouter un titre",
+      "label": "Titre",
+      "labelHint": "Par exemple Fon, chef ou notable. Il s’affiche tel que vous l’écrivez, sans traduction.",
+      "start": "Début du titre",
+      "end": "Fin du titre",
+      "remove": "Retirer ce titre",
+      "removeLabel": "Retirer le titre {number}"
+    },
+    "date": {
+      "mode": "Type de date",
+      "first": "Première date",
+      "second": "Seconde date",
+      "year": "Année",
+      "month": "Mois (de 1 à 12)",
+      "day": "Jour",
+      "text": "Date en toutes lettres",
+      "textPlaceholder": "l’année de la grande sécheresse",
+      "decade": "Années entières",
+      "decadeDescription": "Pour « les années 1940 », saisissez 1940.",
+      "hijri": "Calendrier hégirien",
+      "modes": {
+        "none": "Date inconnue",
+        "exact": "Date précise",
+        "about": "Vers",
+        "before": "Avant",
+        "after": "Après",
+        "between": "Entre deux dates",
+        "calculated": "Date calculée",
+        "text": "En toutes lettres"
+      },
+      "errors": {
+        "yearRequired": "Indiquez l’année.",
+        "yearInvalid": "L’année s’écrit avec des chiffres, par exemple 1940.",
+        "monthInvalid": "Le mois est un nombre de 1 à 12.",
+        "dayInvalid": "Ce jour n’existe pas dans ce mois.",
+        "dayNeedsMonth": "Indiquez aussi le mois.",
+        "decadeYearInvalid": "Une décennie commence par une année qui finit par 0, par exemple 1940.",
+        "decadeNoMonth": "Pour des années entières, laissez le mois et le jour vides.",
+        "precisionDiffers": "Les deux dates doivent être aussi précises l’une que l’autre (deux années, ou deux mois…).",
+        "rangeOrder": "La première date doit être avant la seconde.",
+        "textRequired": "Écrivez la date, ou choisissez « Date inconnue ».",
+        "invalidDate": "Cette date n’existe pas."
+      }
+    },
+    "errors": {
+      "nameRequired": "Indiquez au moins un nom, ou choisissez « Je ne connais pas son nom ».",
+      "cannotForgetName": "Ce nom ne peut pas rester vide. Retirez-le plutôt avec « Retirer ce nom ».",
+      "titleLabelRequired": "Indiquez le titre.",
+      "occupationRequired": "Indiquez la profession.",
+      "record": {
+        "unknownTree": "Cet arbre n’est pas sur ce téléphone.",
+        "foreignAuthor": "Ce téléphone garde la copie d’un autre compte. Déconnectez-vous, puis reconnectez-vous.",
+        "duplicateMutation": "Cette saisie est déjà enregistrée.",
+        "duplicateId": "Cet élément existe déjà. Réessayez.",
+        "unknownObject": "Cette fiche n’est plus disponible sur ce téléphone.",
+        "invalidObject": "Cette information n’est pas valide. Vérifiez ce champ.",
+        "danglingReference": "Cette fiche est encore citée ailleurs (un lien, une union). Rouvrez-la, puis réessayez.",
+        "unsupportedReference": "Les sources ne sont pas encore disponibles.",
+        "authorMismatch": "Cette information ne peut être saisie qu’en votre nom.",
+        "personWithoutName": "Une personne connue garde au moins un nom, autre qu’un ancien prénom.",
+        "invalidSimultaneityAnswer": "La réponse « en même temps ou l’une après l’autre » ne convient pas à ces unions.",
+        "duplicateVisibilityRule": "Ce choix de visibilité existe déjà.",
+        "baseVersionMismatch": "Cette fiche a changé depuis son ouverture. Rouvrez-la, puis réessayez.",
+        "coherenceRefusal": "Ce lien de parenté est impossible tel quel.",
+        "privacyBarrier": "Une information ne peut pas être gardée sur ce téléphone pour votre compte."
+      }
+    },
+    "coherence": {
+      "title": "À vérifier avant d’enregistrer",
+      "intro": "Ces dates sont possibles, mais elles étonnent. Vous pouvez enregistrer malgré tout.",
+      "deathBeforeBirth": "La date du décès est avant la date de naissance.",
+      "implausibleAge": "Cet âge paraît très élevé (plus de 120 ans). Vérifiez les dates.",
+      "parentYoungerThanChild": "Un parent serait plus jeune que son enfant, d’après ces dates.",
+      "parentTooYoung": "Un parent aurait moins de 12 ans à la naissance de son enfant, d’après ces dates.",
+      "bornLongAfterFatherDeath": "Un enfant serait né plus de 10 mois après la mort de son père, d’après ces dates.",
+      "bornAfterMotherDeath": "Un enfant serait né après la mort de sa mère, d’après ces dates."
+    },
+    "delete": {
+      "action": "Supprimer cette fiche",
+      "title": "Supprimer cette fiche ?",
+      "irreversible": "Cette action est irréversible.",
+      "alsoRemoves": "Seront aussi supprimés : {list}.",
+      "nothingElse": "Rien d’autre n’est lié à cette fiche.",
+      "names": "{count, plural, one {# nom} other {# noms}}",
+      "facts": "{count, plural, one {# information datée} other {# informations datées}}",
+      "titles": "{count, plural, one {# titre} other {# titres}}",
+      "links": "{count, plural, one {# lien de parenté} other {# liens de parenté}}",
+      "unions": "{count, plural, one {# union} other {# unions}}",
+      "confirm": "Oui, supprimer",
+      "confirmLabel": "Oui, supprimer cette fiche",
+      "keep": "Non, garder la fiche",
+      "failed": "La suppression a échoué. Rien n’a été modifié. Réessayez."
+    },
+    "removeHint": "Retire ce bloc du formulaire. Rien n’est supprimé tant que vous n’enregistrez pas."
   }
 }

@@ -76,7 +76,9 @@
       "focusHint": "Their parents, spouses and children are listed below."
     },
     "drawingHint": "Use the Browse as a list button to read the tree person by person.",
-    "noName": "Name not entered"
+    "noName": "Name not entered",
+    "addPerson": "Add a person",
+    "addPersonHint": "Opens a form to add a person to your tree."
   },
   "familyScreen": {
     "title": "Family",
@@ -232,11 +234,200 @@
       "after": "after {date}",
       "between": "between {from} and {to}",
       "decade": "the {year}s",
-      "hijri": "{year} (Hijri calendar)"
+      "aboutDecade": "around the {year}s",
+      "beforeDecade": "before the {year}s",
+      "afterDecade": "after the {year}s",
+      "betweenDecades": "between the {from}s and the {to}s",
+      "hijri": "{date} (Hijri calendar)"
     },
     "privacy": {
       "family": "Visible to the “{tree}” tree"
     },
-    "backHint": "Returns to the previous screen."
+    "backHint": "Returns to the previous screen.",
+    "edit": "Edit the profile",
+    "editHint": "Opens the form for this profile."
+  },
+  "personForm": {
+    "titleNew": "Add a person",
+    "titleEdit": "Edit the profile",
+    "loading": "Opening the form…",
+    "failed": "The form will not open right now. Go back, then try again.",
+    "notFound": "This profile is not available on this phone.",
+    "noTree": "Your tree is not on this phone yet. You will be able to add people as soon as it is here.",
+    "backHint": "Goes back to the previous screen without saving.",
+    "saveNew": "Add the person",
+    "saveNewLabel": "Add the person to the tree",
+    "saveEdit": "Save the changes",
+    "saveAnyway": "Save anyway",
+    "saveHint": "Saves on this phone, even without a connection.",
+    "problems": "Please fix the fields marked below before saving.",
+    "saveFailed": "Saving failed. Nothing was changed. Please try again.",
+    "unknown": {
+      "label": "I do not know their name",
+      "description": "The profile will be called “Unknown”. You can fill it in later."
+    },
+    "names": {
+      "title": "Names",
+      "rowTitle": "Name {number}",
+      "type": "Type of name",
+      "givenNames": "Given names",
+      "surname": "Family name",
+      "singleForm": "A single form, with no family name",
+      "singleFormDescription": "For example “Kossivi” or “Uncle Bobo”.",
+      "displayForm": "Name as people say it",
+      "formerNote": "Visible to you only. This former first name does not appear in search or to other members.",
+      "split": "Split first name and family name",
+      "splitHintSurnameFirst": "The first word will be the family name, the next ones the given names.",
+      "splitHintGivenFirst": "The last word will be the family name, the earlier ones the given names.",
+      "add": "Add another name",
+      "remove": "Remove this name",
+      "removeLabel": "Remove name {number}",
+      "dated": "Add dates to this name",
+      "start": "Start of this name",
+      "end": "End of this name"
+    },
+    "suggestFormer": {
+      "title": "Is this a former first name?",
+      "body": "The first name given at birth differs from the current one. If this person no longer uses it, file it as a former first name: only you will see it.",
+      "accept": "File it as a former first name",
+      "keep": "No, leave it as it is"
+    },
+    "identity": {
+      "title": "Identity",
+      "gender": "Gender",
+      "unspecified": "Not specified",
+      "alive": "Is this person alive?",
+      "yes": "Yes, alive",
+      "no": "No, deceased"
+    },
+    "notes": {
+      "label": "Notes"
+    },
+    "birth": {
+      "title": "Birth",
+      "date": "Date of birth",
+      "place": "Place of birth",
+      "placeHint": "Write the place as you know it. The phone’s location is never used."
+    },
+    "death": {
+      "title": "Death",
+      "date": "Date of death",
+      "place": "Place of death",
+      "cause": "Cause of death (optional)",
+      "causeNote": "The cause of death stays private: it does not appear in the tree, in notifications or in exports."
+    },
+    "residences": {
+      "title": "Places lived",
+      "add": "Add a place lived",
+      "place": "Place",
+      "date": "When",
+      "remove": "Remove this place",
+      "removeLabel": "Remove place lived {number}"
+    },
+    "occupations": {
+      "title": "Occupation",
+      "add": "Add an occupation",
+      "value": "Occupation",
+      "place": "Place of work",
+      "date": "When",
+      "remove": "Remove this occupation",
+      "removeLabel": "Remove occupation {number}"
+    },
+    "titles": {
+      "title": "Titles",
+      "add": "Add a title",
+      "label": "Title",
+      "labelHint": "For example Fon, chief or notable. It is shown exactly as you write it, untranslated.",
+      "start": "Start of the title",
+      "end": "End of the title",
+      "remove": "Remove this title",
+      "removeLabel": "Remove title {number}"
+    },
+    "date": {
+      "mode": "Type of date",
+      "first": "First date",
+      "second": "Second date",
+      "year": "Year",
+      "month": "Month (1 to 12)",
+      "day": "Day",
+      "text": "Date in words",
+      "textPlaceholder": "the year of the great drought",
+      "decade": "Whole decade",
+      "decadeDescription": "For “the 1940s”, enter 1940.",
+      "hijri": "Hijri calendar",
+      "modes": {
+        "none": "Unknown date",
+        "exact": "Exact date",
+        "about": "Around",
+        "before": "Before",
+        "after": "After",
+        "between": "Between two dates",
+        "calculated": "Calculated date",
+        "text": "In words"
+      },
+      "errors": {
+        "yearRequired": "Enter the year.",
+        "yearInvalid": "The year is written with digits, for example 1940.",
+        "monthInvalid": "The month is a number from 1 to 12.",
+        "dayInvalid": "This day does not exist in this month.",
+        "dayNeedsMonth": "Enter the month too.",
+        "decadeYearInvalid": "A decade starts with a year ending in 0, for example 1940.",
+        "decadeNoMonth": "For whole decades, leave the month and day empty.",
+        "precisionDiffers": "Both dates must be equally precise (two years, or two months…).",
+        "rangeOrder": "The first date must be before the second.",
+        "textRequired": "Write the date, or choose “Unknown date”.",
+        "invalidDate": "This date does not exist."
+      }
+    },
+    "errors": {
+      "nameRequired": "Enter at least one name, or choose “I do not know their name”.",
+      "cannotForgetName": "This name cannot stay empty. Use “Remove this name” instead.",
+      "titleLabelRequired": "Enter the title.",
+      "occupationRequired": "Enter the occupation.",
+      "record": {
+        "unknownTree": "This tree is not on this phone.",
+        "foreignAuthor": "This phone holds another account’s copy. Sign out, then sign in again.",
+        "duplicateMutation": "This entry is already saved.",
+        "duplicateId": "This item already exists. Please try again.",
+        "unknownObject": "This profile is no longer available on this phone.",
+        "invalidObject": "This information is not valid. Check this field.",
+        "danglingReference": "This profile is still referred to elsewhere (a link, a union). Reopen it, then try again.",
+        "unsupportedReference": "Sources are not available yet.",
+        "authorMismatch": "This information can only be entered in your name.",
+        "personWithoutName": "A known person keeps at least one name other than a former first name.",
+        "invalidSimultaneityAnswer": "The answer “at the same time or one after the other” does not fit these unions.",
+        "duplicateVisibilityRule": "This visibility choice already exists.",
+        "baseVersionMismatch": "This profile changed since you opened it. Reopen it, then try again.",
+        "coherenceRefusal": "This family link is impossible as it stands.",
+        "privacyBarrier": "Some information cannot be kept on this phone for your account."
+      }
+    },
+    "coherence": {
+      "title": "Please check before saving",
+      "intro": "These dates are possible, but they are surprising. You can still save.",
+      "deathBeforeBirth": "The date of death is before the date of birth.",
+      "implausibleAge": "This age looks very high (over 120 years). Check the dates.",
+      "parentYoungerThanChild": "A parent would be younger than their child, going by these dates.",
+      "parentTooYoung": "A parent would be under 12 at the birth of their child, going by these dates.",
+      "bornLongAfterFatherDeath": "A child would be born more than 10 months after their father’s death, going by these dates.",
+      "bornAfterMotherDeath": "A child would be born after their mother’s death, going by these dates."
+    },
+    "delete": {
+      "action": "Delete this profile",
+      "title": "Delete this profile?",
+      "irreversible": "This cannot be undone.",
+      "alsoRemoves": "This will also delete: {list}.",
+      "nothingElse": "Nothing else is linked to this profile.",
+      "names": "{count, plural, one {# name} other {# names}}",
+      "facts": "{count, plural, one {# dated item} other {# dated items}}",
+      "titles": "{count, plural, one {# title} other {# titles}}",
+      "links": "{count, plural, one {# family link} other {# family links}}",
+      "unions": "{count, plural, one {# union} other {# unions}}",
+      "confirm": "Yes, delete",
+      "confirmLabel": "Yes, delete this profile",
+      "keep": "No, keep the profile",
+      "failed": "Deleting failed. Nothing was changed. Please try again."
+    },
+    "removeHint": "Removes this block from the form. Nothing is deleted until you save."
   }
 }
