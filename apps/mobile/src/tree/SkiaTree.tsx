@@ -1,8 +1,10 @@
 // Ce que Skia peint de la scène (T-017) : traits, fiches, pastilles, mentions. Aucune logique de
 // parenté ni de disposition : tout vient de `TreeScene` et du thème. Les couleurs, tailles et
 // épaisseurs viennent des tokens de la charte (packages/ui) ; les textes, de packages/i18n.
+// Pendant la pousse (T-018), les traits se tracent et les personnes apparaissent selon un plan
+// calculé hors de Skia (treeMotion.ts) ; hors pousse, rien ne bouge ici.
 // Trois niveaux de détail suivent le zoom (TRD) : vue d'ensemble (points colorés), standard
-// (avatar et prénom), détail (nom entier et années). Rien ne rebondit : pas d'animation ici.
+// (avatar et prénom), détail (nom entier et années). Rien ne rebondit.
 import {
   Circle,
   DashPathEffect,
@@ -35,11 +37,13 @@ import {
   type UiTheme,
 } from '@lignee/ui';
 import type { Translator } from '@lignee/i18n';
-import { memo, useMemo } from 'react';
+import { memo, useMemo, type ReactNode } from 'react';
+import { useDerivedValue, type SharedValue } from 'react-native-reanimated';
 
 import { cardLines, nameForLevel, pathData, plusPath } from './drawing';
 import { lifespan, missingParentText } from './labels';
 import type { PersonCard } from './personCards';
+import { appearance, type Bezier, type EdgeGrowth, type GrowthPlan } from './treeMotion';
 
 /** Polices de la charte chargées dans Skia (11-react-native.md) : prénom, ligne secondaire, initiale. */
 export interface TreeFonts {
@@ -343,38 +347,114 @@ function MarkShape({ mark, spec, theme, fonts, t }: DrawProps & { readonly mark:
   );
 }
 
+/** Pousse en cours : le temps écoulé (en millisecondes) et le plan qui dit quand chaque chose paraît. */
+export interface TreeGrowth {
+  readonly elapsed: SharedValue<number>;
+  readonly plan: GrowthPlan;
+}
+
+/** Un trait qui se trace depuis l'origine, à son retard, selon la courbe des jetons. */
+function GrowingEdge({
+  edge,
+  color,
+  growth,
+  elapsed,
+  duration,
+  easing,
+}: {
+  readonly edge: SceneEdge;
+  readonly color: string;
+  readonly growth: EdgeGrowth;
+  readonly elapsed: SharedValue<number>;
+  readonly duration: number;
+  readonly easing: Bezier;
+}) {
+  const path = useMemo(
+    () => pathData(growth.reversed ? [...edge.points].reverse() : edge.points),
+    [edge, growth.reversed],
+  );
+  const [x1, y1, x2, y2] = easing;
+  const end = useDerivedValue(() =>
+    appearance(elapsed.value, growth.delay, duration, x1, y1, x2, y2),
+  );
+  return (
+    <Path
+      path={path}
+      style="stroke"
+      color={color}
+      strokeWidth={stroke.lien}
+      strokeJoin="round"
+      strokeCap="round"
+      start={0}
+      end={end}
+    >
+      {edge.supposed ? <DashPathEffect intervals={SUPPOSED_DASH} /> : null}
+    </Path>
+  );
+}
+
+/** Fondu d'apparition (courbe de sortie, sans rebond) d'une personne ou d'un groupe. */
+function Appear({
+  delay,
+  growth,
+  children,
+}: {
+  readonly delay: number;
+  readonly growth: TreeGrowth;
+  readonly children: ReactNode;
+}) {
+  const { timing } = growth.plan;
+  const [x1, y1, x2, y2] = timing.personEasing;
+  const { elapsed } = growth;
+  const opacity = useDerivedValue(() =>
+    appearance(elapsed.value, delay, timing.person, x1, y1, x2, y2),
+  );
+  return <Group opacity={opacity}>{children}</Group>;
+}
+
 export interface SkiaTreeProps extends DrawProps {
   readonly culled: CulledScene;
   readonly cards: ReadonlyMap<Id, PersonCard>;
-  readonly centerId: Id;
+  /** « Vous » : l'avatar doré, même quand l'arbre est recentré sur une autre personne. */
+  readonly youId: Id;
   readonly selectedId: Id | undefined;
   readonly missingOf: ReadonlyMap<string, 'mother' | 'father' | 'parent'>;
+  /** Pousse en cours (T-018) ; absente : tout est dessiné d'un coup. */
+  readonly growth?: TreeGrowth | undefined;
 }
 
 export function SkiaTree({
   culled,
   cards,
-  centerId,
+  youId,
   selectedId,
   missingOf,
+  growth,
   ...draw
 }: SkiaTreeProps) {
   const { theme, level } = draw;
-  return (
+  const people = culled.people.map((person) => {
+    const shape = (
+      <PersonShape
+        key={person.id}
+        person={person}
+        card={cards.get(person.id)}
+        you={person.id === youId}
+        selected={person.id === selectedId}
+        {...draw}
+      />
+    );
+    const delay = growth?.plan.persons.get(person.id);
+    return growth === undefined || delay === undefined ? (
+      shape
+    ) : (
+      <Appear key={person.id} delay={delay} growth={growth}>
+        {shape}
+      </Appear>
+    );
+  });
+  const others = (
     <>
-      {culled.edges.map((edge, index) => (
-        <EdgeShape key={`e${String(index)}`} edge={edge} color={theme.colors.lienArbre} />
-      ))}
-      {culled.people.map((person) => (
-        <PersonShape
-          key={person.id}
-          person={person}
-          card={cards.get(person.id)}
-          you={person.id === centerId}
-          selected={person.id === selectedId}
-          {...draw}
-        />
-      ))}
       {culled.missing.map((place) => (
         <MissingShape
           key={place.familyKey}
@@ -391,6 +471,34 @@ export function SkiaTree({
         : culled.marks.map((mark) => (
             <MarkShape key={`${mark.kind}:${mark.personId}`} mark={mark} {...draw} />
           ))}
+    </>
+  );
+  return (
+    <>
+      {culled.edges.map((edge, index) => {
+        const grows = growth?.plan.edges.get(edge);
+        return growth === undefined || grows === undefined ? (
+          <EdgeShape key={`e${String(index)}`} edge={edge} color={theme.colors.lienArbre} />
+        ) : (
+          <GrowingEdge
+            key={`e${String(index)}`}
+            edge={edge}
+            color={theme.colors.lienArbre}
+            growth={grows}
+            elapsed={growth.elapsed}
+            duration={growth.plan.timing.edge}
+            easing={growth.plan.timing.edgeEasing}
+          />
+        );
+      })}
+      {people}
+      {growth?.plan.rest === undefined ? (
+        others
+      ) : (
+        <Appear delay={growth.plan.rest} growth={growth}>
+          {others}
+        </Appear>
+      )}
     </>
   );
 }
