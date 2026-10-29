@@ -62,10 +62,11 @@ jest.mock('react-native-reanimated', () => {
   return {
     __esModule: true,
     default: { View },
-    Easing: { bezier: () => (value: number) => value },
+    Easing: { bezier: () => (value: number) => value, linear: (value: number) => value },
     useSharedValue: sharedValue,
     useDerivedValue: (compute: () => unknown) => ({ value: compute() }),
     useAnimatedReaction: () => undefined,
+    cancelAnimation: jest.fn(),
     withTiming: jest.fn((value: number) => value),
   };
 });
