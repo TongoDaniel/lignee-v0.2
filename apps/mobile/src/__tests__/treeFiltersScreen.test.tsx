@@ -180,7 +180,46 @@ describe('filtres de l’arbre (ARB-11)', () => {
   });
 });
 
+describe('feuille des filtres fermée', () => {
+  it('ne calcule aucun décompte tant qu’elle est fermée, quel que soit le rendu', async () => {
+    const filters = jest.requireActual<typeof import('../tree/treeFilters')>('../tree/treeFilters');
+    const spy = jest.spyOn(filters, 'matchingPeople');
+    const { scenario } = await renderTree('luc');
+    act(() => {
+      canvas().onActivate({ kind: 'person', person: { id: scenario.id('jean') } as ScenePerson });
+    });
+    press('tree-show-list');
+    press('tree-show-drawing');
+    expect(spy).not.toHaveBeenCalled();
+    // Ouverte, elle calcule ; refermée par un choix, plus rien ensuite.
+    press('tree-filters-open');
+    expect(spy).toHaveBeenCalled();
+    await chooseFilter('filter-vital-living');
+    spy.mockClear();
+    act(() => {
+      canvas().onActivate({ kind: 'person', person: { id: scenario.id('anne') } as ScenePerson });
+    });
+    expect(spy).not.toHaveBeenCalled();
+  });
+});
+
 describe('vue « descendance » (ARB-14)', () => {
+  it('les foyers ouverts avant la descendance le sont encore au retour', async () => {
+    await renderTree('jean');
+    const before = canvas().scene.people.length;
+    const counter = canvas().scene.counters[0];
+    if (counter === undefined) throw new Error('no folded household to open');
+    act(() => {
+      canvas().onActivate({ kind: 'counter', counter });
+    });
+    const opened = canvas().scene.people.length;
+    expect(opened).toBeGreaterThan(before);
+    press('tree-descendants');
+    expect(canvas().scene.people.length).not.toBe(opened);
+    press('tree-descendants-back');
+    expect(canvas().scene.people.length).toBe(opened);
+  });
+
   it('la descendance de Pierre montre ses trois foyers et leurs petits-enfants', async () => {
     const { scenario } = await renderTree('pierre');
     expect(screen.getByLabelText('Voir la descendance de Pierre')).toBeTruthy();

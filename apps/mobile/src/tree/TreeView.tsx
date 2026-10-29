@@ -185,15 +185,18 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
   const choices = useMemo(() => filterChoices(filterSource), [filterSource]);
   // Les décomptes de la feuille ne se calculent que feuille ouverte, et une fois par ouverture ;
   // ils comptent les personnes dessinées (ADR 0033).
+  // Feuille fermée : rien n'est calculé, la dernière table sert à la fermeture animée.
+  const lastCounts = useRef<ReadonlyMap<string, number>>(new Map());
   const counts = useMemo(() => {
+    if (!filtersOpen) return lastCounts.current;
     const result = new Map<string, number>();
-    if (!filtersOpen) return result;
     for (const item of allFilters(choices)) {
       result.set(
         filterTestId(item),
         countPeople(matchingPeople(item, filterSource), model.cards, layout.people),
       );
     }
+    lastCounts.current = result;
     return result;
   }, [filtersOpen, choices, filterSource, model.cards, layout]);
   // Fil des replis de l'arbre ordinaire, gardé le temps d'une vue « descendance ».
@@ -284,9 +287,8 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
         return t('common:treeScreen.filters.branchOf', { name: realNameOf(item.rootId) });
     }
   };
-  const countOfFilter = (item: TreeFilter) =>
-    counts.get(filterTestId(item)) ??
-    countPeople(matchingPeople(item, filterSource), model.cards, layout.people);
+  /** Décompte d'un filtre déjà calculé pour la feuille ouverte ; jamais calculé ici. */
+  const countOfFilter = (item: TreeFilter) => counts.get(filterTestId(item)) ?? 0;
   const countText = (count: number) => t('common:treeScreen.filters.count', { count });
 
   /**
@@ -333,7 +335,9 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
     AccessibilityInfo.announceForAccessibility(
       t('common:treeScreen.filters.applied', {
         filter: lowerFirst(filterName(next)),
-        count: countText(countOfFilter(next)),
+        count: countText(
+          countPeople(matchingPeople(next, filterSource), model.cards, layout.people),
+        ),
       }),
     );
   };
