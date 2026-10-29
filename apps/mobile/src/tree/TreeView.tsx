@@ -10,6 +10,12 @@
 // refait la disposition autour de la personne choisie ; un fil d'Ariane ramène aux étapes. L'arbre
 // pousse à l'ouverture, au recentrage et quand un foyer s'ouvre, sauf si le téléphone demande de
 // réduire les animations (ARB-13) : il s'affiche alors directement.
+//
+// T-025 : les filtres (ARB-11) atténuent, sur le dessin, les personnes qui n'y répondent pas, et les
+// signalent dans la liste ; la vue « descendance » (ARB-14) redessine l'arbre sous un ancêtre, avec
+// la même scène. Toucher une personne la choisit ; la toucher de nouveau, ou « Ouvrir la fiche »,
+// ouvre sa fiche (ADR 0033). Le choix d'une personne offre aussi « Recentrer » et « Voir la
+// descendance », chacun à un bouton (ACC-06).
 import type { Id } from '@lignee/domain';
 import {
   buildOutline,
@@ -27,6 +33,7 @@ import {
   type SceneHit,
   type ScreenSize,
   type TreeLayout,
+  type TreeScene,
   type Viewport,
 } from '@lignee/layout';
 import { Button, space, useTheme } from '@lignee/ui';
@@ -41,10 +48,21 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTranslator } from '../i18n/I18nProvider';
+import { canOpenDescendants, descendantsLayout } from './descendantsView';
 import { fullName } from './labels';
 import { sceneSpecFor } from './sceneSpec';
 import { TreeCanvas, type ViewportCommand } from './TreeCanvas';
-import { bottomCenterFrame } from './treeFrames';
+import { bottomCenterFrame, topCenterFrame } from './treeFrames';
+import { TreeFiltersSheet } from './TreeFiltersSheet';
+import {
+  allFilters,
+  countPeople,
+  filterChoices,
+  filterTestId,
+  matchingPeople,
+  type FilterSource,
+  type TreeFilter,
+} from './treeFilters';
 import { planGrowth, type GrowthTrigger } from './treeMotion';
 import { TreeOutlineList } from './TreeOutlineList';
 import type { TreeModel } from './treeModel';
@@ -58,6 +76,10 @@ export interface TreeViewProps {
 }
 
 const NO_FOLDS: FoldChoices = new Map();
+
+function lowerFirst(text: string): string {
+  return text.charAt(0).toLocaleLowerCase() + text.slice(1);
+}
 
 /** Parent manquant de chaque colonne « non précisé » : « mère », « père » ou « parent ». */
 function missingKinds(layout: TreeLayout): ReadonlyMap<string, 'mother' | 'father' | 'parent'> {
@@ -90,6 +112,10 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
   // Personne au centre de la disposition : « Vous » au départ, puis celle sur laquelle on recentre.
   const [centerId, setCenterId] = useState<Id>(model.centerId);
   const [trail, setTrail] = useState<readonly Id[]>(() => startTrail(model.centerId));
+  // Filtre choisi (ARB-11), feuille des filtres, et ancêtre de la vue « descendance » (ARB-14).
+  const [filter, setFilter] = useState<TreeFilter | undefined>(undefined);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [descendantsOf, setDescendantsOf] = useState<Id | undefined>(undefined);
   // Pousse demandée (l'ouverture d'abord) et dernière pousse terminée.
   const [trigger, setTrigger] = useState<GrowthTrigger>({ id: 1, kind: 'opening' });
   const [growthDone, setGrowthDone] = useState(0);
@@ -102,10 +128,16 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
   const showList = listChoice === undefined ? screenReader : listChoice === 'list';
 
   const cache = useRef(createTreeLayoutCache()).current;
+  // La vue « descendance » ne reçoit que le graphe du lecteur, comme la vue ordinaire (ADR 0024).
   const layout = useMemo(
-    () => cache.layout(model.graph, centerId, folds),
-    [cache, model, centerId, folds],
+    () =>
+      descendantsOf === undefined
+        ? cache.layout(model.graph, centerId, folds)
+        : descendantsLayout(model.graph, descendantsOf, folds),
+    [cache, model, centerId, folds, descendantsOf],
   );
+  // Personne au centre du cadre : l'ancêtre dans la vue « descendance ».
+  const viewCenterId = descendantsOf ?? centerId;
   const spec = useMemo(
     () =>
       sceneSpecFor({
@@ -125,10 +157,50 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
 
   // « Vous » en bas au centre, toujours visible au lancement (06-arbre.md) ; après un recentrage,
   // la personne au centre prend cette place. Le canevas ne lit ce cadre qu'à son ouverture.
-  const initialViewport = useMemo<Viewport | undefined>(
-    () => (size === undefined ? undefined : bottomCenterFrame(scene, centerId, size, space[6])),
-    [scene, centerId, size],
+  const homeFrame = useCallback(
+    (shown: TreeScene, screen: ScreenSize): Viewport =>
+      descendantsOf === undefined
+        ? bottomCenterFrame(shown, centerId, screen, space[6])
+        : topCenterFrame(shown, descendantsOf, screen, space[6]),
+    [centerId, descendantsOf],
   );
+  const initialViewport = useMemo<Viewport | undefined>(
+    () => (size === undefined ? undefined : homeFrame(scene, size)),
+    [scene, size, homeFrame],
+  );
+
+  // Filtres : calculés sur le graphe reçu, jamais ailleurs (ARB-11). Pas de filtre dans la vue
+  // « descendance », qui est déjà une sélection.
+  const filterSource = useMemo<FilterSource>(
+    () => ({ graph: model.graph, cards: model.cards, centerId, outline }),
+    [model, centerId, outline],
+  );
+  const matching = useMemo(
+    () =>
+      filter === undefined || descendantsOf !== undefined
+        ? undefined
+        : matchingPeople(filter, filterSource),
+    [filter, descendantsOf, filterSource],
+  );
+  const choices = useMemo(() => filterChoices(filterSource), [filterSource]);
+  // Les décomptes de la feuille ne se calculent que feuille ouverte, et une fois par ouverture ;
+  // ils comptent les personnes dessinées (ADR 0033).
+  // Feuille fermée : rien n'est calculé, la dernière table sert à la fermeture animée.
+  const lastCounts = useRef<ReadonlyMap<string, number>>(new Map());
+  const counts = useMemo(() => {
+    if (!filtersOpen) return lastCounts.current;
+    const result = new Map<string, number>();
+    for (const item of allFilters(choices)) {
+      result.set(
+        filterTestId(item),
+        countPeople(matchingPeople(item, filterSource), model.cards, layout.people),
+      );
+    }
+    lastCounts.current = result;
+    return result;
+  }, [filtersOpen, choices, filterSource, model.cards, layout]);
+  // Fil des replis de l'arbre ordinaire, gardé le temps d'une vue « descendance ».
+  const ordinaryFolds = useRef<FoldChoices>(NO_FOLDS);
 
   const send = useCallback((viewport: Viewport, instant = false) => {
     commandId.current += 1;
@@ -151,8 +223,8 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
   useEffect(() => {
     if (!reframe.current || size === undefined) return;
     reframe.current = false;
-    send(bottomCenterFrame(scene, centerId, size, space[6]), true);
-  }, [scene, size, centerId, send]);
+    send(homeFrame(scene, size), true);
+  }, [scene, size, homeFrame, send]);
 
   const centerOf = (screen: ScreenSize) => ({ x: screen.width / 2, y: screen.height / 2 });
 
@@ -180,14 +252,44 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
     const now = current.current ?? initialViewport;
     if (target === undefined || now === undefined || size === undefined) return;
     send(
-      shown === centerId
-        ? bottomCenterFrame(scene, centerId, size, space[6])
+      shown === viewCenterId
+        ? homeFrame(scene, size)
         : placeAt(now.scale, { x: target.x, y: target.y }, centerOf(size)),
     );
   };
 
   const nameOf = (id: Id) =>
     id === model.centerId ? t('common:treeScreen.you') : fullName(model.cards.get(id), t);
+  /** Nom réel pour les libellés d'action : « Vous » ne dit pas de qui l'on ouvre la fiche. */
+  const realNameOf = (id: Id) => fullName(model.cards.get(id), t);
+
+  const filterName = (item: TreeFilter): string => {
+    switch (item.kind) {
+      case 'side':
+        return t(
+          item.side === 'paternal'
+            ? 'common:treeScreen.filters.paternal'
+            : 'common:treeScreen.filters.maternal',
+        );
+      case 'vital':
+        return t(
+          item.status === 'living'
+            ? 'common:treeScreen.filters.living'
+            : 'common:treeScreen.filters.deceased',
+        );
+      case 'foyer': {
+        const partner = choices.foyers.find((foyer) => foyer.familyKey === item.familyKey);
+        return t('common:treeScreen.filters.foyerWith', {
+          name: partner === undefined ? '' : realNameOf(partner.partnerId),
+        });
+      }
+      case 'branch':
+        return t('common:treeScreen.filters.branchOf', { name: realNameOf(item.rootId) });
+    }
+  };
+  /** Décompte d'un filtre déjà calculé pour la feuille ouverte ; jamais calculé ici. */
+  const countOfFilter = (item: TreeFilter) => counts.get(filterTestId(item)) ?? 0;
+  const countText = (count: number) => t('common:treeScreen.filters.count', { count });
 
   /**
    * Refait la disposition autour d'une personne : elle prend la place de « Vous » au lancement
@@ -197,13 +299,15 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
   const recenter = (personId: Id) => {
     setFocusId(personId);
     setSelectedId(personId);
+    setFilter(undefined);
+    setDescendantsOf(undefined);
     setTrail((previous) => recenterTrail(previous, personId, model.centerId));
     AccessibilityInfo.announceForAccessibility(
       t('common:treeScreen.recentered', { name: nameOf(personId) }),
     );
-    if (personId === centerId) {
+    if (personId === centerId && descendantsOf === undefined) {
       // Déjà au centre de la disposition : seul le cadre revient, animé ou non selon le réglage.
-      if (size !== undefined) send(bottomCenterFrame(scene, centerId, size, space[6]));
+      if (size !== undefined) send(homeFrame(scene, size));
       return;
     }
     reframe.current = true;
@@ -213,7 +317,63 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
     setTrigger({ id: triggerId.current, kind: 'opening' });
   };
 
-  const canRecenter = focusId !== centerId && model.cards.get(focusId)?.placeholder === false;
+  const canRecenter =
+    descendantsOf === undefined &&
+    focusId !== centerId &&
+    model.cards.get(focusId)?.placeholder === false;
+  const canOpenProfile = model.cards.get(focusId)?.placeholder === false;
+  const canSeeDescendants =
+    descendantsOf === undefined && canOpenDescendants(focusId, model.cards, outline);
+
+  const applyFilter = (next: TreeFilter | undefined) => {
+    setFilter(next);
+    setFiltersOpen(false);
+    if (next === undefined) {
+      AccessibilityInfo.announceForAccessibility(t('common:treeScreen.filters.cleared'));
+      return;
+    }
+    AccessibilityInfo.announceForAccessibility(
+      t('common:treeScreen.filters.applied', {
+        filter: lowerFirst(filterName(next)),
+        count: countText(
+          countPeople(matchingPeople(next, filterSource), model.cards, layout.people),
+        ),
+      }),
+    );
+  };
+
+  /** Ouvre la vue « descendance » de la personne choisie : tout déplié, comme un recentrage. */
+  const openDescendants = (ancestorId: Id) => {
+    setFocusId(ancestorId);
+    setSelectedId(ancestorId);
+    setFilter(undefined);
+    reframe.current = true;
+    ordinaryFolds.current = folds;
+    setFolds(NO_FOLDS);
+    setDescendantsOf(ancestorId);
+    triggerId.current += 1;
+    setTrigger({ id: triggerId.current, kind: 'opening' });
+    const people = descendantsLayout(model.graph, ancestorId, NO_FOLDS).people;
+    AccessibilityInfo.announceForAccessibility(
+      t('common:treeScreen.descendants.opened', {
+        name: realNameOf(ancestorId),
+        count: countPeople(new Set(people.keys()), model.cards),
+      }),
+    );
+  };
+
+  /** Referme la vue « descendance » : l'arbre revient autour de la personne centrale d'avant. */
+  const closeDescendants = () => {
+    if (descendantsOf === undefined) return;
+    setFocusId(descendantsOf);
+    setSelectedId(descendantsOf);
+    reframe.current = true;
+    setFolds(ordinaryFolds.current);
+    setDescendantsOf(undefined);
+    triggerId.current += 1;
+    setTrigger({ id: triggerId.current, kind: 'opening' });
+    AccessibilityInfo.announceForAccessibility(t('common:treeScreen.descendants.closed'));
+  };
 
   const toggle = (familyKey: string) => {
     // Un foyer qui s'ouvre pousse depuis sa pastille ; un foyer qui se replie disparaît d'un coup.
@@ -230,9 +390,14 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
 
   const onActivate = (hit: SceneHit) => {
     if (hit.kind === 'person') {
+      // Première touche : choisir la personne (et offrir ses actions). Touche suivante sur la même
+      // personne : ouvrir sa fiche (ADR 0033).
+      if (hit.person.id === selectedId && model.cards.get(hit.person.id)?.placeholder === false) {
+        onOpenPerson?.(hit.person.id);
+        return;
+      }
       setSelectedId(hit.person.id);
       setFocusId(hit.person.id);
-      onOpenPerson?.(hit.person.id);
     } else if (hit.kind === 'counter') {
       toggle(hit.counter.familyKey);
     } else if (hit.kind === 'mark') {
@@ -264,20 +429,78 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
         }}
       >
         <Text accessibilityRole="header" style={[typography.titreEcran, { color: colors.texte }]}>
-          {t('common:treeScreen.title')}
+          {descendantsOf === undefined
+            ? t('common:treeScreen.title')
+            : t('common:treeScreen.descendants.title', { name: realNameOf(descendantsOf) })}
         </Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space[2] }}>
-          <Button
-            testID="tree-go-you"
-            label={t('common:treeScreen.goToYou')}
-            accessibilityLabel={t('common:treeScreen.goToYouLabel')}
-            accessibilityHint={t('common:treeScreen.goToYouHint')}
-            variant="secondary"
-            compact
-            onPress={() => {
-              recenter(model.centerId);
-            }}
-          />
+          {descendantsOf === undefined ? (
+            <Button
+              testID="tree-go-you"
+              label={t('common:treeScreen.goToYou')}
+              accessibilityLabel={t('common:treeScreen.goToYouLabel')}
+              accessibilityHint={t('common:treeScreen.goToYouHint')}
+              variant="secondary"
+              compact
+              onPress={() => {
+                recenter(model.centerId);
+              }}
+            />
+          ) : (
+            <Button
+              testID="tree-descendants-back"
+              label={t('common:treeScreen.descendants.back')}
+              accessibilityLabel={t('common:treeScreen.descendants.backLabel')}
+              accessibilityHint={t('common:treeScreen.descendants.backHint')}
+              variant="secondary"
+              compact
+              onPress={closeDescendants}
+            />
+          )}
+          {canOpenProfile ? (
+            <Button
+              testID="tree-open-profile"
+              label={t('common:treeScreen.openProfile')}
+              accessibilityLabel={t('common:treeScreen.openProfileLabel', {
+                name: realNameOf(focusId),
+              })}
+              accessibilityHint={t('common:treeScreen.openProfileHint')}
+              variant="secondary"
+              compact
+              onPress={() => {
+                onOpenPerson?.(focusId);
+              }}
+            />
+          ) : null}
+          {canSeeDescendants ? (
+            <Button
+              testID="tree-descendants"
+              label={t('common:treeScreen.descendants.open')}
+              accessibilityLabel={t('common:treeScreen.descendants.openLabel', {
+                name: realNameOf(focusId),
+              })}
+              accessibilityHint={t('common:treeScreen.descendants.openHint')}
+              variant="secondary"
+              compact
+              onPress={() => {
+                openDescendants(focusId);
+              }}
+            />
+          ) : null}
+          {descendantsOf === undefined ? (
+            <Button
+              testID="tree-filters-open"
+              label={t('common:treeScreen.filters.open')}
+              accessibilityLabel={t('common:treeScreen.filters.openLabel')}
+              accessibilityHint={t('common:treeScreen.filters.openHint')}
+              icon="reglages"
+              variant="secondary"
+              compact
+              onPress={() => {
+                setFiltersOpen(true);
+              }}
+            />
+          ) : null}
           {canRecenter ? (
             <Button
               testID="tree-recenter"
@@ -344,7 +567,33 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
             </>
           )}
         </View>
-        {trail.length > 1 ? (
+        {filter === undefined || matching === undefined ? null : (
+          <View
+            testID="tree-filter-active"
+            style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: space[2] }}
+          >
+            <Text style={[typography.titreCarte, { color: colors.texte }]}>
+              {filterName(filter)}
+            </Text>
+            <Text style={[typography.secondaire, { color: colors.texteSecondaire }]}>
+              {countText(countPeople(matching, model.cards, layout.people))}
+            </Text>
+            <Button
+              testID="tree-filter-clear"
+              label={t('common:treeScreen.filters.clear')}
+              accessibilityLabel={t('common:treeScreen.filters.clearLabel', {
+                filter: filterName(filter),
+              })}
+              accessibilityHint={t('common:treeScreen.filters.clearHint')}
+              variant="quiet"
+              compact
+              onPress={() => {
+                applyFilter(undefined);
+              }}
+            />
+          </View>
+        )}
+        {trail.length > 1 && descendantsOf === undefined ? (
           <View
             accessibilityRole="toolbar"
             accessibilityLabel={t('common:treeScreen.trailLabel')}
@@ -386,6 +635,7 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
             outline={outline}
             cards={model.cards}
             focusId={focusId}
+            matching={matching}
             centerId={model.centerId}
             onFocus={(id) => {
               setFocusId(id);
@@ -409,6 +659,7 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
               missingOf={missingOf}
               youId={model.centerId}
               selectedId={selectedId}
+              matching={matching}
               initialViewport={initialViewport}
               command={command}
               growth={growth}
@@ -422,6 +673,20 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
           </View>
         )}
       </View>
+      <TreeFiltersSheet
+        visible={filtersOpen}
+        choices={choices}
+        active={filter}
+        nameOf={realNameOf}
+        countOf={countOfFilter}
+        onChoose={applyFilter}
+        onClear={() => {
+          applyFilter(undefined);
+        }}
+        onClose={() => {
+          setFiltersOpen(false);
+        }}
+      />
     </View>
   );
 }

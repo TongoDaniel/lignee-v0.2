@@ -23,6 +23,8 @@ export interface PersonCard {
   /** Nom de naissance : la teinte de l'avatar le suit, jamais le genre (ADR 0022). */
   readonly birthName: string;
   readonly deceased: boolean;
+  /** Statut « vivante » noté sur la fiche (filtre « vivants », ARB-11) ; inconnu n'est ni l'un ni l'autre. */
+  readonly living: boolean;
   readonly birthYear: number | undefined;
   readonly deathYear: number | undefined;
 }
@@ -86,6 +88,7 @@ export function buildPersonCards(source: CardSource): ReadonlyMap<Id, PersonCard
       fullName,
       birthName: (birth?.surname ?? birth?.givenNames ?? fullName).trim(),
       deceased: person.vitalStatus === 'deceased',
+      living: person.vitalStatus === 'living',
       birthYear: years.get(`birth|${person.id}`),
       deathYear: years.get(`death|${person.id}`),
     });
