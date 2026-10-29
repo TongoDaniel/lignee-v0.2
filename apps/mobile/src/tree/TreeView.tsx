@@ -55,8 +55,10 @@ import { TreeCanvas, type ViewportCommand } from './TreeCanvas';
 import { bottomCenterFrame, topCenterFrame } from './treeFrames';
 import { TreeFiltersSheet } from './TreeFiltersSheet';
 import {
+  allFilters,
   countPeople,
   filterChoices,
+  filterTestId,
   matchingPeople,
   type FilterSource,
   type TreeFilter,
@@ -74,6 +76,10 @@ export interface TreeViewProps {
 }
 
 const NO_FOLDS: FoldChoices = new Map();
+
+function lowerFirst(text: string): string {
+  return text.charAt(0).toLocaleLowerCase() + text.slice(1);
+}
 
 /** Parent manquant de chaque colonne « non précisé » : « mère », « père » ou « parent ». */
 function missingKinds(layout: TreeLayout): ReadonlyMap<string, 'mother' | 'father' | 'parent'> {
@@ -176,7 +182,22 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
         : matchingPeople(filter, filterSource),
     [filter, descendantsOf, filterSource],
   );
-  const choices = useMemo(() => filterChoices(filterSource, layout), [filterSource, layout]);
+  const choices = useMemo(() => filterChoices(filterSource), [filterSource]);
+  // Les décomptes de la feuille ne se calculent que feuille ouverte, et une fois par ouverture ;
+  // ils comptent les personnes dessinées (ADR 0033).
+  const counts = useMemo(() => {
+    const result = new Map<string, number>();
+    if (!filtersOpen) return result;
+    for (const item of allFilters(choices)) {
+      result.set(
+        filterTestId(item),
+        countPeople(matchingPeople(item, filterSource), model.cards, layout.people),
+      );
+    }
+    return result;
+  }, [filtersOpen, choices, filterSource, model.cards, layout]);
+  // Fil des replis de l'arbre ordinaire, gardé le temps d'une vue « descendance ».
+  const ordinaryFolds = useRef<FoldChoices>(NO_FOLDS);
 
   const send = useCallback((viewport: Viewport, instant = false) => {
     commandId.current += 1;
@@ -264,9 +285,9 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
     }
   };
   const countOfFilter = (item: TreeFilter) =>
-    countPeople(matchingPeople(item, filterSource), model.cards);
-  const countText = (item: TreeFilter) =>
-    t('common:treeScreen.filters.count', { count: countOfFilter(item) });
+    counts.get(filterTestId(item)) ??
+    countPeople(matchingPeople(item, filterSource), model.cards, layout.people);
+  const countText = (count: number) => t('common:treeScreen.filters.count', { count });
 
   /**
    * Refait la disposition autour d'une personne : elle prend la place de « Vous » au lancement
@@ -311,8 +332,8 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
     }
     AccessibilityInfo.announceForAccessibility(
       t('common:treeScreen.filters.applied', {
-        filter: filterName(next),
-        count: countText(next),
+        filter: lowerFirst(filterName(next)),
+        count: countText(countOfFilter(next)),
       }),
     );
   };
@@ -323,6 +344,7 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
     setSelectedId(ancestorId);
     setFilter(undefined);
     reframe.current = true;
+    ordinaryFolds.current = folds;
     setFolds(NO_FOLDS);
     setDescendantsOf(ancestorId);
     triggerId.current += 1;
@@ -342,7 +364,7 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
     setFocusId(descendantsOf);
     setSelectedId(descendantsOf);
     reframe.current = true;
-    setFolds(NO_FOLDS);
+    setFolds(ordinaryFolds.current);
     setDescendantsOf(undefined);
     triggerId.current += 1;
     setTrigger({ id: triggerId.current, kind: 'opening' });
@@ -550,7 +572,7 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
               {filterName(filter)}
             </Text>
             <Text style={[typography.secondaire, { color: colors.texteSecondaire }]}>
-              {countText(filter)}
+              {countText(countPeople(matching, model.cards, layout.people))}
             </Text>
             <Button
               testID="tree-filter-clear"

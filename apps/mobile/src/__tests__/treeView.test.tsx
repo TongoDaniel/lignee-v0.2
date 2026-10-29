@@ -542,12 +542,47 @@ describe('TreeCanvas — personnes atténuées par un filtre (ARB-11)', () => {
   });
 
   it('un filtre atténue les personnes qui n’y répondent pas, et elles seules', () => {
-    const probe = dimmedGroups(undefined, String(opacity.attenue));
-    const only = new Set([probe.built.centerId]);
-    const filtered = dimmedGroups(only, String(opacity.attenue));
-    // Le dessin ne peint que l'écran : au moins une autre personne, et jamais « Vous ».
-    expect(filtered.count).toBeGreaterThan(0);
-    const everyone = dimmedGroups(new Set(probe.built.cards.keys()), String(opacity.attenue));
-    expect(everyone.count).toBe(0);
+    const level = String(opacity.attenue);
+    const probe = dimmedGroups(undefined, level);
+    const centerId = probe.built.centerId;
+    const everyone = new Set(probe.built.cards.keys());
+    // Un filtre vide atténue toutes les personnes dessinées : leur nombre.
+    const drawn = dimmedGroups(new Set(), level).count;
+    expect(drawn).toBeGreaterThan(1);
+    // Garder « Vous » seul : toutes les autres sont atténuées, lui jamais (une de moins).
+    expect(dimmedGroups(new Set([centerId]), level).count).toBe(drawn - 1);
+    // Garder tout le monde sauf « Vous » : lui seul est atténué.
+    const others = new Set(everyone);
+    others.delete(centerId);
+    expect(dimmedGroups(others, level).count).toBe(1);
+    // Garder tout le monde : personne.
+    expect(dimmedGroups(everyone, level).count).toBe(0);
   });
+});
+
+describe('TreeView — budget des filtres sur 500 personnes', () => {
+  // Marge large : le test garde l'ordre de grandeur (la feuille fermée ne calcule rien, l'ouvrir
+  // calcule les décomptes de quelques filtres), pas une mesure fine.
+  const BUDGET_MS = 500;
+  const FACTOR = 4;
+
+  it('ouvrir la feuille des filtres reste sous le budget, la feuille fermée ne coûte rien', async () => {
+    const built = model(500);
+    render(
+      <AppProviders theme={{ reduceMotion: true }}>
+        <TreeView model={built} />
+      </AppProviders>,
+    );
+    await act(() => Promise.resolve());
+    layOut();
+    const start = performance.now();
+    act(() => {
+      fireEvent.press(screen.getByTestId('tree-filters-open'));
+    });
+    const elapsed = performance.now() - start;
+    expect(screen.getByTestId('filter-vital-living')).toBeTruthy();
+    // Au plus six branches (parents et grands-parents), jamais une par oncle ou belle-mère.
+    expect(screen.queryAllByTestId(/^filter-branch-/).length).toBeLessThanOrEqual(6);
+    expect(elapsed).toBeLessThan(BUDGET_MS * FACTOR);
+  }, 30_000);
 });

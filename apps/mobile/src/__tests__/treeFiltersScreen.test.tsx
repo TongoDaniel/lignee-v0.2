@@ -96,7 +96,7 @@ describe('filtres de l’arbre (ARB-11)', () => {
     expect(screen.getByTestId('filter-vital-deceased')).toBeTruthy();
     expect(screen.getAllByTestId(/^filter-foyer-/)).toHaveLength(1);
     // Un verbe, un nom, et le nombre de personnes gardées, lu avec la ligne.
-    expect(screen.getByLabelText('Côté paternel, 10 personnes')).toBeTruthy();
+    expect(screen.getByLabelText('Côté paternel, 6 personnes')).toBeTruthy();
     expect(screen.getByLabelText('Foyer avec Zoe, 3 personnes')).toBeTruthy();
     expect(screen.getByText('Branche de Jean')).toBeTruthy();
   });
@@ -113,12 +113,12 @@ describe('filtres de l’arbre (ARB-11)', () => {
       ['andre', 'jacques', 'jean', 'lea', 'marthe', 'noe', 'paul', 'pierre', 'rose', 'tom'].sort(),
     );
     expect(AccessibilityInfo.announceForAccessibility).toHaveBeenCalledWith(
-      'Filtre Côté paternel appliqué, 10 personnes.',
+      'Filtre côté paternel appliqué, 6 personnes.',
     );
     // Le filtre actif se lit en texte : son nom, le nombre de personnes, et le moyen de le retirer.
     const banner = screen.getByTestId('tree-filter-active');
     expect(within(banner).getByText('Côté paternel')).toBeTruthy();
-    expect(within(banner).getByText('10 personnes')).toBeTruthy();
+    expect(within(banner).getByText('6 personnes')).toBeTruthy();
     expect(within(banner).getByLabelText('Retirer le filtre Côté paternel')).toBeTruthy();
     // Les personnes atténuées restent sur le dessin : la scène n'est pas modifiée.
     expect(canvas().scene.personById.has(scenario.id('anne'))).toBe(true);

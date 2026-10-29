@@ -6,6 +6,7 @@
 // et le dénombrement. Définitions : ADR 0033.
 import type { Id } from '@lignee/domain';
 import {
+  ancestorRoots,
   branchMembers,
   foyerMembers,
   sideMembers,
@@ -13,7 +14,6 @@ import {
   type LayoutGraph,
   type OutlineEntry,
   type Side,
-  type TreeLayout,
 } from '@lignee/layout';
 
 import type { PersonCard } from './personCards';
@@ -34,8 +34,8 @@ export interface FilterSource {
   readonly outline: ReadonlyMap<Id, OutlineEntry>;
 }
 
-/** Rangées au-dessus de la personne au centre dont on propose la branche : parents, grands-parents. */
-export const BRANCH_ROOT_ROWS = 2;
+/** Générations d'ancêtres dont on propose la branche : parents, grands-parents. */
+export const BRANCH_ROOT_GENERATIONS = 2;
 
 /** Personnes qui répondent au filtre (placeholders compris : ils restent dessinés avec leur famille). */
 export function matchingPeople(filter: TreeFilter, source: FilterSource): ReadonlySet<Id> {
@@ -62,10 +62,20 @@ export function matchingPeople(filter: TreeFilter, source: FilterSource): Readon
   }
 }
 
-/** Nombre de personnes à compter pour le lecteur : les places à compléter n'en sont pas. */
-export function countPeople(matching: ReadonlySet<Id>, cards: ReadonlyMap<Id, PersonCard>): number {
+/**
+ * Nombre de personnes à compter pour le lecteur : les places à compléter n'en sont pas, et, si
+ * `drawn` est donné, seulement celles qui sont dessinées (les foyers repliés ne comptent pas :
+ * le nombre dit ce que l'on voit, ADR 0033).
+ */
+export function countPeople(
+  matching: ReadonlySet<Id>,
+  cards: ReadonlyMap<Id, PersonCard>,
+  drawn?: ReadonlyMap<Id, unknown>,
+): number {
   let count = 0;
-  for (const id of matching) if (cards.get(id)?.placeholder === false) count += 1;
+  for (const id of matching) {
+    if (cards.get(id)?.placeholder === false && (drawn === undefined || drawn.has(id))) count += 1;
+  }
   return count;
 }
 
@@ -74,12 +84,12 @@ export interface FilterChoices {
   readonly sides: readonly Side[];
   /** Foyers de la personne au centre, dans l'ordre des rangs. */
   readonly foyers: readonly { readonly familyKey: string; readonly partnerId: Id }[];
-  /** Parents et grands-parents dessinés au-dessus de la personne au centre. */
+  /** Parents puis grands-parents de naissance de la personne au centre. */
   readonly branchRoots: readonly Id[];
 }
 
-/** Choix proposés pour la disposition en cours. */
-export function filterChoices(source: FilterSource, layout: TreeLayout): FilterChoices {
+/** Choix proposés pour la personne au centre. */
+export function filterChoices(source: FilterSource): FilterChoices {
   const sides = (['paternal', 'maternal'] as const).filter(
     (side) => sideRoots(source.graph, source.centerId, side).length > 0,
   );
@@ -90,14 +100,9 @@ export function filterChoices(source: FilterSource, layout: TreeLayout): FilterC
       ? [{ familyKey: union.familyKey, partnerId: union.partnerId }]
       : [],
   );
-  const ancestors: { readonly id: Id; readonly row: number }[] = [];
-  for (const [id, row] of layout.structure.rowOf) {
-    if (row < 0 && row >= -BRANCH_ROOT_ROWS && source.cards.get(id)?.placeholder === false) {
-      ancestors.push({ id, row });
-    }
-  }
-  // Les parents d'abord, puis les grands-parents ; l'ordre de la disposition départage.
-  const branchRoots = ancestors.sort((a, b) => b.row - a.row).map((ancestor) => ancestor.id);
+  const branchRoots = ancestorRoots(source.graph, source.centerId, BRANCH_ROOT_GENERATIONS).filter(
+    (id) => source.cards.get(id)?.placeholder === false,
+  );
   return { sides, foyers, branchRoots };
 }
 
@@ -128,4 +133,15 @@ export function sameFilter(a: TreeFilter | undefined, b: TreeFilter | undefined)
     case 'branch':
       return a.rootId === (b as typeof a).rootId;
   }
+}
+
+/** Tous les filtres que la feuille propose pour ces choix. */
+export function allFilters(choices: FilterChoices): readonly TreeFilter[] {
+  return [
+    ...choices.sides.map((side) => ({ kind: 'side', side }) as const),
+    { kind: 'vital', status: 'living' },
+    { kind: 'vital', status: 'deceased' },
+    ...choices.foyers.map((foyer) => ({ kind: 'foyer', familyKey: foyer.familyKey }) as const),
+    ...choices.branchRoots.map((rootId) => ({ kind: 'branch', rootId }) as const),
+  ];
 }

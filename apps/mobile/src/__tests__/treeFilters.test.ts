@@ -11,6 +11,7 @@ import { canOpenDescendants, descendantsLayout, hasDescendants } from '../tree/d
 import { buildPersonCards } from '../tree/personCards';
 import { sceneSpecFor } from '../tree/sceneSpec';
 import {
+  allFilters,
   countPeople,
   filterChoices,
   matchingPeople,
@@ -47,7 +48,7 @@ function sourceOf(model: TreeModel, centerId: Id = model.centerId): FilterSource
 /** Tous les filtres que l'écran peut proposer pour cette disposition, plus la vie. */
 function everyFilter(model: TreeModel, centerId: Id): TreeFilter[] {
   const source = sourceOf(model, centerId);
-  const choices = filterChoices(source, layoutTree(model.graph, centerId));
+  const choices = filterChoices(source);
   return [
     ...choices.sides.map((side) => ({ kind: 'side', side }) as const),
     { kind: 'vital', status: 'living' },
@@ -252,8 +253,7 @@ describe('critères de filtre prouvés sur un arbre inventé', () => {
 
   it('les foyers proposés sont ceux de la personne au centre, dans l’ordre des rangs', () => {
     const { model, scenario } = pierreModel();
-    const layout = layoutTree(model.graph, model.centerId);
-    const choices = filterChoices(sourceOf(model), layout);
+    const choices = filterChoices(sourceOf(model));
     expect(choices.foyers.map((foyer) => scenario.keyOf(foyer.partnerId))).toEqual([
       'rose',
       'odile',
@@ -267,39 +267,32 @@ describe('critères de filtre prouvés sur un arbre inventé', () => {
     );
   });
 
-  it('les branches proposées sont les parents et grands-parents dessinés au-dessus', () => {
-    const { model, scenario } = pierreModel('jean');
-    const layout = layoutTree(model.graph, model.centerId);
-    const keys = filterChoices(sourceOf(model), layout).branchRoots.map((id) => scenario.keyOf(id));
-    expect(keys).toContain('pierre');
-    expect(keys).toContain('rose');
-    expect(keys).toContain('jacques');
-    // Les parents (rangée -1) précèdent les grands-parents (rangée -2).
-    expect(keys.indexOf('pierre')).toBeLessThan(keys.indexOf('jacques'));
-    // Ni la personne au centre ni ses enfants.
-    expect(keys).not.toContain('jean');
-    expect(keys).not.toContain('luc');
+  it('les branches proposées sont les ancêtres de naissance sur deux générations', () => {
+    const jean = pierreModel('jean');
+    expect(
+      filterChoices(sourceOf(jean.model)).branchRoots.map((id) => jean.scenario.keyOf(id)),
+    ).toEqual(['pierre', 'rose', 'jacques', 'lea']);
+    // Ni les oncles (André, Marthe), ni les belles-mères (Odile, Clarisse), ni les beaux-parents.
+    const luc = pierreModel('luc');
+    expect(
+      filterChoices(sourceOf(luc.model)).branchRoots.map((id) => luc.scenario.keyOf(id)),
+    ).toEqual(['jean', 'anne', 'pierre', 'rose', 'bruno', 'carla']);
   });
 
   it('les côtés ne sont proposés que si le parent est connu et de genre noté', () => {
     const { model, scenario } = pierreModel('jean');
-    const choices = filterChoices(sourceOf(model), layoutTree(model.graph, model.centerId));
+    const choices = filterChoices(sourceOf(model));
     expect(choices.sides).toEqual(['paternal', 'maternal']);
     const members = matchingPeople({ kind: 'side', side: 'paternal' }, sourceOf(model));
     expect([...members].map((id) => scenario.keyOf(id)).sort()).toEqual(
       ['andre', 'jacques', 'lea', 'pierre'].sort(),
     );
-    // Vu de Pierre, dont les parents sont notés mais pas ceux de Rose : un seul côté.
-    const fromPierre = pierreModel('luc');
-    const lucChoices = filterChoices(
-      sourceOf(fromPierre.model),
-      layoutTree(fromPierre.model.graph, fromPierre.model.centerId),
-    );
-    expect(lucChoices.sides).toEqual(['paternal', 'maternal']);
+    // Vu de Luc, dont le père et la mère sont notés : les deux côtés.
+    const luc = pierreModel('luc');
+    expect(filterChoices(sourceOf(luc.model)).sides).toEqual(['paternal', 'maternal']);
+    // Vu de Tom, dont seul le père (Paul) est noté : un seul côté.
     const tom = pierreModel('tom');
-    expect(
-      filterChoices(sourceOf(tom.model), layoutTree(tom.model.graph, tom.model.centerId)).sides,
-    ).toEqual(['paternal']);
+    expect(filterChoices(sourceOf(tom.model)).sides).toEqual(['paternal']);
   });
 
   it('deux filtres identiques se reconnaissent, deux différents non', () => {
@@ -310,4 +303,37 @@ describe('critères de filtre prouvés sur un arbre inventé', () => {
     expect(sameFilter(undefined, undefined)).toBe(true);
     expect(sameFilter(undefined, paternal)).toBe(false);
   });
+});
+
+describe('budget de la feuille des filtres (500 personnes)', () => {
+  // Budget de calcul avec facteur de marge pour les machines lentes (CI, Android d'entrée de gamme
+  // émulé) : proposer les choix et leurs décomptes doit rester une fraction de seconde.
+  const BUDGET_MS = 150;
+  const FACTOR = 4;
+
+  it('choix et décomptes de tous les filtres tiennent le budget, avec des branches bornées', () => {
+    const { model } = readerModel(7, 500);
+    const centers = [...model.cards.keys()].filter(
+      (id) => model.cards.get(id)?.placeholder === false,
+    );
+    const start = performance.now();
+    let widest = 0;
+    for (const centerId of centers.slice(0, 5)) {
+      const layout = layoutTree(model.graph, centerId);
+      const source = {
+        graph: model.graph,
+        cards: model.cards,
+        centerId,
+        outline: buildOutline(layout),
+      };
+      const choices = filterChoices(source);
+      widest = Math.max(widest, choices.branchRoots.length);
+      for (const filter of allFilters(choices)) {
+        countPeople(matchingPeople(filter, source), model.cards, layout.people);
+      }
+    }
+    const perCenter = (performance.now() - start) / 5;
+    expect(widest).toBeLessThanOrEqual(6);
+    expect(perCenter).toBeLessThan(BUDGET_MS * FACTOR);
+  }, 30_000);
 });
