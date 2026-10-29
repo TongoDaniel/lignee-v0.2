@@ -527,9 +527,6 @@
   "common:treeScreen.filters.maternal": {
     "status": "to-review"
   },
-  "common:treeScreen.filters.none": {
-    "status": "to-review"
-  },
   "common:treeScreen.filters.open": {
     "status": "to-review"
   },

@@ -120,7 +120,6 @@
       "count": "{count, plural, =0 {Aucune personne} one {# personne} other {# personnes}}",
       "chosen": "Choisi, {count}",
       "rowHint": "Applique ce filtre à l’arbre.",
-      "none": "Aucun filtre",
       "clear": "Retirer le filtre",
       "clearLabel": "Retirer le filtre {filter}",
       "clearHint": "Réaffiche toutes les personnes sans atténuation.",

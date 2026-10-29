@@ -178,7 +178,6 @@ export interface MessageParams {
   'common:treeScreen.filters.foyerWith': { readonly name: string | number };
   'common:treeScreen.filters.living': null;
   'common:treeScreen.filters.maternal': null;
-  'common:treeScreen.filters.none': null;
   'common:treeScreen.filters.open': null;
   'common:treeScreen.filters.openHint': null;
   'common:treeScreen.filters.openLabel': null;

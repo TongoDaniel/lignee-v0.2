@@ -120,7 +120,6 @@
       "count": "{count, plural, =0 {Nobody} one {# person} other {# people}}",
       "chosen": "Chosen, {count}",
       "rowHint": "Applies this filter to the tree.",
-      "none": "No filter",
       "clear": "Remove the filter",
       "clearLabel": "Remove the filter {filter}",
       "clearHint": "Shows everyone again without fading.",
