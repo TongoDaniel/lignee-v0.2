@@ -627,6 +627,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - UNI-10 : « Un lien probable s'affiche « Peut-être son frère » »
   - UNI-11 : « Choisir la mère plus tard déplace l'enfant dans son foyer »
   - UNI-14 (partie saisie) : « « Jumeaux » affiché sur les deux fiches »
+  - Obligation reçue de T-031 (ADR 0032, point 10) : « rebond léger » et vibration légère de la charte (07-mouvement) quand une personne ajoutée apparaît dans l'arbre ; T-031 revient à l'arbre sans animation.
   - ARB-05 : « Préciser la mère déplace l'enfant dans le bon foyer »
   - Obligations reçues des relectures (T-030, ADR 0027, Conséquences) : une suppression liste ses dépendants (noms, faits, liens, unions) dans le même lot de `recordLocalChanges` ; codes de refus (`MUTATION_ISSUE_CODES`) traduits par `packages/i18n`.
 - Cas limites : CL-POL-03, CL-POL-11, CL-GEN-14, CL-FAM-02, CL-FAM-03, CL-FAM-04, CL-FAM-05, CL-FAM-06, CL-FAM-07, CL-FAM-08, CL-FAM-11, CL-FAM-13, CL-DON-11.
