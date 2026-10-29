@@ -1,0 +1,13 @@
+# En-tête du jeu de paires annotées (T-023, plan V1) : total exact et quota minimal par catégorie.
+# Format et répartition : README.md de ce dossier (le test vérifie que sa table suit ces quotas).
+version: 1
+total: 200
+quotas:
+  polygamie: 30
+  levirat_sororat: 20
+  alliance: 28
+  degres_civils: 36
+  non_biologique_certitude: 28
+  implexe: 14
+  places_a_completer: 14
+  visibilite: 6

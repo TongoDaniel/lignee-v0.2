@@ -1,0 +1,390 @@
+# Arbre généré par generateTree({ seed: 6, size: 30 }) de @lignee/domain (graine figée,
+# noms générés), figé ici par freezeGeneratedFamily (src/test-support/generated-family.ts) : le jeu
+# ne dépend plus du générateur. Toutes les personnes sont visibles du lecteur.
+famille: F10
+titre: Arbre généré, graine 6, 30 personnes
+origine: { generateur: generateTree, graine: 6, taille: 30, commit: 71c5170 }
+arbre:
+  personnes:
+    - tsenee/F
+    - meluo/M
+    - boumbon/M
+    - tchoou/F
+    - fouyee/M
+    - sondom/M
+    - tsoi/M
+    - zouzaette/F
+    - panuo/M
+    - hufon/M
+    - mbiette/F
+    - goupiine/F
+    - njae/M
+    - tchotaette/F
+    - livee/M
+    - tchadjam/M
+    - yaou/F
+    - vio/M
+    - ndoufeine/F
+    - lakoette/F
+    - tembon/M
+    - mboette/F
+    - mbidjin/M
+    - ndoneine/F
+    - natoa/F
+    - sans_prenom/M
+    - kwandii/M
+    - tsapan/M
+    - nouou/M
+    - tsemoou/F
+  unions:
+    - { conjoints: [tsenee, meluo], rang_tsenee: 1, rang_meluo: 1 }
+    - conjoints: [boumbon, zouzaette]
+      rang_boumbon: 1
+      rang_zouzaette: 1
+      debut: { qualificatif: exacte, date: 1941-11-01 }
+      fin: { qualificatif: exacte, date: 1947-06-07 }
+      motif: deces
+    - conjoints: [tchoou, hufon]
+      rang_tchoou: 1
+      rang_hufon: 1
+      debut: { qualificatif: exacte, date: "1938" }
+      fin: { qualificatif: exacte, date: "1981" }
+      motif: deces
+    - conjoints: [fouyee, tchotaette]
+      rang_fouyee: 1
+      rang_tchotaette: 1
+      debut: { qualificatif: exacte, date: "1944" }
+    - conjoints: [sondom, yaou]
+      rang_sondom: 1
+      rang_yaou: 1
+      debut: { qualificatif: exacte, date: "1948" }
+      fin: { qualificatif: vers, date: "1951", texte: vers 1951 }
+      motif: deces
+    - conjoints: [sondom, ndoufeine]
+      rang_sondom: 2
+      rang_ndoufeine: 1
+      debut: { qualificatif: exacte, date: "1948" }
+      fin: { qualificatif: vers, date: "1951", texte: vers 1951 }
+      motif: deces
+    - { conjoints: [yaou, fouyee], rang_yaou: 2, rang_fouyee: 2 }
+    - conjoints: [ndoufeine, fouyee]
+      rang_ndoufeine: 2
+      rang_fouyee: 3
+      debut: { qualificatif: exacte, date: "1954" }
+    - conjoints: [panuo, mbiette]
+      rang_panuo: 1
+      rang_mbiette: 1
+      debut: { qualificatif: vers, date: "1965", texte: vers 1965 }
+    - conjoints: [goupiine, sans_prenom]
+      rang_goupiine: 1
+      rang_sans_prenom: 1
+      debut: { qualificatif: exacte, date: 1969-02-03 }
+    - conjoints: [njae, mboette]
+      rang_njae: 1
+      rang_mboette: 1
+      debut: { qualificatif: texte, texte: "vers 1980, d'après la famille" }
+      fin: { qualificatif: exacte, date: "1983" }
+      motif: deces
+    - conjoints: [livee, tsemoou]
+      rang_livee: 1
+      rang_tsemoou: 1
+      debut: { qualificatif: vers, date: "1968", texte: vers 1968 }
+      fin: { qualificatif: exacte, date: "1996" }
+      motif: deces
+    - conjoints: [tsemoou, tembon]
+      rang_tsemoou: 2
+      rang_tembon: 1
+      debut: { qualificatif: exacte, date: "1998" }
+  filiations:
+    - { parents: [tsenee], enfant: boumbon, certitude: probable }
+    - { parents: [meluo], enfant: boumbon }
+    - { parents: [tsenee, meluo], enfant: tchoou }
+    - { parents: [tsenee, meluo], enfant: fouyee }
+    - { parents: [tsenee], enfant: sondom, certitude: probable }
+    - { parents: [meluo], enfant: sondom }
+    - { parents: [tsenee, meluo], enfant: tsoi }
+    - { parents: [boumbon], enfant: panuo }
+    - { parents: [zouzaette], enfant: panuo, certitude: probable }
+    - { parents: [tchoou], enfant: mbiette }
+    - { parents: [hufon], enfant: mbiette, certitude: probable }
+    - { parents: [tchoou, hufon], enfant: goupiine }
+    - { parents: [tchoou], enfant: njae }
+    - { parents: [hufon], enfant: njae, certitude: probable }
+    - { parents: [fouyee, tchotaette], enfant: livee }
+    - { parents: [fouyee, tchotaette], enfant: tchadjam }
+    - { parents: [sondom, yaou], enfant: vio }
+    - { parents: [yaou, fouyee], enfant: lakoette }
+    - { parents: [yaou, fouyee], enfant: tembon }
+    - { parents: [sondom], enfant: tembon, type: adoptive }
+    - { parents: [yaou], enfant: mboette }
+    - { parents: [fouyee], enfant: mboette, certitude: probable }
+    - { parents: [ndoufeine, fouyee], enfant: mbidjin }
+    - { parents: [ndoufeine], enfant: ndoneine, certitude: probable }
+    - { parents: [fouyee], enfant: ndoneine }
+    - { parents: [panuo, mbiette], enfant: natoa }
+    - { parents: [goupiine, sans_prenom], enfant: kwandii }
+    - { parents: [goupiine, sans_prenom], enfant: tsapan }
+    - { parents: [goupiine, sans_prenom], enfant: nouou }
+  simultaneites:
+    - { unions: [[fouyee, tchotaette], [yaou, fouyee]], reponse: simultanees }
+    - { unions: [[fouyee, tchotaette], [ndoufeine, fouyee]], reponse: simultanees }
+    - { unions: [[yaou, fouyee], [ndoufeine, fouyee]], reponse: simultanees }
+    - { unions: [[sondom, yaou], [sondom, ndoufeine]], reponse: simultanees }
+    - { unions: [[sondom, yaou], [yaou, fouyee]], reponse: successives }
+    - { unions: [[sondom, ndoufeine], [ndoufeine, fouyee]], reponse: successives }
+    - { unions: [[livee, tsemoou], [tsemoou, tembon]], reponse: successives }
+  faits:
+    - { personne: tsenee, type: deces, date: { qualificatif: exacte, date: "1963" } }
+    - { personne: boumbon, type: deces, date: { qualificatif: exacte, date: 1947-11-01 } }
+    - personne: tchoou
+      type: deces
+      date: { qualificatif: entre, de: "1981", a: "1986", texte: entre 1981 et 1986 }
+    - personne: sondom
+      type: deces
+      date: { qualificatif: entre, de: "1951", a: "1954", texte: entre 1951 et 1954 }
+    - { personne: hufon, type: deces, date: { qualificatif: exacte, date: 1989-01-04 } }
+    - { personne: tchotaette, type: deces, date: { qualificatif: exacte, date: 1971-05-05 } }
+    - { personne: livee, type: deces, date: { qualificatif: exacte, date: "1996" } }
+    - personne: mbidjin
+      type: deces
+      date: { qualificatif: texte, texte: "vers 2008, d'après la famille" }
+    - personne: tsapan
+      type: deces
+      date: { qualificatif: vers, date: "1993", texte: vers 1993 }
+    - { personne: tsemoou, type: deces, date: { qualificatif: exacte, date: "2014" } }
+paires:
+  - id: F10-01
+    de: vio
+    vers: lakoette
+    categorie: levirat_sororat
+    pourquoi: "Lévirat : demi-sœur, même mère, d'abord ; et aussi cousine par le père (Sondom et Fouyee frères, paternité probable) ; et aussi par Ndoufeine, épouse des deux frères (deux unions, deux générations)."
+    attendu:
+      - chemin: "1/1[yaou]"
+        fratrie: { type: birth, partage: half, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "2/2[meluo+tsenee]"
+        certitude: probable
+        cote_de: { par: sondom, cote: father }
+        cote_vers: { par: fouyee, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "1/0[sondom] =ndoufeine =fouyee 0/1[fouyee]"
+        alliance:
+          type: other
+          simultaneite: successive
+          autre_parent: [simultaneous, simultaneous]
+        cote_de: { par: sondom, cote: father }
+        cote_vers: { par: fouyee, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F10-02
+    de: vio
+    vers: tembon
+    categorie: levirat_sororat
+    pourquoi: "Demi-frère, même mère ; Sondom, père de Vio et père adoptif de Tembon, est réuni dans la fratrie sans la changer (ADR 0021, point 5) ; et aussi cousin par les pères ; puis deux chemins d'alliance par les épouses des deux frères."
+    attendu:
+      - chemin: "1/1[yaou] | 1/1[sondom]"
+        fratrie: { type: birth, partage: half, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "2/2[meluo+tsenee]"
+        certitude: probable
+        cote_de: { par: sondom, cote: father }
+        cote_vers: { par: fouyee, cote: parent }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "1/0[sondom] =ndoufeine =fouyee 0/1[fouyee]"
+        alliance:
+          type: other
+          simultaneite: successive
+          autre_parent: [simultaneous, simultaneous]
+        cote_de: { par: sondom, cote: father }
+        cote_vers: { par: fouyee, cote: parent }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "1/0[yaou] =fouyee 1/2[meluo+tsenee]"
+        alliance: { type: other, autre_parent: [successive] }
+        base: [adoptive]
+        certitude: probable
+        cote_de: { par: yaou, cote: mother }
+        cote_vers: { par: sondom, cote: parent, type: adoptive }
+        fr: à rédiger
+        en: à rédiger
+  - id: F10-03
+    de: vio
+    vers: mbidjin
+    categorie: levirat_sororat
+    pourquoi: "Cousin par les pères (paternité probable) ; et aussi deux fois enfant du conjoint d'un parent : fils de l'autre épouse du père (Ndoufeine), et fils du second mari de la mère (Fouyee) ; jamais « demi-frère » (CL-FAM-01)."
+    attendu:
+      - chemin: "2/2[meluo+tsenee]"
+        certitude: probable
+        cote_de: { par: sondom, cote: father }
+        cote_vers: { par: fouyee, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "1/0[sondom] =ndoufeine 0/1[ndoufeine]"
+        alliance: { type: step_sibling, autre_parent: [simultaneous, successive] }
+        cote_de: { par: sondom, cote: father }
+        cote_vers: { par: ndoufeine, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "1/0[yaou] =fouyee 0/1[fouyee]"
+        alliance: { type: step_sibling, autre_parent: [successive, simultaneous] }
+        cote_de: { par: yaou, cote: mother }
+        cote_vers: { par: fouyee, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F10-04
+    de: yaou
+    vers: ndoufeine
+    categorie: levirat_sororat
+    pourquoi: "Épouses de Sondom, puis toutes deux de son frère Fouyee (lévirat) : co-épouses deux fois, par chaque mari (réponses gardées) ; et aussi deux fois épouse du frère du mari (probable)."
+    attendu:
+      - chemin: "=fouyee =ndoufeine"
+        alliance: { type: co_spouse, simultaneite: simultaneous }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=sondom =ndoufeine"
+        alliance: { type: co_spouse, simultaneite: simultaneous }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=fouyee 1/1[meluo+tsenee] =ndoufeine"
+        alliance: { type: spouse_of_sibling_of_spouse }
+        certitude: probable
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=sondom 1/1[meluo+tsenee] =ndoufeine"
+        alliance: { type: spouse_of_sibling_of_spouse }
+        certitude: probable
+        fr: à rédiger
+        en: à rédiger
+  - id: F10-05
+    de: fouyee
+    vers: vio
+    categorie: levirat_sororat
+    pourquoi: "Neveu (fils du frère, probable) d'abord ; et aussi fils de son épouse Yaou (union successive à celle avec Sondom) ; et aussi par l'autre épouse héritée."
+    attendu:
+      - chemin: "1/2[meluo+tsenee]"
+        certitude: probable
+        cote_vers: { par: sondom, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=yaou 0/1[yaou]"
+        alliance: { type: child_of_spouse, autre_parent: [successive] }
+        cote_vers: { par: yaou, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=ndoufeine =sondom 0/1[sondom]"
+        alliance: { type: other, simultaneite: successive, autre_parent: [simultaneous] }
+        cote_vers: { par: sondom, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F10-06
+    de: sondom
+    vers: tembon
+    categorie: non_biologique_certitude
+    pourquoi: "Fils adoptif d'abord, et aussi neveu par la naissance (probable) ; côté « parent » pour Tembon, qui a deux pères (naissance et adoption, CL-FAM-08)."
+    attendu:
+      - chemin: "0/1[sondom]"
+        base: [adoptive]
+        cote_vers: { par: sondom, cote: parent, type: adoptive }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "1/2[meluo+tsenee]"
+        certitude: probable
+        cote_vers: { par: fouyee, cote: parent }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=ndoufeine =fouyee 0/1[fouyee]"
+        alliance: { type: other, simultaneite: successive, autre_parent: [simultaneous] }
+        cote_vers: { par: fouyee, cote: parent }
+        fr: à rédiger
+        en: à rédiger
+  - id: F10-07
+    de: livee
+    vers: tembon
+    categorie: levirat_sororat
+    pourquoi: "Demi-frère par Fouyee, côté « parent » (Tembon a aussi un père adoptif, ADR 0017, point 6) ; et aussi cousin par l'adoption ; et aussi second mari de Tsemoou, veuve de Livee (union successive : lévirat) ; et aussi par les épouses de Sondom."
+    attendu:
+      - chemin: "1/1[fouyee]"
+        fratrie: { type: birth, partage: half, cote: parent }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "2/2[meluo+tsenee]"
+        base: [adoptive]
+        certitude: probable
+        cote_de: { par: fouyee, cote: father }
+        cote_vers: { par: sondom, cote: parent, type: adoptive }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=tsemoou =tembon"
+        alliance: { type: spouse_of_spouse, simultaneite: successive }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "1/0[fouyee] =ndoufeine =sondom 0/1[sondom]"
+        alliance:
+          type: other
+          simultaneite: successive
+          autre_parent: [simultaneous, simultaneous]
+        base: [adoptive]
+        cote_de: { par: fouyee, cote: father }
+        cote_vers: { par: sondom, cote: parent, type: adoptive }
+        fr: à rédiger
+        en: à rédiger
+  - id: F10-08
+    de: tembon
+    vers: tsemoou
+    categorie: levirat_sororat
+    pourquoi: "Son épouse ; et aussi veuve de son demi-frère Livee ; et aussi épouse du cousin par l'adoption : le plus proche d'abord."
+    attendu:
+      - chemin: "=tsemoou"
+        alliance: { type: spouse }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "1/1[fouyee] =tsemoou"
+        alliance: { type: spouse_of_sibling }
+        cote_de: { par: fouyee, cote: parent }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "2/2[meluo+tsenee] =tsemoou"
+        alliance: { type: other }
+        base: [adoptive]
+        certitude: probable
+        cote_de: { par: sondom, cote: parent, type: adoptive }
+        fr: à rédiger
+        en: à rédiger
+  - id: F10-09
+    de: natoa
+    vers: kwandii
+    categorie: implexe
+    pourquoi: "Parents cousins germains (Panuo et Mbiette) : cousin germain par la mère (2 et 2) et aussi issu de germain par le père (3 et 3), les deux par des filiations probables (PAR-08)."
+    attendu:
+      - chemin: "2/2[hufon+tchoou]"
+        certitude: probable
+        cote_de: { par: mbiette, cote: mother }
+        cote_vers: { par: goupiine, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "3/3[meluo+tsenee]"
+        certitude: probable
+        cote_de: { par: panuo, cote: father }
+        cote_vers: { par: goupiine, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F10-10
+    de: panuo
+    vers: mbiette
+    categorie: implexe
+    pourquoi: "Cousine germaine, probable par la filiation de Boumbon (père de Panuo) envers sa mère Tsenee, puis épouse : le sang avant l'alliance."
+    attendu:
+      - chemin: "2/2[meluo+tsenee]"
+        certitude: probable
+        cote_de: { par: boumbon, cote: father }
+        cote_vers: { par: tchoou, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=mbiette"
+        alliance: { type: spouse }
+        fr: à rédiger
+        en: à rédiger

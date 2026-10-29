@@ -95,6 +95,8 @@ T-004 ne calcule aucune visibilité : il donne à chaque donnée sensible sa pro
 | Cause de décès | Fait distinct, `type: 'death_cause'`, séparé du fait `death` (date, lieu) | **Auteur seul** : un fait `death_cause` sans règle n'est visible que de son auteur (`authorAccountId` du fait), comme une règle `only_me` posée par lui. Jamais dans l'arbre, une notification ni un export partagé (UNI-15) | Le fait exige une valeur et un auteur ; il ne décrit qu'une personne ; il peut porter sa propre règle (`target.type: 'fact'`) |
 | Ancien prénom | Nom distinct, `type: 'former'` | Masqué : visible de qui y a droit seulement, jamais dans la recherche des autres (UNI-22) | Le nom exige un auteur ; il peut porter sa propre règle (`target.type: 'name'`) ; il ne suffit pas à nommer une personne connue |
 
+Fiche (T-024, ADR 0029) : `buildProfile` (`src/profile.ts`) calcule ce que la fiche affiche, sans mot. L'ancien prénom n'en sort que par `canViewFormerName` (l'auteur du nom, ou la personne concernée si sa fiche est reliée au compte du lecteur ; ni le propriétaire, ni un responsable, ni un administrateur) ; `chooseDisplayName`, seule fonction de choix du nom affiché, n'a jamais un ancien prénom à choisir ; la cause de décès (`death_cause`) n'en sort jamais.
+
 Point ouvert pour T-052, à trancher avec gardien-confidentialite : le cahier ne dit pas qui « a droit » à un ancien prénom masqué. Proposition à valider (ADR 0008) : par défaut, l'auteur du nom seulement (équivalent `only_me`) ; une règle explicite peut l'ouvrir.
 
 ### Liens pour lesquels « moi seul » est proposé (CON-04)

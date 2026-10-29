@@ -1,10 +1,10 @@
 # Noms générés. Titre traditionnel daté, rattaché à la personne ; le libellé ne se traduit pas.
-# Reste : l'affichage sous le nom (T-024) et la saisie (T-031).
+# La fiche (T-024) les affiche sous le nom, dans l'ordre des dates. Reste : la saisie (T-031).
 id: CL-FAM-19
 titre: Titre traditionnel (Fon, chef, successeur désigné)
 couverture:
-  teste: [modele]
-  reste: [T-024, T-031]
+  teste: [modele, fiche]
+  reste: [T-031]
 arbre:
   personnes: [ndi/M, tamfu/M]
   noms:
@@ -23,3 +23,12 @@ attendu:
     tamfu:
       - { libelle: "Successeur désigné", debut: "1999", fin: "2004" }
       - { libelle: Fon, debut: "2004" }
+  fiche:
+    - personne: ndi
+      nom_affiche: Ndi Abenzo
+      titres: [{ libelle: Fon, debut: "1968", fin: "2004" }]
+    - personne: tamfu
+      nom_affiche: Tamfu Abenzo
+      titres:
+        - { libelle: "Successeur désigné", debut: "1999", fin: "2004" }
+        - { libelle: Fon, debut: "2004" }

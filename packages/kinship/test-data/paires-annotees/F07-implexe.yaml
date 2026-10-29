@@ -1,0 +1,265 @@
+# Prénoms générés (generateGivenName, graine 2300) ; famille composée, jamais une vraie famille.
+# Implexe. Gim et Genei ont Tchenon, Nyeneou et Foou. Ngen (fils de Tchenon et Honjuia) épouse sa
+# cousine germaine Yue (fille de Nyeneou et Zindoe) : fils Kuvae (CL-FAM-09). Foou épouse sa
+# nièce Nyoe, fille de Tchenon : fils Kwitchoui (union entre générations, CL-FAM-10). Doubles
+# cousins : les frères Tchue et Mbie (parents Budjouo et Yeyiette) épousent les sœurs Zea et
+# Kwakaa (parents Fovouo et Vakwaette) : Sun et Hakwie.
+famille: F07
+titre: Implexe, mariage entre cousins, union entre générations, doubles cousins
+origine: composee
+arbre:
+  personnes:
+    - gim/M
+    - genei/F
+    - tchenon/M
+    - honjuia/F
+    - nyeneou/F
+    - zindoe/M
+    - foou/M
+    - ngen/M
+    - yue/F
+    - kuvae/M
+    - nyoe/F
+    - kwitchoui/M
+    - budjouo/M
+    - yeyiette/F
+    - tchue/M
+    - mbie/M
+    - fovouo/M
+    - vakwaette/F
+    - zea/F
+    - kwakaa/F
+    - sun/M
+    - hakwie/F
+  unions:
+    - { conjoints: [gim, genei] }
+    - { conjoints: [tchenon, honjuia] }
+    - { conjoints: [nyeneou, zindoe] }
+    - { conjoints: [ngen, yue] }
+    - { conjoints: [foou, nyoe] }
+    - { conjoints: [budjouo, yeyiette] }
+    - { conjoints: [fovouo, vakwaette] }
+    - { conjoints: [tchue, zea] }
+    - { conjoints: [mbie, kwakaa] }
+  filiations:
+    - { parents: [gim, genei], enfant: tchenon }
+    - { parents: [gim, genei], enfant: nyeneou }
+    - { parents: [gim, genei], enfant: foou }
+    - { parents: [tchenon, honjuia], enfant: ngen }
+    - { parents: [tchenon, honjuia], enfant: nyoe }
+    - { parents: [nyeneou, zindoe], enfant: yue }
+    - { parents: [ngen, yue], enfant: kuvae }
+    - { parents: [foou, nyoe], enfant: kwitchoui }
+    - { parents: [budjouo, yeyiette], enfant: tchue }
+    - { parents: [budjouo, yeyiette], enfant: mbie }
+    - { parents: [fovouo, vakwaette], enfant: zea }
+    - { parents: [fovouo, vakwaette], enfant: kwakaa }
+    - { parents: [tchue, zea], enfant: sun }
+    - { parents: [mbie, kwakaa], enfant: hakwie }
+paires:
+  - id: F07-01
+    de: kuvae
+    vers: gim
+    categorie: implexe
+    pourquoi: "Arrière-grand-père par le père et par la mère : un seul ancêtre, deux chemins, tous deux affichés (CL-FAM-09, PAR-05), à égalité dans l'ordre des identifiants (ADR 0010, point 5) ; et aussi père du mari de la tante paternelle Nyoe (une union, quatre générations, limite de l'ADR 0010, point 4)."
+    attendu:
+      - chemin: "3/0[gim]"
+        cote_de: { par: ngen, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "3/0[gim]"
+        cote_de: { par: yue, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "2/1[honjuia+tchenon] =foou 1/0[gim]"
+        alliance: { type: other }
+        cote_de: { par: ngen, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F07-02
+    de: kuvae
+    vers: tchenon
+    categorie: implexe
+    pourquoi: "Grand-père par le père, et aussi grand-oncle par la mère : le plus proche d'abord (CL-FAM-09, PAR-05)."
+    attendu:
+      - chemin: "2/0[tchenon]"
+        cote_de: { par: ngen, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "3/1[genei+gim]"
+        cote_de: { par: yue, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F07-03
+    de: ngen
+    vers: yue
+    categorie: implexe
+    pourquoi: "Cousine germaine par le père, et aussi épouse : le sang avant l'alliance (CL-FAM-09)."
+    attendu:
+      - chemin: "2/2[genei+gim]"
+        cote_de: { par: tchenon, cote: father }
+        cote_vers: { par: nyeneou, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=yue"
+        alliance: { type: spouse }
+        fr: à rédiger
+        en: à rédiger
+  - id: F07-04
+    de: kuvae
+    vers: nyeneou
+    categorie: implexe
+    pourquoi: "Grand-mère par la mère, et aussi grand-tante par le père."
+    attendu:
+      - chemin: "2/0[nyeneou]"
+        cote_de: { par: yue, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "3/1[genei+gim]"
+        cote_de: { par: ngen, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F07-05
+    de: sun
+    vers: hakwie
+    categorie: implexe
+    pourquoi: "Doubles cousins germains : par les pères (deux frères) et par les mères (deux sœurs), deux liens de même distance (PAR-05) ; à égalité, l'ordre des identifiants."
+    attendu:
+      - chemin: "2/2[budjouo+yeyiette]"
+        cote_de: { par: tchue, cote: father }
+        cote_vers: { par: mbie, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "2/2[fovouo+vakwaette]"
+        cote_de: { par: zea, cote: mother }
+        cote_vers: { par: kwakaa, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F07-06
+    de: tchue
+    vers: kwakaa
+    categorie: implexe
+    pourquoi: "Épouse du frère et sœur de l'épouse : deux sens de « belle-sœur », de même longueur, rangés à égalité par identifiant (ADR 0010, point 5)."
+    attendu:
+      - chemin: "=zea 1/1[fovouo+vakwaette]"
+        alliance: { type: sibling_of_spouse }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "1/1[budjouo+yeyiette] =kwakaa"
+        alliance: { type: spouse_of_sibling }
+        fr: à rédiger
+        en: à rédiger
+  - id: F07-07
+    de: sun
+    vers: mbie
+    categorie: implexe
+    pourquoi: "Frère du père : oncle par le père, et aussi mari de la tante maternelle (une union, trois générations) : le sang d'abord."
+    attendu:
+      - chemin: "2/1[budjouo+yeyiette]"
+        cote_de: { par: tchue, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "2/1[fovouo+vakwaette] =mbie"
+        alliance: { type: other }
+        cote_de: { par: zea, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F07-08
+    de: kwitchoui
+    vers: ngen
+    categorie: implexe
+    pourquoi: "Union entre générations : frère de la mère, donc oncle par la mère (3 générations), et aussi cousin germain par le père (4), et aussi mari de la cousine germaine Yue (4 et une union) (CL-FAM-10, PAR-05)."
+    attendu:
+      - chemin: "2/1[honjuia+tchenon]"
+        cote_de: { par: nyoe, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "2/2[genei+gim]"
+        cote_de: { par: foou, cote: father }
+        cote_vers: { par: tchenon, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "2/2[genei+gim] =ngen"
+        alliance: { type: other }
+        cote_de: { par: foou, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F07-09
+    de: kwitchoui
+    vers: tchenon
+    categorie: implexe
+    pourquoi: "Grand-père par la mère (2), et aussi oncle par le père (3)."
+    attendu:
+      - chemin: "2/0[tchenon]"
+        cote_de: { par: nyoe, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "2/1[genei+gim]"
+        cote_de: { par: foou, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F07-10
+    de: kwitchoui
+    vers: gim
+    categorie: implexe
+    pourquoi: "Grand-père par le père (2), et aussi arrière-grand-père par la mère (3) : un seul ancêtre à deux générations différentes, gardé à la plus proche dans les ancêtres, les deux liens affichés (CL-FAM-10)."
+    attendu:
+      - chemin: "2/0[gim]"
+        cote_de: { par: foou, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "3/0[gim]"
+        cote_de: { par: nyoe, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F07-11
+    de: foou
+    vers: nyoe
+    categorie: implexe
+    pourquoi: "Nièce (fille du frère), et aussi épouse : le sang avant l'alliance."
+    attendu:
+      - chemin: "1/2[genei+gim]"
+        cote_vers: { par: tchenon, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=nyoe"
+        alliance: { type: spouse }
+        fr: à rédiger
+        en: à rédiger
+  - id: F07-12
+    de: genei
+    vers: kuvae
+    categorie: implexe
+    pourquoi: "Arrière-petit-fils par ses deux enfants Tchenon et Nyeneou (implexe) : deux chemins de trois générations descendantes, tous deux affichés, dans l'ordre des identifiants (CL-FAM-09) ; et aussi neveu de sa bru Nyoe (une union, quatre générations, limite de l'ADR 0010)."
+    attendu:
+      - chemin: "0/3[genei]"
+        cote_vers: { par: ngen, cote: father }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "0/3[genei]"
+        cote_vers: { par: yue, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "0/1[genei] =nyoe 1/2[honjuia+tchenon]"
+        alliance: { type: other }
+        cote_vers: { par: ngen, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F07-13
+    de: honjuia
+    vers: foou
+    categorie: implexe
+    pourquoi: "Mari de sa fille (une union, une génération) avant frère de son mari (une union, deux générations) : le plus court d'abord (ADR 0010, point 5) ; et aussi oncle de sa belle-fille Yue (une union, quatre générations)."
+    attendu:
+      - chemin: "0/1[honjuia] =foou"
+        alliance: { type: spouse_of_child }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "=tchenon 1/1[genei+gim]"
+        alliance: { type: sibling_of_spouse }
+        fr: à rédiger
+        en: à rédiger
+      - chemin: "0/1[honjuia] =yue 2/1[genei+gim]"
+        alliance: { type: other }
+        fr: à rédiger
+        en: à rédiger

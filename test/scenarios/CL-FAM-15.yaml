@@ -1,0 +1,34 @@
+# Noms générés. Prénom et genre actuels affichés ; l'ancien prénom (type « ancien ») n'est montré
+# qu'à son auteur : ni à un autre lecteur, ni dans le titre, l'initiale ou la teinte de l'avatar.
+# Reste : la règle de visibilité du nom, qui pourra l'ouvrir à d'autres lecteurs (T-052).
+id: CL-FAM-15
+titre: Personne trans
+couverture:
+  teste: [fiche]
+  reste: [T-052]
+arbre:
+  personnes: [mia/F, noa/A]
+  noms:
+    - { personne: mia, type: usage, prenoms: Mia, nom: Lemaire }
+    - { personne: mia, type: ancien, prenoms: Marc, nom: Lemaire }
+    - { personne: noa, type: usage, prenoms: Noa, nom: Perrin }
+    - { personne: noa, type: ancien, prenoms: Noé }
+attendu:
+  fiche:
+    - personne: mia
+      lecteur: auteur
+      nom_affiche: Mia Lemaire
+      genre: femme
+      anciens_noms: ["Marc Lemaire"]
+    - personne: mia
+      lecteur: autre
+      nom_affiche: Mia Lemaire
+      genre: femme
+      anciens_noms: []
+      texte_absent: [Marc]
+    - personne: noa
+      lecteur: autre
+      nom_affiche: Noa Perrin
+      genre: autre
+      anciens_noms: []
+      texte_absent: [Noé]

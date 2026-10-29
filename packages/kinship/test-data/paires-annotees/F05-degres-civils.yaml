@@ -1,0 +1,410 @@
+# Prénoms générés (generateGivenName, graine 2300) ; famille composée, jamais une vraie famille.
+# Lignée de six générations depuis Nehae et Lie. Trois branches : Seloi (avec Yekaa : Soou et
+# Pasoe ; puis Yon, Biwiou, Kegee, de père en fils), Vie (Nesoine, Viia, Tchetea, Ndonaine, de
+# mère en fille) et Toui (Veo, de genre non renseigné, puis Fea). Sous la première génération,
+# chaque enfant n'a qu'un parent saisi : les sommets des cousins sont Nehae et Lie. Ndei, de genre
+# « autre », est l'enfant de Pasoe.
+famille: F05
+titre: Degrés civils, oncles à la mode de Bretagne et générations décalées
+origine: composee
+arbre:
+  personnes:
+    - nehae/M
+    - lie/F
+    - seloi/M
+    - yekaa/F
+    - vie/F
+    - toui/M
+    - soou/M
+    - pasoe/F
+    - yon/M
+    - biwiou/M
+    - kegee/M
+    - nesoine/F
+    - viia/F
+    - tchetea/F
+    - ndonaine/F
+    - veo/N
+    - fea/F
+    - ndei/A
+  unions:
+    - { conjoints: [nehae, lie] }
+    - { conjoints: [seloi, yekaa] }
+  filiations:
+    - { parents: [nehae, lie], enfant: seloi }
+    - { parents: [nehae, lie], enfant: vie }
+    - { parents: [nehae, lie], enfant: toui }
+    - { parents: [seloi, yekaa], enfant: soou }
+    - { parents: [seloi, yekaa], enfant: pasoe }
+    - { parents: [soou], enfant: yon }
+    - { parents: [yon], enfant: biwiou }
+    - { parents: [biwiou], enfant: kegee }
+    - { parents: [vie], enfant: nesoine }
+    - { parents: [nesoine], enfant: viia }
+    - { parents: [viia], enfant: tchetea }
+    - { parents: [tchetea], enfant: ndonaine }
+    - { parents: [toui], enfant: veo }
+    - { parents: [veo], enfant: fea }
+    - { parents: [pasoe], enfant: ndei }
+paires:
+  - id: F05-01
+    de: soou
+    vers: nehae
+    categorie: degres_civils
+    pourquoi: "Grand-père : ligne directe, deux générations, par le père (TRD, question 1)."
+    attendu:
+      - chemin: "2/0[nehae]"
+        cote_de: { par: seloi, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-02
+    de: yon
+    vers: lie
+    categorie: degres_civils
+    pourquoi: "Arrière-grand-mère : trois générations (PAR-02)."
+    attendu:
+      - chemin: "3/0[lie]"
+        cote_de: { par: soou, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-03
+    de: biwiou
+    vers: nehae
+    categorie: degres_civils
+    pourquoi: "Quatre générations en ligne directe (arrière-arrière-grand-père)."
+    attendu:
+      - chemin: "4/0[nehae]"
+        cote_de: { par: yon, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-04
+    de: kegee
+    vers: lie
+    categorie: degres_civils
+    pourquoi: "Cinq générations en ligne directe."
+    attendu:
+      - chemin: "5/0[lie]"
+        cote_de: { par: biwiou, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-05
+    de: nehae
+    vers: kegee
+    categorie: degres_civils
+    pourquoi: "Descendant à cinq générations : A ne monte pas, B monte par son père (inverse exact de la ligne directe)."
+    attendu:
+      - chemin: "0/5[nehae]"
+        cote_vers: { par: biwiou, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-06
+    de: soou
+    vers: vie
+    categorie: degres_civils
+    pourquoi: "Sœur du père : tante (2 et 1) ; elle atteint ses deux parents, d'où aucun côté pour elle."
+    attendu:
+      - chemin: "2/1[lie+nehae]"
+        cote_de: { par: seloi, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-07
+    de: nesoine
+    vers: seloi
+    categorie: degres_civils
+    pourquoi: "Frère de la mère : oncle par la mère."
+    attendu:
+      - chemin: "2/1[lie+nehae]"
+        cote_de: { par: vie, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-08
+    de: yon
+    vers: vie
+    categorie: degres_civils
+    pourquoi: "Sœur du grand-père : grand-tante (3 et 1, PAR-02)."
+    attendu:
+      - chemin: "3/1[lie+nehae]"
+        cote_de: { par: soou, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-09
+    de: biwiou
+    vers: toui
+    categorie: degres_civils
+    pourquoi: "Frère de l'arrière-grand-père : 4 et 1."
+    attendu:
+      - chemin: "4/1[lie+nehae]"
+        cote_de: { par: yon, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-10
+    de: vie
+    vers: viia
+    categorie: degres_civils
+    pourquoi: "Petite-fille : deux générations descendantes, par sa fille Nesoine."
+    attendu:
+      - chemin: "0/2[vie]"
+        cote_vers: { par: nesoine, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-11
+    de: vie
+    vers: tchetea
+    categorie: degres_civils
+    pourquoi: "Arrière-petite-fille : trois générations descendantes."
+    attendu:
+      - chemin: "0/3[vie]"
+        cote_vers: { par: viia, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-12
+    de: soou
+    vers: nesoine
+    categorie: degres_civils
+    pourquoi: "Cousins germains : 2 et 2, deux grands-parents communs (TRD)."
+    attendu:
+      - chemin: "2/2[lie+nehae]"
+        cote_de: { par: seloi, cote: father }
+        cote_vers: { par: vie, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-13
+    de: yon
+    vers: viia
+    categorie: degres_civils
+    pourquoi: "Cousins issus de germains : 3 et 3 (TRD, PAR-02)."
+    attendu:
+      - chemin: "3/3[lie+nehae]"
+        cote_de: { par: soou, cote: father }
+        cote_vers: { par: nesoine, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-14
+    de: biwiou
+    vers: tchetea
+    categorie: degres_civils
+    pourquoi: "4 et 4 : au-delà des issus de germains, le degré civil (8e degré, PAR-02 ; TRD, question 2)."
+    attendu:
+      - chemin: "4/4[lie+nehae]"
+        cote_de: { par: yon, cote: father }
+        cote_vers: { par: viia, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-15
+    de: kegee
+    vers: ndonaine
+    categorie: degres_civils
+    pourquoi: "5 et 5 : 10e degré civil."
+    attendu:
+      - chemin: "5/5[lie+nehae]"
+        cote_de: { par: biwiou, cote: father }
+        cote_vers: { par: tchetea, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-16
+    de: yon
+    vers: nesoine
+    categorie: degres_civils
+    pourquoi: "3 et 2 : oncle (ici tante) « à la mode de Bretagne », cousine germaine du père (TRD)."
+    attendu:
+      - chemin: "3/2[lie+nehae]"
+        cote_de: { par: soou, cote: father }
+        cote_vers: { par: vie, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-17
+    de: seloi
+    vers: viia
+    categorie: degres_civils
+    pourquoi: "Petite-fille de la sœur : petite-nièce (1 et 3) ; Seloi atteint ses deux parents, Viia monte par sa mère."
+    attendu:
+      - chemin: "1/3[lie+nehae]"
+        cote_vers: { par: nesoine, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-18
+    de: biwiou
+    vers: nesoine
+    categorie: degres_civils
+    pourquoi: "Générations décalées : 4 et 2 (6e degré civil)."
+    attendu:
+      - chemin: "4/2[lie+nehae]"
+        cote_de: { par: yon, cote: father }
+        cote_vers: { par: vie, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-19
+    de: kegee
+    vers: viia
+    categorie: degres_civils
+    pourquoi: "Générations décalées : 5 et 3 (8e degré civil)."
+    attendu:
+      - chemin: "5/3[lie+nehae]"
+        cote_de: { par: biwiou, cote: father }
+        cote_vers: { par: nesoine, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-20
+    de: viia
+    vers: soou
+    categorie: degres_civils
+    pourquoi: "3 et 2 vers un homme : oncle « à la mode de Bretagne », cousin germain de la mère (TRD, PAR-02)."
+    attendu:
+      - chemin: "3/2[lie+nehae]"
+        cote_de: { par: nesoine, cote: mother }
+        cote_vers: { par: seloi, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-21
+    de: soou
+    vers: veo
+    categorie: degres_civils
+    pourquoi: "Cousin germain de genre non renseigné : mêmes générations, le genre ne change que les mots (CL-FAM-08)."
+    attendu:
+      - chemin: "2/2[lie+nehae]"
+        cote_de: { par: seloi, cote: father }
+        cote_vers: { par: toui, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-22
+    de: fea
+    vers: toui
+    categorie: degres_civils
+    pourquoi: "Grand-père par un parent de genre non renseigné : côté « parent », jamais « père » ni « mère » (ADR 0017, point 6 ; CL-FAM-08)."
+    attendu:
+      - chemin: "2/0[toui]"
+        cote_de: { par: veo, cote: parent }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-23
+    de: yon
+    vers: fea
+    categorie: degres_civils
+    pourquoi: "Issus de germains par la branche de Toui : 3 et 3, côté « parent » pour Fea."
+    attendu:
+      - chemin: "3/3[lie+nehae]"
+        cote_de: { par: soou, cote: father }
+        cote_vers: { par: veo, cote: parent }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-24
+    de: soou
+    vers: yon
+    categorie: degres_civils
+    pourquoi: "Fils : ligne directe descendante d'une génération."
+    attendu:
+      - chemin: "0/1[soou]"
+        cote_vers: { par: soou, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-25
+    de: kegee
+    vers: soou
+    categorie: degres_civils
+    pourquoi: "Arrière-grand-père paternel : trois générations."
+    attendu:
+      - chemin: "3/0[soou]"
+        cote_de: { par: biwiou, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-26
+    de: nesoine
+    vers: yon
+    categorie: degres_civils
+    pourquoi: "2 et 3 vers un homme : neveu « à la mode de Bretagne », fils du cousin germain Soou (inverse de F05-16)."
+    attendu:
+      - chemin: "2/3[lie+nehae]"
+        cote_de: { par: vie, cote: mother }
+        cote_vers: { par: soou, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-27
+    de: yon
+    vers: ndei
+    categorie: degres_civils
+    pourquoi: "Cousin germain de genre « autre » (Yon est le fils de Soou, Ndei l’enfant de sa sœur Pasoe) : mêmes générations, le genre ne change que les mots (PAR-11, CL-FAM-08)."
+    attendu:
+      - chemin: "2/2[seloi+yekaa]"
+        cote_de: { par: soou, cote: father }
+        cote_vers: { par: pasoe, cote: mother }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-28
+    de: seloi
+    vers: toui
+    categorie: degres_civils
+    pourquoi: "Frères : deux parents communs (TRD)."
+    attendu:
+      - chemin: "1/1[lie+nehae]"
+        fratrie: { type: birth, partage: full }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-29
+    de: seloi
+    vers: vie
+    categorie: degres_civils
+    pourquoi: "Frère et sœur : deux parents communs ; seul l'accord change (PAR-11)."
+    attendu:
+      - chemin: "1/1[lie+nehae]"
+        fratrie: { type: birth, partage: full }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-30
+    de: soou
+    vers: pasoe
+    categorie: degres_civils
+    pourquoi: "Sœur, deux parents communs (Seloi et Yekaa)."
+    attendu:
+      - chemin: "1/1[seloi+yekaa]"
+        fratrie: { type: birth, partage: full }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-31
+    de: pasoe
+    vers: yon
+    categorie: degres_civils
+    pourquoi: "Fils du frère : neveu, par les deux parents de Pasoe."
+    attendu:
+      - chemin: "1/2[seloi+yekaa]"
+        cote_vers: { par: soou, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-32
+    de: soou
+    vers: soou
+    categorie: degres_civils
+    pourquoi: "Une personne avec elle-même : « same_person », aucun chemin (ADR 0010)."
+    attendu: meme_personne
+  - id: F05-33
+    de: vie
+    vers: yon
+    categorie: degres_civils
+    pourquoi: "Petit-fils du frère : petit-neveu (1 et 3) ; Vie atteint ses deux parents, Yon monte par son père."
+    attendu:
+      - chemin: "1/3[lie+nehae]"
+        cote_vers: { par: soou, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-34
+    de: tchetea
+    vers: biwiou
+    categorie: degres_civils
+    pourquoi: "4 et 4 vers un homme : au-delà des issus de germains, le degré civil (« cousin au 8e degré », PAR-02 ; TRD, question 2)."
+    attendu:
+      - chemin: "4/4[lie+nehae]"
+        cote_de: { par: viia, cote: mother }
+        cote_vers: { par: yon, cote: father }
+        fr: à rédiger
+        en: à rédiger
+  - id: F05-35
+    de: biwiou
+    vers: tchetea
+    masques: [lie]
+    categorie: visibilite
+    pourquoi: "Lie masquée pour le lecteur : comme jamais saisie, les deux branches ne partagent que Nehae (4 et 4, un seul sommet), sans indice sur Lie (PAR-09 ; ADR 0010, point 6)."
+    attendu:
+      - chemin: "4/4[nehae]"
+        cote_de: { par: yon, cote: father }
+        cote_vers: { par: viia, cote: mother }
+        fr: à rédiger
+        en: à rédiger
