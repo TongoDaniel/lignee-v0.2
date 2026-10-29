@@ -149,8 +149,6 @@ export function DateInput({ label, value, onChange, issue, error, testID }: Date
       </Text>
       <View
         accessibilityRole="radiogroup"
-        accessibilityLabel={`${label}, ${t('common:personForm.date.mode')}`}
-        accessibilityHint={t('common:personForm.date.mode')}
         style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space[2] }}
       >
         {shownModes.map((mode) => (

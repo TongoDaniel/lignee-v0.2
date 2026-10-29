@@ -373,6 +373,7 @@ export function validatePersonDraft(draft: PersonDraft): EntryIssue[] {
     if (!named) issues.push({ field: 'names.0.givenNames', code: 'name_required' });
   }
   draft.names.forEach((name, index) => {
+    if (draft.placeholder && name.id === undefined) return;
     // Une ligne ajoutée puis laissée vide est ignorée ; un nom existant ne se vide pas en silence.
     if (name.id !== undefined && !nameHasContent(name)) {
       issues.push({ field: `names.${String(index)}.givenNames`, code: 'cannot_forget_name' });
@@ -462,6 +463,14 @@ export function planPersonChanges(options: PersonPlanOptions): PersonPlan {
     const result = parseDateDraft(date);
     return result.ok ? result.date : undefined;
   };
+  /** Les deux brouillons disent-ils la même date ? (un aller-retour de choix ne change rien) */
+  const sameDate = (a: DateDraft, b: DateDraft): boolean => same(dateOf(a), dateOf(b));
+  /**
+   * Date modifiée à la main : une date « calculée » (VOX-14) ne l'est plus, elle devient « vers ».
+   * Une date calculée qu'on n'a pas touchée n'est jamais renvoyée ici (`sameDate`).
+   */
+  const editedDate = (date: DateDraft): FuzzyDate | undefined =>
+    dateOf(date.mode === 'calculated' ? { ...date, mode: 'about' } : date);
 
   // --- La fiche
   const personFields: Fields = {};
@@ -511,6 +520,8 @@ export function planPersonChanges(options: PersonPlanOptions): PersonPlan {
   // --- Les noms
   const nameChanges: PlannedChange[] = [];
   draft.names.forEach((name, index) => {
+    // « Inconnu » : un nom saisi avant de cocher la case n'est jamais enregistré.
+    if (draft.placeholder && name.id === undefined) return;
     const target = `names.${String(index)}`;
     const fieldMap = {
       type: `${target}.type`,
@@ -544,12 +555,14 @@ export function planPersonChanges(options: PersonPlanOptions): PersonPlan {
       return;
     }
     const fields: Fields = {};
-    if (name.type !== before.type) fields.type = name.type;
+    // Un ancien prénom enregistré garde son type : le changer le montrerait à toute la famille
+    // (UNI-22). Il se modifie ou se supprime, il ne se « déclasse » pas.
+    if (before.type !== 'former' && name.type !== before.type) fields.type = name.type;
     for (const key of ['givenNames', 'surname', 'displayForm'] as const) {
       if (trimmed(name[key]) !== trimmed(before[key])) fields[key] = text(name[key]);
     }
-    if (!same(name.start, before.start)) fields.start = dateOf(name.start) ?? null;
-    if (!same(name.end, before.end)) fields.end = dateOf(name.end) ?? null;
+    if (!sameDate(name.start, before.start)) fields.start = editedDate(name.start) ?? null;
+    if (!sameDate(name.end, before.end)) fields.end = editedDate(name.end) ?? null;
     if (Object.keys(fields).length > 0) {
       nameChanges.push({
         entity: 'name',
@@ -617,7 +630,7 @@ export function planPersonChanges(options: PersonPlanOptions): PersonPlan {
       return;
     }
     const fields: Fields = {};
-    if (!same(now.date, before.date)) fields.date = dateOf(now.date) ?? null;
+    if (!sameDate(now.date, before.date)) fields.date = editedDate(now.date) ?? null;
     if (normalizePlaceName(now.place) !== normalizePlaceName(before.place)) {
       fields.placeId = placeIdFor(now.place, `${target}.place`) ?? null;
     }
@@ -717,8 +730,8 @@ export function planPersonChanges(options: PersonPlanOptions): PersonPlan {
     }
     const fields: Fields = {};
     if (trimmed(title.label) !== trimmed(before.label)) fields.label = trimmed(title.label);
-    if (!same(title.start, before.start)) fields.start = dateOf(title.start) ?? null;
-    if (!same(title.end, before.end)) fields.end = dateOf(title.end) ?? null;
+    if (!sameDate(title.start, before.start)) fields.start = editedDate(title.start) ?? null;
+    if (!sameDate(title.end, before.end)) fields.end = editedDate(title.end) ?? null;
     if (Object.keys(fields).length > 0) {
       titleChanges.push({
         entity: 'title_role',
@@ -783,9 +796,18 @@ export function entryFieldForIssue(plan: PersonPlan, issue: RecordIssue): string
   const change = plan.changes[Number(match[1])];
   if (change === undefined) return 'form';
   const field = match[2];
-  if (field !== undefined && change.fieldMap?.[field] !== undefined) return change.fieldMap[field];
-  return change.target;
+  const found =
+    field !== undefined && change.fieldMap?.[field] !== undefined
+      ? change.fieldMap[field]
+      : change.target;
+  // Un champ que le formulaire n'affiche pas (version de départ, auteur, cible d'un bloc) ne
+  // doit pas faire perdre le refus : il remonte à l'ensemble du formulaire.
+  return DISPLAYED_FIELD.test(found) ? found : 'form';
 }
+
+/** Champs qui montrent une erreur dans le formulaire (voir PersonFormFields et PersonFormScreen). */
+const DISPLAYED_FIELD =
+  /^(?:names\.\d+\.(?:givenNames|surname|displayForm|start|end)|birth\.(?:date|place)|death\.(?:date|place)|deathCause|(?:residences|occupations)\.\d+\.(?:value|place|date)|titles\.\d+\.(?:label|start|end)|notes)$/u;
 
 // --- Du brouillon au plan : lecture d'une fiche existante ----------------------------------
 
@@ -887,11 +909,7 @@ export function suggestFormerNameIndex(draft: PersonDraft): number | undefined {
   if (!hasFormer && draft.gender === 'unspecified') return undefined;
   const lower = (value: string) => trimmed(value).toLowerCase();
   const current = draft.names.filter(
-    (name) =>
-      name.type !== 'former' &&
-      name.type !== 'birth' &&
-      name.end.mode === 'none' &&
-      trimmed(name.givenNames) !== '',
+    (name) => name.type === 'usage' && name.end.mode === 'none' && trimmed(name.givenNames) !== '',
   );
   if (current.length === 0) return undefined;
   const index = draft.names.findIndex(

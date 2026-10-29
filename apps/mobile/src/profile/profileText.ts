@@ -10,8 +10,8 @@ type Calendar = 'gregorian' | 'hijri';
 
 /**
  * Une borne sans la mention du calendrier. Le grégorien suit la langue (« 1er mars 1931 »). Le
- * calendrier hégirien n'a pas de noms de mois ici : l'année, le mois puis le jour en chiffres
- * (« 3/1431 », « 14/3/1431 »). Une décennie se dit par ses mots (« années 1940 »).
+ * calendrier hégirien n'a pas de noms de mois ici : le jour, le mois puis l'année en chiffres,
+ * ce qu'on connaît seulement (« 3/1431 », « 14/3/1431 »). Une décennie se dit par ses mots (« années 1940 »).
  */
 function plainBoundText(bound: DisplayBound, calendar: Calendar, translator: Translator): string {
   if (bound.precision === 'decade') {

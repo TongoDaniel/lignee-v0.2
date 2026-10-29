@@ -127,7 +127,7 @@ export function Chip({
       onBlur={onBlur}
       hitSlop={hitSlopFor(metrics.chip.minHeight, theme.touchTarget)}
       accessibilityRole={choice ? 'radio' : 'button'}
-      accessibilityState={choice ? { selected } : undefined}
+      accessibilityState={choice ? { checked: selected } : undefined}
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityHint={accessibilityHint}
       style={[styles.wrapper, { minWidth: theme.touchTarget }]}

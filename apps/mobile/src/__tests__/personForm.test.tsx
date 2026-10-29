@@ -543,12 +543,12 @@ describe('accessibilité et langues', () => {
   it('chaque puce de choix dit ce qu’elle choisit, et qu’elle soit sélectionnée ou non', async () => {
     await renderForm();
     const chip = screen.getByRole('radio', { name: 'Date de naissance, Vers' });
-    expect(chip.props.accessibilityState).toEqual({ selected: false });
+    expect(chip.props.accessibilityState).toEqual({ checked: false });
     fireEvent.press(chip);
     expect(
       screen.getByRole('radio', { name: 'Date de naissance, Vers' }).props.accessibilityState,
     ).toEqual({
-      selected: true,
+      checked: true,
     });
   });
 
@@ -617,5 +617,117 @@ describe('points d’entrée', () => {
       </AppProviders>,
     );
     expect(screen.queryByTestId('profile-edit')).toBeNull();
+  });
+});
+
+describe('relectures de T-031', () => {
+  it('R2 — « Inconnu » après un nom tapé : ce nom n’est pas enregistré', async () => {
+    await renderForm();
+    type('name-1-given', 'Jean');
+    press('person-form-unknown');
+    press('person-form-save');
+    const { changes } = recorded();
+    expect(changes.map((change) => change.entity)).toEqual(['person']);
+    expect(JSON.stringify(changes)).not.toContain('Jean');
+  });
+
+  it('R3 — un refus sans champ affiché (version changée) s’affiche en haut du formulaire', async () => {
+    mockSync.readPersonDraft.mockReturnValue({ context: context(), draft: existing() });
+    mockSync.recordLocalChanges.mockImplementation(() => {
+      throw new MutationBatchRefusedError([
+        { code: 'base_version_mismatch', path: 'mutations[0].baseVersion' },
+      ]);
+    });
+    await renderForm({ personId: FATHER });
+    type('name-1-surname', 'Ndomo-Essaka');
+    press('person-form-save');
+    expect(
+      within(screen.getByTestId('person-form-error')).getByText(
+        'Cette fiche a changé depuis son ouverture. Rouvrez-la, puis réessayez.',
+      ),
+    ).toBeOnTheScreen();
+  });
+
+  it('R3 — un auteur refusé sur un nom modifié s’affiche aussi en haut', async () => {
+    mockSync.readPersonDraft.mockReturnValue({ context: context(), draft: existing() });
+    mockSync.recordLocalChanges.mockImplementation(() => {
+      throw new MutationBatchRefusedError([
+        { code: 'author_mismatch', path: 'mutations[0].fields.authorAccountId' },
+      ]);
+    });
+    await renderForm({ personId: FATHER });
+    type('name-1-surname', 'Ndomo-Essaka');
+    press('person-form-save');
+    expect(
+      within(screen.getByTestId('person-form-error')).getByText(
+        'Cette information ne peut être saisie qu’en votre nom.',
+      ),
+    ).toBeOnTheScreen();
+  });
+
+  it('retirer le seul nom laisse une ligne vide pour porter l’erreur du nom manquant', async () => {
+    await renderForm();
+    press('name-1-remove');
+    expect(screen.getByTestId('name-1')).toBeOnTheScreen();
+    press('person-form-save');
+    expect(mockSync.recordLocalChanges).not.toHaveBeenCalled();
+    expect(
+      within(screen.getByTestId('name-1')).getByText(/Indiquez au moins un nom/u),
+    ).toBeOnTheScreen();
+  });
+
+  it('G1 — un ancien prénom enregistré ne propose aucun autre type', async () => {
+    const draft = existing();
+    mockSync.readPersonDraft.mockReturnValue({
+      context: context(),
+      draft: {
+        ...draft,
+        names: [...draft.names, { ...emptyNameDraft('former'), id: newId(), givenNames: 'Jo' }],
+      },
+    });
+    await renderForm({ personId: FATHER });
+    expect(screen.getByTestId('name-2-type-former')).toBeOnTheScreen();
+    expect(screen.queryByTestId('name-2-type-birth')).toBeNull();
+    expect(screen.queryByTestId('name-2-type-usage')).toBeNull();
+    // Un nom neuf, lui, garde tous ses types.
+    expect(screen.getByTestId('name-1-type-usage')).toBeOnTheScreen();
+  });
+
+  it('G2 — un nom de naissance déjà enregistré : le texte ne promet pas « vous seul le verrez » d’avance', async () => {
+    const draft = existing();
+    mockSync.readPersonDraft.mockReturnValue({
+      context: context(),
+      draft: {
+        ...draft,
+        gender: 'female',
+        names: [
+          ...draft.names,
+          { ...emptyNameDraft('usage'), id: newId(), givenNames: 'Abessola' },
+        ],
+      },
+    });
+    await renderForm({ personId: FATHER });
+    const card = screen.getByTestId('person-form-suggest-former');
+    expect(within(card).getByText(/déjà été vu par votre famille/u)).toBeOnTheScreen();
+    expect(within(card).queryByText(/vous seul le verrez\./u)).toBeNull();
+  });
+
+  it('G3 — un surnom différent ne déclenche aucune question', async () => {
+    await renderForm();
+    press('person-form-gender-female');
+    type('name-1-given', 'Jean');
+    press('person-form-add-name');
+    press('name-2-type-nickname');
+    type('name-2-given', 'Jeannot');
+    expect(screen.queryByTestId('person-form-suggest-former')).toBeNull();
+  });
+
+  it('une même indication n’est pas lue deux fois : le groupe de choix n’en porte pas', async () => {
+    await renderForm();
+    const groups = screen.UNSAFE_root.findAll(
+      (node) => typeof node.type === 'string' && node.props.accessibilityRole === 'radiogroup',
+    );
+    expect(groups.length).toBeGreaterThan(0);
+    for (const group of groups) expect(group.props.accessibilityHint).toBeUndefined();
   });
 });

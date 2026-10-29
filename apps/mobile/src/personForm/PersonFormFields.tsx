@@ -54,6 +54,9 @@ export function NameEditor({
   const { colors, typography } = useTheme();
   const field = (part: string) => `names.${String(index)}.${part}`;
   const number = String(index + 1);
+  // Un ancien prénom enregistré garde son type : le changer le montrerait à toute la famille.
+  const types =
+    name.id !== undefined && name.type === 'former' ? (['former'] as const) : NAME_TYPES;
   const [single, setSingle] = useState(name.displayForm !== '');
   const [dated, setDated] = useState(name.start.mode !== 'none' || name.end.mode !== 'none');
   const set = (patch: Partial<NameDraft>) => {
@@ -103,11 +106,9 @@ export function NameEditor({
       <View style={{ gap: space[4] }}>
         <View
           accessibilityRole="radiogroup"
-          accessibilityLabel={t('common:personForm.names.type')}
-          accessibilityHint={t('common:personForm.names.type')}
           style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space[2] }}
         >
-          {NAME_TYPES.map((type) => (
+          {types.map((type) => (
             <Chip
               key={type}
               testID={`name-${number}-type-${type}`}

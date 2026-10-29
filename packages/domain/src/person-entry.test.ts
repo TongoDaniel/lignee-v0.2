@@ -21,6 +21,7 @@ import {
   suggestFormerNameIndex,
   validatePersonDraft,
   type DateDraft,
+  type NameDraft as NameDraftT,
   type PersonDraft,
 } from './person-entry';
 import { deterministicIds } from './test-support';
@@ -851,17 +852,136 @@ describe('suppression (ADR 0027)', () => {
     );
   });
 
-  it('une personne sans rien autour : la fiche seule', () => {
+  it('la fiche d’un enfant : ses liens avec ses parents partent avec elle, pas ceux de ses frères', () => {
     const plan = planPersonDeletion(source, c);
-    expect(plan.summary.names).toBe(0);
-    expect(
-      plan.changes.some((change) => change.entityId === c && change.operation === 'delete'),
-    ).toBe(true);
+    const deleted = new Set(
+      plan.changes
+        .filter((change) => change.operation === 'delete')
+        .map((change) => change.entityId),
+    );
+    expect(deleted.has(filAC) && deleted.has(filBC) && deleted.has(c)).toBe(true);
+    expect(deleted.has(filAD)).toBe(false);
+    expect(plan.summary).toMatchObject({ names: 0, links: 2, unions: 1 });
   });
 });
 
 describe('identifiants', () => {
   it('le générateur de l’app sert aussi aux tests', () => {
     expect(createUuidV7Generator()()).toMatch(/^[0-9a-f-]{36}$/u);
+  });
+});
+
+describe('relectures de T-031', () => {
+  const places: { id: Id; name: string }[] = [];
+  const base = (overrides: Partial<PersonDraft>) => draft(overrides);
+  const planOf = (value: PersonDraft, original?: PersonDraft, personId = nextId()) =>
+    planPersonChanges({
+      draft: value,
+      ...(original === undefined ? {} : { original }),
+      personId,
+      authorAccountId: author,
+      places,
+      newId: nextId,
+    });
+
+  it('R2 — « Inconnu » après un nom saisi : aucun nom n’est enregistré', () => {
+    const typed = base({
+      placeholder: true,
+      names: [{ ...emptyNameDraft('birth'), givenNames: 'Jean', start: date({ mode: 'about' }) }],
+    });
+    expect(validatePersonDraft(typed)).toEqual([]);
+    const plan = planOf(typed);
+    expect(plan.changes.map((change) => change.entity)).toEqual(['person']);
+    expect(JSON.stringify(plan.changes)).not.toContain('Jean');
+  });
+
+  it('R3 — un constat sans champ affiché remonte au formulaire', () => {
+    const plan = planOf(
+      base({ birth: { date: date({ mode: 'exact', from: year('1940') }), place: '' } }),
+    );
+    const factIndex = plan.changes.findIndex((change) => change.entity === 'fact');
+    const nameIndex = plan.changes.findIndex((change) => change.entity === 'name');
+    const at = (index: number, rest: string) => `mutations[${String(index)}]${rest}`;
+    for (const path of [
+      at(factIndex, '.baseVersion'),
+      at(factIndex, '.fields.authorAccountId'),
+      at(nameIndex, '.fields.authorAccountId'),
+      at(0, '.fields.vitalStatus'),
+      at(factIndex, '.entityId'),
+    ]) {
+      expect(entryFieldForIssue(plan, { code: 'base_version_mismatch', path })).toBe('form');
+    }
+    expect(
+      entryFieldForIssue(plan, { code: 'invalid_object', path: at(factIndex, '.fields.date') }),
+    ).toBe('birth.date');
+  });
+
+  describe('modification', () => {
+    const personId = nextId();
+    const formerId = nextId();
+    const birthId = nextId();
+    const original = base({
+      names: [
+        { ...emptyNameDraft('birth'), id: birthId, givenNames: 'Jean', surname: 'Ndomo' },
+        { ...emptyNameDraft('former'), id: formerId, givenNames: 'Jo' },
+      ],
+    });
+
+    it('G1 — le type d’un ancien prénom enregistré ne change pas', () => {
+      const moved = {
+        ...original,
+        names: [
+          original.names[0] as NameDraftT,
+          { ...(original.names[1] as NameDraftT), type: 'usage' as const, givenNames: 'Joe' },
+        ],
+      };
+      const plan = planOf(moved, original, personId);
+      expect(plan.changes).toEqual([
+        expect.objectContaining({ entityId: formerId, fields: { givenNames: 'Joe' } }),
+      ]);
+    });
+
+    it('une date calculée qu’on n’a pas touchée reste calculée ; modifiée à la main, elle devient « vers »', () => {
+      const calculated = dateDraftFromDate(
+        fuzzyDateSchema.parse({ qualifier: 'calculated', precision: 'year', date: { year: 1930 } }),
+      );
+      const start = { ...original, birth: { id: nextId(), date: calculated, place: '' } };
+      expect(planOf(start, start, personId).changes).toEqual([]);
+      const edited = {
+        ...start,
+        birth: { ...start.birth, date: { ...calculated, from: year('1931') } },
+      };
+      expect(planOf(edited, start, personId).changes[0]?.fields?.date).toMatchObject({
+        qualifier: 'about',
+        date: { year: 1931 },
+      });
+    });
+
+    it('un aller-retour de choix de date n’envoie rien', () => {
+      const wandered = {
+        ...original,
+        birth: {
+          date: { ...emptyDateDraft(), mode: 'none' as const, from: year('1950') },
+          place: '',
+        },
+      };
+      expect(planOf(wandered, original, personId).changes).toEqual([]);
+    });
+  });
+
+  describe('question de l’ancien prénom (G3)', () => {
+    const named = (type: 'usage' | 'nickname' | 'variant'): PersonDraft =>
+      base({
+        gender: 'female',
+        names: [
+          { ...emptyNameDraft('birth'), givenNames: 'Jean' },
+          { ...emptyNameDraft(type), givenNames: 'Jeanne' },
+        ],
+      });
+    it('seul un nom d’usage compte comme prénom en cours', () => {
+      expect(suggestFormerNameIndex(named('usage'))).toBe(0);
+      expect(suggestFormerNameIndex(named('nickname'))).toBeUndefined();
+      expect(suggestFormerNameIndex(named('variant'))).toBeUndefined();
+    });
   });
 });

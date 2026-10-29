@@ -686,6 +686,9 @@
   "common:personForm.suggestFormer.body": {
     "status": "to-review"
   },
+  "common:personForm.suggestFormer.bodySeen": {
+    "status": "to-review"
+  },
   "common:personForm.suggestFormer.keep": {
     "status": "to-review"
   },

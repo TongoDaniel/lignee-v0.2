@@ -127,3 +127,31 @@ describe('adresses du formulaire', () => {
     expect(editPersonRoute('abc', 'arbre 1')).toBe('/person/edit/abc?treeId=arbre%201');
   });
 });
+
+describe('refus sans champ affiché (R3)', () => {
+  const person = emptyPersonDraft();
+  const plan = planPersonChanges({
+    draft: { ...person, names: [{ ...emptyNameDraft('birth'), givenNames: 'Awa' }] },
+    personId: '01900000-0000-7000-8000-000000000001',
+    authorAccountId: '01900000-0000-7000-8000-000000000002',
+    places: [],
+    newId: (() => {
+      let counter = 50;
+      return () => `01900000-0000-7000-8000-${String((counter += 1)).padStart(12, '0')}`;
+    })(),
+  });
+
+  it.each([
+    ['base_version_mismatch', 'mutations[0].baseVersion'],
+    ['author_mismatch', 'mutations[1].fields.authorAccountId'],
+    ['duplicate_id', 'mutations[1].entityId'],
+  ])('%s remonte au niveau du formulaire, jamais perdu', (code, path) => {
+    const failure = describeSaveFailure(
+      new MutationBatchRefusedError([{ code: code as never, path }]),
+      plan,
+      fr,
+    );
+    expect(failure.fields).toEqual({});
+    expect(failure.form).toBe(recordIssueText(fr, code));
+  });
+});

@@ -301,7 +301,8 @@
       "title": "Ce prénom est-il un ancien prénom ?",
       "body": "Le prénom de naissance saisi diffère du prénom actuel. Si cette personne ne l’utilise plus, rangez-le comme ancien prénom : vous seul le verrez.",
       "accept": "Le ranger comme ancien prénom",
-      "keep": "Non, le laisser tel quel"
+      "keep": "Non, le laisser tel quel",
+      "bodySeen": "Ce prénom a déjà été vu par votre famille. Rangé à part, il disparaît de la fiche pour les autres, qui l’ont peut-être déjà lu ; vous seul le verrez désormais."
     },
     "identity": {
       "title": "Identité",

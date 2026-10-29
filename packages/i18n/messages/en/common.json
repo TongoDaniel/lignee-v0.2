@@ -301,7 +301,8 @@
       "title": "Is this a former first name?",
       "body": "The first name given at birth differs from the current one. If this person no longer uses it, file it as a former first name: only you will see it.",
       "accept": "File it as a former first name",
-      "keep": "No, leave it as it is"
+      "keep": "No, leave it as it is",
+      "bodySeen": "Your family has already seen this first name. Filed separately, it disappears from the profile for others, who may already have read it; only you will see it from now on."
     },
     "identity": {
       "title": "Identity",

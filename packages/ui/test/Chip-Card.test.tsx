@@ -67,7 +67,7 @@ describe.each(THEME_CASES)('Puce ($scheme, mode Aînés : $seniorMode)', (theme)
     expect(onPress).toHaveBeenCalledTimes(1);
   });
 
-  it('de choix : lue comme un choix sélectionné ou non, avec une coche quand elle est choisie', () => {
+  it('de choix : lue comme un choix coché ou non, avec une coche quand elle est choisie', () => {
     const view = renderThemed(
       <>
         <Chip label="Vers" selected onPress={noop} testID="chosen" />
@@ -78,8 +78,8 @@ describe.each(THEME_CASES)('Puce ($scheme, mode Aînés : $seniorMode)', (theme)
     expectReadableTexts(view, theme.scheme);
     const chosen = screen.getByRole('radio', { name: 'Vers' });
     const other = screen.getByRole('radio', { name: 'Avant' });
-    expect(chosen.props.accessibilityState).toEqual({ selected: true });
-    expect(other.props.accessibilityState).toEqual({ selected: false });
+    expect(chosen.props.accessibilityState).toEqual({ checked: true });
+    expect(other.props.accessibilityState).toEqual({ checked: false });
     expect(touchHeight(chosen)).toBeGreaterThanOrEqual(touchTargetFor(theme));
     const icons = (id: string) =>
       screen.getByTestId(id).findAll((n) => n.props.viewBox === '0 0 24 24').length;

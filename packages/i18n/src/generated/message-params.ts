@@ -231,6 +231,7 @@ export interface MessageParams {
   'common:personForm.saveNewLabel': null;
   'common:personForm.suggestFormer.accept': null;
   'common:personForm.suggestFormer.body': null;
+  'common:personForm.suggestFormer.bodySeen': null;
   'common:personForm.suggestFormer.keep': null;
   'common:personForm.suggestFormer.title': null;
   'common:personForm.titleEdit': null;

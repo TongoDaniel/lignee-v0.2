@@ -295,8 +295,6 @@ function ChoiceGroup<Value extends string>({
       <Text style={[typography.etiquette, { color: colors.texteSecondaire }]}>{label}</Text>
       <View
         accessibilityRole="radiogroup"
-        accessibilityLabel={label}
-        accessibilityHint={label}
         style={{ flexDirection: 'row', flexWrap: 'wrap', gap: space[2] }}
       >
         {options.map(([option, key]) => (
@@ -588,7 +586,9 @@ function PersonForm({
                     update('names', replaceAt(draft.names, index, next));
                   }}
                   onRemove={() => {
-                    update('names', removeAt(draft.names, index));
+                    // Jamais de liste vide : le champ du nom manquant reste affiché pour porter son erreur.
+                    const rest = removeAt(draft.names, index);
+                    update('names', rest.length > 0 ? rest : [emptyNameDraft('birth')]);
                   }}
                 />
               ))}
@@ -610,7 +610,11 @@ function PersonForm({
               >
                 <View style={{ gap: space[3] }}>
                   <Text style={[typography.corps, { color: colors.texte }]}>
-                    {t('common:personForm.suggestFormer.body')}
+                    {t(
+                      draft.names[formerIndex]?.id === undefined
+                        ? 'common:personForm.suggestFormer.body'
+                        : 'common:personForm.suggestFormer.bodySeen',
+                    )}
                   </Text>
                   <PrivacyNote circle="you" label={t('common:privacy.onlyYou')} />
                   <Button
