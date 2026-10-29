@@ -923,6 +923,15 @@
   "common:treeScreen.fit": {
     "status": "to-review"
   },
+  "common:treeScreen.goToYou": {
+    "status": "to-review"
+  },
+  "common:treeScreen.goToYouHint": {
+    "status": "to-review"
+  },
+  "common:treeScreen.goToYouLabel": {
+    "status": "to-review"
+  },
   "common:treeScreen.lifespan": {
     "status": "to-review"
   },
@@ -1007,6 +1016,18 @@
   "common:treeScreen.parentsMark": {
     "status": "to-review"
   },
+  "common:treeScreen.recenter": {
+    "status": "to-review"
+  },
+  "common:treeScreen.recentered": {
+    "status": "to-review"
+  },
+  "common:treeScreen.recenterHint": {
+    "status": "to-review"
+  },
+  "common:treeScreen.recenterLabel": {
+    "status": "to-review"
+  },
   "common:treeScreen.seeAlso": {
     "status": "to-review"
   },
@@ -1017,6 +1038,18 @@
     "status": "to-review"
   },
   "common:treeScreen.title": {
+    "status": "to-review"
+  },
+  "common:treeScreen.trailGo": {
+    "status": "to-review"
+  },
+  "common:treeScreen.trailGoHint": {
+    "status": "to-review"
+  },
+  "common:treeScreen.trailHint": {
+    "status": "to-review"
+  },
+  "common:treeScreen.trailLabel": {
     "status": "to-review"
   },
   "common:treeScreen.unknownPerson": {
