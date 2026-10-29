@@ -443,6 +443,33 @@
   "common:treeScreen.deceasedLabel": {
     "status": "to-review"
   },
+  "common:treeScreen.descendants.back": {
+    "status": "to-review"
+  },
+  "common:treeScreen.descendants.backHint": {
+    "status": "to-review"
+  },
+  "common:treeScreen.descendants.backLabel": {
+    "status": "to-review"
+  },
+  "common:treeScreen.descendants.closed": {
+    "status": "to-review"
+  },
+  "common:treeScreen.descendants.open": {
+    "status": "to-review"
+  },
+  "common:treeScreen.descendants.opened": {
+    "status": "to-review"
+  },
+  "common:treeScreen.descendants.openHint": {
+    "status": "to-review"
+  },
+  "common:treeScreen.descendants.openLabel": {
+    "status": "to-review"
+  },
+  "common:treeScreen.descendants.title": {
+    "status": "to-review"
+  },
   "common:treeScreen.drawingHint": {
     "status": "to-review"
   },
@@ -453,6 +480,87 @@
     "status": "to-review"
   },
   "common:treeScreen.failed": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.applied": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.branchOf": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.branchTitle": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.chosen": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.clear": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.cleared": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.clearHint": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.clearLabel": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.close": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.count": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.deceased": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.foyerTitle": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.foyerWith": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.living": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.maternal": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.none": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.open": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.openHint": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.openLabel": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.outside": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.outsideLabel": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.paternal": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.rowHint": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.sideTitle": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.subtitle": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.title": {
+    "status": "to-review"
+  },
+  "common:treeScreen.filters.vitalTitle": {
     "status": "to-review"
   },
   "common:treeScreen.fit": {
@@ -546,6 +654,15 @@
     "status": "to-review"
   },
   "common:treeScreen.noName": {
+    "status": "to-review"
+  },
+  "common:treeScreen.openProfile": {
+    "status": "to-review"
+  },
+  "common:treeScreen.openProfileHint": {
+    "status": "to-review"
+  },
+  "common:treeScreen.openProfileLabel": {
     "status": "to-review"
   },
   "common:treeScreen.parentsMark": {
