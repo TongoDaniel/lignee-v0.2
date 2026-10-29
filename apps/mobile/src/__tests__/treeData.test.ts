@@ -18,6 +18,7 @@ function card(overrides: Partial<PersonCard> = {}): PersonCard {
     fullName: 'Claire Martin',
     birthName: 'Martin',
     deceased: false,
+    living: true,
     birthYear: undefined,
     deathYear: undefined,
     ...overrides,

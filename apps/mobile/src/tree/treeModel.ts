@@ -12,6 +12,8 @@ import {
 import { buildPersonCards, type PersonCard } from './personCards';
 
 export interface TreeModel {
+  /** Arbre affiché : la route de la fiche d'une personne le nomme (plusieurs arbres, CPT-04). */
+  readonly treeId: Id;
   readonly graph: LayoutGraph;
   readonly cards: ReadonlyMap<Id, PersonCard>;
   /** Personne au centre, « Vous » (provisoire, voir `chooseCenter`). */
@@ -51,6 +53,7 @@ export function modelFromSnapshot(
 ): TreeModel | undefined {
   if (centerId === undefined) return undefined;
   return {
+    treeId: snapshot.tree.id,
     graph: snapshot,
     cards: buildPersonCards({
       people: snapshot.people,

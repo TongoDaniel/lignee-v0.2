@@ -31,6 +31,7 @@ import {
   avatarTintColors,
   componentMetrics,
   defaultAvatarTintRule,
+  opacity as opacities,
   palette,
   radius,
   stroke,
@@ -96,6 +97,7 @@ function PersonShape({
   card,
   you,
   selected,
+  dimmed,
   spec,
   theme,
   fonts,
@@ -106,6 +108,8 @@ function PersonShape({
   readonly card: PersonCard | undefined;
   readonly you: boolean;
   readonly selected: boolean;
+  /** Hors du filtre choisi : la personne passe à `opacite-attenue` (06-arbre.md, ARB-11). */
+  readonly dimmed: boolean;
 }) {
   const { colors } = theme;
   const { silhouette } = componentMetrics.avatar;
@@ -137,7 +141,7 @@ function PersonShape({
   const initial = Array.from((card?.firstName ?? '').trim())[0]?.toLocaleUpperCase() ?? '';
   const nameTop = y + spec.nameTop;
   return (
-    <Group>
+    <Group opacity={dimmed ? opacities.attenue : 1}>
       {selected ? (
         <Circle
           cx={x}
@@ -418,6 +422,8 @@ export interface SkiaTreeProps extends DrawProps {
   /** « Vous » : l'avatar doré, même quand l'arbre est recentré sur une autre personne. */
   readonly youId: Id;
   readonly selectedId: Id | undefined;
+  /** Personnes qui répondent au filtre choisi ; les autres sont atténuées. Absent : aucun filtre. */
+  readonly matching?: ReadonlySet<Id> | undefined;
   readonly missingOf: ReadonlyMap<string, 'mother' | 'father' | 'parent'>;
   /** Pousse en cours (T-018) ; absente : tout est dessiné d'un coup. */
   readonly growth?: TreeGrowth | undefined;
@@ -428,6 +434,7 @@ export function SkiaTree({
   cards,
   youId,
   selectedId,
+  matching,
   missingOf,
   growth,
   ...draw
@@ -441,6 +448,7 @@ export function SkiaTree({
         card={cards.get(person.id)}
         you={person.id === youId}
         selected={person.id === selectedId}
+        dimmed={matching !== undefined && !matching.has(person.id)}
         {...draw}
       />
     );

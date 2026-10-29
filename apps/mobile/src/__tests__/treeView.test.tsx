@@ -16,6 +16,7 @@ import { AccessibilityInfo } from 'react-native';
 import { cancelAnimation, withTiming } from 'react-native-reanimated';
 
 import { AppProviders } from '../AppProviders';
+import { opacity } from '@lignee/ui';
 import { sceneSpecFor } from '../tree/sceneSpec';
 import { modelFromSnapshot } from '../tree/treeModel';
 import { TreeCanvas } from '../tree/TreeCanvas';
@@ -498,5 +499,55 @@ describe('TreeView — l’arbre pousse (ARB-13)', () => {
     view.rerender(inTree(true, built));
     await act(() => Promise.resolve());
     expect(cancelAnimation).toHaveBeenCalled();
+  });
+});
+
+describe('TreeCanvas — personnes atténuées par un filtre (ARB-11)', () => {
+  function dimmedGroups(matching: ReadonlySet<string> | undefined, opacity: string) {
+    const built = model(80);
+    const spec = sceneSpecFor({ seniorScale: 1, systemFontScale: 1, touchTarget: 48 });
+    const scene = buildScene(layoutTree(built.graph, built.centerId), spec);
+    const view = render(
+      <AppProviders theme={{ reduceMotion: true }}>
+        <TreeCanvas
+          scene={scene}
+          index={indexScene(scene)}
+          size={{ width: 360, height: 800 }}
+          cards={built.cards}
+          missingOf={new Map()}
+          youId={built.centerId}
+          selectedId={undefined}
+          matching={matching}
+          initialViewport={{ scale: 1, x: 0, y: 0 }}
+          command={undefined}
+          onSettle={jest.fn()}
+          onActivate={jest.fn()}
+        />
+      </AppProviders>,
+    );
+    const count = screen
+      .queryAllByTestId('skia-Group')
+      .filter(
+        (group) =>
+          (group.props as { accessibilityValue?: { text?: string } }).accessibilityValue?.text ===
+          opacity,
+      ).length;
+    view.unmount();
+    return { built, count };
+  }
+
+  it('sans filtre, personne n’est atténué', () => {
+    const none = dimmedGroups(undefined, String(opacity.attenue));
+    expect(none.count).toBe(0);
+  });
+
+  it('un filtre atténue les personnes qui n’y répondent pas, et elles seules', () => {
+    const probe = dimmedGroups(undefined, String(opacity.attenue));
+    const only = new Set([probe.built.centerId]);
+    const filtered = dimmedGroups(only, String(opacity.attenue));
+    // Le dessin ne peint que l'écran : au moins une autre personne, et jamais « Vous ».
+    expect(filtered.count).toBeGreaterThan(0);
+    const everyone = dimmedGroups(new Set(probe.built.cards.keys()), String(opacity.attenue));
+    expect(everyone.count).toBe(0);
   });
 });

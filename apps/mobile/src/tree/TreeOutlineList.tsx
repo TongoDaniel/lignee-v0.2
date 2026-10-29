@@ -15,6 +15,8 @@ export interface TreeOutlineListProps {
   readonly outline: ReadonlyMap<Id, OutlineEntry>;
   readonly cards: ReadonlyMap<Id, PersonCard>;
   readonly focusId: Id;
+  /** Personnes qui répondent au filtre (ARB-11) ; les autres sont signalées. Absent : aucun filtre. */
+  readonly matching?: ReadonlySet<Id> | undefined;
   /** « Vous » : sa fiche est annoncée comme telle. */
   readonly centerId: Id;
   readonly onFocus: (id: Id) => void;
@@ -27,6 +29,7 @@ export function TreeOutlineList({
   outline,
   cards,
   focusId,
+  matching,
   centerId,
   onFocus,
   onToggleFamily,
@@ -40,22 +43,32 @@ export function TreeOutlineList({
   const body = [typography.corps, { color: colors.texte }];
   const note = [typography.secondaire, { color: colors.texteSecondaire }];
 
-  const person = (id: Id) => (
-    <Button
-      key={id}
-      testID={`outline-go-${id}`}
-      label={name(id)}
-      accessibilityLabel={t('common:treeScreen.list.goTo', {
-        name: personLabel(cards.get(id), { you: id === centerId }, t),
-      })}
-      accessibilityHint={t('common:treeScreen.list.goToHint')}
-      variant="quiet"
-      compact
-      onPress={() => {
-        onFocus(id);
-      }}
-    />
-  );
+  const person = (id: Id) => {
+    const outside = matching !== undefined && !matching.has(id);
+    const label = personLabel(cards.get(id), { you: id === centerId }, t);
+    return (
+      <View key={id} style={{ gap: space[1] }}>
+        <Button
+          testID={`outline-go-${id}`}
+          label={name(id)}
+          accessibilityLabel={t('common:treeScreen.list.goTo', {
+            name: outside ? t('common:treeScreen.filters.outsideLabel', { label }) : label,
+          })}
+          accessibilityHint={t('common:treeScreen.list.goToHint')}
+          variant="quiet"
+          compact
+          onPress={() => {
+            onFocus(id);
+          }}
+        />
+        {outside ? (
+          <Text testID={`outline-outside-${id}`} style={note}>
+            {t('common:treeScreen.filters.outside')}
+          </Text>
+        ) : null}
+      </View>
+    );
+  };
 
   const union = (item: OutlineUnion) => {
     const partner = item.partnerId === undefined ? undefined : name(item.partnerId);
