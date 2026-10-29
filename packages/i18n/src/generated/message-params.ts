@@ -310,6 +310,9 @@ export interface MessageParams {
   'common:treeScreen.empty': null;
   'common:treeScreen.failed': null;
   'common:treeScreen.fit': null;
+  'common:treeScreen.goToYou': null;
+  'common:treeScreen.goToYouHint': null;
+  'common:treeScreen.goToYouLabel': null;
   'common:treeScreen.lifespan': { readonly from: string | number; readonly to: string | number };
   'common:treeScreen.lifespanUnknownStart': { readonly to: string | number };
   'common:treeScreen.list.children': null;
@@ -338,10 +341,18 @@ export interface MessageParams {
   'common:treeScreen.missingParent': null;
   'common:treeScreen.noName': null;
   'common:treeScreen.parentsMark': null;
+  'common:treeScreen.recenter': null;
+  'common:treeScreen.recentered': { readonly name: string | number };
+  'common:treeScreen.recenterHint': null;
+  'common:treeScreen.recenterLabel': { readonly name: string | number };
   'common:treeScreen.seeAlso': null;
   'common:treeScreen.showDrawing': null;
   'common:treeScreen.showList': null;
   'common:treeScreen.title': null;
+  'common:treeScreen.trailGo': { readonly name: string | number };
+  'common:treeScreen.trailGoHint': null;
+  'common:treeScreen.trailHint': null;
+  'common:treeScreen.trailLabel': null;
   'common:treeScreen.unknownPerson': null;
   'common:treeScreen.you': null;
   'common:treeScreen.youLabel': { readonly name: string | number };
