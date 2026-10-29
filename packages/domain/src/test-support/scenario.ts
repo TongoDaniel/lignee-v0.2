@@ -25,10 +25,23 @@ const PLAYED_DIR_VARIABLE = 'LIGNEE_SCENARIOS_PLAYED_DIR';
  * T-026 et T-027. `budget` : les budgets de temps du TRD, ramenés au poste par un facteur de
  * ralentissement estimé, sont tenus (packages/kinship, T-028). `fiche` : la fiche d'une personne
  * (`buildProfile`, packages/domain, T-024) est celle de `attendu.fiche`, lecteur par lecteur.
+ * `saisie` : la saisie à la main (T-031) — formulaire, dates saisies par morceaux, découpage du
+ * nom — produit les changements attendus, enregistrés par `recordLocalChanges` (packages/sync).
  */
 export const coverageSchema = z.strictObject({
   teste: z
-    .array(z.enum(['lecture', 'modele', 'disposition', 'lien', 'base_locale', 'budget', 'fiche']))
+    .array(
+      z.enum([
+        'lecture',
+        'modele',
+        'disposition',
+        'lien',
+        'base_locale',
+        'budget',
+        'fiche',
+        'saisie',
+      ]),
+    )
     .min(1),
   reste: z.array(z.string().regex(/^T-\d{3}$/)),
 });
@@ -73,6 +86,7 @@ export const scenarioPartKeys = {
   },
   lien: { racine: [], attendu: ['liens'] },
   fiche: { racine: [], attendu: ['fiche'] },
+  saisie: { racine: [], attendu: ['saisie'] },
 } as const satisfies Partial<
   Record<ScenarioPart, { racine: readonly string[]; attendu: readonly string[] }>
 >;

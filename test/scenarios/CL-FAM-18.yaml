@@ -3,8 +3,8 @@
 id: CL-FAM-18
 titre: Changement de nom (mariage, conversion, francisation)
 couverture:
-  teste: [modele]
-  reste: [T-031]
+  teste: [modele, saisie]
+  reste: []
 arbre:
   personnes: [marthe/F, ngassa/M]
   noms:
@@ -23,3 +23,74 @@ attendu:
     ngassa:
       - { nom: Mbolang, prenoms: Ngassa, fin: "vers 1960" }
       - { nom: Mbolang, prenoms: Nicolas, debut: "vers 1960" }
+  # T-031 : les noms successifs se saisissent avec leurs dates, qui deviennent de vraies dates floues.
+  saisie:
+    personnes:
+      - formulaire:
+          noms:
+            - {
+                type: naissance,
+                prenoms: Marthe,
+                nom: Tchoupa,
+                fin: { choix: exacte, annee: "1978" },
+              }
+            - type: usage
+              prenoms: Marthe
+              nom: Essaka
+              debut: { choix: exacte, annee: "1978" }
+              fin: { choix: exacte, annee: "1991" }
+            - {
+                type: usage,
+                prenoms: Aminatou,
+                nom: Essaka,
+                debut: { choix: exacte, annee: "1991" },
+              }
+        resultat:
+          nature: connue
+          noms:
+            - {
+                type: naissance,
+                prenoms: Marthe,
+                nom: Tchoupa,
+                fin: { qualificatif: exacte, date: "1978" },
+              }
+            - type: usage
+              prenoms: Marthe
+              nom: Essaka
+              debut: { qualificatif: exacte, date: "1978" }
+              fin: { qualificatif: exacte, date: "1991" }
+            - {
+                type: usage,
+                prenoms: Aminatou,
+                nom: Essaka,
+                debut: { qualificatif: exacte, date: "1991" },
+              }
+      - formulaire:
+          noms:
+            - {
+                type: naissance,
+                prenoms: Ngassa,
+                nom: Mbolang,
+                fin: { choix: vers, annee: "1960" },
+              }
+            - {
+                type: variante,
+                prenoms: Nicolas,
+                nom: Mbolang,
+                debut: { choix: vers, annee: "1960" },
+              }
+        resultat:
+          nature: connue
+          noms:
+            - {
+                type: naissance,
+                prenoms: Ngassa,
+                nom: Mbolang,
+                fin: { qualificatif: vers, date: "1960" },
+              }
+            - {
+                type: variante,
+                prenoms: Nicolas,
+                nom: Mbolang,
+                debut: { qualificatif: vers, date: "1960" },
+              }

@@ -39,8 +39,9 @@ describe('CL-POL-15 — épouses qui gardent leur nom, enfants sans le nom du p�
         attendu: z.strictObject({
           valide: z.literal(true),
           noms_de_famille: z.record(z.string(), z.array(z.string())),
+          ...otherPartsShape(['saisie'], 'attendu'),
         }),
-      }),
+      }).superRefine(requireScenarioParts('modele', ['saisie'])),
     );
     const built = buildScenarioTree(scenario.arbre);
     expect(built.data.unions).toHaveLength(2);
@@ -63,9 +64,9 @@ describe('CL-DON-01 — nom donné dans l’ordre NOM Prénom', () => {
             nom_puis_prenoms: z.string(),
             prenoms_puis_nom: z.string(),
           }),
-          ...otherPartsShape(['fiche'], 'attendu'),
+          ...otherPartsShape(['fiche', 'saisie'], 'attendu'),
         }),
-      }).superRefine(requireScenarioParts('modele', ['fiche'])),
+      }).superRefine(requireScenarioParts('modele', ['fiche', 'saisie'])),
     );
     const [name] = buildScenarioTree(scenario.arbre).data.names;
     if (name === undefined) throw new Error('missing name');
@@ -85,8 +86,9 @@ describe('CL-DON-02 — une seule forme de nom, sans nom de famille', () => {
         attendu: z.strictObject({
           valide: z.literal(true),
           affichage: z.record(z.string(), z.string()),
+          ...otherPartsShape(['saisie'], 'attendu'),
         }),
-      }),
+      }).superRefine(requireScenarioParts('modele', ['saisie'])),
     );
     const built = buildScenarioTree(scenario.arbre);
     for (const [key, expected] of Object.entries(scenario.attendu.affichage)) {
@@ -106,9 +108,9 @@ describe('CL-FAM-11 — jumeaux', () => {
       valide: z.literal(true),
       meme_naissance: z.record(z.string(), z.array(z.string())),
       refuse: z.array(scenarioMultipleBirthSchema),
-      ...otherPartsShape(['fiche'], 'attendu'),
+      ...otherPartsShape(['fiche', 'saisie'], 'attendu'),
     }),
-  }).superRefine(requireScenarioParts('modele', ['fiche']));
+  }).superRefine(requireScenarioParts('modele', ['fiche', 'saisie']));
 
   it('modèle : une même naissance, ordre facultatif, retrouvée depuis chaque fiche ; les naissances impossibles sont refusées', () => {
     const scenario = loadScenario('CL-FAM-11', schema);
@@ -137,9 +139,9 @@ describe('CL-FAM-17 — personne connue seulement par un surnom', () => {
           nature: z.literal('connue'),
           nom_affiche: z.string(),
           nom_de_naissance: z.literal('absent'),
-          ...otherPartsShape(['fiche'], 'attendu'),
+          ...otherPartsShape(['fiche', 'saisie'], 'attendu'),
         }),
-      }).superRefine(requireScenarioParts('modele', ['fiche'])),
+      }).superRefine(requireScenarioParts('modele', ['fiche', 'saisie'])),
     );
     const built = buildScenarioTree(scenario.arbre);
     const [line] = scenario.arbre.personnes;
@@ -169,8 +171,9 @@ describe('CL-FAM-18 — changement de nom', () => {
         attendu: z.strictObject({
           valide: z.literal(true),
           noms_dates: z.record(z.string(), z.array(datedName)),
+          ...otherPartsShape(['saisie'], 'attendu'),
         }),
-      }),
+      }).superRefine(requireScenarioParts('modele', ['saisie'])),
     );
     const built = buildScenarioTree(scenario.arbre);
     for (const [key, expected] of Object.entries(scenario.attendu.noms_dates)) {
@@ -204,9 +207,9 @@ describe('CL-FAM-19 — titre traditionnel', () => {
         attendu: z.strictObject({
           valide: z.literal(true),
           titres_par_personne: z.record(z.string(), z.array(titleLine)),
-          ...otherPartsShape(['fiche'], 'attendu'),
+          ...otherPartsShape(['fiche', 'saisie'], 'attendu'),
         }),
-      }).superRefine(requireScenarioParts('modele', ['fiche'])),
+      }).superRefine(requireScenarioParts('modele', ['fiche', 'saisie'])),
     );
     const built = buildScenarioTree(scenario.arbre);
     const titles = built.data.titleRoles;

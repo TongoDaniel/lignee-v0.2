@@ -1,0 +1,40 @@
+# Noms générés. Partie saisie (T-031) : un enfant mort-né ou décédé en bas âge s'ajoute comme
+# n'importe quelle personne, avec une naissance et un décès le même jour. Aucune alerte de
+# cohérence ne le bloque ni ne l'accompagne. « Visibilité au choix » relève des règles de
+# visibilité (T-052) ; « aucun rappel » de l'absence de rappel d'anniversaire (V2).
+id: CL-FAM-12
+titre: Enfant mort-né ou décédé en bas âge
+couverture:
+  teste: [saisie]
+  reste: [T-052]
+attendu:
+  saisie:
+    personnes:
+      - formulaire:
+          genre: F
+          statut: decedee
+          noms: [{ type: naissance, prenoms: Mbella, nom: Ekane }]
+          naissance: { date: { choix: exacte, annee: "2019", mois: "3", jour: "14" }, lieu: Douala }
+          deces: { date: { choix: exacte, annee: "2019", mois: "3", jour: "14" }, lieu: Douala }
+        resultat:
+          nature: connue
+          statut: decedee
+          noms: [{ type: naissance, prenoms: Mbella, nom: Ekane }]
+          naissance: { date: { qualificatif: exacte, date: "2019-03-14" }, lieu: Douala }
+          deces: { date: { qualificatif: exacte, date: "2019-03-14" }, lieu: Douala }
+          alertes: []
+      - formulaire:
+          statut: decedee
+          noms: [{ type: naissance, prenoms: Nkoa, nom: Ekane }]
+          naissance: { date: { choix: exacte, annee: "2020", mois: "6" } }
+          deces:
+            {
+              date: { choix: exacte, annee: "2020", mois: "6" },
+              cause: "Cause saisie pour le test",
+            }
+        resultat:
+          nature: connue
+          statut: decedee
+          noms: [{ type: naissance, prenoms: Nkoa, nom: Ekane }]
+          cause_de_deces: "Cause saisie pour le test"
+          alertes: []

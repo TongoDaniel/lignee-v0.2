@@ -74,7 +74,7 @@ function play(id: string): void {
   const scenario = loadScenario(
     id,
     scenarioSchema(id, { arbre: scenarioTreeSchema, attendu: ficheAttendu }).superRefine(
-      requireScenarioParts('fiche', []),
+      requireScenarioParts('fiche', ['saisie']),
     ),
   );
   const built = buildScenarioTree(scenario.arbre);

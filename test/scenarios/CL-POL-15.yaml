@@ -4,8 +4,8 @@
 id: CL-POL-15
 titre: Épouses qui gardent leur nom, enfants qui ne portent pas celui du père
 couverture:
-  teste: [modele]
-  reste: [T-031, T-062]
+  teste: [modele, saisie]
+  reste: [T-062]
 arbre:
   personnes: [samuel/M, rose/F, odile/F, joseph/M, comfort/F]
   noms:
@@ -28,3 +28,11 @@ attendu:
     odile: [Mbolang]
     joseph: [Tchoupa]
     comfort: [Ewondi]
+  # T-031 : créer un enfant à la main ne recopie aucun nom (ni celui du père, ni celui de la mère).
+  saisie:
+    personnes:
+      - formulaire:
+          noms: [{ type: naissance, prenoms: Esther, nom: Awono }]
+        resultat:
+          nature: connue
+          noms: [{ type: naissance, prenoms: Esther, nom: Awono }]

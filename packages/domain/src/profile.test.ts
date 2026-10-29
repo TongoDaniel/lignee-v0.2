@@ -174,6 +174,20 @@ describe('buildProfile', () => {
     expect(author?.tintName).toBe(stranger?.tintName);
   });
 
+  it('« Nom de naissance : À compléter » n’est pas affiché à qui voit un ancien prénom (ADR 0032)', () => {
+    const { profile } = treeOf({
+      personnes: ['mia/F'],
+      noms: [
+        { personne: 'mia', type: 'usage', prenoms: 'Mia', nom: 'Lemaire' },
+        { personne: 'mia', type: 'ancien', prenoms: 'Marc' },
+      ],
+    });
+    // L'auteur de l'ancien prénom n'est pas invité à le ranger comme nom de naissance ; un autre
+    // lecteur, qui ne voit rien de tel, lit la mention ordinaire d'une personne sans nom de naissance.
+    expect(profile('mia')?.birthNameMissing).toBe(false);
+    expect(profile('mia', { viewer: 'stranger' })?.birthNameMissing).toBe(true);
+  });
+
   it('un ancien prénom placé dans les noms d’une autre personne n’apparaît pas non plus', () => {
     const { profile } = treeOf({
       personnes: ['mia/F', 'jade/F'],

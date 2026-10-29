@@ -4,8 +4,8 @@
 id: CL-DON-06
 titre: « Entre 1935 et 1940 »
 couverture:
-  teste: [modele]
-  reste: [T-031]
+  teste: [modele, saisie]
+  reste: []
 action:
   saisie: "entre 1935 et 1940"
   date: { qualificatif: entre, de: "1935", a: "1940", texte: "entre 1935 et 1940" }
@@ -23,3 +23,17 @@ attendu:
     - { qualificatif: entre, de: "1940", a: "1940" }
     - { qualificatif: entre, de: "1935-05", a: "1940" }
     - { qualificatif: entre, de: "1935" }
+  # T-031 : « entre 1935 et 1940 » se saisit avec deux bornes ; les bornes inversées, égales ou de
+  # précisions différentes sont refusées sur le champ de la seconde borne.
+  saisie:
+    dates:
+      - formulaire: { choix: entre, annee: "1935", annee_fin: "1940" }
+        attendue: { qualificatif: entre, de: "1935", a: "1940" }
+    dates_refusees:
+      - { formulaire: { choix: entre, annee: "1940", annee_fin: "1935" }, code: range_order }
+      - { formulaire: { choix: entre, annee: "1940", annee_fin: "1940" }, code: range_order }
+      - {
+          formulaire: { choix: entre, annee: "1935", mois: "5", annee_fin: "1940" },
+          code: precision_differs,
+        }
+      - { formulaire: { choix: entre, annee: "1935" }, code: year_required }

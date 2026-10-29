@@ -3,8 +3,8 @@
 id: CL-DON-02
 titre: Une seule forme de nom, sans nom de famille
 couverture:
-  teste: [modele]
-  reste: [T-031]
+  teste: [modele, saisie]
+  reste: []
 arbre:
   personnes: [ayo/F, kossi/M]
   noms:
@@ -15,3 +15,16 @@ attendu:
   affichage:
     ayo: Ayo
     kossi: Kossivi
+  # T-031 : une seule forme, ou des prénoms sans nom de famille, sont enregistrés tels quels.
+  saisie:
+    personnes:
+      - formulaire:
+          noms: [{ type: naissance, forme: Kossivi }]
+        resultat:
+          nature: connue
+          noms: [{ type: naissance, forme: Kossivi }]
+      - formulaire:
+          noms: [{ type: naissance, prenoms: Ayo }]
+        resultat:
+          nature: connue
+          noms: [{ type: naissance, prenoms: Ayo }]

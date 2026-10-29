@@ -3,8 +3,8 @@
 id: CL-FAM-19
 titre: Titre traditionnel (Fon, chef, successeur désigné)
 couverture:
-  teste: [modele, fiche]
-  reste: [T-031]
+  teste: [modele, fiche, saisie]
+  reste: []
 arbre:
   personnes: [ndi/M, tamfu/M]
   noms:
@@ -32,3 +32,25 @@ attendu:
       titres:
         - { libelle: "Successeur désigné", debut: "1999", fin: "2004" }
         - { libelle: Fon, debut: "2004" }
+  # T-031 : des titres datés se saisissent avec le nom ; le libellé n'est pas traduit.
+  saisie:
+    personnes:
+      - formulaire:
+          noms: [{ type: naissance, prenoms: Tamfu, nom: Abenzo }]
+          titres:
+            - {
+                libelle: "Successeur désigné",
+                debut: { choix: exacte, annee: "1999" },
+                fin: { choix: exacte, annee: "2004" },
+              }
+            - { libelle: Fon, debut: { choix: exacte, annee: "2004" } }
+        resultat:
+          nature: connue
+          noms: [{ type: naissance, prenoms: Tamfu, nom: Abenzo }]
+          titres:
+            - {
+                libelle: "Successeur désigné",
+                debut: { qualificatif: exacte, date: "1999" },
+                fin: { qualificatif: exacte, date: "2004" },
+              }
+            - { libelle: Fon, debut: { qualificatif: exacte, date: "2004" } }

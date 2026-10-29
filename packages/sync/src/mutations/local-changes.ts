@@ -11,7 +11,10 @@
 // `applyLocalMutationBatch` : il aura sa propre fonction, qui garde la seconde barrière et ne
 // rejoue que les mutations du lecteur.
 import {
+  checkPersonDates,
   mutationBatchSchema,
+  type CalendarDay,
+  type CoherenceIssue,
   type Id,
   type MutationBatch,
   type MutationEntity,
@@ -253,6 +256,26 @@ function baseVersions(tree: TreeObjects, changes: readonly LocalChange[]): (numb
   });
 }
 
+/** Lot formé à partir de changements, sans les champs inchangés ; les rangs d'origine suivent. */
+function buildBatch(tree: TreeObjects, input: RecordLocalChangesInput) {
+  const createdAt = new Date(input.now).toISOString();
+  const versions = baseVersions(tree, input.changes);
+  const batch = parseBatch({
+    id: input.newId(),
+    treeId: input.treeId,
+    mutations: input.changes.map((change, index) => ({
+      id: input.newId(),
+      entity: change.entity,
+      entityId: change.entityId,
+      operation: change.operation,
+      ...(change.fields === undefined ? {} : { fields: change.fields }),
+      baseVersion: versions[index] ?? null,
+      createdAt,
+    })),
+  });
+  return dropUnchangedFields(tree, batch);
+}
+
 /**
  * Enregistre des changements saisis sur le téléphone : un lot, appliqué d'un seul bloc à la copie
  * locale, puis ajouté à la file. Les champs non modifiés sont retirés des modifications (la file
@@ -265,23 +288,44 @@ export function recordLocalChanges(
   return db.transaction((tx) => {
     const local = tx as unknown as LocalDatabase;
     const tree = readOwnTree(local, input.treeId, input.authorAccountId);
-    const createdAt = new Date(input.now).toISOString();
-    const versions = baseVersions(tree, input.changes);
-    const batch = parseBatch({
-      id: input.newId(),
-      treeId: input.treeId,
-      mutations: input.changes.map((change, index) => ({
-        id: input.newId(),
-        entity: change.entity,
-        entityId: change.entityId,
-        operation: change.operation,
-        ...(change.fields === undefined ? {} : { fields: change.fields }),
-        baseVersion: versions[index] ?? null,
-        createdAt,
-      })),
-    });
-    const trimmed = dropUnchangedFields(tree, batch);
+    const trimmed = buildBatch(tree, input);
     if (trimmed.batch.mutations.length === 0) return { status: 'no_change' } as const;
     return applyAndEnqueue(local, tree, trimmed.batch, input.authorAccountId, trimmed.origins);
   });
+}
+
+export interface PreviewCoherenceInput extends RecordLocalChangesInput {
+  /** Personne saisie : ses dates, et celles de ses liens, sont contrôlées. */
+  readonly personId: Id;
+  /** Jour de référence : l'âge d'une personne vivante se contrôle avec lui. */
+  readonly today: CalendarDay;
+}
+
+/**
+ * Alertes de cohérence (UNI-18) que les changements produiraient sur la fiche saisie, calculées
+ * sur la copie du lecteur avant d'écrire quoi que ce soit : l'écran les explique, et la personne
+ * choisit de passer outre (ADR 0027, point 5 ; ADR 0011). Aucune écriture, aucune file. Un lot
+ * qui serait refusé ne donne aucune alerte : son refus s'affiche à l'enregistrement.
+ */
+export function previewCoherence(
+  db: LocalDatabase,
+  input: PreviewCoherenceInput,
+): readonly CoherenceIssue[] {
+  try {
+    const tree = readOwnTree(db, input.treeId, input.authorAccountId);
+    const trimmed = buildBatch(tree, input);
+    if (trimmed.batch.mutations.length === 0) return [];
+    const result = applyMutationBatch(tree, trimmed.batch, {
+      authorAccountId: input.authorAccountId,
+      requireCurrentBaseVersion: true,
+    });
+    if (!result.ok) return [];
+    return checkPersonDates(result.tree, input.personId, { today: input.today });
+  } catch (error) {
+    // Lot mal formé ou refusé : l'enregistrement le dira sur le bon champ.
+    if (error instanceof InvalidMutationBatchError || error instanceof MutationBatchRefusedError) {
+      return [];
+    }
+    throw error;
+  }
 }

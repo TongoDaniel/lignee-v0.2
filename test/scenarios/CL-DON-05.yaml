@@ -6,8 +6,8 @@
 id: CL-DON-05
 titre: « Né vers 1940 »
 couverture:
-  teste: [modele]
-  reste: [T-031]
+  teste: [modele, saisie]
+  reste: []
 action:
   saisie: "né vers 1940"
   date: { qualificatif: vers, date: "1940", texte: "vers 1940" }
@@ -28,3 +28,24 @@ attendu:
     - { qualificatif: apres, date: "1940" }
     - { qualificatif: exacte, date: "1941" }
     - { qualificatif: texte, texte: "l'année de la grande sécheresse" }
+  # T-031 : « vers 1940 » et « années 1940 » se saisissent par morceaux (choix, année, décennie).
+  saisie:
+    dates:
+      - formulaire: { choix: vers, annee: "1940" }
+        attendue: { qualificatif: vers, date: "1940" }
+      - formulaire: { choix: exacte, annee: "1940", decennie: true }
+        attendue: { qualificatif: exacte, date: "1940", precision: decennie }
+      - formulaire: { choix: vers, annee: "1940", decennie: true }
+        attendue: { qualificatif: vers, date: "1940", precision: decennie }
+      - formulaire: { choix: apres, annee: "1940", mois: "7" }
+        attendue: { qualificatif: apres, date: "1940-07" }
+      - formulaire: { choix: exacte, annee: "1431", calendrier: hegirien }
+        attendue: { qualificatif: exacte, date: "1431", calendrier: hegirien }
+    dates_refusees:
+      - { formulaire: { choix: vers }, code: year_required }
+      - { formulaire: { choix: vers, annee: "19x0" }, code: year_invalid }
+      - { formulaire: { choix: vers, annee: "1945", decennie: true }, code: decade_year_invalid }
+      - { formulaire: { choix: exacte, annee: "1940", mois: "13" }, code: month_invalid }
+      - { formulaire: { choix: exacte, annee: "1940", jour: "3" }, code: day_needs_month }
+      - { formulaire: { choix: exacte, annee: "1941", mois: "2", jour: "29" }, code: day_invalid }
+      - { formulaire: { choix: texte }, code: text_required }

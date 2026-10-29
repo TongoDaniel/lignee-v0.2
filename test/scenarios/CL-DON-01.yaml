@@ -4,8 +4,8 @@
 id: CL-DON-01
 titre: Nom donné dans l'ordre NOM Prénom
 couverture:
-  teste: [modele, fiche]
-  reste: [T-031, T-058]
+  teste: [modele, fiche, saisie]
+  reste: [T-058]
 arbre:
   personnes: [lucien/M]
   noms:
@@ -18,3 +18,15 @@ attendu:
   fiche:
     - { personne: lucien, ordre_des_noms: nom_puis_prenoms, nom_affiche: "Abenzo Lucien" }
     - { personne: lucien, ordre_des_noms: prenoms_puis_nom, nom_affiche: "Lucien Abenzo" }
+  # T-031 : le formulaire garde prénoms et nom dans deux champs ; un nom écrit d'un trait se
+  # sépare selon l'ordre réglé par l'arbre.
+  saisie:
+    decouper:
+      - { ordre: nom_puis_prenoms, texte: "Abenzo Lucien", prenoms: Lucien, nom: Abenzo }
+      - { ordre: prenoms_puis_nom, texte: "Lucien Abenzo", prenoms: Lucien, nom: Abenzo }
+    personnes:
+      - formulaire:
+          noms: [{ type: naissance, prenoms: Lucien, nom: Abenzo }]
+        resultat:
+          nature: connue
+          noms: [{ type: naissance, prenoms: Lucien, nom: Abenzo }]
