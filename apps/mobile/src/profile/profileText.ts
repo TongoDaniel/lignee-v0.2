@@ -6,17 +6,21 @@ import type { FuzzyDateDisplay, MultipleBirthKind, ProfileMultipleBirth } from '
 import type { Translator } from '@lignee/i18n';
 
 type DisplayBound = Extract<FuzzyDateDisplay, { kind: 'point' }>['date'];
+type Calendar = 'gregorian' | 'hijri';
 
-function boundText(
-  bound: DisplayBound,
-  calendar: 'gregorian' | 'hijri',
-  translator: Translator,
-): string {
-  if (calendar === 'hijri') {
-    return translator.t('common:profile.dates.hijri', { year: String(bound.year) });
-  }
+/**
+ * Une borne sans la mention du calendrier. Le grégorien suit la langue (« 1er mars 1931 »). Le
+ * calendrier hégirien n'a pas de noms de mois ici : l'année, le mois puis le jour en chiffres
+ * (« 3/1431 », « 14/3/1431 »). Une décennie se dit par ses mots (« années 1940 »).
+ */
+function plainBoundText(bound: DisplayBound, calendar: Calendar, translator: Translator): string {
   if (bound.precision === 'decade') {
     return translator.t('common:profile.dates.decade', { year: String(bound.year) });
+  }
+  if (calendar === 'hijri') {
+    return [bound.day, bound.month, bound.year]
+      .filter((part): part is number => part !== undefined)
+      .join('/');
   }
   try {
     return translator.format.calendarDate({
@@ -30,30 +34,57 @@ function boundText(
   }
 }
 
+/** La mention du calendrier, une seule fois pour toute la date (« vers 1431 (calendrier hégirien) »). */
+function withCalendar(text: string, calendar: Calendar, translator: Translator): string {
+  return calendar === 'hijri' ? translator.t('common:profile.dates.hijri', { date: text }) : text;
+}
+
 /** Date floue en toutes lettres : « 1er mars 1931 », « vers 1940 », « entre 1935 et 1940 »… */
 export function fuzzyDateText(date: FuzzyDateDisplay, translator: Translator): string {
   const { t } = translator;
   switch (date.kind) {
     case 'text':
       return date.text;
-    case 'range':
-      return t('common:profile.dates.between', {
-        from: boundText(date.from, date.calendar, translator),
-        to: boundText(date.to, date.calendar, translator),
-      });
+    case 'range': {
+      // Deux décennies : « entre les années 1930 et les années 1940 », jamais « années 1930 ».
+      const text =
+        date.from.precision === 'decade' && date.to.precision === 'decade'
+          ? t('common:profile.dates.betweenDecades', {
+              from: String(date.from.year),
+              to: String(date.to.year),
+            })
+          : t('common:profile.dates.between', {
+              from: plainBoundText(date.from, date.calendar, translator),
+              to: plainBoundText(date.to, date.calendar, translator),
+            });
+      return withCalendar(text, date.calendar, translator);
+    }
     case 'point': {
-      const text = boundText(date.date, date.calendar, translator);
-      switch (date.qualifier) {
-        case 'exact':
-          return text;
-        case 'about':
-        case 'calculated':
-          return t('common:profile.dates.about', { date: text });
-        case 'before':
-          return t('common:profile.dates.before', { date: text });
-        case 'after':
-          return t('common:profile.dates.after', { date: text });
-      }
+      const year = String(date.date.year);
+      const decade = date.date.precision === 'decade';
+      const plain = plainBoundText(date.date, date.calendar, translator);
+      // Une décennie se compose avec « les années » (« vers les années 1940 »), pas avec le mot
+      // « années » collé derrière « vers » (« vers années 1940 »).
+      const text = (() => {
+        switch (date.qualifier) {
+          case 'exact':
+            return plain;
+          case 'about':
+          case 'calculated':
+            return decade
+              ? t('common:profile.dates.aboutDecade', { year })
+              : t('common:profile.dates.about', { date: plain });
+          case 'before':
+            return decade
+              ? t('common:profile.dates.beforeDecade', { year })
+              : t('common:profile.dates.before', { date: plain });
+          case 'after':
+            return decade
+              ? t('common:profile.dates.afterDecade', { year })
+              : t('common:profile.dates.after', { date: plain });
+        }
+      })();
+      return withCalendar(text, date.calendar, translator);
     }
   }
 }

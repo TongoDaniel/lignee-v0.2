@@ -64,6 +64,57 @@ describe('fuzzyDateText', () => {
     );
   });
 
+  it('compose une décennie avec « les années », jamais « vers années 1940 »', () => {
+    const decade = (qualifier: 'about' | 'before' | 'after') =>
+      point(qualifier, { year: 1940 }, 'decade');
+    expect(fuzzyDateText(decade('about'), fr)).toBe('vers les années 1940');
+    expect(fuzzyDateText(decade('before'), fr)).toBe('avant les années 1940');
+    expect(fuzzyDateText(decade('after'), fr)).toBe('après les années 1940');
+    expect(fuzzyDateText(decade('about'), en)).toBe('around the 1940s');
+    expect(fuzzyDateText(decade('before'), en)).toBe('before the 1940s');
+    expect(fuzzyDateText(decade('after'), en)).toBe('after the 1940s');
+    const range: FuzzyDateDisplay = {
+      kind: 'range',
+      from: { precision: 'decade', year: 1930 },
+      to: { precision: 'decade', year: 1940 },
+      calendar: 'gregorian',
+      approximate: true,
+    };
+    expect(fuzzyDateText(range, fr)).toBe('entre les années 1930 et les années 1940');
+    expect(fuzzyDateText(range, en)).toBe('between the 1930s and the 1940s');
+    for (const text of [fr, en].flatMap((tr) => [
+      fuzzyDateText(decade('about'), tr),
+      fuzzyDateText(range, tr),
+    ])) {
+      expect(text).not.toMatch(/(vers|avant|après|entre) années/u);
+    }
+  });
+
+  it('écrit le calendrier hégirien une seule fois, avec le mois et le jour s’ils sont connus', () => {
+    const hijri = (
+      qualifier: 'exact' | 'about',
+      date: { year: number; month?: number; day?: number },
+      precision: 'day' | 'month' | 'year',
+    ) => point(qualifier, date, precision, 'hijri');
+    expect(fuzzyDateText(hijri('about', { year: 1431 }, 'year'), fr)).toBe(
+      'vers 1431 (calendrier hégirien)',
+    );
+    expect(fuzzyDateText(hijri('exact', { year: 1431, month: 3 }, 'month'), fr)).toBe(
+      '3/1431 (calendrier hégirien)',
+    );
+    expect(fuzzyDateText(hijri('exact', { year: 1431, month: 3, day: 14 }, 'day'), en)).toBe(
+      '14/3/1431 (Hijri calendar)',
+    );
+    const range: FuzzyDateDisplay = {
+      kind: 'range',
+      from: { precision: 'year', year: 1431 },
+      to: { precision: 'year', year: 1435 },
+      calendar: 'hijri',
+      approximate: true,
+    };
+    expect(fuzzyDateText(range, fr)).toBe('entre 1431 et 1435 (calendrier hégirien)');
+  });
+
   it('garde l’année quand la date est impossible', () => {
     expect(fuzzyDateText(point('exact', { year: 1931, month: 13 }, 'month'), fr)).toBe('1931');
   });

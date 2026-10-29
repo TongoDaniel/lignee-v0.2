@@ -14,7 +14,7 @@ import type {
   ProfileName,
   ProfileSectionKey,
 } from '@lignee/domain';
-import { Avatar, Card, Chip, Header, PrivacyNote, space, useTheme } from '@lignee/ui';
+import { Avatar, Button, Card, Chip, Header, PrivacyNote, space, useTheme } from '@lignee/ui';
 import type { ReactNode } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -27,6 +27,8 @@ export interface ProfileViewProps {
   /** Nom de l'arbre, pour la mention de confidentialité d'une date de naissance. */
   readonly treeName: string;
   readonly onBack: () => void;
+  /** Ouvre le formulaire de la fiche (T-031) ; absent : pas de bouton. */
+  readonly onEdit?: () => void;
 }
 
 /** Une ligne de la fiche : intitulé, valeur, détail ; lue d'un bloc par le lecteur d'écran. */
@@ -62,7 +64,7 @@ function Rows({ children }: { readonly children: ReactNode }) {
   return <View style={{ gap: space[4] }}>{children}</View>;
 }
 
-export function ProfileView({ profile, treeName, onBack }: ProfileViewProps) {
+export function ProfileView({ profile, treeName, onBack, onEdit }: ProfileViewProps) {
   const translator = useTranslator();
   const { t } = translator;
   const { colors, typography } = useTheme();
@@ -226,6 +228,23 @@ export function ProfileView({ profile, treeName, onBack }: ProfileViewProps) {
           accessibilityLabel: t('common:controls.back'),
           accessibilityHint: t('common:profile.backHint'),
         }}
+        action={
+          onEdit === undefined ? undefined : (
+            <Button
+              testID="profile-edit"
+              compact
+              icon="modifier"
+              label={t('common:profile.edit')}
+              accessibilityLabel={
+                profile.name === undefined
+                  ? t('common:profile.edit')
+                  : `${t('common:profile.edit')} — ${profile.name}`
+              }
+              accessibilityHint={t('common:profile.editHint')}
+              onPress={onEdit}
+            />
+          )
+        }
       />
       <View style={{ paddingHorizontal: space.margeEcran, gap: space[5] }}>
         <View style={{ alignItems: 'center', gap: space[3] }}>
