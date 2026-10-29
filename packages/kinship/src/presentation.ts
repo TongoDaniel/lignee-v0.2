@@ -3,7 +3,8 @@
 // les autres (« aussi : cousin par votre père »), chacun avec sa nature (sang ou alliance), sa
 // base (naissance, ou un lien non biologique : adoption, « a élevé », confiage…, jamais confondu
 // avec la naissance), la certitude la plus faible du lien affiché et le côté de chacun. Les mots
-// (« demi-frère, même mère », « Peut-être son frère », « fils adoptif ») sont T-026 et T-027.
+// (« demi-frère, même mère », « Peut-être votre frère », « fils adoptif ») sont dans words.ts
+// (T-026 ; T-027 pour l'anglais).
 // Règles : ADR 0021.
 //
 // Aucun nouveau parcours : la présentation lit les chemins de `findRelationships` (dans leur

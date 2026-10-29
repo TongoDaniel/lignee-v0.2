@@ -91,6 +91,12 @@ const LINE_NOUNS: readonly [number, number, Record<Gendered, [string, string]>, 
   [2, 1, { male: ['oncle', 'uncle'], female: ['tante', 'aunt'] }, true],
   [3, 1, { male: ['grand-oncle', 'great-uncle'], female: ['grand-tante', 'great-aunt'] }, true],
   [2, 2, { male: ['cousin', 'cousin'], female: ['cousine', 'cousin'] }, true],
+  [
+    2,
+    2,
+    { male: ['cousin germain', 'first cousin'], female: ['cousine germaine', 'first cousin'] },
+    true,
+  ],
   [1, 2, { male: ['neveu', 'nephew'], female: ['nièce', 'niece'] }, false],
 ];
 
@@ -187,7 +193,7 @@ const ADOPTION_SIBLINGS: Record<string, { gender: Gendered; en: string }> = {
 
 /** Autres formes de l'alliance (`other`, ADR 0020), nommées d'après leurs segments. */
 const OTHER_ALLIANCES: Record<string, { gender: Gendered; via: Gendered[]; en: string }> = {
-  "fils de l'épouse de votre oncle": {
+  "fils de l'épouse de votre oncle par votre père": {
     gender: 'male',
     via: ['male', 'female'],
     en: "son of your uncle's wife",
@@ -212,7 +218,9 @@ function check(fr: string, en: string, expected: string) {
  * les mots ne sont pas connus, ou si l'anglais ne dit pas la même chose que le français.
  * « Peut-être » (UNI-10) : certitude `probable` ; sinon `certain`.
  */
-export function presentedMeaningOfWords(frWords: string, enWords: string): PresentedWordsMeaning {
+export function presentedMeaningOfWords(frInput: string, enWords: string): PresentedWordsMeaning {
+  // Apostrophe typographique des mots du dictionnaire (T-026) : même sens que l'apostrophe droite.
+  const frWords = frInput.replaceAll('’', "'");
   if (frWords === 'Lien non disponible') {
     check(frWords, enWords, 'Link not available');
     return { category: 'none' };

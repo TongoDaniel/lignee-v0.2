@@ -1,0 +1,293 @@
+{
+  "step": {
+    "ancestor": {
+      "you": "{generations, plural, =1 {{gender, select, male {father} female {mother} other {parent}}} =2 {{gender, select, male {grandfather} female {grandmother} other {grandparent}}} =3 {{gender, select, male {great-grandfather} female {great-grandmother} other {great-grandparent}}} =4 {{gender, select, male {great-great-grandfather} female {great-great-grandmother} other {great-great-grandparent}}} other {{gender, select, male {ancestor {generations} generations back} female {ancestor {generations} generations back} other {ancestor {generations} generations back}}}}",
+      "yourThe": "{generations, plural, =1 {{gender, select, male {your father} female {your mother} other {your parent}}} =2 {{gender, select, male {your grandfather} female {your grandmother} other {your grandparent}}} =3 {{gender, select, male {your great-grandfather} female {your great-grandmother} other {your great-grandparent}}} =4 {{gender, select, male {your great-great-grandfather} female {your great-great-grandmother} other {your great-great-grandparent}}} other {{gender, select, male {your ancestor {generations} generations back} female {your ancestor {generations} generations back} other {your ancestor {generations} generations back}}}}",
+      "yourOf": "{generations, plural, =1 {{gender, select, male {of your father} female {of your mother} other {of your parent}}} =2 {{gender, select, male {of your grandfather} female {of your grandmother} other {of your grandparent}}} =3 {{gender, select, male {of your great-grandfather} female {of your great-grandmother} other {of your great-grandparent}}} =4 {{gender, select, male {of your great-great-grandfather} female {of your great-great-grandmother} other {of your great-great-grandparent}}} other {{gender, select, male {of your ancestor {generations} generations back} female {of your ancestor {generations} generations back} other {of your ancestor {generations} generations back}}}}",
+      "of": "{generations, plural, =1 {{gender, select, male {father {of}} female {mother {of}} other {parent {of}}}} =2 {{gender, select, male {grandfather {of}} female {grandmother {of}} other {grandparent {of}}}} =3 {{gender, select, male {great-grandfather {of}} female {great-grandmother {of}} other {great-grandparent {of}}}} =4 {{gender, select, male {great-great-grandfather {of}} female {great-great-grandmother {of}} other {great-great-grandparent {of}}}} other {{gender, select, male {ancestor {generations} generations back {of}} female {ancestor {generations} generations back {of}} other {ancestor {generations} generations back {of}}}}}",
+      "theOf": "{generations, plural, =1 {{gender, select, male {the father {of}} female {the mother {of}} other {the parent {of}}}} =2 {{gender, select, male {the grandfather {of}} female {the grandmother {of}} other {the grandparent {of}}}} =3 {{gender, select, male {the great-grandfather {of}} female {the great-grandmother {of}} other {the great-grandparent {of}}}} =4 {{gender, select, male {the great-great-grandfather {of}} female {the great-great-grandmother {of}} other {the great-great-grandparent {of}}}} other {{gender, select, male {the ancestor {generations} generations back {of}} female {the ancestor {generations} generations back {of}} other {the ancestor {generations} generations back {of}}}}}",
+      "ofOf": "{generations, plural, =1 {{gender, select, male {of the father {of}} female {of the mother {of}} other {of the parent {of}}}} =2 {{gender, select, male {of the grandfather {of}} female {of the grandmother {of}} other {of the grandparent {of}}}} =3 {{gender, select, male {of the great-grandfather {of}} female {of the great-grandmother {of}} other {of the great-grandparent {of}}}} =4 {{gender, select, male {of the great-great-grandfather {of}} female {of the great-great-grandmother {of}} other {of the great-great-grandparent {of}}}} other {{gender, select, male {of the ancestor {generations} generations back {of}} female {of the ancestor {generations} generations back {of}} other {of the ancestor {generations} generations back {of}}}}}",
+      "explained": "{gender, select, male {your birth father} female {your birth mother} other {your birth parent}}"
+    },
+    "descendant": {
+      "you": "{generations, plural, =1 {{gender, select, male {son} female {daughter} other {child}}} =2 {{gender, select, male {grandson} female {granddaughter} other {grandchild}}} =3 {{gender, select, male {great-grandson} female {great-granddaughter} other {great-grandchild}}} =4 {{gender, select, male {great-great-grandson} female {great-great-granddaughter} other {great-great-grandchild}}} other {{gender, select, male {descendant {generations} generations down} female {descendant {generations} generations down} other {descendant {generations} generations down}}}}",
+      "yourThe": "{generations, plural, =1 {{gender, select, male {your son} female {your daughter} other {your child}}} =2 {{gender, select, male {your grandson} female {your granddaughter} other {your grandchild}}} =3 {{gender, select, male {your great-grandson} female {your great-granddaughter} other {your great-grandchild}}} =4 {{gender, select, male {your great-great-grandson} female {your great-great-granddaughter} other {your great-great-grandchild}}} other {{gender, select, male {your descendant {generations} generations down} female {your descendant {generations} generations down} other {your descendant {generations} generations down}}}}",
+      "yourOf": "{generations, plural, =1 {{gender, select, male {of your son} female {of your daughter} other {of your child}}} =2 {{gender, select, male {of your grandson} female {of your granddaughter} other {of your grandchild}}} =3 {{gender, select, male {of your great-grandson} female {of your great-granddaughter} other {of your great-grandchild}}} =4 {{gender, select, male {of your great-great-grandson} female {of your great-great-granddaughter} other {of your great-great-grandchild}}} other {{gender, select, male {of your descendant {generations} generations down} female {of your descendant {generations} generations down} other {of your descendant {generations} generations down}}}}",
+      "of": "{generations, plural, =1 {{gender, select, male {son {of}} female {daughter {of}} other {child {of}}}} =2 {{gender, select, male {grandson {of}} female {granddaughter {of}} other {grandchild {of}}}} =3 {{gender, select, male {great-grandson {of}} female {great-granddaughter {of}} other {great-grandchild {of}}}} =4 {{gender, select, male {great-great-grandson {of}} female {great-great-granddaughter {of}} other {great-great-grandchild {of}}}} other {{gender, select, male {descendant {generations} generations down {of}} female {descendant {generations} generations down {of}} other {descendant {generations} generations down {of}}}}}",
+      "theOf": "{generations, plural, =1 {{gender, select, male {the son {of}} female {the daughter {of}} other {the child {of}}}} =2 {{gender, select, male {the grandson {of}} female {the granddaughter {of}} other {the grandchild {of}}}} =3 {{gender, select, male {the great-grandson {of}} female {the great-granddaughter {of}} other {the great-grandchild {of}}}} =4 {{gender, select, male {the great-great-grandson {of}} female {the great-great-granddaughter {of}} other {the great-great-grandchild {of}}}} other {{gender, select, male {the descendant {generations} generations down {of}} female {the descendant {generations} generations down {of}} other {the descendant {generations} generations down {of}}}}}",
+      "ofOf": "{generations, plural, =1 {{gender, select, male {of the son {of}} female {of the daughter {of}} other {of the child {of}}}} =2 {{gender, select, male {of the grandson {of}} female {of the granddaughter {of}} other {of the grandchild {of}}}} =3 {{gender, select, male {of the great-grandson {of}} female {of the great-granddaughter {of}} other {of the great-grandchild {of}}}} =4 {{gender, select, male {of the great-great-grandson {of}} female {of the great-great-granddaughter {of}} other {of the great-great-grandchild {of}}}} other {{gender, select, male {of the descendant {generations} generations down {of}} female {of the descendant {generations} generations down {of}} other {of the descendant {generations} generations down {of}}}}}",
+      "explained": "{gender, select, male {your birth son} female {your birth daughter} other {your birth child}}"
+    },
+    "sibling": {
+      "you": "{gender, select, male {brother} female {sister} other {sibling}}",
+      "yourThe": "{gender, select, male {your brother} female {your sister} other {your sibling}}",
+      "yourOf": "{gender, select, male {of your brother} female {of your sister} other {of your sibling}}",
+      "of": "{gender, select, male {brother {of}} female {sister {of}} other {sibling {of}}}",
+      "theOf": "{gender, select, male {the brother {of}} female {the sister {of}} other {the sibling {of}}}",
+      "ofOf": "{gender, select, male {of the brother {of}} female {of the sister {of}} other {of the sibling {of}}}"
+    },
+    "spouse": {
+      "you": "{gender, select, male {husband} female {wife} other {spouse}}",
+      "yourThe": "{gender, select, male {your husband} female {your wife} other {your spouse}}",
+      "yourOf": "{gender, select, male {of your husband} female {of your wife} other {of your spouse}}",
+      "of": "{gender, select, male {husband {of}} female {wife {of}} other {spouse {of}}}",
+      "theOf": "{gender, select, male {the husband {of}} female {the wife {of}} other {the spouse {of}}}",
+      "ofOf": "{gender, select, male {of the husband {of}} female {of the wife {of}} other {of the spouse {of}}}"
+    },
+    "otherSpouse": {
+      "you": "{gender, select, male {other husband} female {other wife} other {other spouse}}",
+      "yourThe": "{gender, select, male {your other husband} female {your other wife} other {your other spouse}}",
+      "yourOf": "{gender, select, male {of your other husband} female {of your other wife} other {of your other spouse}}",
+      "of": "{gender, select, male {other husband {of}} female {other wife {of}} other {other spouse {of}}}",
+      "theOf": "{gender, select, male {the other husband {of}} female {the other wife {of}} other {the other spouse {of}}}",
+      "ofOf": "{gender, select, male {of the other husband {of}} female {of the other wife {of}} other {of the other spouse {of}}}"
+    },
+    "coSpouse": {
+      "you": "{gender, select, female {co-wife} other {co-husband}}",
+      "yourThe": "{gender, select, female {your co-wife} other {your co-husband}}",
+      "yourOf": "{gender, select, female {of your co-wife} other {of your co-husband}}",
+      "of": "{gender, select, female {co-wife {of}} other {co-husband {of}}}",
+      "theOf": "{gender, select, female {the co-wife {of}} other {the co-husband {of}}}",
+      "ofOf": "{gender, select, female {of the co-wife {of}} other {of the co-husband {of}}}"
+    },
+    "adoptiveParent": {
+      "you": "{gender, select, male {adoptive father} female {adoptive mother} other {adoptive parent}}",
+      "yourThe": "{gender, select, male {your adoptive father} female {your adoptive mother} other {your adoptive parent}}",
+      "yourOf": "{gender, select, male {of your adoptive father} female {of your adoptive mother} other {of your adoptive parent}}",
+      "of": "{gender, select, male {adoptive father {of}} female {adoptive mother {of}} other {adoptive parent {of}}}",
+      "theOf": "{gender, select, male {the adoptive father {of}} female {the adoptive mother {of}} other {the adoptive parent {of}}}",
+      "ofOf": "{gender, select, male {of the adoptive father {of}} female {of the adoptive mother {of}} other {of the adoptive parent {of}}}",
+      "explained": "{youGender, select, female {person who adopted you} other {person who adopted you}}"
+    },
+    "adoptiveChild": {
+      "you": "{gender, select, male {adopted son} female {adopted daughter} other {adopted child}}",
+      "yourThe": "{gender, select, male {your adopted son} female {your adopted daughter} other {your adopted child}}",
+      "yourOf": "{gender, select, male {of your adopted son} female {of your adopted daughter} other {of your adopted child}}",
+      "of": "{gender, select, male {adopted son {of}} female {adopted daughter {of}} other {adopted child {of}}}",
+      "theOf": "{gender, select, male {the adopted son {of}} female {the adopted daughter {of}} other {the adopted child {of}}}",
+      "ofOf": "{gender, select, male {of the adopted son {of}} female {of the adopted daughter {of}} other {of the adopted child {of}}}",
+      "explained": "{gender, select, female {child you adopted} other {child you adopted}}"
+    },
+    "raisedBy": {
+      "you": "{youGender, select, female {person who raised you} other {person who raised you}}",
+      "yourThe": "{youGender, select, female {the person who raised you} other {the person who raised you}}",
+      "yourOf": "{youGender, select, female {of the person who raised you} other {of the person who raised you}}",
+      "of": "person who raised {who}",
+      "theOf": "the person who raised {who}",
+      "ofOf": "of the person who raised {who}",
+      "explained": "{youGender, select, female {person who raised you; this is not a birth link} other {person who raised you; this is not a birth link}}"
+    },
+    "raisedChild": {
+      "you": "{gender, select, female {child you raised} other {child you raised}}",
+      "yourThe": "{gender, select, female {the child you raised} other {the child you raised}}",
+      "yourOf": "{gender, select, female {of the child you raised} other {of the child you raised}}",
+      "of": "{gender, select, female {child raised by {who}} other {child raised by {who}}}",
+      "theOf": "{gender, select, female {the child raised by {who}} other {the child raised by {who}}}",
+      "ofOf": "{gender, select, female {of the child raised by {who}} other {of the child raised by {who}}}",
+      "explained": "{gender, select, female {child you raised; this is not a birth link} other {child you raised; this is not a birth link}}"
+    },
+    "fosteredTo": {
+      "you": "{youGender, select, female {person you are entrusted to} other {person you are entrusted to}}",
+      "yourThe": "{youGender, select, female {the person you are entrusted to} other {the person you are entrusted to}}",
+      "yourOf": "{youGender, select, female {of the person you are entrusted to} other {of the person you are entrusted to}}",
+      "of": "{whoGender, select, female {person {who} is entrusted to} other {person {who} is entrusted to}}",
+      "theOf": "{whoGender, select, female {the person {who} is entrusted to} other {the person {who} is entrusted to}}",
+      "ofOf": "{whoGender, select, female {of the person {who} is entrusted to} other {of the person {who} is entrusted to}}",
+      "explained": "{youGender, select, female {person you are entrusted to; this is neither birth nor adoption} other {person you are entrusted to; this is neither birth nor adoption}}"
+    },
+    "fosteredChild": {
+      "you": "{gender, select, female {child entrusted to you} other {child entrusted to you}}",
+      "yourThe": "{gender, select, female {the child entrusted to you} other {the child entrusted to you}}",
+      "yourOf": "{gender, select, female {of the child entrusted to you} other {of the child entrusted to you}}",
+      "of": "{gender, select, female {child entrusted to the care {of}} other {child entrusted to the care {of}}}",
+      "theOf": "{gender, select, female {the child entrusted to the care {of}} other {the child entrusted to the care {of}}}",
+      "ofOf": "{gender, select, female {of the child entrusted to the care {of}} other {of the child entrusted to the care {of}}}",
+      "explained": "{gender, select, female {child entrusted to you; this is neither birth nor adoption} other {child entrusted to you; this is neither birth nor adoption}}"
+    },
+    "guardian": {
+      "you": "{gender, select, male {guardian} female {guardian} other {guardian}}",
+      "yourThe": "{gender, select, male {your guardian} female {your guardian} other {your guardian}}",
+      "yourOf": "{gender, select, male {of your guardian} female {of your guardian} other {of your guardian}}",
+      "of": "{gender, select, male {guardian {of}} female {guardian {of}} other {guardian {of}}}",
+      "theOf": "{gender, select, male {the guardian {of}} female {the guardian {of}} other {the guardian {of}}}",
+      "ofOf": "{gender, select, male {of the guardian {of}} female {of the guardian {of}} other {of the guardian {of}}}",
+      "explained": "person who is your guardian; this is not a birth link"
+    },
+    "ward": {
+      "you": "{gender, select, male {ward} female {ward} other {ward}}",
+      "yourThe": "{gender, select, male {your ward} female {your ward} other {your ward}}",
+      "yourOf": "{gender, select, male {of your ward} female {of your ward} other {of your ward}}",
+      "of": "{gender, select, male {ward {of}} female {ward {of}} other {ward {of}}}",
+      "theOf": "{gender, select, male {the ward {of}} female {the ward {of}} other {the ward {of}}}",
+      "ofOf": "{gender, select, male {of the ward {of}} female {of the ward {of}} other {of the ward {of}}}",
+      "explained": "person under your guardianship; this is not a birth link"
+    },
+    "donor": {
+      "you": "{gender, select, male {donor} female {donor} other {donor}}",
+      "yourThe": "{gender, select, male {your donor} female {your donor} other {your donor}}",
+      "yourOf": "{gender, select, male {of your donor} female {of your donor} other {of your donor}}",
+      "of": "{gender, select, male {donor {of}} female {donor {of}} other {donor {of}}}",
+      "theOf": "{gender, select, male {the donor {of}} female {the donor {of}} other {the donor {of}}}",
+      "ofOf": "{gender, select, male {of the donor {of}} female {of the donor {of}} other {of the donor {of}}}",
+      "explained": "person whose donation made your birth possible"
+    },
+    "donorChild": {
+      "you": "{gender, select, female {child born from your donation} other {child born from your donation}}",
+      "yourThe": "{gender, select, female {the child born from your donation} other {the child born from your donation}}",
+      "yourOf": "{gender, select, female {of the child born from your donation} other {of the child born from your donation}}",
+      "of": "{gender, select, female {child born from the donation {of}} other {child born from the donation {of}}}",
+      "theOf": "{gender, select, female {the child born from the donation {of}} other {the child born from the donation {of}}}",
+      "ofOf": "{gender, select, female {of the child born from the donation {of}} other {of the child born from the donation {of}}}",
+      "explained": "{gender, select, female {child born thanks to your donation} other {child born thanks to your donation}}"
+    },
+    "carrier": {
+      "you": "{youGender, select, female {person who carried you} other {person who carried you}}",
+      "yourThe": "{youGender, select, female {the person who carried you} other {the person who carried you}}",
+      "yourOf": "{youGender, select, female {of the person who carried you} other {of the person who carried you}}",
+      "of": "person who carried {who}",
+      "theOf": "the person who carried {who}",
+      "ofOf": "of the person who carried {who}",
+      "explained": "{youGender, select, female {person who carried you during pregnancy, through surrogacy} other {person who carried you during pregnancy, through surrogacy}}"
+    },
+    "carriedChild": {
+      "you": "{gender, select, female {child you carried} other {child you carried}}",
+      "yourThe": "{gender, select, female {the child you carried} other {the child you carried}}",
+      "yourOf": "{gender, select, female {of the child you carried} other {of the child you carried}}",
+      "of": "{gender, select, female {child carried by {who}} other {child carried by {who}}}",
+      "theOf": "{gender, select, female {the child carried by {who}} other {the child carried by {who}}}",
+      "ofOf": "{gender, select, female {of the child carried by {who}} other {of the child carried by {who}}}",
+      "explained": "{gender, select, female {child you carried during pregnancy, through surrogacy} other {child you carried during pregnancy, through surrogacy}}"
+    }
+  },
+  "term": {
+    "uncle": {
+      "you": "{generations, plural, =1 {{gender, select, female {aunt} other {uncle}}} =2 {{gender, select, female {great-aunt} other {great-uncle}}} other {{gender, select, female {great-great-aunt} other {great-great-uncle}}}}",
+      "yourThe": "{generations, plural, =1 {{gender, select, female {your aunt} other {your uncle}}} =2 {{gender, select, female {your great-aunt} other {your great-uncle}}} other {{gender, select, female {your great-great-aunt} other {your great-great-uncle}}}}",
+      "yourOf": "{generations, plural, =1 {{gender, select, female {of your aunt} other {of your uncle}}} =2 {{gender, select, female {of your great-aunt} other {of your great-uncle}}} other {{gender, select, female {of your great-great-aunt} other {of your great-great-uncle}}}}"
+    },
+    "nephew": {
+      "you": "{generations, plural, =1 {{gender, select, female {niece} other {nephew}}} =2 {{gender, select, female {grandniece} other {grandnephew}}} other {{gender, select, female {great-grandniece} other {great-grandnephew}}}}",
+      "yourThe": "{generations, plural, =1 {{gender, select, female {your niece} other {your nephew}}} =2 {{gender, select, female {your grandniece} other {your grandnephew}}} other {{gender, select, female {your great-grandniece} other {your great-grandnephew}}}}",
+      "yourOf": "{generations, plural, =1 {{gender, select, female {of your niece} other {of your nephew}}} =2 {{gender, select, female {of your grandniece} other {of your grandnephew}}} other {{gender, select, female {of your great-grandniece} other {of your great-grandnephew}}}}"
+    },
+    "firstCousin": {
+      "you": "{gender, select, female {first cousin} other {first cousin}}",
+      "yourThe": "{gender, select, female {your first cousin} other {your first cousin}}",
+      "yourOf": "{gender, select, female {of your first cousin} other {of your first cousin}}"
+    },
+    "cousin": {
+      "you": "{gender, select, female {cousin} other {cousin}}",
+      "yourThe": "{gender, select, female {your cousin} other {your cousin}}",
+      "yourOf": "{gender, select, female {of your cousin} other {of your cousin}}"
+    },
+    "bretonUncle": {
+      "you": "{gender, select, female {first cousin once removed} other {first cousin once removed}}",
+      "yourThe": "{gender, select, female {your first cousin once removed} other {your first cousin once removed}}",
+      "yourOf": "{gender, select, female {of your first cousin once removed} other {of your first cousin once removed}}"
+    },
+    "bretonNephew": {
+      "you": "{gender, select, female {first cousin once removed} other {first cousin once removed}}",
+      "yourThe": "{gender, select, female {your first cousin once removed} other {your first cousin once removed}}",
+      "yourOf": "{gender, select, female {of your first cousin once removed} other {of your first cousin once removed}}"
+    },
+    "secondCousin": {
+      "you": "{gender, select, female {second cousin} other {second cousin}}",
+      "yourThe": "{gender, select, female {your second cousin} other {your second cousin}}",
+      "yourOf": "{gender, select, female {of your second cousin} other {of your second cousin}}"
+    },
+    "degreeCousin": {
+      "you": "{gender, select, female {cousin in the {degree}th degree} other {cousin in the {degree}th degree}}",
+      "yourThe": "{gender, select, female {your cousin in the {degree}th degree} other {your cousin in the {degree}th degree}}",
+      "yourOf": "{gender, select, female {of your cousin in the {degree}th degree} other {of your cousin in the {degree}th degree}}"
+    },
+    "parentInLaw": {
+      "you": "{gender, select, female {mother-in-law} other {father-in-law}}",
+      "yourThe": "{gender, select, female {your mother-in-law} other {your father-in-law}}",
+      "yourOf": "{gender, select, female {of your mother-in-law} other {of your father-in-law}}"
+    },
+    "childInLaw": {
+      "you": "{gender, select, female {daughter-in-law} other {son-in-law}}",
+      "yourThe": "{gender, select, female {your daughter-in-law} other {your son-in-law}}",
+      "yourOf": "{gender, select, female {of your daughter-in-law} other {of your son-in-law}}"
+    },
+    "siblingInLaw": {
+      "you": "{gender, select, female {sister-in-law} other {brother-in-law}}",
+      "yourThe": "{gender, select, female {your sister-in-law} other {your brother-in-law}}",
+      "yourOf": "{gender, select, female {of your sister-in-law} other {of your brother-in-law}}"
+    },
+    "fullSibling": {
+      "you": "{gender, select, male {brother} female {sister} other {sibling}}",
+      "yourThe": "{gender, select, male {your brother} female {your sister} other {your sibling}}",
+      "yourOf": "{gender, select, male {of your brother} female {of your sister} other {of your sibling}}"
+    },
+    "halfSibling": {
+      "you": "{gender, select, male {half-brother, {side, select, father {same father} mother {same mother} other {same parent}}} female {half-sister, {side, select, father {same father} mother {same mother} other {same parent}}} other {half-sibling, {side, select, father {same father} mother {same mother} other {same parent}}}}",
+      "yourThe": "{gender, select, male {your half-brother, {side, select, father {same father} mother {same mother} other {same parent}}} female {your half-sister, {side, select, father {same father} mother {same mother} other {same parent}}} other {your half-sibling, {side, select, father {same father} mother {same mother} other {same parent}}}}",
+      "yourOf": "{gender, select, male {of your half-brother, {side, select, father {same father} mother {same mother} other {same parent}}} female {of your half-sister, {side, select, father {same father} mother {same mother} other {same parent}}} other {of your half-sibling, {side, select, father {same father} mother {same mother} other {same parent}}}}"
+    },
+    "fullOrHalfSibling": {
+      "you": "{gender, select, male {brother or half-brother} female {sister or half-sister} other {sibling or half-sibling}}",
+      "yourThe": "{gender, select, male {your brother or half-brother} female {your sister or half-sister} other {your sibling or half-sibling}}",
+      "yourOf": "{gender, select, male {of your brother or half-brother} female {of your sister or half-sister} other {of your sibling or half-sibling}}"
+    },
+    "adoptedFullSibling": {
+      "you": "{gender, select, male {brother by adoption} female {sister by adoption} other {sibling by adoption}}",
+      "yourThe": "{gender, select, male {your brother by adoption} female {your sister by adoption} other {your sibling by adoption}}",
+      "yourOf": "{gender, select, male {of your brother by adoption} female {of your sister by adoption} other {of your sibling by adoption}}"
+    },
+    "adoptedHalfSibling": {
+      "you": "{gender, select, male {half-brother by adoption, {side, select, father {same father} mother {same mother} other {same parent}}} female {half-sister by adoption, {side, select, father {same father} mother {same mother} other {same parent}}} other {half-sibling by adoption, {side, select, father {same father} mother {same mother} other {same parent}}}}",
+      "yourThe": "{gender, select, male {your half-brother by adoption, {side, select, father {same father} mother {same mother} other {same parent}}} female {your half-sister by adoption, {side, select, father {same father} mother {same mother} other {same parent}}} other {your half-sibling by adoption, {side, select, father {same father} mother {same mother} other {same parent}}}}",
+      "yourOf": "{gender, select, male {of your half-brother by adoption, {side, select, father {same father} mother {same mother} other {same parent}}} female {of your half-sister by adoption, {side, select, father {same father} mother {same mother} other {same parent}}} other {of your half-sibling by adoption, {side, select, father {same father} mother {same mother} other {same parent}}}}"
+    },
+    "adoptedFullOrHalfSibling": {
+      "you": "{gender, select, male {brother or half-brother by adoption} female {sister or half-sister by adoption} other {sibling or half-sibling by adoption}}",
+      "yourThe": "{gender, select, male {your brother or half-brother by adoption} female {your sister or half-sister by adoption} other {your sibling or half-sibling by adoption}}",
+      "yourOf": "{gender, select, male {of your brother or half-brother by adoption} female {of your sister or half-sister by adoption} other {of your sibling or half-sibling by adoption}}"
+    },
+    "birthAndAdoptionSibling": {
+      "you": "{gender, select, male {brother by birth and adoption} female {sister by birth and adoption} other {sibling by birth and adoption}}",
+      "yourThe": "{gender, select, male {your brother by birth and adoption} female {your sister by birth and adoption} other {your sibling by birth and adoption}}",
+      "yourOf": "{gender, select, male {of your brother by birth and adoption} female {of your sister by birth and adoption} other {of your sibling by birth and adoption}}"
+    }
+  },
+  "side": {
+    "plain": "through {parent}",
+    "named": "through {parent} {name}"
+  },
+  "explained": {
+    "fullSiblingOf": "{gender, select, male {son} female {daughter} other {child}} of {first} and {second}{byAdoption, select, yes {, by adoption} other {}}",
+    "fullSiblingNamed": "{gender, select, male {son} female {daughter} other {child}} of your parents {first} and {second}{byAdoption, select, yes {, by adoption} other {}}",
+    "fullSiblingUnnamed": "{gender, select, male {son} female {daughter} other {child}} of your two parents{byAdoption, select, yes {, by adoption} other {}}",
+    "halfSibling": "{gender, select, male {son} female {daughter} other {child}} of {shared} and {otherOf}{byAdoption, select, yes {, by adoption} other {}}",
+    "halfSiblingOtherUnnamed": "{gender, select, male {son} female {daughter} other {child}} of {shared} and another parent{byAdoption, select, yes {, by adoption} other {}}",
+    "fullOrHalfSibling": "{gender, select, male {son} female {daughter} other {child}} of {shared}{byAdoption, select, yes {, by adoption} other {}}; it is not yet known whether you share both parents",
+    "birthAndAdoptionSibling": "{gender, select, male {son} female {daughter} other {child}} of {shared} and, by adoption, of {adoptive}",
+    "ofNamed": "{nameOf}, {rest}",
+    "whoNamed": "{name}, {rest}",
+    "otherParentSimultaneous": "{link}, at the same time as {otherParent}",
+    "otherParentSuccessive": "{link}, at a different time from {otherParent}",
+    "otherParentUnknown": "{link}; it is not yet known whether this was at the same time as {otherParent}",
+    "childOfCouple": "{gender, select, male {son} female {daughter} other {child}} of {parent} and {otherOf}",
+    "coSpouse": "{link}, at the same time as you",
+    "otherSpouseSuccessive": "{link}, at a different time from you",
+    "otherSpouseUnknown": "{link}; it is not yet known whether this was at the same time as you",
+    "spouseNoEnd": "{spouse}, with no known end to the union",
+    "spouseEnded": "{spouse}, union ended{reason, select, divorce { by divorce} separation { by separation} death { by death} other {}}",
+    "probable": "{text} (probable link, to be confirmed)",
+    "hypothetical": "{text} (hypothesis, to be checked)"
+  },
+  "certainty": {
+    "probable": "Possibly {link}",
+    "hypothetical": "Hypothesis: {link}"
+  },
+  "result": {
+    "none": "Link not available",
+    "incomplete": "Link not found",
+    "samePerson": "Same person"
+  },
+  "withSide": "{term} {side}",
+  "named": "{phrase}, {name}",
+  "nameOf": "{initial, select, vowel {of {name}} other {of {name}}}",
+  "also": "also: {link}"
+}

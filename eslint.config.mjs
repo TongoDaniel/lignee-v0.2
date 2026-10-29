@@ -147,11 +147,19 @@ function layoutSourceRules() {
 
 // Règles du code de packages/kinship hors des tests : le moteur de parenté tourne à l'identique
 // sur le téléphone et sur le serveur (TRD, « Moteur de parenté ») : il n'importe que
-// @lignee/domain (sans ses outils de test) et ses propres fichiers, sans Node ni réseau.
+// @lignee/domain (sans ses outils de test) et ses propres fichiers, sans Node ni réseau ; de
+// @lignee/i18n, seulement des types (les clés des messages `kinship`, vérifiées à la
+// compilation) : le traducteur est passé par l'appelant (ADR 0031).
 function kinshipSourceRules() {
   const onlyDomain = {
-    regex: '^(?!@lignee/domain$|\\.{1,2}/)',
+    regex: '^(?!@lignee/domain$|@lignee/i18n$|\\.{1,2}/)',
     message: 'packages/kinship ne dépend que de @lignee/domain (TRD, « Moteur de parenté »).',
+  };
+  const i18nTypesOnly = {
+    regex: '^@lignee/i18n$',
+    allowTypeImports: true,
+    message:
+      'packages/kinship n’importe de @lignee/i18n que des types : le traducteur est passé par l’appelant (ADR 0031).',
   };
   const testSupport = {
     regex: '(^|/)test-support(/|$)',
@@ -179,6 +187,7 @@ function kinshipSourceRules() {
       rules: {
         'no-restricted-globals': ['error', ...globals],
         'no-restricted-imports': ['error', { patterns: [onlyDomain, testSupport] }],
+        '@typescript-eslint/no-restricted-imports': ['error', { patterns: [i18nTypesOnly] }],
         'lignee/no-relative-import-outside': ['error', 'packages/kinship/src'],
       },
     },

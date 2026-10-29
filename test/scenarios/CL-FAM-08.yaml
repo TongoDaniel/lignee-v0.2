@@ -1,13 +1,13 @@
 # Deux mères ou deux pères : aucun rôle imposé, « parent » quand le mot genré ne convient pas.
 # Partie lien (T-020) : les enfants de deux mères sont frères ; un demi-frère par l'une des deux
 # mères est « même parent », car « même mère » ne dirait pas laquelle (de même pour deux pères).
-# Reste : les mots (T-026, T-027, « même parent » proposé dans l'ADR 0017) et la saisie d'une
-# filiation sans rôle imposé (T-033).
+# Mots français (T-026) : ceux du dictionnaire (« même parent », ADR 0017 et 0031). Reste :
+# l'anglais (T-027) et la saisie d'une filiation sans rôle imposé (T-033).
 id: CL-FAM-08
 titre: Deux mères ou deux pères
 couverture:
   teste: [lien]
-  reste: [T-026, T-027, T-033]
+  reste: [T-027, T-033]
 arbre:
   personnes: [ada/F, bea/F, carl/M, lea/F, noe/M, tom/M, dan/M, eli/M, fay/F, sam/M, kim/F]
   unions:

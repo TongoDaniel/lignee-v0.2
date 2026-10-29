@@ -1,0 +1,293 @@
+{
+  "step": {
+    "ancestor": {
+      "you": "{generations, plural, =1 {{gender, select, male {père} female {mère} other {parent}}} =2 {{gender, select, male {grand-père} female {grand-mère} other {grand-parent}}} =3 {{gender, select, male {arrière-grand-père} female {arrière-grand-mère} other {arrière-grand-parent}}} =4 {{gender, select, male {arrière-arrière-grand-père} female {arrière-arrière-grand-mère} other {arrière-arrière-grand-parent}}} other {{gender, select, male {ancêtre à la {generations}e génération} female {ancêtre à la {generations}e génération} other {ancêtre à la {generations}e génération}}}}",
+      "yourThe": "{generations, plural, =1 {{gender, select, male {votre père} female {votre mère} other {votre parent}}} =2 {{gender, select, male {votre grand-père} female {votre grand-mère} other {votre grand-parent}}} =3 {{gender, select, male {votre arrière-grand-père} female {votre arrière-grand-mère} other {votre arrière-grand-parent}}} =4 {{gender, select, male {votre arrière-arrière-grand-père} female {votre arrière-arrière-grand-mère} other {votre arrière-arrière-grand-parent}}} other {{gender, select, male {votre ancêtre à la {generations}e génération} female {votre ancêtre à la {generations}e génération} other {votre ancêtre à la {generations}e génération}}}}",
+      "yourOf": "{generations, plural, =1 {{gender, select, male {de votre père} female {de votre mère} other {de votre parent}}} =2 {{gender, select, male {de votre grand-père} female {de votre grand-mère} other {de votre grand-parent}}} =3 {{gender, select, male {de votre arrière-grand-père} female {de votre arrière-grand-mère} other {de votre arrière-grand-parent}}} =4 {{gender, select, male {de votre arrière-arrière-grand-père} female {de votre arrière-arrière-grand-mère} other {de votre arrière-arrière-grand-parent}}} other {{gender, select, male {de votre ancêtre à la {generations}e génération} female {de votre ancêtre à la {generations}e génération} other {de votre ancêtre à la {generations}e génération}}}}",
+      "of": "{generations, plural, =1 {{gender, select, male {père {of}} female {mère {of}} other {parent {of}}}} =2 {{gender, select, male {grand-père {of}} female {grand-mère {of}} other {grand-parent {of}}}} =3 {{gender, select, male {arrière-grand-père {of}} female {arrière-grand-mère {of}} other {arrière-grand-parent {of}}}} =4 {{gender, select, male {arrière-arrière-grand-père {of}} female {arrière-arrière-grand-mère {of}} other {arrière-arrière-grand-parent {of}}}} other {{gender, select, male {ancêtre à la {generations}e génération {of}} female {ancêtre à la {generations}e génération {of}} other {ancêtre à la {generations}e génération {of}}}}}",
+      "theOf": "{generations, plural, =1 {{gender, select, male {le père {of}} female {la mère {of}} other {le parent {of}}}} =2 {{gender, select, male {le grand-père {of}} female {la grand-mère {of}} other {le grand-parent {of}}}} =3 {{gender, select, male {l’arrière-grand-père {of}} female {l’arrière-grand-mère {of}} other {l’arrière-grand-parent {of}}}} =4 {{gender, select, male {l’arrière-arrière-grand-père {of}} female {l’arrière-arrière-grand-mère {of}} other {l’arrière-arrière-grand-parent {of}}}} other {{gender, select, male {l’ancêtre à la {generations}e génération {of}} female {l’ancêtre à la {generations}e génération {of}} other {l’ancêtre à la {generations}e génération {of}}}}}",
+      "ofOf": "{generations, plural, =1 {{gender, select, male {du père {of}} female {de la mère {of}} other {du parent {of}}}} =2 {{gender, select, male {du grand-père {of}} female {de la grand-mère {of}} other {du grand-parent {of}}}} =3 {{gender, select, male {de l’arrière-grand-père {of}} female {de l’arrière-grand-mère {of}} other {de l’arrière-grand-parent {of}}}} =4 {{gender, select, male {de l’arrière-arrière-grand-père {of}} female {de l’arrière-arrière-grand-mère {of}} other {de l’arrière-arrière-grand-parent {of}}}} other {{gender, select, male {de l’ancêtre à la {generations}e génération {of}} female {de l’ancêtre à la {generations}e génération {of}} other {de l’ancêtre à la {generations}e génération {of}}}}}",
+      "explained": "{gender, select, male {votre père, par la naissance} female {votre mère, par la naissance} other {votre parent, par la naissance}}"
+    },
+    "descendant": {
+      "you": "{generations, plural, =1 {{gender, select, male {fils} female {fille} other {enfant}}} =2 {{gender, select, male {petit-fils} female {petite-fille} other {petit-enfant}}} =3 {{gender, select, male {arrière-petit-fils} female {arrière-petite-fille} other {arrière-petit-enfant}}} =4 {{gender, select, male {arrière-arrière-petit-fils} female {arrière-arrière-petite-fille} other {arrière-arrière-petit-enfant}}} other {{gender, select, male {descendant à la {generations}e génération} female {descendante à la {generations}e génération} other {personne descendante à la {generations}e génération}}}}",
+      "yourThe": "{generations, plural, =1 {{gender, select, male {votre fils} female {votre fille} other {votre enfant}}} =2 {{gender, select, male {votre petit-fils} female {votre petite-fille} other {votre petit-enfant}}} =3 {{gender, select, male {votre arrière-petit-fils} female {votre arrière-petite-fille} other {votre arrière-petit-enfant}}} =4 {{gender, select, male {votre arrière-arrière-petit-fils} female {votre arrière-arrière-petite-fille} other {votre arrière-arrière-petit-enfant}}} other {{gender, select, male {votre descendant à la {generations}e génération} female {votre descendante à la {generations}e génération} other {votre personne descendante à la {generations}e génération}}}}",
+      "yourOf": "{generations, plural, =1 {{gender, select, male {de votre fils} female {de votre fille} other {de votre enfant}}} =2 {{gender, select, male {de votre petit-fils} female {de votre petite-fille} other {de votre petit-enfant}}} =3 {{gender, select, male {de votre arrière-petit-fils} female {de votre arrière-petite-fille} other {de votre arrière-petit-enfant}}} =4 {{gender, select, male {de votre arrière-arrière-petit-fils} female {de votre arrière-arrière-petite-fille} other {de votre arrière-arrière-petit-enfant}}} other {{gender, select, male {de votre descendant à la {generations}e génération} female {de votre descendante à la {generations}e génération} other {de votre personne descendante à la {generations}e génération}}}}",
+      "of": "{generations, plural, =1 {{gender, select, male {fils {of}} female {fille {of}} other {enfant {of}}}} =2 {{gender, select, male {petit-fils {of}} female {petite-fille {of}} other {petit-enfant {of}}}} =3 {{gender, select, male {arrière-petit-fils {of}} female {arrière-petite-fille {of}} other {arrière-petit-enfant {of}}}} =4 {{gender, select, male {arrière-arrière-petit-fils {of}} female {arrière-arrière-petite-fille {of}} other {arrière-arrière-petit-enfant {of}}}} other {{gender, select, male {descendant à la {generations}e génération {of}} female {descendante à la {generations}e génération {of}} other {personne descendante à la {generations}e génération {of}}}}}",
+      "theOf": "{generations, plural, =1 {{gender, select, male {le fils {of}} female {la fille {of}} other {l’enfant {of}}}} =2 {{gender, select, male {le petit-fils {of}} female {la petite-fille {of}} other {le petit-enfant {of}}}} =3 {{gender, select, male {l’arrière-petit-fils {of}} female {l’arrière-petite-fille {of}} other {l’arrière-petit-enfant {of}}}} =4 {{gender, select, male {l’arrière-arrière-petit-fils {of}} female {l’arrière-arrière-petite-fille {of}} other {l’arrière-arrière-petit-enfant {of}}}} other {{gender, select, male {le descendant à la {generations}e génération {of}} female {la descendante à la {generations}e génération {of}} other {la personne descendante à la {generations}e génération {of}}}}}",
+      "ofOf": "{generations, plural, =1 {{gender, select, male {du fils {of}} female {de la fille {of}} other {de l’enfant {of}}}} =2 {{gender, select, male {du petit-fils {of}} female {de la petite-fille {of}} other {du petit-enfant {of}}}} =3 {{gender, select, male {de l’arrière-petit-fils {of}} female {de l’arrière-petite-fille {of}} other {de l’arrière-petit-enfant {of}}}} =4 {{gender, select, male {de l’arrière-arrière-petit-fils {of}} female {de l’arrière-arrière-petite-fille {of}} other {de l’arrière-arrière-petit-enfant {of}}}} other {{gender, select, male {du descendant à la {generations}e génération {of}} female {de la descendante à la {generations}e génération {of}} other {de la personne descendante à la {generations}e génération {of}}}}}",
+      "explained": "{gender, select, male {votre fils, par la naissance} female {votre fille, par la naissance} other {votre enfant, par la naissance}}"
+    },
+    "sibling": {
+      "you": "{gender, select, male {frère} female {sœur} other {personne de votre fratrie}}",
+      "yourThe": "{gender, select, male {votre frère} female {votre sœur} other {une personne de votre fratrie}}",
+      "yourOf": "{gender, select, male {de votre frère} female {de votre sœur} other {d’une personne de votre fratrie}}",
+      "of": "{gender, select, male {frère {of}} female {sœur {of}} other {personne de la fratrie {of}}}",
+      "theOf": "{gender, select, male {le frère {of}} female {la sœur {of}} other {une personne de la fratrie {of}}}",
+      "ofOf": "{gender, select, male {du frère {of}} female {de la sœur {of}} other {d’une personne de la fratrie {of}}}"
+    },
+    "spouse": {
+      "you": "{gender, select, male {mari} female {épouse} other {conjoint}}",
+      "yourThe": "{gender, select, male {votre mari} female {votre épouse} other {votre conjoint}}",
+      "yourOf": "{gender, select, male {de votre mari} female {de votre épouse} other {de votre conjoint}}",
+      "of": "{gender, select, male {mari {of}} female {épouse {of}} other {conjoint {of}}}",
+      "theOf": "{gender, select, male {le mari {of}} female {l’épouse {of}} other {le conjoint {of}}}",
+      "ofOf": "{gender, select, male {du mari {of}} female {de l’épouse {of}} other {du conjoint {of}}}"
+    },
+    "otherSpouse": {
+      "you": "{gender, select, male {autre mari} female {autre épouse} other {autre conjoint}}",
+      "yourThe": "{gender, select, male {votre autre mari} female {votre autre épouse} other {votre autre conjoint}}",
+      "yourOf": "{gender, select, male {de votre autre mari} female {de votre autre épouse} other {de votre autre conjoint}}",
+      "of": "{gender, select, male {autre mari {of}} female {autre épouse {of}} other {autre conjoint {of}}}",
+      "theOf": "{gender, select, male {l’autre mari {of}} female {l’autre épouse {of}} other {l’autre conjoint {of}}}",
+      "ofOf": "{gender, select, male {de l’autre mari {of}} female {de l’autre épouse {of}} other {de l’autre conjoint {of}}}"
+    },
+    "adoptiveParent": {
+      "you": "{gender, select, male {père adoptif} female {mère adoptive} other {parent adoptif}}",
+      "yourThe": "{gender, select, male {votre père adoptif} female {votre mère adoptive} other {votre parent adoptif}}",
+      "yourOf": "{gender, select, male {de votre père adoptif} female {de votre mère adoptive} other {de votre parent adoptif}}",
+      "of": "{gender, select, male {père adoptif {of}} female {mère adoptive {of}} other {parent adoptif {of}}}",
+      "theOf": "{gender, select, male {le père adoptif {of}} female {la mère adoptive {of}} other {le parent adoptif {of}}}",
+      "ofOf": "{gender, select, male {du père adoptif {of}} female {de la mère adoptive {of}} other {du parent adoptif {of}}}",
+      "explained": "{youGender, select, female {personne qui vous a adoptée} other {personne qui vous a adopté}}"
+    },
+    "adoptiveChild": {
+      "you": "{gender, select, male {fils adoptif} female {fille adoptive} other {enfant adoptif}}",
+      "yourThe": "{gender, select, male {votre fils adoptif} female {votre fille adoptive} other {votre enfant adoptif}}",
+      "yourOf": "{gender, select, male {de votre fils adoptif} female {de votre fille adoptive} other {de votre enfant adoptif}}",
+      "of": "{gender, select, male {fils adoptif {of}} female {fille adoptive {of}} other {enfant adoptif {of}}}",
+      "theOf": "{gender, select, male {le fils adoptif {of}} female {la fille adoptive {of}} other {l’enfant adoptif {of}}}",
+      "ofOf": "{gender, select, male {du fils adoptif {of}} female {de la fille adoptive {of}} other {de l’enfant adoptif {of}}}",
+      "explained": "{gender, select, female {enfant que vous avez adoptée} other {enfant que vous avez adopté}}"
+    },
+    "raisedBy": {
+      "you": "{youGender, select, female {personne qui vous a élevée} other {personne qui vous a élevé}}",
+      "yourThe": "{youGender, select, female {la personne qui vous a élevée} other {la personne qui vous a élevé}}",
+      "yourOf": "{youGender, select, female {de la personne qui vous a élevée} other {de la personne qui vous a élevé}}",
+      "of": "personne qui a élevé {who}",
+      "theOf": "la personne qui a élevé {who}",
+      "ofOf": "de la personne qui a élevé {who}",
+      "explained": "{youGender, select, female {personne qui vous a élevée ; ce lien n’est pas un lien de naissance} other {personne qui vous a élevé ; ce lien n’est pas un lien de naissance}}"
+    },
+    "raisedChild": {
+      "you": "{gender, select, female {enfant que vous avez élevée} other {enfant que vous avez élevé}}",
+      "yourThe": "{gender, select, female {l’enfant que vous avez élevée} other {l’enfant que vous avez élevé}}",
+      "yourOf": "{gender, select, female {de l’enfant que vous avez élevée} other {de l’enfant que vous avez élevé}}",
+      "of": "{gender, select, female {enfant élevée par {who}} other {enfant élevé par {who}}}",
+      "theOf": "{gender, select, female {l’enfant élevée par {who}} other {l’enfant élevé par {who}}}",
+      "ofOf": "{gender, select, female {de l’enfant élevée par {who}} other {de l’enfant élevé par {who}}}",
+      "explained": "{gender, select, female {enfant que vous avez élevée ; ce lien n’est pas un lien de naissance} other {enfant que vous avez élevé ; ce lien n’est pas un lien de naissance}}"
+    },
+    "fosteredTo": {
+      "you": "{youGender, select, female {personne à qui vous êtes confiée} other {personne à qui vous êtes confié}}",
+      "yourThe": "{youGender, select, female {la personne à qui vous êtes confiée} other {la personne à qui vous êtes confié}}",
+      "yourOf": "{youGender, select, female {de la personne à qui vous êtes confiée} other {de la personne à qui vous êtes confié}}",
+      "of": "{whoGender, select, female {personne à qui {who} est confiée} other {personne à qui {who} est confié}}",
+      "theOf": "{whoGender, select, female {la personne à qui {who} est confiée} other {la personne à qui {who} est confié}}",
+      "ofOf": "{whoGender, select, female {de la personne à qui {who} est confiée} other {de la personne à qui {who} est confié}}",
+      "explained": "{youGender, select, female {personne à qui vous êtes confiée ; ce lien n’est ni une naissance ni une adoption} other {personne à qui vous êtes confié ; ce lien n’est ni une naissance ni une adoption}}"
+    },
+    "fosteredChild": {
+      "you": "{gender, select, female {enfant qui vous est confiée} other {enfant qui vous est confié}}",
+      "yourThe": "{gender, select, female {l’enfant qui vous est confiée} other {l’enfant qui vous est confié}}",
+      "yourOf": "{gender, select, female {de l’enfant qui vous est confiée} other {de l’enfant qui vous est confié}}",
+      "of": "{gender, select, female {enfant confiée aux soins {of}} other {enfant confié aux soins {of}}}",
+      "theOf": "{gender, select, female {l’enfant confiée aux soins {of}} other {l’enfant confié aux soins {of}}}",
+      "ofOf": "{gender, select, female {de l’enfant confiée aux soins {of}} other {de l’enfant confié aux soins {of}}}",
+      "explained": "{gender, select, female {enfant qui vous est confiée ; ce lien n’est ni une naissance ni une adoption} other {enfant qui vous est confié ; ce lien n’est ni une naissance ni une adoption}}"
+    },
+    "guardian": {
+      "you": "{gender, select, male {tuteur} female {tutrice} other {personne qui exerce votre tutelle}}",
+      "yourThe": "{gender, select, male {votre tuteur} female {votre tutrice} other {la personne qui exerce votre tutelle}}",
+      "yourOf": "{gender, select, male {de votre tuteur} female {de votre tutrice} other {de la personne qui exerce votre tutelle}}",
+      "of": "{gender, select, male {tuteur {of}} female {tutrice {of}} other {personne qui exerce la tutelle {of}}}",
+      "theOf": "{gender, select, male {le tuteur {of}} female {la tutrice {of}} other {la personne qui exerce la tutelle {of}}}",
+      "ofOf": "{gender, select, male {du tuteur {of}} female {de la tutrice {of}} other {de la personne qui exerce la tutelle {of}}}",
+      "explained": "personne qui exerce votre tutelle ; ce lien n’est pas un lien de naissance"
+    },
+    "ward": {
+      "you": "{gender, select, male {pupille} female {pupille} other {pupille}}",
+      "yourThe": "{gender, select, male {votre pupille} female {votre pupille} other {votre pupille}}",
+      "yourOf": "{gender, select, male {de votre pupille} female {de votre pupille} other {de votre pupille}}",
+      "of": "{gender, select, male {pupille {of}} female {pupille {of}} other {personne sous la tutelle {of}}}",
+      "theOf": "{gender, select, male {le pupille {of}} female {la pupille {of}} other {la personne sous la tutelle {of}}}",
+      "ofOf": "{gender, select, male {du pupille {of}} female {de la pupille {of}} other {de la personne sous la tutelle {of}}}",
+      "explained": "personne placée sous votre tutelle ; ce lien n’est pas un lien de naissance"
+    },
+    "donor": {
+      "you": "{gender, select, male {donneur} female {donneuse} other {personne donneuse}}",
+      "yourThe": "{gender, select, male {votre donneur} female {votre donneuse} other {la personne donneuse}}",
+      "yourOf": "{gender, select, male {de votre donneur} female {de votre donneuse} other {de la personne donneuse}}",
+      "of": "{gender, select, male {donneur à l’origine {of}} female {donneuse à l’origine {of}} other {personne donneuse à l’origine {of}}}",
+      "theOf": "{gender, select, male {le donneur à l’origine {of}} female {la donneuse à l’origine {of}} other {la personne donneuse à l’origine {of}}}",
+      "ofOf": "{gender, select, male {du donneur à l’origine {of}} female {de la donneuse à l’origine {of}} other {de la personne donneuse à l’origine {of}}}",
+      "explained": "personne dont le don a permis votre naissance"
+    },
+    "donorChild": {
+      "you": "{gender, select, female {enfant née de votre don} other {enfant né de votre don}}",
+      "yourThe": "{gender, select, female {l’enfant née de votre don} other {l’enfant né de votre don}}",
+      "yourOf": "{gender, select, female {de l’enfant née de votre don} other {de l’enfant né de votre don}}",
+      "of": "{gender, select, female {enfant née du don {of}} other {enfant né du don {of}}}",
+      "theOf": "{gender, select, female {l’enfant née du don {of}} other {l’enfant né du don {of}}}",
+      "ofOf": "{gender, select, female {de l’enfant née du don {of}} other {de l’enfant né du don {of}}}",
+      "explained": "{gender, select, female {enfant née grâce à votre don} other {enfant né grâce à votre don}}"
+    },
+    "carrier": {
+      "you": "{youGender, select, female {personne qui vous a portée} other {personne qui vous a porté}}",
+      "yourThe": "{youGender, select, female {la personne qui vous a portée} other {la personne qui vous a porté}}",
+      "yourOf": "{youGender, select, female {de la personne qui vous a portée} other {de la personne qui vous a porté}}",
+      "of": "personne qui a porté {who}",
+      "theOf": "la personne qui a porté {who}",
+      "ofOf": "de la personne qui a porté {who}",
+      "explained": "{youGender, select, female {personne qui vous a portée pendant la grossesse, par gestation pour autrui} other {personne qui vous a porté pendant la grossesse, par gestation pour autrui}}"
+    },
+    "carriedChild": {
+      "you": "{gender, select, female {enfant que vous avez portée} other {enfant que vous avez porté}}",
+      "yourThe": "{gender, select, female {l’enfant que vous avez portée} other {l’enfant que vous avez porté}}",
+      "yourOf": "{gender, select, female {de l’enfant que vous avez portée} other {de l’enfant que vous avez porté}}",
+      "of": "{gender, select, female {enfant portée par {who}} other {enfant porté par {who}}}",
+      "theOf": "{gender, select, female {l’enfant portée par {who}} other {l’enfant porté par {who}}}",
+      "ofOf": "{gender, select, female {de l’enfant portée par {who}} other {de l’enfant porté par {who}}}",
+      "explained": "{gender, select, female {enfant que vous avez portée pendant la grossesse, par gestation pour autrui} other {enfant que vous avez porté pendant la grossesse, par gestation pour autrui}}"
+    },
+    "coSpouse": {
+      "you": "{gender, select, female {co-épouse} other {co-époux}}",
+      "yourThe": "{gender, select, female {votre co-épouse} other {votre co-époux}}",
+      "yourOf": "{gender, select, female {de votre co-épouse} other {de votre co-époux}}",
+      "of": "{gender, select, female {co-épouse {of}} other {co-époux {of}}}",
+      "theOf": "{gender, select, female {la co-épouse {of}} other {le co-époux {of}}}",
+      "ofOf": "{gender, select, female {de la co-épouse {of}} other {du co-époux {of}}}"
+    }
+  },
+  "term": {
+    "uncle": {
+      "you": "{generations, plural, =1 {{gender, select, female {tante} other {oncle}}} =2 {{gender, select, female {grand-tante} other {grand-oncle}}} other {{gender, select, female {arrière-grand-tante} other {arrière-grand-oncle}}}}",
+      "yourThe": "{generations, plural, =1 {{gender, select, female {votre tante} other {votre oncle}}} =2 {{gender, select, female {votre grand-tante} other {votre grand-oncle}}} other {{gender, select, female {votre arrière-grand-tante} other {votre arrière-grand-oncle}}}}",
+      "yourOf": "{generations, plural, =1 {{gender, select, female {de votre tante} other {de votre oncle}}} =2 {{gender, select, female {de votre grand-tante} other {de votre grand-oncle}}} other {{gender, select, female {de votre arrière-grand-tante} other {de votre arrière-grand-oncle}}}}"
+    },
+    "nephew": {
+      "you": "{generations, plural, =1 {{gender, select, female {nièce} other {neveu}}} =2 {{gender, select, female {petite-nièce} other {petit-neveu}}} other {{gender, select, female {arrière-petite-nièce} other {arrière-petit-neveu}}}}",
+      "yourThe": "{generations, plural, =1 {{gender, select, female {votre nièce} other {votre neveu}}} =2 {{gender, select, female {votre petite-nièce} other {votre petit-neveu}}} other {{gender, select, female {votre arrière-petite-nièce} other {votre arrière-petit-neveu}}}}",
+      "yourOf": "{generations, plural, =1 {{gender, select, female {de votre nièce} other {de votre neveu}}} =2 {{gender, select, female {de votre petite-nièce} other {de votre petit-neveu}}} other {{gender, select, female {de votre arrière-petite-nièce} other {de votre arrière-petit-neveu}}}}"
+    },
+    "firstCousin": {
+      "you": "{gender, select, female {cousine germaine} other {cousin germain}}",
+      "yourThe": "{gender, select, female {votre cousine germaine} other {votre cousin germain}}",
+      "yourOf": "{gender, select, female {de votre cousine germaine} other {de votre cousin germain}}"
+    },
+    "cousin": {
+      "you": "{gender, select, female {cousine} other {cousin}}",
+      "yourThe": "{gender, select, female {votre cousine} other {votre cousin}}",
+      "yourOf": "{gender, select, female {de votre cousine} other {de votre cousin}}"
+    },
+    "bretonUncle": {
+      "you": "{gender, select, female {tante à la mode de Bretagne} other {oncle à la mode de Bretagne}}",
+      "yourThe": "{gender, select, female {votre tante à la mode de Bretagne} other {votre oncle à la mode de Bretagne}}",
+      "yourOf": "{gender, select, female {de votre tante à la mode de Bretagne} other {de votre oncle à la mode de Bretagne}}"
+    },
+    "bretonNephew": {
+      "you": "{gender, select, female {nièce à la mode de Bretagne} other {neveu à la mode de Bretagne}}",
+      "yourThe": "{gender, select, female {votre nièce à la mode de Bretagne} other {votre neveu à la mode de Bretagne}}",
+      "yourOf": "{gender, select, female {de votre nièce à la mode de Bretagne} other {de votre neveu à la mode de Bretagne}}"
+    },
+    "secondCousin": {
+      "you": "{gender, select, female {cousine issue de germain} other {cousin issu de germain}}",
+      "yourThe": "{gender, select, female {votre cousine issue de germain} other {votre cousin issu de germain}}",
+      "yourOf": "{gender, select, female {de votre cousine issue de germain} other {de votre cousin issu de germain}}"
+    },
+    "degreeCousin": {
+      "you": "{gender, select, female {cousine au {degree}e degré} other {cousin au {degree}e degré}}",
+      "yourThe": "{gender, select, female {votre cousine au {degree}e degré} other {votre cousin au {degree}e degré}}",
+      "yourOf": "{gender, select, female {de votre cousine au {degree}e degré} other {de votre cousin au {degree}e degré}}"
+    },
+    "parentInLaw": {
+      "you": "{gender, select, female {belle-mère} other {beau-père}}",
+      "yourThe": "{gender, select, female {votre belle-mère} other {votre beau-père}}",
+      "yourOf": "{gender, select, female {de votre belle-mère} other {de votre beau-père}}"
+    },
+    "childInLaw": {
+      "you": "{gender, select, female {bru} other {gendre}}",
+      "yourThe": "{gender, select, female {votre bru} other {votre gendre}}",
+      "yourOf": "{gender, select, female {de votre bru} other {de votre gendre}}"
+    },
+    "siblingInLaw": {
+      "you": "{gender, select, female {belle-sœur} other {beau-frère}}",
+      "yourThe": "{gender, select, female {votre belle-sœur} other {votre beau-frère}}",
+      "yourOf": "{gender, select, female {de votre belle-sœur} other {de votre beau-frère}}"
+    },
+    "fullSibling": {
+      "you": "{gender, select, male {frère} female {sœur} other {personne de votre fratrie}}",
+      "yourThe": "{gender, select, male {votre frère} female {votre sœur} other {une personne de votre fratrie}}",
+      "yourOf": "{gender, select, male {de votre frère} female {de votre sœur} other {d’une personne de votre fratrie}}"
+    },
+    "halfSibling": {
+      "you": "{gender, select, male {demi-frère, {side, select, father {même père} mother {même mère} other {même parent}}} female {demi-sœur, {side, select, father {même père} mother {même mère} other {même parent}}} other {personne de votre demi-fratrie, {side, select, father {même père} mother {même mère} other {même parent}}}}",
+      "yourThe": "{gender, select, male {votre demi-frère, {side, select, father {même père} mother {même mère} other {même parent}}} female {votre demi-sœur, {side, select, father {même père} mother {même mère} other {même parent}}} other {une personne de votre demi-fratrie, {side, select, father {même père} mother {même mère} other {même parent}}}}",
+      "yourOf": "{gender, select, male {de votre demi-frère, {side, select, father {même père} mother {même mère} other {même parent}}} female {de votre demi-sœur, {side, select, father {même père} mother {même mère} other {même parent}}} other {d’une personne de votre demi-fratrie, {side, select, father {même père} mother {même mère} other {même parent}}}}"
+    },
+    "fullOrHalfSibling": {
+      "you": "{gender, select, male {frère ou demi-frère} female {sœur ou demi-sœur} other {personne de votre fratrie ou demi-fratrie}}",
+      "yourThe": "{gender, select, male {votre frère ou demi-frère} female {votre sœur ou demi-sœur} other {une personne de votre fratrie ou demi-fratrie}}",
+      "yourOf": "{gender, select, male {de votre frère ou demi-frère} female {de votre sœur ou demi-sœur} other {d’une personne de votre fratrie ou demi-fratrie}}"
+    },
+    "adoptedFullSibling": {
+      "you": "{gender, select, male {frère par adoption} female {sœur par adoption} other {personne de votre fratrie par adoption}}",
+      "yourThe": "{gender, select, male {votre frère par adoption} female {votre sœur par adoption} other {une personne de votre fratrie par adoption}}",
+      "yourOf": "{gender, select, male {de votre frère par adoption} female {de votre sœur par adoption} other {d’une personne de votre fratrie par adoption}}"
+    },
+    "adoptedHalfSibling": {
+      "you": "{gender, select, male {demi-frère par adoption, {side, select, father {même père} mother {même mère} other {même parent}}} female {demi-sœur par adoption, {side, select, father {même père} mother {même mère} other {même parent}}} other {personne de votre demi-fratrie par adoption, {side, select, father {même père} mother {même mère} other {même parent}}}}",
+      "yourThe": "{gender, select, male {votre demi-frère par adoption, {side, select, father {même père} mother {même mère} other {même parent}}} female {votre demi-sœur par adoption, {side, select, father {même père} mother {même mère} other {même parent}}} other {une personne de votre demi-fratrie par adoption, {side, select, father {même père} mother {même mère} other {même parent}}}}",
+      "yourOf": "{gender, select, male {de votre demi-frère par adoption, {side, select, father {même père} mother {même mère} other {même parent}}} female {de votre demi-sœur par adoption, {side, select, father {même père} mother {même mère} other {même parent}}} other {d’une personne de votre demi-fratrie par adoption, {side, select, father {même père} mother {même mère} other {même parent}}}}"
+    },
+    "adoptedFullOrHalfSibling": {
+      "you": "{gender, select, male {frère ou demi-frère par adoption} female {sœur ou demi-sœur par adoption} other {personne de votre fratrie ou demi-fratrie par adoption}}",
+      "yourThe": "{gender, select, male {votre frère ou demi-frère par adoption} female {votre sœur ou demi-sœur par adoption} other {une personne de votre fratrie ou demi-fratrie par adoption}}",
+      "yourOf": "{gender, select, male {de votre frère ou demi-frère par adoption} female {de votre sœur ou demi-sœur par adoption} other {d’une personne de votre fratrie ou demi-fratrie par adoption}}"
+    },
+    "birthAndAdoptionSibling": {
+      "you": "{gender, select, male {frère par la naissance et par adoption} female {sœur par la naissance et par adoption} other {personne de votre fratrie par la naissance et par adoption}}",
+      "yourThe": "{gender, select, male {votre frère par la naissance et par adoption} female {votre sœur par la naissance et par adoption} other {une personne de votre fratrie par la naissance et par adoption}}",
+      "yourOf": "{gender, select, male {de votre frère par la naissance et par adoption} female {de votre sœur par la naissance et par adoption} other {d’une personne de votre fratrie par la naissance et par adoption}}"
+    }
+  },
+  "side": {
+    "plain": "par {parent}",
+    "named": "par {parent} {name}"
+  },
+  "explained": {
+    "fullSiblingOf": "{gender, select, male {fils} female {fille} other {enfant}} de {first} et de {second}{byAdoption, select, yes {, par adoption} other {}}",
+    "fullSiblingNamed": "{gender, select, male {fils} female {fille} other {enfant}} de vos parents {first} et {second}{byAdoption, select, yes {, par adoption} other {}}",
+    "fullSiblingUnnamed": "{gender, select, male {fils} female {fille} other {enfant}} de vos deux parents{byAdoption, select, yes {, par adoption} other {}}",
+    "halfSibling": "{gender, select, male {fils} female {fille} other {enfant}} de {shared} et {otherOf}{byAdoption, select, yes {, par adoption} other {}}",
+    "halfSiblingOtherUnnamed": "{gender, select, male {fils} female {fille} other {enfant}} de {shared} et d’un autre parent{byAdoption, select, yes {, par adoption} other {}}",
+    "fullOrHalfSibling": "{gender, select, male {fils} female {fille} other {enfant}} de {shared}{byAdoption, select, yes {, par adoption} other {}} ; on ne sait pas encore si vous avez les deux mêmes parents",
+    "birthAndAdoptionSibling": "{gender, select, male {fils} female {fille} other {enfant}} de {shared} et, par adoption, de {adoptive}",
+    "ofNamed": "{nameOf}, {rest}",
+    "whoNamed": "{name}, {rest}",
+    "otherParentSimultaneous": "{link}, en même temps que {otherParent}",
+    "otherParentSuccessive": "{link}, à une autre période que {otherParent}",
+    "otherParentUnknown": "{link} ; on ne sait pas encore si c’était en même temps que {otherParent}",
+    "childOfCouple": "{gender, select, male {fils} female {fille} other {enfant}} de {parent} et {otherOf}",
+    "coSpouse": "{link}, en même temps que vous",
+    "otherSpouseSuccessive": "{link}, à une autre période que vous",
+    "otherSpouseUnknown": "{link} ; on ne sait pas encore si c’était en même temps que vous",
+    "spouseNoEnd": "{spouse}, sans fin d’union connue",
+    "spouseEnded": "{spouse}, union terminée{reason, select, divorce { par un divorce} separation { par une séparation} death { par un décès} other {}}",
+    "probable": "{text} (lien probable, à confirmer)",
+    "hypothetical": "{text} (hypothèse, à vérifier)"
+  },
+  "certainty": {
+    "probable": "Peut-être {link}",
+    "hypothetical": "Hypothèse : {link}"
+  },
+  "result": {
+    "none": "Lien non disponible",
+    "incomplete": "Lien non trouvé",
+    "samePerson": "Même personne"
+  },
+  "withSide": "{term} {side}",
+  "named": "{phrase}, {name}",
+  "nameOf": "{initial, select, vowel {d’{name}} other {de {name}}}",
+  "also": "aussi : {link}"
+}

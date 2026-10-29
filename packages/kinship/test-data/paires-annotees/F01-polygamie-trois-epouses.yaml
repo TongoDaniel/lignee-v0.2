@@ -56,7 +56,9 @@ paires:
     attendu:
       - chemin: "1/1[ben+kwoa]"
         fratrie: { type: birth, partage: full }
-        fr: à rédiger
+        fr:
+          court: "sœur"
+          explique: "fille de votre père et de votre mère"
         en: à rédiger
   - id: F01-02
     de: finae
@@ -66,7 +68,9 @@ paires:
     attendu:
       - chemin: "1/1[ben]"
         fratrie: { type: birth, partage: half, cote: father }
-        fr: à rédiger
+        fr:
+          court: "demi-frère, même père"
+          explique: "fils de votre père et de Mbuou"
         en: à rédiger
   - id: F01-03
     de: finae
@@ -76,7 +80,9 @@ paires:
     attendu:
       - chemin: "1/1[kwoa]"
         fratrie: { type: birth, partage: half, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "demi-sœur, même mère"
+          explique: "fille de votre mère et de Bapouou"
         en: à rédiger
   - id: F01-04
     de: finae
@@ -86,7 +92,9 @@ paires:
     attendu:
       - chemin: "1/1[ben]"
         fratrie: { type: birth, partage: full_or_half, cote: father }
-        fr: à rédiger
+        fr:
+          court: "frère ou demi-frère"
+          explique: "fils de votre père ; on ne sait pas encore si vous avez les deux mêmes parents"
         en: à rédiger
   - id: F01-05
     de: tsao
@@ -96,7 +104,9 @@ paires:
     attendu:
       - chemin: "1/1[ben]"
         fratrie: { type: birth, partage: full_or_half, cote: father }
-        fr: à rédiger
+        fr:
+          court: "frère ou demi-frère"
+          explique: "fils de votre père ; on ne sait pas encore si vous avez les deux mêmes parents"
         en: à rédiger
   - id: F01-06
     de: ndanoa
@@ -106,7 +116,9 @@ paires:
     attendu:
       - chemin: "1/1[ben]"
         fratrie: { type: birth, partage: half, cote: father }
-        fr: à rédiger
+        fr:
+          court: "demi-sœur, même père"
+          explique: "fille de votre père et de Mbuou"
         en: à rédiger
   - id: F01-07
     de: finae
@@ -117,7 +129,9 @@ paires:
       - chemin: "1/0[ben] =mbuou"
         alliance: { type: spouse_of_parent, autre_parent: [simultaneous] }
         cote_de: { par: ben, cote: father }
-        fr: à rédiger
+        fr:
+          court: "épouse de votre père"
+          explique: "épouse de votre père, Ben, en même temps que votre mère"
         en: à rédiger
   - id: F01-08
     de: kwoa
@@ -127,7 +141,9 @@ paires:
     attendu:
       - chemin: "=ben =mbuou"
         alliance: { type: co_spouse, simultaneite: simultaneous }
-        fr: à rédiger
+        fr:
+          court: "co-épouse"
+          explique: "autre épouse de votre mari, Ben, en même temps que vous"
         en: à rédiger
   - id: F01-09
     de: mbuou
@@ -137,7 +153,9 @@ paires:
     attendu:
       - chemin: "=ben =kaou"
         alliance: { type: co_spouse, simultaneite: simultaneous }
-        fr: à rédiger
+        fr:
+          court: "co-épouse"
+          explique: "autre épouse de votre mari, Ben, en même temps que vous"
         en: à rédiger
   - id: F01-10
     de: bapouou
@@ -147,7 +165,9 @@ paires:
     attendu:
       - chemin: "=kwoa =ben"
         alliance: { type: spouse_of_spouse, simultaneite: successive }
-        fr: à rédiger
+        fr:
+          court: "autre mari de votre épouse"
+          explique: "autre mari de votre épouse, Kwoa, à une autre période que vous"
         en: à rédiger
   - id: F01-11
     de: lepae
@@ -159,7 +179,9 @@ paires:
         alliance: { type: step_sibling, autre_parent: [successive, simultaneous] }
         cote_de: { par: kwoa, cote: mother }
         cote_vers: { par: ben, cote: father }
-        fr: à rédiger
+        fr:
+          court: "fils du mari de votre mère"
+          explique: "fils de Ben, mari de votre mère"
         en: à rédiger
   - id: F01-12
     de: fiwai
@@ -170,7 +192,9 @@ paires:
       - chemin: "1/0[ben] =kwoa"
         alliance: { type: spouse_of_parent, autre_parent: [none] }
         cote_de: { par: ben, cote: father }
-        fr: à rédiger
+        fr:
+          court: "épouse de votre père"
+          explique: "épouse de votre père, Ben"
         en: à rédiger
   - id: F01-13
     de: kaou
@@ -181,7 +205,9 @@ paires:
       - chemin: "=ben 0/1[ben]"
         alliance: { type: child_of_spouse, autre_parent: [simultaneous] }
         cote_vers: { par: ben, cote: father }
-        fr: à rédiger
+        fr:
+          court: "fils de votre mari"
+          explique: "fils de votre mari et de Kwoa"
         en: à rédiger
   - id: F01-14
     de: tcheou
@@ -192,7 +218,9 @@ paires:
       - chemin: "2/2[ben]"
         cote_de: { par: finae, cote: father }
         cote_vers: { par: ngembuo, cote: father }
-        fr: à rédiger
+        fr:
+          court: "cousine par votre père"
+          explique: "petite-fille de Ben, père de votre père"
         en: à rédiger
   - id: F01-15
     de: tcheou
@@ -203,7 +231,9 @@ paires:
       - chemin: "2/1[ben]"
         cote_de: { par: finae, cote: father }
         cote_vers: { par: ben, cote: father }
-        fr: à rédiger
+        fr:
+          court: "oncle par votre père"
+          explique: "fils de Ben, père de votre père"
         en: à rédiger
   - id: F01-16
     de: tcheou
@@ -213,7 +243,9 @@ paires:
     attendu:
       - chemin: "2/0[ben]"
         cote_de: { par: finae, cote: father }
-        fr: à rédiger
+        fr:
+          court: "grand-père par votre père"
+          explique: "père de votre père, Finae"
         en: à rédiger
   - id: F01-17
     de: tcheou
@@ -224,7 +256,9 @@ paires:
       - chemin: "2/0[ben] =mbuou"
         alliance: { type: other, autre_parent: [simultaneous] }
         cote_de: { par: finae, cote: father }
-        fr: à rédiger
+        fr:
+          court: "épouse de votre grand-père par votre père"
+          explique: "épouse de Ben, père de votre père"
         en: à rédiger
   - id: F01-18
     de: paine
@@ -234,7 +268,9 @@ paires:
     attendu:
       - chemin: "=finae 1/0[kwoa]"
         alliance: { type: parent_of_spouse }
-        fr: à rédiger
+        fr:
+          court: "belle-mère"
+          explique: "mère de votre mari, Finae"
         en: à rédiger
   - id: F01-19
     de: ben
@@ -244,7 +280,9 @@ paires:
     attendu:
       - chemin: "0/1[ben] =paine"
         alliance: { type: spouse_of_child }
-        fr: à rédiger
+        fr:
+          court: "bru"
+          explique: "épouse de votre fils, Finae"
         en: à rédiger
   - id: F01-20
     de: paine
@@ -255,7 +293,9 @@ paires:
       - chemin: "=finae 1/1[ben]"
         alliance: { type: sibling_of_spouse }
         cote_vers: { par: ben, cote: father }
-        fr: à rédiger
+        fr:
+          court: "beau-frère"
+          explique: "fils de Ben, père de votre mari"
         en: à rédiger
   - id: F01-21
     de: paine
@@ -265,7 +305,9 @@ paires:
     attendu:
       - chemin: "=finae 1/1[ben] =poe"
         alliance: { type: spouse_of_sibling_of_spouse }
-        fr: à rédiger
+        fr:
+          court: "belle-sœur"
+          explique: "épouse de Ngembuo, fils du père de votre mari"
         en: à rédiger
   - id: F01-22
     de: finae
@@ -283,7 +325,9 @@ paires:
     attendu:
       - chemin: "1/1[ben]"
         fratrie: { type: birth, partage: full_or_half, cote: father }
-        fr: à rédiger
+        fr:
+          court: "sœur ou demi-sœur"
+          explique: "fille de votre père ; on ne sait pas encore si vous avez les deux mêmes parents"
         en: à rédiger
   - id: F01-24
     de: kwoa

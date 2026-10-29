@@ -64,7 +64,9 @@ paires:
     attendu:
       - chemin: "1/1[inconnue1+nii]"
         fratrie: { type: birth, partage: full }
-        fr: à rédiger
+        fr:
+          court: "sœur"
+          explique: "fille de votre père et de votre mère"
         en: à rédiger
   - id: F08-02
     de: biou
@@ -74,7 +76,9 @@ paires:
     attendu:
       - chemin: "1/1[nii]"
         fratrie: { type: birth, partage: full_or_half, cote: father }
-        fr: à rédiger
+        fr:
+          court: "frère ou demi-frère"
+          explique: "fils de votre père ; on ne sait pas encore si vous avez les deux mêmes parents"
         en: à rédiger
   - id: F08-03
     de: biou
@@ -84,7 +88,9 @@ paires:
     attendu:
       - chemin: "1/1[nii]"
         fratrie: { type: birth, partage: full_or_half, cote: father }
-        fr: à rédiger
+        fr:
+          court: "frère ou demi-frère"
+          explique: "fils de votre père ; on ne sait pas encore si vous avez les deux mêmes parents"
         en: à rédiger
   - id: F08-04
     de: ngie
@@ -94,7 +100,9 @@ paires:
     attendu:
       - chemin: "1/1[nii]"
         fratrie: { type: birth, partage: half, cote: father }
-        fr: à rédiger
+        fr:
+          court: "demi-frère, même père"
+          explique: "fils de votre père et de Galea"
         en: à rédiger
   - id: F08-05
     de: ngie
@@ -104,7 +112,9 @@ paires:
     attendu:
       - chemin: "1/1[nii]"
         fratrie: { type: birth, partage: full_or_half, cote: father }
-        fr: à rédiger
+        fr:
+          court: "frère ou demi-frère"
+          explique: "fils de votre père ; on ne sait pas encore si vous avez les deux mêmes parents"
         en: à rédiger
   - id: F08-06
     de: bumbei
@@ -114,7 +124,9 @@ paires:
     attendu:
       - chemin: "1/1[taou]"
         fratrie: { type: birth, partage: full_or_half, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "frère ou demi-frère"
+          explique: "fils de votre mère ; on ne sait pas encore si vous avez les deux mêmes parents"
         en: à rédiger
   - id: F08-07
     de: nem
@@ -125,7 +137,9 @@ paires:
       - chemin: "2/2[inconnu5+inconnue6]"
         cote_de: { par: min, cote: father }
         cote_vers: { par: tchio, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "cousine germaine par votre père"
+          explique: "fille de Tchio, sœur de votre père"
         en: à rédiger
   - id: F08-08
     de: min
@@ -135,7 +149,9 @@ paires:
     attendu:
       - chemin: "1/1[inconnu5+inconnue6]"
         fratrie: { type: birth, partage: full }
-        fr: à rédiger
+        fr:
+          court: "sœur"
+          explique: "fille de votre père et de votre mère"
         en: à rédiger
   - id: F08-09
     de: nem
@@ -145,7 +161,9 @@ paires:
     attendu:
       - chemin: "2/1[inconnu5+inconnue6]"
         cote_de: { par: min, cote: father }
-        fr: à rédiger
+        fr:
+          court: "tante par votre père"
+          explique: "sœur de votre père, Min"
         en: à rédiger
   - id: F08-10
     de: nem
@@ -155,7 +173,9 @@ paires:
     attendu:
       - chemin: "=inconnue7"
         alliance: { type: spouse }
-        fr: à rédiger
+        fr:
+          court: "épouse"
+          explique: "votre épouse, sans fin d’union connue"
         en: à rédiger
   - id: F08-11
     de: biou
@@ -165,7 +185,9 @@ paires:
     attendu:
       - chemin: "1/0[inconnue1]"
         cote_de: { par: inconnue1, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "mère"
+          explique: "votre mère, par la naissance"
         en: à rédiger
   - id: F08-12
     de: biou
@@ -176,7 +198,9 @@ paires:
       - chemin: "1/0[nii] =galea"
         alliance: { type: spouse_of_parent, autre_parent: [none] }
         cote_de: { par: nii, cote: father }
-        fr: à rédiger
+        fr:
+          court: "épouse de votre père"
+          explique: "épouse de votre père, Nii"
         en: à rédiger
   - id: F08-13
     de: kweyuette
@@ -186,7 +210,9 @@ paires:
     attendu:
       - chemin: "1/1[nii]"
         fratrie: { type: birth, partage: full_or_half, cote: father }
-        fr: à rédiger
+        fr:
+          court: "frère ou demi-frère"
+          explique: "fils de votre père ; on ne sait pas encore si vous avez les deux mêmes parents"
         en: à rédiger
   - id: F08-14
     de: nyeo
@@ -196,7 +222,9 @@ paires:
     attendu:
       - chemin: "2/0[inconnu5]"
         cote_de: { par: tchio, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "grand-père par votre mère"
+          explique: "père de votre mère, Tchio"
         en: à rédiger
   - id: F08-15
     de: inconnue7
@@ -206,7 +234,9 @@ paires:
     attendu:
       - chemin: "=nem 1/0[min]"
         alliance: { type: parent_of_spouse }
-        fr: à rédiger
+        fr:
+          court: "beau-père"
+          explique: "père de votre mari, Nem"
         en: à rédiger
   - id: F08-16
     de: tindon

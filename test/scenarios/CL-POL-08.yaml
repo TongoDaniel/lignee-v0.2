@@ -7,12 +7,13 @@
 # co-épouse, enfant du conjoint) et comparé au lien le plus proche calculé ; « co-épouse »
 # seulement parce que la simultanéité est établie. Le test rejoue l'arbre avec les unions
 # successives, puis sans réponse : « autre épouse de votre mari », jamais « co-épouse ».
-# Reste : les mots (T-026, T-027), le nom d'usage « Maman Fatou » affiché et trouvé (T-041).
+# Mots français (T-026) : ceux du dictionnaire. Reste : l'anglais (T-027), le nom d'usage
+# « Maman Fatou » affiché et trouvé (T-041).
 id: CL-POL-08
 titre: « La co-épouse de ma mère »
 couverture:
   teste: [lien]
-  reste: [T-026, T-027, T-041]
+  reste: [T-027, T-041]
 arbre:
   personnes: [moussa/M, mariam/F, fatou/F, aicha/F, ali/M]
   noms:

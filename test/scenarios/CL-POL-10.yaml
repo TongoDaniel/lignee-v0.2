@@ -4,12 +4,14 @@
 # leurs mères, les deux liens affichés, le plus proche d'abord (PAR-05) ; pour Kévin, Solange est
 # sa tante par sa mère et aussi l'épouse de son père (le sang avant l'alliance). Chaque lien
 # attendu est ramené à sa structure et comparé à la présentation calculée, dans les deux sens.
-# Reste : les mots en français et en anglais (T-026, T-027).
+# Mots français (T-026) : les mots calculés par le dictionnaire sont ceux de chaque lien ; les
+# cousins ont leurs deux grands-parents maternels en commun : « cousin germain ». Reste : les
+# mots en anglais (T-027).
 id: CL-POL-10
 titre: Sororat, deux sœurs épouses du même homme
 couverture:
   teste: [lien]
-  reste: [T-026, T-027]
+  reste: [T-027]
 arbre:
   personnes: [gp/M, gm/F, sabine/F, solange/F, modeste/M, kevin/M, karine/F]
   unions:
@@ -31,13 +33,13 @@ attendu:
       fr: "demi-sœur, même père"
       en: "half-sister, same father"
       aussi:
-        - { fr: "cousine par votre mère", en: "cousin through your mother" }
+        - { fr: "cousine germaine par votre mère", en: "first cousin through your mother" }
     - de: karine
       vers: kevin
       fr: "demi-frère, même père"
       en: "half-brother, same father"
       aussi:
-        - { fr: "cousin par votre mère", en: "cousin through your mother" }
+        - { fr: "cousin germain par votre mère", en: "first cousin through your mother" }
     - de: kevin
       vers: solange
       fr: "tante par votre mère"

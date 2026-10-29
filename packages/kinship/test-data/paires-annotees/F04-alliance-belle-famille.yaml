@@ -61,7 +61,9 @@ paires:
     attendu:
       - chemin: "=moutsun"
         alliance: { type: spouse }
-        fr: à rédiger
+        fr:
+          court: "mari"
+          explique: "votre mari, sans fin d’union connue"
         en: à rédiger
   - id: F04-02
     de: moutsun
@@ -71,7 +73,9 @@ paires:
     attendu:
       - chemin: "=houou 1/0[wui]"
         alliance: { type: parent_of_spouse }
-        fr: à rédiger
+        fr:
+          court: "beau-père"
+          explique: "père de votre épouse, Houou"
         en: à rédiger
   - id: F04-03
     de: saine
@@ -81,7 +85,9 @@ paires:
     attendu:
       - chemin: "0/1[saine] =moutsun"
         alliance: { type: spouse_of_child }
-        fr: à rédiger
+        fr:
+          court: "gendre"
+          explique: "mari de votre fille, Houou"
         en: à rédiger
   - id: F04-04
     de: seine
@@ -91,7 +97,9 @@ paires:
     attendu:
       - chemin: "0/1[seine] =houou"
         alliance: { type: spouse_of_child }
-        fr: à rédiger
+        fr:
+          court: "bru"
+          explique: "épouse de votre fils, Moutsun"
         en: à rédiger
   - id: F04-05
     de: moutsun
@@ -101,7 +109,9 @@ paires:
     attendu:
       - chemin: "=houou 1/1[saine+wui]"
         alliance: { type: sibling_of_spouse }
-        fr: à rédiger
+        fr:
+          court: "belle-sœur"
+          explique: "sœur de votre épouse, Houou"
         en: à rédiger
   - id: F04-06
     de: moutsun
@@ -111,7 +121,9 @@ paires:
     attendu:
       - chemin: "0/1[moutsun]"
         cote_vers: { par: moutsun, cote: father }
-        fr: à rédiger
+        fr:
+          court: "fille"
+          explique: "votre fille, par la naissance"
         en: à rédiger
   - id: F04-07
     de: moutsun
@@ -121,7 +133,9 @@ paires:
     attendu:
       - chemin: "=houou 1/1[saine+wui] =pee"
         alliance: { type: spouse_of_sibling_of_spouse }
-        fr: à rédiger
+        fr:
+          court: "beau-frère"
+          explique: "mari de Yayoia, sœur de votre épouse"
         en: à rédiger
   - id: F04-08
     de: houou
@@ -131,7 +145,9 @@ paires:
     attendu:
       - chemin: "=moutsun 1/1[mbosei+seine]"
         alliance: { type: sibling_of_spouse }
-        fr: à rédiger
+        fr:
+          court: "belle-sœur"
+          explique: "sœur de votre mari, Moutsun"
         en: à rédiger
   - id: F04-09
     de: houou
@@ -141,7 +157,9 @@ paires:
     attendu:
       - chemin: "=moutsun 1/1[mbosei+seine] =nom"
         alliance: { type: spouse_of_sibling_of_spouse }
-        fr: à rédiger
+        fr:
+          court: "beau-frère"
+          explique: "mari de Kwoniou, sœur de votre mari"
         en: à rédiger
   - id: F04-10
     de: houou
@@ -151,7 +169,9 @@ paires:
     attendu:
       - chemin: "=moutsun 1/0[seine]"
         alliance: { type: parent_of_spouse }
-        fr: à rédiger
+        fr:
+          court: "belle-mère"
+          explique: "mère de votre mari, Moutsun"
         en: à rédiger
   - id: F04-11
     de: moutsun
@@ -161,7 +181,9 @@ paires:
     attendu:
       - chemin: "=houou 1/1[saine+wui]"
         alliance: { type: sibling_of_spouse }
-        fr: à rédiger
+        fr:
+          court: "beau-frère"
+          explique: "frère de votre épouse, Houou"
         en: à rédiger
   - id: F04-12
     de: toe
@@ -171,7 +193,9 @@ paires:
     attendu:
       - chemin: "=tsia"
         alliance: { type: spouse }
-        fr: à rédiger
+        fr:
+          court: "épouse"
+          explique: "votre épouse, sans fin d’union connue"
         en: à rédiger
   - id: F04-13
     de: moutsun
@@ -181,7 +205,9 @@ paires:
     attendu:
       - chemin: "=houou 1/1[saine+wui] =tsia"
         alliance: { type: spouse_of_sibling_of_spouse }
-        fr: à rédiger
+        fr:
+          court: "belle-sœur"
+          explique: "épouse de Toe, frère de votre épouse"
         en: à rédiger
   - id: F04-14
     de: tsoe
@@ -192,7 +218,9 @@ paires:
       - chemin: "2/1[saine+wui] =pee"
         alliance: { type: other }
         cote_de: { par: houou, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "mari de votre tante par votre mère"
+          explique: "mari de Yayoia, sœur de votre mère"
         en: à rédiger
   - id: F04-15
     de: tsoe
@@ -203,7 +231,9 @@ paires:
       - chemin: "2/1[saine+wui] =pee 1/0[ham]"
         alliance: { type: other }
         cote_de: { par: houou, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "père du mari de votre tante par votre mère"
+          explique: "père de Pee, mari de la sœur de votre mère"
         en: à rédiger
   - id: F04-16
     de: tsoe
@@ -219,7 +249,9 @@ paires:
     attendu:
       - chemin: "=kwoniou =hem"
         alliance: { type: spouse_of_spouse, simultaneite: successive }
-        fr: à rédiger
+        fr:
+          court: "autre mari de votre épouse"
+          explique: "autre mari de votre épouse, Kwoniou, à une autre période que vous"
         en: à rédiger
   - id: F04-18
     de: nonyoette
@@ -230,7 +262,9 @@ paires:
       - chemin: "1/0[kwoniou] =hem"
         alliance: { type: spouse_of_parent, autre_parent: [successive] }
         cote_de: { par: kwoniou, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "mari de votre mère"
+          explique: "mari de votre mère, Kwoniou, à une autre période que votre père"
         en: à rédiger
   - id: F04-19
     de: tsoe
@@ -240,7 +274,9 @@ paires:
     attendu:
       - chemin: "2/1[mbosei+seine]"
         cote_de: { par: moutsun, cote: father }
-        fr: à rédiger
+        fr:
+          court: "tante par votre père"
+          explique: "sœur de votre père, Moutsun"
         en: à rédiger
   - id: F04-20
     de: tsoe
@@ -251,7 +287,9 @@ paires:
       - chemin: "2/1[mbosei+seine] =nom"
         alliance: { type: other }
         cote_de: { par: moutsun, cote: father }
-        fr: à rédiger
+        fr:
+          court: "mari de votre tante par votre père"
+          explique: "mari de Kwoniou, sœur de votre père"
         en: à rédiger
   - id: F04-21
     de: tsoe
@@ -261,7 +299,9 @@ paires:
     attendu:
       - chemin: "2/1[mbosei+seine]"
         cote_de: { par: moutsun, cote: father }
-        fr: à rédiger
+        fr:
+          court: "oncle par votre père"
+          explique: "frère de votre père, Moutsun"
         en: à rédiger
   - id: F04-22
     de: houou
@@ -271,7 +311,9 @@ paires:
     attendu:
       - chemin: "1/1[saine+wui] =pee"
         alliance: { type: spouse_of_sibling }
-        fr: à rédiger
+        fr:
+          court: "beau-frère"
+          explique: "mari de votre sœur, Yayoia"
         en: à rédiger
   - id: F04-23
     de: wui
@@ -281,7 +323,9 @@ paires:
     attendu:
       - chemin: "0/1[wui] =moutsun 1/0[mbosei]"
         alliance: { type: other }
-        fr: à rédiger
+        fr:
+          court: "père du mari de votre fille"
+          explique: "père de Moutsun, mari de votre fille"
         en: à rédiger
   - id: F04-24
     de: tsoe
@@ -292,5 +336,7 @@ paires:
       - chemin: "2/1[saine+wui] =tsia"
         alliance: { type: other }
         cote_de: { par: houou, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "épouse de votre oncle par votre mère"
+          explique: "épouse de Toe, frère de votre mère"
         en: à rédiger

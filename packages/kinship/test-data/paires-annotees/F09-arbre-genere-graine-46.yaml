@@ -191,11 +191,15 @@ paires:
     attendu:
       - chemin: "=nyouvui =mbaine"
         alliance: { type: co_spouse, simultaneite: simultaneous }
-        fr: à rédiger
+        fr:
+          court: "co-épouse"
+          explique: "autre épouse de votre mari, Nyouvui, en même temps que vous"
         en: à rédiger
       - chemin: "0/2[tchudjoette] =soe 2/0[mbaine]"
         alliance: { type: other }
-        fr: à rédiger
+        fr:
+          court: "mère du père de l’épouse de votre petit-fils"
+          explique: "mère de Mboe, père de l’épouse du fils de votre fils"
         en: à rédiger
   - id: F09-02
     de: tchudjoette
@@ -205,7 +209,9 @@ paires:
     attendu:
       - chemin: "=nyouvui =inconnue_2"
         alliance: { type: co_spouse, simultaneite: simultaneous }
-        fr: à rédiger
+        fr:
+          court: "co-épouse"
+          explique: "autre épouse de votre mari, Nyouvui, en même temps que vous"
         en: à rédiger
   - id: F09-03
     de: njonyem
@@ -215,11 +221,15 @@ paires:
     attendu:
       - chemin: "1/1[nyouvui] | 1/1[tchudjoette]"
         fratrie: { type: birth, partage: half, cote: father }
-        fr: à rédiger
+        fr:
+          court: "demi-sœur, même père"
+          explique: "fille de votre père et de Mbaine"
         en: à rédiger
       - chemin: "0/1[njonyem] =soe 2/1[mbaine+nyouvui]"
         alliance: { type: other }
-        fr: à rédiger
+        fr:
+          court: "sœur du père de l’épouse de votre fils"
+          explique: "sœur de Mboe, père de l’épouse de votre fils"
         en: à rédiger
   - id: F09-04
     de: njonyem
@@ -229,11 +239,15 @@ paires:
     attendu:
       - chemin: "1/1[nyouvui]"
         fratrie: { type: birth, partage: half, cote: father }
-        fr: à rédiger
+        fr:
+          court: "demi-frère, même père"
+          explique: "fils de votre père et de Mbaine"
         en: à rédiger
       - chemin: "0/1[njonyem] =soe 1/0[mboe]"
         alliance: { type: other }
-        fr: à rédiger
+        fr:
+          court: "père de l’épouse de votre fils"
+          explique: "père de Soe, épouse de votre fils"
         en: à rédiger
   - id: F09-05
     de: njonyem
@@ -243,7 +257,9 @@ paires:
     attendu:
       - chemin: "=piwoue =boum"
         alliance: { type: co_spouse, simultaneite: simultaneous }
-        fr: à rédiger
+        fr:
+          court: "co-époux"
+          explique: "autre mari de votre épouse, Piwoue, en même temps que vous"
         en: à rédiger
   - id: F09-06
     de: soou
@@ -254,11 +270,15 @@ paires:
       - chemin: "2/2[nyouvui]"
         cote_de: { par: njonyem, cote: father }
         cote_vers: { par: mboe, cote: father }
-        fr: à rédiger
+        fr:
+          court: "cousine par votre père"
+          explique: "petite-fille de Nyouvui, père de votre père"
         en: à rédiger
       - chemin: "=soe"
         alliance: { type: spouse }
-        fr: à rédiger
+        fr:
+          court: "épouse"
+          explique: "votre épouse, sans fin d’union connue"
         en: à rédiger
   - id: F09-07
     de: soou
@@ -269,17 +289,23 @@ paires:
       - chemin: "1/1[njonyem+piwoue]"
         fratrie: { type: birth, partage: full }
         certitude: probable
-        fr: à rédiger
+        fr:
+          court: "Peut-être votre frère"
+          explique: "fils de votre père et de votre mère (lien probable, à confirmer)"
         en: à rédiger
       - chemin: "=ndozea =nyouou"
         alliance: { type: spouse_of_spouse, simultaneite: successive }
-        fr: à rédiger
+        fr:
+          court: "autre mari de votre épouse"
+          explique: "autre mari de votre épouse, Ndozea, à une autre période que vous"
         en: à rédiger
       - chemin: "=soe 2/2[nyouvui]"
         alliance: { type: other }
         certitude: probable
         cote_vers: { par: njonyem, cote: father }
-        fr: à rédiger
+        fr:
+          court: "Peut-être le petit-fils du père du père de votre épouse"
+          explique: "petit-fils de Nyouvui, père du père de votre épouse (lien probable, à confirmer)"
         en: à rédiger
   - id: F09-08
     de: mbedjaette
@@ -289,12 +315,16 @@ paires:
     attendu:
       - chemin: "=nyouou =ndozea"
         alliance: { type: co_spouse, simultaneite: simultaneous }
-        fr: à rédiger
+        fr:
+          court: "co-épouse"
+          explique: "autre épouse de votre mari, Nyouou, en même temps que vous"
         en: à rédiger
       - chemin: "=nyouou 1/1[njonyem+piwoue] =ndozea"
         alliance: { type: spouse_of_sibling_of_spouse }
         certitude: probable
-        fr: à rédiger
+        fr:
+          court: "Peut-être votre belle-sœur"
+          explique: "épouse de Soou, frère de votre mari (lien probable, à confirmer)"
         en: à rédiger
   - id: F09-09
     de: vie
@@ -305,12 +335,16 @@ paires:
       - chemin: "1/1[loa]"
         fratrie: { type: adoption, partage: full_or_half, cote: parent }
         base: [adoptive]
-        fr: à rédiger
+        fr:
+          court: "frère ou demi-frère par adoption"
+          explique: "fils de votre mère, par adoption ; on ne sait pas encore si vous avez les deux mêmes parents"
         en: à rédiger
       - chemin: "2/2[mbaine+nyouvui]"
         cote_de: { par: loa, cote: mother }
         cote_vers: { par: tsoun, cote: father }
-        fr: à rédiger
+        fr:
+          court: "cousin germain par votre mère"
+          explique: "fils de Tsoun, frère de votre mère"
         en: à rédiger
   - id: F09-10
     de: feou
@@ -320,13 +354,17 @@ paires:
     attendu:
       - chemin: "1/1[ndae+tsoun]"
         fratrie: { type: birth, partage: full }
-        fr: à rédiger
+        fr:
+          court: "frère"
+          explique: "fils de votre père et de votre mère"
         en: à rédiger
       - chemin: "2/2[mbaine+nyouvui]"
         base: [adoptive]
         cote_de: { par: tsoun, cote: father }
         cote_vers: { par: loa, cote: parent, type: adoptive }
-        fr: à rédiger
+        fr:
+          court: "fils adoptif de la sœur de votre père"
+          explique: "fils adoptif de Loa, sœur de votre père"
         en: à rédiger
   - id: F09-11
     de: sans_prenom
@@ -336,24 +374,32 @@ paires:
     attendu:
       - chemin: "1/1[mboe+zouette]"
         fratrie: { type: birth, partage: full }
-        fr: à rédiger
+        fr:
+          court: "sœur"
+          explique: "fille de votre père et de votre mère"
         en: à rédiger
       - chemin: "2/2[mbaine+nyouvui]"
         base: [raised]
         cote_de: { par: tsoun, cote: parent, type: raised }
         cote_vers: { par: mboe, cote: father }
-        fr: à rédiger
+        fr:
+          court: "cousine germaine par la personne qui vous a élevée"
+          explique: "fille de Mboe, frère de la personne qui vous a élevée"
         en: à rédiger
       - chemin: "2/2[nyouvui] =soe"
         alliance: { type: other }
         cote_de: { par: mboe, cote: father }
-        fr: à rédiger
+        fr:
+          court: "épouse de votre cousin par votre père"
+          explique: "épouse de Soou, petit-fils du père de votre père"
         en: à rédiger
       - chemin: "2/2[nyouvui] =soe"
         alliance: { type: other }
         base: [raised]
         cote_de: { par: tsoun, cote: parent, type: raised }
-        fr: à rédiger
+        fr:
+          court: "épouse de votre cousin par la personne qui vous a élevée"
+          explique: "épouse de Soou, petit-fils du père de la personne qui vous a élevée"
         en: à rédiger
   - id: F09-12
     de: soe
@@ -365,18 +411,24 @@ paires:
         certitude: probable
         cote_de: { par: mboe, cote: father }
         cote_vers: { par: nyouou, cote: father }
-        fr: à rédiger
+        fr:
+          court: "Peut-être votre nièce à la mode de Bretagne par votre père"
+          explique: "arrière-petite-fille de Nyouvui, père de votre père (lien probable, à confirmer)"
         en: à rédiger
       - chemin: "=soou =ndozea 0/1[ndozea]"
         alliance: { type: other, simultaneite: simultaneous, autre_parent: [successive] }
         cote_vers: { par: ndozea, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "fille de votre co-épouse"
+          explique: "fille de Ndozea, autre épouse de votre mari"
         en: à rédiger
       - chemin: "=soou 1/2[njonyem+piwoue]"
         alliance: { type: other }
         certitude: probable
         cote_vers: { par: nyouou, cote: father }
-        fr: à rédiger
+        fr:
+          court: "Peut-être la fille du frère de votre mari"
+          explique: "fille de Nyouou, frère de votre mari (lien probable, à confirmer)"
         en: à rédiger
   - id: F09-13
     de: vee
@@ -387,14 +439,18 @@ paires:
       - chemin: "1/1[nyouou]"
         fratrie: { type: birth, partage: half, cote: father }
         certitude: probable
-        fr: à rédiger
+        fr:
+          court: "Peut-être votre demi-sœur, même père"
+          explique: "fille de votre père et de Ndozea (lien probable, à confirmer)"
         en: à rédiger
       - chemin: "2/1[njonyem+piwoue] =ndozea 0/1[ndozea]"
         alliance: { type: other, autre_parent: [successive] }
         certitude: probable
         cote_de: { par: nyouou, cote: father }
         cote_vers: { par: ndozea, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "Peut-être la fille de l’épouse de votre oncle par votre père"
+          explique: "fille de Ndozea, épouse du frère de votre père (lien probable, à confirmer)"
         en: à rédiger
   - id: F09-14
     de: tsoun
@@ -405,11 +461,15 @@ paires:
       - chemin: "0/1[tsoun]"
         base: [raised]
         cote_vers: { par: tsoun, cote: parent, type: raised }
-        fr: à rédiger
+        fr:
+          court: "enfant que vous avez élevée"
+          explique: "enfant que vous avez élevée ; ce lien n’est pas un lien de naissance"
         en: à rédiger
       - chemin: "1/2[mbaine+nyouvui]"
         cote_vers: { par: mboe, cote: father }
-        fr: à rédiger
+        fr:
+          court: "nièce"
+          explique: "fille de votre frère, Mboe"
         en: à rédiger
   - id: F09-15
     de: loa
@@ -420,9 +480,13 @@ paires:
       - chemin: "0/1[loa]"
         base: [adoptive]
         cote_vers: { par: loa, cote: parent, type: adoptive }
-        fr: à rédiger
+        fr:
+          court: "fils adoptif"
+          explique: "enfant que vous avez adopté"
         en: à rédiger
       - chemin: "1/2[mbaine+nyouvui]"
         cote_vers: { par: tsoun, cote: father }
-        fr: à rédiger
+        fr:
+          court: "neveu"
+          explique: "fils de votre frère, Tsoun"
         en: à rédiger

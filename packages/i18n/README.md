@@ -24,7 +24,7 @@ i18next avec le format de messages ICU (`i18next-icu`, `intl-messageformat`) ; d
 
 | Chemin | Contenu |
 | --- | --- |
-| `messages/<langue>/<espace>.json` | Les textes, un fichier par langue et par espace de noms (`common` pour l'instant). Le français fait référence. |
+| `messages/<langue>/<espace>.json` | Les textes, un fichier par langue et par espace de noms (`common` ; `kinship` pour les mots des liens de parenté, assemblés par `@lignee/kinship`, ADR 0031). Le français fait référence. |
 | `review/<langue>.json` | Relecture par un locuteur natif (ACC-05) : une entrée par message, `to-review` ou `reviewed` avec le texte relu. |
 | `src/generated/message-params.ts` | Types des clés et des paramètres, générés depuis les messages français. Ne pas modifier à la main. |
 | `src/translator.ts` | `createTranslator` : traduction typée, changement de langue à chaud, abonnement. |

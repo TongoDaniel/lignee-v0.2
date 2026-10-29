@@ -19,6 +19,7 @@ import {
 import { parse } from 'yaml';
 import { z } from 'zod';
 
+import type { KinshipGraph } from '../graph';
 import type { PresentationResult, PresentedLink } from '../presentation';
 import type { Relationship } from '../relationship';
 
@@ -45,6 +46,17 @@ export type PairCategory = (typeof PAIR_CATEGORIES)[number];
 const KEY = /^[a-z][a-z0-9_]*$/;
 const keySchema = z.string().regex(KEY);
 const words = z.string().trim().min(1);
+
+/**
+ * Mots d'un lien dans une langue (PAR-11) : forme courte (« demi-frère, même père ») et forme
+ * expliquée (« fils de votre père et de Mbuou »), ou « à rédiger » tant que le ticket de la
+ * langue ne les a pas écrits (T-027 pour l'anglais).
+ */
+export const linkWordsSchema = z.union([
+  z.literal(TO_WRITE),
+  z.strictObject({ court: words, explique: words }),
+]);
+export type ExpectedWords = z.infer<typeof linkWordsSchema>;
 
 const sideSchema = z.strictObject({
   par: keySchema,
@@ -105,8 +117,8 @@ export const expectedLinkSchema = z.strictObject({
   cote_de: sideSchema.optional(),
   /** Parent par lequel monte B, lu de B vers A (sauf fratrie). */
   cote_vers: sideSchema.optional(),
-  fr: words,
-  en: words,
+  fr: linkWordsSchema,
+  en: linkWordsSchema,
 });
 export type ExpectedLink = z.infer<typeof expectedLinkSchema>;
 
@@ -430,4 +442,21 @@ export function vocabularyKeys(families: readonly AnnotatedFamily[]): Set<string
     }
   }
   return keys;
+}
+
+/** Personne sans prénom dans une famille générée : aucun nom dans les mots. */
+const NAMELESS_KEY = 'sans_prenom';
+
+/**
+ * Noms affichés dans la forme expliquée des paires (« fils de votre père et de Mbuou ») : la clé
+ * de la personne avec une majuscule ; aucun nom pour une place à compléter, ni pour une personne
+ * sans prénom (`sans_prenom`). Dans l'application, c'est le nom affiché au lecteur (PAR-07).
+ */
+export function pairNameOf(tree: ScenarioTree, graph: KinshipGraph) {
+  return (personId: Id): string | undefined => {
+    const key = tree.keyOf(personId);
+    const person = graph.person(personId);
+    if (key === undefined || key === NAMELESS_KEY || person?.nature !== 'known') return undefined;
+    return `${key.charAt(0).toUpperCase()}${key.slice(1)}`;
+  };
 }

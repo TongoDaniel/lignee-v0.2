@@ -21,8 +21,8 @@ const PLAYED_DIR_VARIABLE = 'LIGNEE_SCENARIOS_PLAYED_DIR';
  * `lecture` : le scénario est lu et son arbre de départ construit en objets valides du modèle,
  * sans que son attendu soit encore vérifié. `disposition` : générations et foyers calculés par
  * packages/layout et comparés à l'attendu (T-008). `lien` : le lien attendu (`attendu.lien`) est
- * vérifié sur la structure calculée par packages/kinship (fratrie, T-020) ; les mots restent à
- * T-026 et T-027. `budget` : les budgets de temps du TRD, ramenés au poste par un facteur de
+ * vérifié sur la structure calculée par packages/kinship (fratrie, T-020) ; pour les cas limites
+ * de T-026, les mots français sont aussi ceux du dictionnaire ; l'anglais reste à T-027. `budget` : les budgets de temps du TRD, ramenés au poste par un facteur de
  * ralentissement estimé, sont tenus (packages/kinship, T-028). `fiche` : la fiche d'une personne
  * (`buildProfile`, packages/domain, T-024) est celle de `attendu.fiche`, lecteur par lecteur.
  */

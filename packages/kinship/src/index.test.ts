@@ -23,5 +23,9 @@ describe('@lignee/kinship', () => {
     expect(typeof kinship.findRelationshipsInSlices).toBe('function');
     expect(typeof kinship.presentRelationshipsInSlices).toBe('function');
     expect(kinship.MAX_SLICE_MS).toBe(50);
+    // Mots des liens (T-026).
+    expect(typeof kinship.describeLink).toBe('function');
+    expect(typeof kinship.describeResult).toBe('function');
+    expect(typeof kinship.alsoText).toBe('function');
   });
 });

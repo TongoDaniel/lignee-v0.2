@@ -1,6 +1,7 @@
 // Cas limites de l'alliance, joués depuis test/scenarios (T-021) : CL-FAM-01 et CL-POL-08. Le
 // lien attendu, écrit en mots, est ramené à sa structure (`allianceMeaningOfWords`) et comparé au
-// lien le plus proche calculé, en attendant les dictionnaires (T-026, T-027). La simultanéité est
+// lien le plus proche calculé ; ses mots français sont exactement ceux du dictionnaire (T-026),
+// l'anglais reste à T-027. La simultanéité est
 // lue sur l'arbre du scénario (dates des unions, réponses gardées) par `createAllianceContext`.
 import type { TreeData } from '@lignee/domain/test-support';
 import {
@@ -19,6 +20,7 @@ import { createAllianceContext } from './alliance';
 import { createKinshipGraph } from './graph';
 import { findRelationships } from './kinship';
 import { siblingLink } from './siblings';
+import { frenchShortWords } from './test-support/french-words';
 import {
   allianceMeaningOfResult,
   allianceMeaningOfWords,
@@ -48,6 +50,8 @@ function expectLink(tree: ScenarioTree, data: TreeData, lien: ExpectedLink) {
   expect(allianceMeaningOfResult(engine.graph, result), `${lien.de} → ${lien.vers}`).toEqual(
     allianceMeaningOfWords(lien.fr, lien.en),
   );
+  const words = frenchShortWords(data, tree.id(lien.de), tree.id(lien.vers));
+  expect(words, `${lien.de} → ${lien.vers} (fr)`).toEqual([lien.fr]);
 }
 
 describe('PAR-04 — aucun « belle-mère » ni « beau-père » pour le conjoint d’un parent', () => {
