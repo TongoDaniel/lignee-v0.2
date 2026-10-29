@@ -1,7 +1,7 @@
 # Noms générés. Le surnom sert de nom affiché ; le nom de naissance reste à compléter. La
 # personne est connue : « à compléter » est une nature, pas l'absence d'un nom de naissance.
-# La fiche (T-024) affiche le surnom comme nom, sans inventer de nom de naissance. Reste : la
-# saisie (T-031).
+# La fiche (T-024) affiche le surnom comme nom, sans inventer de nom de naissance. La
+# saisie à la main (T-031) est la partie saisie.
 id: CL-FAM-17
 titre: Personne connue seulement par un surnom
 couverture:
