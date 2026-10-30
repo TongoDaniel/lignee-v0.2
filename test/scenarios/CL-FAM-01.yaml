@@ -4,12 +4,12 @@
 # Partie lien (T-021) : aucun chemin de sang entre Emma et Luc ; le lien le plus proche est un
 # lien par alliance, ramené à sa structure (enfant du conjoint d'un parent, par le père et son
 # épouse) et comparé au lien calculé ; l'union de Paul et Carine est successive à celle de Paul
-# et Anne (dates). Reste : les mots en français et en anglais (T-026, T-027).
+# et Anne (dates). Mots français (T-026) : ceux du dictionnaire. Reste : l'anglais (T-027).
 id: CL-FAM-01
 titre: Enfant du conjoint d'un parent (famille recomposée)
 couverture:
   teste: [lien]
-  reste: [T-026, T-027]
+  reste: [T-027]
 arbre:
   personnes: [paul/M, anne/F, carine/F, marc/M, emma/F, luc/M]
   unions:
@@ -28,7 +28,7 @@ arbre:
     - { parents: [carine, marc], enfant: luc }
 attendu:
   liens:
-    - { de: emma, vers: luc, fr: "fils de l'épouse de votre père", en: "son of your father's wife" }
+    - { de: emma, vers: luc, fr: "fils de l’épouse de votre père", en: "son of your father's wife" }
     - de: luc
       vers: emma
       fr: "fille du mari de votre mère"

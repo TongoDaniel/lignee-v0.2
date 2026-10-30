@@ -52,7 +52,9 @@ paires:
     attendu:
       - chemin: "=djon =zongeia"
         alliance: { type: co_spouse, simultaneite: simultaneous }
-        fr: à rédiger
+        fr:
+          court: "co-épouse"
+          explique: "autre épouse de Djon, votre mari, en même temps que vous"
         en: à rédiger
   - id: F02-02
     de: djaine
@@ -62,7 +64,9 @@ paires:
     attendu:
       - chemin: "=djon =ngoungoe"
         alliance: { type: spouse_of_spouse, simultaneite: unknown }
-        fr: à rédiger
+        fr:
+          court: "autre épouse de votre mari"
+          explique: "autre épouse de Djon, votre mari ; on ne sait pas encore si c’était en même temps que vous"
         en: à rédiger
   - id: F02-03
     de: djaine
@@ -72,7 +76,9 @@ paires:
     attendu:
       - chemin: "=djon =tengoua"
         alliance: { type: spouse_of_spouse, simultaneite: successive }
-        fr: à rédiger
+        fr:
+          court: "autre épouse de votre mari"
+          explique: "autre épouse de Djon, votre mari, à une autre période que vous"
         en: à rédiger
   - id: F02-04
     de: zongeia
@@ -82,7 +88,9 @@ paires:
     attendu:
       - chemin: "=djon =tengoua"
         alliance: { type: spouse_of_spouse, simultaneite: successive }
-        fr: à rédiger
+        fr:
+          court: "autre épouse de votre mari"
+          explique: "autre épouse de Djon, votre mari, à une autre période que vous"
         en: à rédiger
   - id: F02-05
     de: djuvai
@@ -93,7 +101,9 @@ paires:
       - chemin: "1/0[djon] =zongeia"
         alliance: { type: spouse_of_parent, autre_parent: [simultaneous] }
         cote_de: { par: djon, cote: father }
-        fr: à rédiger
+        fr:
+          court: "épouse de votre père"
+          explique: "épouse de Djon, votre père, en même temps que votre mère"
         en: à rédiger
   - id: F02-06
     de: djuvai
@@ -104,7 +114,9 @@ paires:
       - chemin: "1/0[djon] =tengoua"
         alliance: { type: spouse_of_parent, autre_parent: [successive] }
         cote_de: { par: djon, cote: father }
-        fr: à rédiger
+        fr:
+          court: "épouse de votre père"
+          explique: "épouse de Djon, votre père, à une autre période que votre mère"
         en: à rédiger
   - id: F02-07
     de: djuvai
@@ -115,7 +127,9 @@ paires:
       - chemin: "1/0[djon] =ngoungoe"
         alliance: { type: spouse_of_parent, autre_parent: [unknown] }
         cote_de: { par: djon, cote: father }
-        fr: à rédiger
+        fr:
+          court: "épouse de votre père"
+          explique: "épouse de Djon, votre père ; on ne sait pas encore si c’était en même temps que votre mère"
         en: à rédiger
   - id: F02-08
     de: djuvai
@@ -125,7 +139,9 @@ paires:
     attendu:
       - chemin: "1/1[djon]"
         fratrie: { type: birth, partage: half, cote: father }
-        fr: à rédiger
+        fr:
+          court: "demi-frère, même père"
+          explique: "fils de votre père et de Zongeia"
         en: à rédiger
   - id: F02-09
     de: djuvai
@@ -135,7 +151,9 @@ paires:
     attendu:
       - chemin: "1/1[djon]"
         fratrie: { type: birth, partage: half, cote: father }
-        fr: à rédiger
+        fr:
+          court: "demi-sœur, même père"
+          explique: "fille de votre père et de Tengoua"
         en: à rédiger
   - id: F02-10
     de: zee
@@ -145,7 +163,9 @@ paires:
     attendu:
       - chemin: "1/1[zongeia]"
         fratrie: { type: birth, partage: half, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "demi-sœur, même mère"
+          explique: "fille de votre mère et de Djao"
         en: à rédiger
   - id: F02-11
     de: djuvai
@@ -157,7 +177,9 @@ paires:
         alliance: { type: step_sibling, autre_parent: [simultaneous, successive] }
         cote_de: { par: djon, cote: father }
         cote_vers: { par: zongeia, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "fille de l’épouse de votre père"
+          explique: "fille de Zongeia, épouse de votre père"
         en: à rédiger
   - id: F02-12
     de: djuvai
@@ -168,7 +190,9 @@ paires:
       - chemin: "1/0[djon] =zongeia =djao"
         alliance: { type: other, simultaneite: successive, autre_parent: [simultaneous] }
         cote_de: { par: djon, cote: father }
-        fr: à rédiger
+        fr:
+          court: "autre mari de l’épouse de votre père"
+          explique: "autre mari de Zongeia, épouse de votre père"
         en: à rédiger
   - id: F02-13
     de: djuvai
@@ -178,7 +202,9 @@ paires:
     attendu:
       - chemin: "1/1[djon]"
         fratrie: { type: birth, partage: full_or_half, cote: father }
-        fr: à rédiger
+        fr:
+          court: "frère ou demi-frère"
+          explique: "fils de votre père ; on ne sait pas encore si vous avez les deux mêmes parents"
         en: à rédiger
   - id: F02-14
     de: sondoou
@@ -188,7 +214,9 @@ paires:
     attendu:
       - chemin: "1/1[djon]"
         fratrie: { type: birth, partage: half, cote: father }
-        fr: à rédiger
+        fr:
+          court: "demi-frère, même père"
+          explique: "fils de votre père et de Ngoungoe"
         en: à rédiger
   - id: F02-15
     de: zongeia
@@ -199,7 +227,9 @@ paires:
       - chemin: "=djon 0/1[djon]"
         alliance: { type: child_of_spouse, autre_parent: [unknown] }
         cote_vers: { par: djon, cote: father }
-        fr: à rédiger
+        fr:
+          court: "fils de votre mari"
+          explique: "fils de votre mari et de Ngoungoe"
         en: à rédiger
   - id: F02-16
     de: gezuou
@@ -210,7 +240,9 @@ paires:
       - chemin: "1/0[zongeia] =djon"
         alliance: { type: spouse_of_parent, autre_parent: [successive] }
         cote_de: { par: zongeia, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "mari de votre mère"
+          explique: "mari de Zongeia, votre mère, à une autre période que votre père"
         en: à rédiger
   - id: F02-17
     de: tengoua
@@ -221,7 +253,9 @@ paires:
       - chemin: "=djon 0/1[djon]"
         alliance: { type: child_of_spouse, autre_parent: [successive] }
         cote_vers: { par: djon, cote: father }
-        fr: à rédiger
+        fr:
+          court: "fille de votre mari"
+          explique: "fille de votre mari et de Djaine"
         en: à rédiger
   - id: F02-18
     de: koette
@@ -231,5 +265,7 @@ paires:
     attendu:
       - chemin: "1/1[djon]"
         fratrie: { type: birth, partage: full_or_half, cote: father }
-        fr: à rédiger
+        fr:
+          court: "frère ou demi-frère"
+          explique: "fils de votre père ; on ne sait pas encore si vous avez les deux mêmes parents"
         en: à rédiger

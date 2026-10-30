@@ -2,8 +2,9 @@
 // test/scenarios (T-022) : CL-POL-09, CL-POL-10, CL-POL-11, CL-FAM-02, CL-FAM-03, CL-FAM-04,
 // CL-FAM-05, CL-FAM-09, CL-FAM-14. Chaque lien attendu, écrit en mots (le principal, puis
 // `aussi`, dans l'ordre), est ramené à sa structure (`presentedMeaningOfWords`) et comparé à la
-// présentation calculée, en attendant les dictionnaires (T-026, T-027). Le sens inverse est
-// vérifié à chaque fois : exactement l'inverse, dans le même ordre.
+// présentation calculée. Le sens inverse est vérifié à chaque fois : exactement l'inverse, dans le
+// même ordre. Pour CL-POL-09 et CL-POL-10 (T-026), les mots français de chaque lien sont aussi
+// exactement ceux du dictionnaire ; l'anglais reste à T-027.
 import type { Filiation, Id } from '@lignee/domain';
 import type { TreeData } from '@lignee/domain/test-support';
 import {
@@ -23,6 +24,7 @@ import { createAllianceContext } from './alliance';
 import { createKinshipGraph } from './graph';
 import { findRelationships } from './kinship';
 import { invertPresentedLink, presentRelationships, type PresentationResult } from './presentation';
+import { frenchShortWords } from './test-support/french-words';
 import { neverEntered } from './test-support/never-entered';
 import {
   presentedMeaningOfWords,
@@ -84,21 +86,28 @@ function expectPresented(tree: ScenarioTree, data: TreeData, lien: ExpectedPrese
   }
 }
 
-function playLinks(id: string) {
+/** Joue les liens d'un scénario ; avec `french`, compare aussi les mots du dictionnaire (T-026). */
+function playLinks(id: string, french = false) {
   const scenario = loadScenario(id, linksScenarioSchema(id));
   const tree = buildScenarioTree(scenario.arbre);
   expect(scenario.couverture?.teste).toContain('lien');
-  for (const lien of scenario.attendu.liens) expectPresented(tree, tree.data, lien);
+  for (const lien of scenario.attendu.liens) {
+    expectPresented(tree, tree.data, lien);
+    if (!french) continue;
+    const words = frenchShortWords(tree.data, tree.id(lien.de), tree.id(lien.vers));
+    const expected = [lien.fr, ...(lien.aussi ?? []).map((entry) => entry.fr)];
+    expect(words, `${lien.de} → ${lien.vers} (fr)`).toEqual(expected);
+  }
   return { scenario, tree };
 }
 
 describe('PAR-05, UNI-21 — plusieurs chemins : le plus proche d’abord, les autres dessous', () => {
   it('CL-POL-09 — lévirat : demi-frères par la mère et cousins par les pères', () => {
-    playLinks('CL-POL-09');
+    playLinks('CL-POL-09', true);
   });
 
   it('CL-POL-10 — sororat : demi-frères par le père et cousins par les mères', () => {
-    playLinks('CL-POL-10');
+    playLinks('CL-POL-10', true);
   });
 
   it('CL-FAM-09 — mariage entre cousins : chaque ancêtre une fois, tous les liens', () => {

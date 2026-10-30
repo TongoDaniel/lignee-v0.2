@@ -87,7 +87,8 @@ const WORDS = table();
  * français.
  */
 export function allianceMeaningOfWords(fr: string, en: string): AllianceWordsMeaning {
-  const entry = WORDS.get(fr);
+  // Apostrophe typographique des mots du dictionnaire (T-026) : même sens que l'apostrophe droite.
+  const entry = WORDS.get(fr.replaceAll('’', "'"));
   if (entry === undefined) throw new Error(`Not a known alliance phrase: ${fr}`);
   if (entry.en !== en)
     throw new Error(`"${en}" does not translate "${fr}" (expected "${entry.en}")`);

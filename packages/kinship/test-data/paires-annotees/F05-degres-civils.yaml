@@ -55,7 +55,9 @@ paires:
     attendu:
       - chemin: "2/0[nehae]"
         cote_de: { par: seloi, cote: father }
-        fr: à rédiger
+        fr:
+          court: "grand-père par votre père"
+          explique: "père de Seloi, votre père"
         en: à rédiger
   - id: F05-02
     de: yon
@@ -65,7 +67,9 @@ paires:
     attendu:
       - chemin: "3/0[lie]"
         cote_de: { par: soou, cote: father }
-        fr: à rédiger
+        fr:
+          court: "arrière-grand-mère par votre père"
+          explique: "mère de Seloi, père de votre père"
         en: à rédiger
   - id: F05-03
     de: biwiou
@@ -75,7 +79,9 @@ paires:
     attendu:
       - chemin: "4/0[nehae]"
         cote_de: { par: yon, cote: father }
-        fr: à rédiger
+        fr:
+          court: "arrière-arrière-grand-père par votre père"
+          explique: "père de Seloi, père du père de votre père"
         en: à rédiger
   - id: F05-04
     de: kegee
@@ -85,7 +91,9 @@ paires:
     attendu:
       - chemin: "5/0[lie]"
         cote_de: { par: biwiou, cote: father }
-        fr: à rédiger
+        fr:
+          court: "ancêtre à la 5e génération par votre père"
+          explique: "mère de Seloi, père du père du père de votre père"
         en: à rédiger
   - id: F05-05
     de: nehae
@@ -95,7 +103,9 @@ paires:
     attendu:
       - chemin: "0/5[nehae]"
         cote_vers: { par: biwiou, cote: father }
-        fr: à rédiger
+        fr:
+          court: "descendant à la 5e génération"
+          explique: "fils de Biwiou, fils du fils du fils de votre fils"
         en: à rédiger
   - id: F05-06
     de: soou
@@ -105,7 +115,9 @@ paires:
     attendu:
       - chemin: "2/1[lie+nehae]"
         cote_de: { par: seloi, cote: father }
-        fr: à rédiger
+        fr:
+          court: "tante par votre père"
+          explique: "sœur de Seloi, votre père"
         en: à rédiger
   - id: F05-07
     de: nesoine
@@ -115,7 +127,9 @@ paires:
     attendu:
       - chemin: "2/1[lie+nehae]"
         cote_de: { par: vie, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "oncle par votre mère"
+          explique: "frère de Vie, votre mère"
         en: à rédiger
   - id: F05-08
     de: yon
@@ -125,7 +139,9 @@ paires:
     attendu:
       - chemin: "3/1[lie+nehae]"
         cote_de: { par: soou, cote: father }
-        fr: à rédiger
+        fr:
+          court: "grand-tante par votre père"
+          explique: "sœur de Seloi, père de votre père"
         en: à rédiger
   - id: F05-09
     de: biwiou
@@ -135,7 +151,9 @@ paires:
     attendu:
       - chemin: "4/1[lie+nehae]"
         cote_de: { par: yon, cote: father }
-        fr: à rédiger
+        fr:
+          court: "arrière-grand-oncle par votre père"
+          explique: "frère de Seloi, père du père de votre père"
         en: à rédiger
   - id: F05-10
     de: vie
@@ -145,7 +163,9 @@ paires:
     attendu:
       - chemin: "0/2[vie]"
         cote_vers: { par: nesoine, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "petite-fille"
+          explique: "fille de Nesoine, votre fille"
         en: à rédiger
   - id: F05-11
     de: vie
@@ -155,7 +175,9 @@ paires:
     attendu:
       - chemin: "0/3[vie]"
         cote_vers: { par: viia, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "arrière-petite-fille"
+          explique: "fille de Viia, fille de votre fille"
         en: à rédiger
   - id: F05-12
     de: soou
@@ -166,7 +188,9 @@ paires:
       - chemin: "2/2[lie+nehae]"
         cote_de: { par: seloi, cote: father }
         cote_vers: { par: vie, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "cousine germaine par votre père"
+          explique: "fille de Vie, sœur de votre père"
         en: à rédiger
   - id: F05-13
     de: yon
@@ -177,7 +201,9 @@ paires:
       - chemin: "3/3[lie+nehae]"
         cote_de: { par: soou, cote: father }
         cote_vers: { par: nesoine, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "cousine issue de germain par votre père"
+          explique: "petite-fille de Vie, sœur du père de votre père"
         en: à rédiger
   - id: F05-14
     de: biwiou
@@ -188,7 +214,9 @@ paires:
       - chemin: "4/4[lie+nehae]"
         cote_de: { par: yon, cote: father }
         cote_vers: { par: viia, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "cousine au 8e degré par votre père"
+          explique: "arrière-petite-fille de Vie, sœur du père du père de votre père"
         en: à rédiger
   - id: F05-15
     de: kegee
@@ -199,7 +227,9 @@ paires:
       - chemin: "5/5[lie+nehae]"
         cote_de: { par: biwiou, cote: father }
         cote_vers: { par: tchetea, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "cousine au 10e degré par votre père"
+          explique: "arrière-arrière-petite-fille de Vie, sœur du père du père du père de votre père"
         en: à rédiger
   - id: F05-16
     de: yon
@@ -210,7 +240,9 @@ paires:
       - chemin: "3/2[lie+nehae]"
         cote_de: { par: soou, cote: father }
         cote_vers: { par: vie, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "tante à la mode de Bretagne par votre père"
+          explique: "fille de Vie, sœur du père de votre père"
         en: à rédiger
   - id: F05-17
     de: seloi
@@ -220,7 +252,9 @@ paires:
     attendu:
       - chemin: "1/3[lie+nehae]"
         cote_vers: { par: nesoine, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "petite-nièce"
+          explique: "petite-fille de Vie, votre sœur"
         en: à rédiger
   - id: F05-18
     de: biwiou
@@ -231,7 +265,9 @@ paires:
       - chemin: "4/2[lie+nehae]"
         cote_de: { par: yon, cote: father }
         cote_vers: { par: vie, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "cousine au 6e degré par votre père"
+          explique: "fille de Vie, sœur du père du père de votre père"
         en: à rédiger
   - id: F05-19
     de: kegee
@@ -242,7 +278,9 @@ paires:
       - chemin: "5/3[lie+nehae]"
         cote_de: { par: biwiou, cote: father }
         cote_vers: { par: nesoine, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "cousine au 8e degré par votre père"
+          explique: "petite-fille de Vie, sœur du père du père du père de votre père"
         en: à rédiger
   - id: F05-20
     de: viia
@@ -253,7 +291,9 @@ paires:
       - chemin: "3/2[lie+nehae]"
         cote_de: { par: nesoine, cote: mother }
         cote_vers: { par: seloi, cote: father }
-        fr: à rédiger
+        fr:
+          court: "oncle à la mode de Bretagne par votre mère"
+          explique: "fils de Seloi, frère de la mère de votre mère"
         en: à rédiger
   - id: F05-21
     de: soou
@@ -264,7 +304,9 @@ paires:
       - chemin: "2/2[lie+nehae]"
         cote_de: { par: seloi, cote: father }
         cote_vers: { par: toui, cote: father }
-        fr: à rédiger
+        fr:
+          court: "enfant du frère de votre père"
+          explique: "enfant de Toui, frère de votre père"
         en: à rédiger
   - id: F05-22
     de: fea
@@ -274,7 +316,9 @@ paires:
     attendu:
       - chemin: "2/0[toui]"
         cote_de: { par: veo, cote: parent }
-        fr: à rédiger
+        fr:
+          court: "grand-père par votre parent Veo"
+          explique: "père de Veo, votre parent"
         en: à rédiger
   - id: F05-23
     de: yon
@@ -285,7 +329,9 @@ paires:
       - chemin: "3/3[lie+nehae]"
         cote_de: { par: soou, cote: father }
         cote_vers: { par: veo, cote: parent }
-        fr: à rédiger
+        fr:
+          court: "cousine issue de germain par votre père"
+          explique: "petite-fille de Toui, frère du père de votre père"
         en: à rédiger
   - id: F05-24
     de: soou
@@ -295,7 +341,9 @@ paires:
     attendu:
       - chemin: "0/1[soou]"
         cote_vers: { par: soou, cote: father }
-        fr: à rédiger
+        fr:
+          court: "fils"
+          explique: "votre fils, par la naissance"
         en: à rédiger
   - id: F05-25
     de: kegee
@@ -305,7 +353,9 @@ paires:
     attendu:
       - chemin: "3/0[soou]"
         cote_de: { par: biwiou, cote: father }
-        fr: à rédiger
+        fr:
+          court: "arrière-grand-père par votre père"
+          explique: "père de Yon, père de votre père"
         en: à rédiger
   - id: F05-26
     de: nesoine
@@ -316,7 +366,9 @@ paires:
       - chemin: "2/3[lie+nehae]"
         cote_de: { par: vie, cote: mother }
         cote_vers: { par: soou, cote: father }
-        fr: à rédiger
+        fr:
+          court: "neveu à la mode de Bretagne par votre mère"
+          explique: "petit-fils de Seloi, frère de votre mère"
         en: à rédiger
   - id: F05-27
     de: yon
@@ -327,7 +379,9 @@ paires:
       - chemin: "2/2[seloi+yekaa]"
         cote_de: { par: soou, cote: father }
         cote_vers: { par: pasoe, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "enfant de la sœur de votre père"
+          explique: "enfant de Pasoe, sœur de votre père"
         en: à rédiger
   - id: F05-28
     de: seloi
@@ -337,7 +391,9 @@ paires:
     attendu:
       - chemin: "1/1[lie+nehae]"
         fratrie: { type: birth, partage: full }
-        fr: à rédiger
+        fr:
+          court: "frère"
+          explique: "fils de votre père et de votre mère"
         en: à rédiger
   - id: F05-29
     de: seloi
@@ -347,7 +403,9 @@ paires:
     attendu:
       - chemin: "1/1[lie+nehae]"
         fratrie: { type: birth, partage: full }
-        fr: à rédiger
+        fr:
+          court: "sœur"
+          explique: "fille de votre père et de votre mère"
         en: à rédiger
   - id: F05-30
     de: soou
@@ -357,7 +415,9 @@ paires:
     attendu:
       - chemin: "1/1[seloi+yekaa]"
         fratrie: { type: birth, partage: full }
-        fr: à rédiger
+        fr:
+          court: "sœur"
+          explique: "fille de votre père et de votre mère"
         en: à rédiger
   - id: F05-31
     de: pasoe
@@ -367,7 +427,9 @@ paires:
     attendu:
       - chemin: "1/2[seloi+yekaa]"
         cote_vers: { par: soou, cote: father }
-        fr: à rédiger
+        fr:
+          court: "neveu"
+          explique: "fils de Soou, votre frère"
         en: à rédiger
   - id: F05-32
     de: soou
@@ -383,7 +445,9 @@ paires:
     attendu:
       - chemin: "1/3[lie+nehae]"
         cote_vers: { par: soou, cote: father }
-        fr: à rédiger
+        fr:
+          court: "petit-neveu"
+          explique: "petit-fils de Seloi, votre frère"
         en: à rédiger
   - id: F05-34
     de: tchetea
@@ -394,7 +458,9 @@ paires:
       - chemin: "4/4[lie+nehae]"
         cote_de: { par: viia, cote: mother }
         cote_vers: { par: yon, cote: father }
-        fr: à rédiger
+        fr:
+          court: "cousin au 8e degré par votre mère"
+          explique: "arrière-petit-fils de Seloi, frère de la mère de la mère de votre mère"
         en: à rédiger
   - id: F05-35
     de: biwiou
@@ -406,5 +472,7 @@ paires:
       - chemin: "4/4[nehae]"
         cote_de: { par: yon, cote: father }
         cote_vers: { par: viia, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "cousine au 8e degré par votre père"
+          explique: "arrière-arrière-petite-fille de Nehae, père du père du père de votre père"
         en: à rédiger

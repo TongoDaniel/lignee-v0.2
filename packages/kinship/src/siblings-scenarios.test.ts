@@ -1,7 +1,8 @@
 // Cas limites de la fratrie, joués depuis test/scenarios (T-020) : CL-POL-02, CL-POL-03 (lien),
 // CL-GEN-07 (lien), CL-VOI-08 (lien), CL-FAM-08. Le lien attendu, écrit en mots, est ramené à sa
-// structure (`siblingMeaningOfWords`) et comparé à la fratrie calculée, en attendant les
-// dictionnaires (T-026, T-027).
+// structure (`siblingMeaningOfWords`) et comparé à la fratrie calculée. Pour CL-POL-02, CL-POL-03
+// et CL-FAM-08, les mots français sont aussi exactement ceux du dictionnaire (T-026) ; l'anglais
+// reste à T-027.
 import {
   actionScenarioSchema,
   applyExpectedPlan,
@@ -19,6 +20,7 @@ import { z } from 'zod';
 
 import { createKinshipGraph } from './graph';
 import { siblingLink } from './siblings';
+import { frenchShortWords } from './test-support/french-words';
 import { siblingMeaningOfResult, siblingMeaningOfWords } from './test-support/sibling-words';
 
 function graphOf(tree: ScenarioTree) {
@@ -26,12 +28,19 @@ function graphOf(tree: ScenarioTree) {
   return createKinshipGraph({ people, unions, filiations, parentCandidates });
 }
 
-/** Vérifie un lien attendu sur l'arbre : la fratrie calculée dit ce que disent les mots. */
-function expectLink(tree: ScenarioTree, lien: ExpectedLink) {
+/**
+ * Vérifie un lien attendu sur l'arbre : la fratrie calculée dit ce que disent les mots ; avec
+ * `french`, les mots français du dictionnaire sont exactement ceux du scénario (T-026).
+ */
+function expectLink(tree: ScenarioTree, lien: ExpectedLink, french = false) {
   const result = siblingLink(graphOf(tree), tree.id(lien.de), tree.id(lien.vers));
   expect(siblingMeaningOfResult(result), `${lien.de} → ${lien.vers}`).toEqual(
     siblingMeaningOfWords(lien.fr, lien.en),
   );
+  if (french) {
+    const words = frenchShortWords(tree.data, tree.id(lien.de), tree.id(lien.vers));
+    expect(words, `${lien.de} → ${lien.vers} (fr)`).toEqual([lien.fr]);
+  }
 }
 
 /** Scénario sans dictée : un arbre et des liens attendus. */
@@ -47,7 +56,7 @@ describe('CL-POL-02 — enfants de deux épouses différentes', () => {
     const scenario = loadScenario('CL-POL-02', linksScenarioSchema('CL-POL-02'));
     expect(scenario.couverture?.teste).toContain('lien');
     const tree = buildScenarioTree(scenario.arbre);
-    for (const lien of scenario.attendu.liens) expectLink(tree, lien);
+    for (const lien of scenario.attendu.liens) expectLink(tree, lien, true);
   });
 });
 
@@ -59,7 +68,7 @@ describe('CL-POL-03 — enfant du grand-père, mère inconnue parmi ses épouses
     if (lien === undefined) throw new Error('CL-POL-03 attend un lien');
     const tree = buildScenarioTree(scenario.arbre);
     const after = applyExpectedPlan(tree, plan); // copie : l'arbre de départ reste intact
-    expectLink(after, lien);
+    expectLink(after, lien, true);
     const link = siblingLink(graphOf(after), after.id(lien.de), after.id(lien.vers));
     if (link?.kind !== 'sibling') throw new Error('Expected a sibling');
     expect(link.toOtherParent).toEqual({
@@ -72,16 +81,16 @@ describe('CL-POL-03 — enfant du grand-père, mère inconnue parmi ses épouses
       ...plan,
       { filiation: { parent: 'odile', enfant: 'samuel', type: 'naissance' } },
     ]);
-    expectLink(odile, { ...lien, fr: 'frère', en: 'brother' });
+    expectLink(odile, { ...lien, fr: 'frère', en: 'brother' }, true);
     const rose = applyExpectedPlan(tree, [
       ...plan,
       { filiation: { parent: 'rose', enfant: 'samuel', type: 'naissance' } },
     ]);
-    expectLink(rose, {
-      ...lien,
-      fr: 'demi-frère, même père',
-      en: 'half-brother, same father',
-    });
+    expectLink(
+      rose,
+      { ...lien, fr: 'demi-frère, même père', en: 'half-brother, same father' },
+      true,
+    );
   });
 });
 
@@ -132,6 +141,6 @@ describe('CL-FAM-08 — deux mères ou deux pères', () => {
   it('frères par deux mères ; « même parent » quand le mot genré ne dirait pas lequel', () => {
     const scenario = loadScenario('CL-FAM-08', linksScenarioSchema('CL-FAM-08'));
     const tree = buildScenarioTree(scenario.arbre);
-    for (const lien of scenario.attendu.liens) expectLink(tree, lien);
+    for (const lien of scenario.attendu.liens) expectLink(tree, lien, true);
   });
 });

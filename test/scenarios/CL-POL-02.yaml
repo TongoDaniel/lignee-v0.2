@@ -1,12 +1,13 @@
 # Enfants de deux épouses différentes du même homme : « demi-frère, même père » (PAR-03).
 # Partie lien (T-020) : la fratrie calculée est vérifiée sur sa structure (demi, côté du père,
-# genre de la personne visée), et les enfants d'une même épouse sont frères. Reste : les mots en
-# français et en anglais (T-026, T-027), le nom d'usage « mon frère » affiché à côté (T-041).
+# genre de la personne visée), et les enfants d'une même épouse sont frères ; les mots français
+# (T-026) sont ceux du dictionnaire. Reste : l'anglais (T-027), le nom d'usage « mon frère »
+# affiché à côté (T-041).
 id: CL-POL-02
 titre: Enfants de deux épouses différentes
 couverture:
   teste: [lien]
-  reste: [T-026, T-027, T-041]
+  reste: [T-027, T-041]
 arbre:
   personnes: [ibrahim/M, mariam/F, aissatou/F, ousmane/M, souleymane/M, hadja/F]
   unions:

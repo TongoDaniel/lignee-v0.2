@@ -715,5 +715,626 @@
   },
   "common:treeScreen.zoomOut": {
     "status": "to-review"
+  },
+  "kinship:also": {
+    "status": "to-review"
+  },
+  "kinship:certainty.hypothetical": {
+    "status": "to-review"
+  },
+  "kinship:certainty.probable": {
+    "status": "to-review"
+  },
+  "kinship:explained.birthAndAdoptionSibling": {
+    "status": "to-review"
+  },
+  "kinship:explained.childOfCouple": {
+    "status": "to-review"
+  },
+  "kinship:explained.coSpouse": {
+    "status": "to-review"
+  },
+  "kinship:explained.fullOrHalfSibling": {
+    "status": "to-review"
+  },
+  "kinship:explained.fullSiblingNamed": {
+    "status": "to-review"
+  },
+  "kinship:explained.fullSiblingOf": {
+    "status": "to-review"
+  },
+  "kinship:explained.fullSiblingUnnamed": {
+    "status": "to-review"
+  },
+  "kinship:explained.halfSibling": {
+    "status": "to-review"
+  },
+  "kinship:explained.halfSiblingOtherUnnamed": {
+    "status": "to-review"
+  },
+  "kinship:explained.hypothetical": {
+    "status": "to-review"
+  },
+  "kinship:explained.ofNamed": {
+    "status": "to-review"
+  },
+  "kinship:explained.otherParentSimultaneous": {
+    "status": "to-review"
+  },
+  "kinship:explained.otherParentSuccessive": {
+    "status": "to-review"
+  },
+  "kinship:explained.otherParentUnknown": {
+    "status": "to-review"
+  },
+  "kinship:explained.otherSpouseSuccessive": {
+    "status": "to-review"
+  },
+  "kinship:explained.otherSpouseUnknown": {
+    "status": "to-review"
+  },
+  "kinship:explained.probable": {
+    "status": "to-review"
+  },
+  "kinship:explained.spouseEnded": {
+    "status": "to-review"
+  },
+  "kinship:explained.spouseNoEnd": {
+    "status": "to-review"
+  },
+  "kinship:explained.whoNamed": {
+    "status": "to-review"
+  },
+  "kinship:nameOf": {
+    "status": "to-review"
+  },
+  "kinship:parentNamed": {
+    "status": "to-review"
+  },
+  "kinship:result.incomplete": {
+    "status": "to-review"
+  },
+  "kinship:result.none": {
+    "status": "to-review"
+  },
+  "kinship:result.samePerson": {
+    "status": "to-review"
+  },
+  "kinship:side.named": {
+    "status": "to-review"
+  },
+  "kinship:side.plain": {
+    "status": "to-review"
+  },
+  "kinship:step.adoptiveChild.explained": {
+    "status": "to-review"
+  },
+  "kinship:step.adoptiveChild.of": {
+    "status": "to-review"
+  },
+  "kinship:step.adoptiveChild.ofOf": {
+    "status": "to-review"
+  },
+  "kinship:step.adoptiveChild.theOf": {
+    "status": "to-review"
+  },
+  "kinship:step.adoptiveChild.you": {
+    "status": "to-review"
+  },
+  "kinship:step.adoptiveChild.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:step.adoptiveChild.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:step.adoptiveParent.explained": {
+    "status": "to-review"
+  },
+  "kinship:step.adoptiveParent.of": {
+    "status": "to-review"
+  },
+  "kinship:step.adoptiveParent.ofOf": {
+    "status": "to-review"
+  },
+  "kinship:step.adoptiveParent.theOf": {
+    "status": "to-review"
+  },
+  "kinship:step.adoptiveParent.you": {
+    "status": "to-review"
+  },
+  "kinship:step.adoptiveParent.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:step.adoptiveParent.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:step.ancestor.explained": {
+    "status": "to-review"
+  },
+  "kinship:step.ancestor.of": {
+    "status": "to-review"
+  },
+  "kinship:step.ancestor.ofOf": {
+    "status": "to-review"
+  },
+  "kinship:step.ancestor.theOf": {
+    "status": "to-review"
+  },
+  "kinship:step.ancestor.you": {
+    "status": "to-review"
+  },
+  "kinship:step.ancestor.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:step.ancestor.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:step.carriedChild.explained": {
+    "status": "to-review"
+  },
+  "kinship:step.carriedChild.of": {
+    "status": "to-review"
+  },
+  "kinship:step.carriedChild.ofOf": {
+    "status": "to-review"
+  },
+  "kinship:step.carriedChild.theOf": {
+    "status": "to-review"
+  },
+  "kinship:step.carriedChild.you": {
+    "status": "to-review"
+  },
+  "kinship:step.carriedChild.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:step.carriedChild.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:step.carrier.explained": {
+    "status": "to-review"
+  },
+  "kinship:step.carrier.of": {
+    "status": "to-review"
+  },
+  "kinship:step.carrier.ofOf": {
+    "status": "to-review"
+  },
+  "kinship:step.carrier.theOf": {
+    "status": "to-review"
+  },
+  "kinship:step.carrier.you": {
+    "status": "to-review"
+  },
+  "kinship:step.carrier.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:step.carrier.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:step.coSpouse.of": {
+    "status": "to-review"
+  },
+  "kinship:step.coSpouse.ofOf": {
+    "status": "to-review"
+  },
+  "kinship:step.coSpouse.theOf": {
+    "status": "to-review"
+  },
+  "kinship:step.coSpouse.you": {
+    "status": "to-review"
+  },
+  "kinship:step.coSpouse.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:step.coSpouse.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:step.descendant.explained": {
+    "status": "to-review"
+  },
+  "kinship:step.descendant.of": {
+    "status": "to-review"
+  },
+  "kinship:step.descendant.ofOf": {
+    "status": "to-review"
+  },
+  "kinship:step.descendant.theOf": {
+    "status": "to-review"
+  },
+  "kinship:step.descendant.you": {
+    "status": "to-review"
+  },
+  "kinship:step.descendant.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:step.descendant.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:step.donor.explained": {
+    "status": "to-review"
+  },
+  "kinship:step.donor.of": {
+    "status": "to-review"
+  },
+  "kinship:step.donor.ofOf": {
+    "status": "to-review"
+  },
+  "kinship:step.donor.theOf": {
+    "status": "to-review"
+  },
+  "kinship:step.donor.you": {
+    "status": "to-review"
+  },
+  "kinship:step.donor.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:step.donor.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:step.donorChild.explained": {
+    "status": "to-review"
+  },
+  "kinship:step.donorChild.of": {
+    "status": "to-review"
+  },
+  "kinship:step.donorChild.ofOf": {
+    "status": "to-review"
+  },
+  "kinship:step.donorChild.theOf": {
+    "status": "to-review"
+  },
+  "kinship:step.donorChild.you": {
+    "status": "to-review"
+  },
+  "kinship:step.donorChild.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:step.donorChild.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:step.fosteredChild.explained": {
+    "status": "to-review"
+  },
+  "kinship:step.fosteredChild.of": {
+    "status": "to-review"
+  },
+  "kinship:step.fosteredChild.ofOf": {
+    "status": "to-review"
+  },
+  "kinship:step.fosteredChild.theOf": {
+    "status": "to-review"
+  },
+  "kinship:step.fosteredChild.you": {
+    "status": "to-review"
+  },
+  "kinship:step.fosteredChild.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:step.fosteredChild.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:step.fosteredTo.explained": {
+    "status": "to-review"
+  },
+  "kinship:step.fosteredTo.of": {
+    "status": "to-review"
+  },
+  "kinship:step.fosteredTo.ofOf": {
+    "status": "to-review"
+  },
+  "kinship:step.fosteredTo.theOf": {
+    "status": "to-review"
+  },
+  "kinship:step.fosteredTo.you": {
+    "status": "to-review"
+  },
+  "kinship:step.fosteredTo.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:step.fosteredTo.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:step.guardian.explained": {
+    "status": "to-review"
+  },
+  "kinship:step.guardian.of": {
+    "status": "to-review"
+  },
+  "kinship:step.guardian.ofOf": {
+    "status": "to-review"
+  },
+  "kinship:step.guardian.theOf": {
+    "status": "to-review"
+  },
+  "kinship:step.guardian.you": {
+    "status": "to-review"
+  },
+  "kinship:step.guardian.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:step.guardian.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:step.otherSpouse.of": {
+    "status": "to-review"
+  },
+  "kinship:step.otherSpouse.ofOf": {
+    "status": "to-review"
+  },
+  "kinship:step.otherSpouse.theOf": {
+    "status": "to-review"
+  },
+  "kinship:step.otherSpouse.you": {
+    "status": "to-review"
+  },
+  "kinship:step.otherSpouse.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:step.otherSpouse.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:step.raisedBy.explained": {
+    "status": "to-review"
+  },
+  "kinship:step.raisedBy.of": {
+    "status": "to-review"
+  },
+  "kinship:step.raisedBy.ofOf": {
+    "status": "to-review"
+  },
+  "kinship:step.raisedBy.theOf": {
+    "status": "to-review"
+  },
+  "kinship:step.raisedBy.you": {
+    "status": "to-review"
+  },
+  "kinship:step.raisedBy.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:step.raisedBy.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:step.raisedChild.explained": {
+    "status": "to-review"
+  },
+  "kinship:step.raisedChild.of": {
+    "status": "to-review"
+  },
+  "kinship:step.raisedChild.ofOf": {
+    "status": "to-review"
+  },
+  "kinship:step.raisedChild.theOf": {
+    "status": "to-review"
+  },
+  "kinship:step.raisedChild.you": {
+    "status": "to-review"
+  },
+  "kinship:step.raisedChild.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:step.raisedChild.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:step.sibling.of": {
+    "status": "to-review"
+  },
+  "kinship:step.sibling.ofOf": {
+    "status": "to-review"
+  },
+  "kinship:step.sibling.theOf": {
+    "status": "to-review"
+  },
+  "kinship:step.sibling.you": {
+    "status": "to-review"
+  },
+  "kinship:step.sibling.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:step.sibling.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:step.spouse.of": {
+    "status": "to-review"
+  },
+  "kinship:step.spouse.ofOf": {
+    "status": "to-review"
+  },
+  "kinship:step.spouse.theOf": {
+    "status": "to-review"
+  },
+  "kinship:step.spouse.you": {
+    "status": "to-review"
+  },
+  "kinship:step.spouse.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:step.spouse.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:step.ward.explained": {
+    "status": "to-review"
+  },
+  "kinship:step.ward.of": {
+    "status": "to-review"
+  },
+  "kinship:step.ward.ofOf": {
+    "status": "to-review"
+  },
+  "kinship:step.ward.theOf": {
+    "status": "to-review"
+  },
+  "kinship:step.ward.you": {
+    "status": "to-review"
+  },
+  "kinship:step.ward.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:step.ward.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:term.adoptedFullOrHalfSibling.you": {
+    "status": "to-review"
+  },
+  "kinship:term.adoptedFullOrHalfSibling.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:term.adoptedFullOrHalfSibling.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:term.adoptedFullSibling.you": {
+    "status": "to-review"
+  },
+  "kinship:term.adoptedFullSibling.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:term.adoptedFullSibling.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:term.adoptedHalfSibling.you": {
+    "status": "to-review"
+  },
+  "kinship:term.adoptedHalfSibling.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:term.adoptedHalfSibling.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:term.birthAndAdoptionSibling.you": {
+    "status": "to-review"
+  },
+  "kinship:term.birthAndAdoptionSibling.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:term.birthAndAdoptionSibling.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:term.bretonNephew.you": {
+    "status": "to-review"
+  },
+  "kinship:term.bretonNephew.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:term.bretonNephew.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:term.bretonUncle.you": {
+    "status": "to-review"
+  },
+  "kinship:term.bretonUncle.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:term.bretonUncle.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:term.childInLaw.you": {
+    "status": "to-review"
+  },
+  "kinship:term.childInLaw.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:term.childInLaw.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:term.cousin.you": {
+    "status": "to-review"
+  },
+  "kinship:term.cousin.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:term.cousin.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:term.degreeCousin.you": {
+    "status": "to-review"
+  },
+  "kinship:term.degreeCousin.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:term.degreeCousin.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:term.firstCousin.you": {
+    "status": "to-review"
+  },
+  "kinship:term.firstCousin.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:term.firstCousin.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:term.fullOrHalfSibling.you": {
+    "status": "to-review"
+  },
+  "kinship:term.fullOrHalfSibling.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:term.fullOrHalfSibling.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:term.fullSibling.you": {
+    "status": "to-review"
+  },
+  "kinship:term.fullSibling.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:term.fullSibling.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:term.halfSibling.you": {
+    "status": "to-review"
+  },
+  "kinship:term.halfSibling.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:term.halfSibling.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:term.nephew.you": {
+    "status": "to-review"
+  },
+  "kinship:term.nephew.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:term.nephew.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:term.parentInLaw.you": {
+    "status": "to-review"
+  },
+  "kinship:term.parentInLaw.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:term.parentInLaw.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:term.secondCousin.you": {
+    "status": "to-review"
+  },
+  "kinship:term.secondCousin.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:term.secondCousin.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:term.siblingInLaw.you": {
+    "status": "to-review"
+  },
+  "kinship:term.siblingInLaw.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:term.siblingInLaw.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:term.uncle.you": {
+    "status": "to-review"
+  },
+  "kinship:term.uncle.yourOf": {
+    "status": "to-review"
+  },
+  "kinship:term.uncle.yourThe": {
+    "status": "to-review"
+  },
+  "kinship:withSide": {
+    "status": "to-review"
   }
 }

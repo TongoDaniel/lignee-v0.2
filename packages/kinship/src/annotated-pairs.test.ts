@@ -1,13 +1,15 @@
 // Jeu de 200 paires annotées (T-023, plan V1 ; PRD, PAR-02 ; TRD, « Moteur de parenté », Tests),
 // joué contre le moteur : packages/kinship/test-data/paires-annotees/. Chaque paire porte
 // l'attendu structurel de ses liens (le principal, puis les autres), vérifié ici en entier, dans
-// les deux sens ; les mots français et anglais restent à rédiger (T-026, T-027) et sont comptés.
+// les deux sens, et les mots de chaque lien : français (T-026), comparés au dictionnaire ;
+// anglais encore « à rédiger » (T-027), comptés.
 // Un lien changé par le moteur, une paire mal formée ou une catégorie sous son quota font échouer
 // ces tests.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import type { Id } from '@lignee/domain';
+import { createTranslator } from '@lignee/i18n';
 import { describe, expect, it } from 'vitest';
 import { stringify } from 'yaml';
 
@@ -22,6 +24,7 @@ import {
   familySchema,
   loadPairSet,
   pairIssues,
+  pairNameOf,
   pairSetHeaderSchema,
   pairSetIssues,
   resultSignature,
@@ -31,6 +34,7 @@ import {
   type LoadedFamily,
 } from './test-support/annotated-pairs';
 import { neverEntered } from './test-support/never-entered';
+import { describeResult } from './words';
 
 const HEAVY_TIMEOUT_MS = 60_000;
 
@@ -45,7 +49,7 @@ function play({ tree }: LoadedFamily, pair: AnnotatedPair) {
   const keyOf = (id: Id) => tree.keyOf(id) ?? id;
   const forward = presentRelationships(graph, a, b, options);
   const backward = presentRelationships(graph, b, a, options);
-  return { forward, backward, keyOf };
+  return { forward, backward, keyOf, graph };
 }
 
 describe('T-023 — jeu de 200 paires annotées (PAR-02)', () => {
@@ -175,7 +179,45 @@ describe('T-023 — jeu de 200 paires annotées (PAR-02)', () => {
     HEAVY_TIMEOUT_MS,
   );
 
-  it('les mots français et anglais de chaque lien sont comptés : rédigés ou « à rédiger »', () => {
+  it(
+    'T-026 — les mots français de chaque lien sont ceux du dictionnaire (100 %), courts et expliqués',
+    () => {
+      // Dictionnaire français : `describeResult` (src/words.ts) et les messages `kinship` de
+      // @lignee/i18n. Chaque lien de chaque paire est écrit (forme courte et forme expliquée,
+      // PAR-11) et comparé aux mots calculés, dans l'ordre des liens.
+      const { families } = loadPairSet();
+      const { t } = createTranslator({ language: 'fr' });
+      const failures: string[] = [];
+      let compared = 0;
+      for (const loaded of families) {
+        for (const pair of loaded.family.paires) {
+          if (typeof pair.attendu === 'string') continue;
+          const { forward, graph } = play(loaded, pair);
+          const words = describeResult(forward, {
+            graph,
+            t,
+            nameOf: pairNameOf(loaded.tree, graph),
+          });
+          const actual =
+            words.status === 'related'
+              ? words.links.map((link) => ({ court: link.short, explique: link.explained }))
+              : [];
+          const expected = pair.attendu.map((link) => link.fr);
+          compared += expected.length;
+          try {
+            expect(actual).toEqual(expected);
+          } catch {
+            failures.push(`${pair.id} : calculé\n${stringify(actual, { lineWidth: 100 })}`);
+          }
+        }
+      }
+      expect(failures, failures.join('\n')).toEqual([]);
+      expect(compared).toBe(264);
+    },
+    HEAVY_TIMEOUT_MS,
+  );
+
+  it('les mots anglais sont comptés ; « à rédiger » accepté tant que T-027 n’est pas fait', () => {
     const { families } = loadPairSet();
     const fields = wordFields(families.map(({ family }) => family));
     const pending = (language: 'fr' | 'en') =>
@@ -185,14 +227,13 @@ describe('T-023 — jeu de 200 paires annotées (PAR-02)', () => {
       `[paires] mots à rédiger : français ${String(pending('fr'))}/${String(total)} (T-026), ` +
         `anglais ${String(pending('en'))}/${String(total)} (T-027)`,
     );
-    // Aucun dictionnaire n'existe encore (T-026, T-027) : un mot écrit ne serait vérifié par rien.
-    // Le ticket qui remplit ces champs branche ici son dictionnaire et compare chaque mot écrit.
-    // T-026 vient avant T-027 : la vérification devra alors accepter `en` encore « à rédiger », et
-    // le schéma des mots porter la forme courte et la forme expliquée (PAR-11).
-    const written = fields.filter((field) => field.words !== TO_WRITE);
+    expect(pending('fr')).toBe(0);
+    // Aucun dictionnaire anglais n'est encore vérifié (T-027) : un mot anglais écrit ne serait
+    // comparé à rien. T-027 branche ici son dictionnaire, comme le test français ci-dessus.
+    const written = fields.filter((field) => field.language === 'en' && field.words !== TO_WRITE);
     expect(
       written.map((field) => `${field.pair}[${String(field.index)}].${field.language}`),
-      'mots écrits sans dictionnaire pour les vérifier',
+      'mots anglais écrits sans dictionnaire pour les vérifier (T-027)',
     ).toEqual([]);
     expect(total).toBeGreaterThanOrEqual(200);
   });
@@ -275,7 +316,21 @@ describe('T-023 — une paire mal formée est refusée', () => {
     ['une clé inconnue', { ...good, commentaire: 'x' }, /Unrecognized key/],
     ['une catégorie inconnue', { ...good, categorie: 'divers' }, /Invalid option/],
     ['une justification absente', { ...good, pourquoi: '' }, /Too small/],
-    ['des mots vides', { ...good, attendu: [{ ...good.attendu[0], fr: '' }] }, /Too small/],
+    [
+      'des mots vides',
+      { ...good, attendu: [{ ...good.attendu[0], fr: { court: '', explique: 'votre père' } }] },
+      /Too small/,
+    ],
+    [
+      'des mots sans forme expliquée (PAR-11)',
+      { ...good, attendu: [{ ...good.attendu[0], fr: { court: 'père' } }] },
+      /Invalid input/,
+    ],
+    [
+      'des mots en une seule chaîne',
+      { ...good, attendu: [{ ...good.attendu[0], fr: 'père' }] },
+      /Invalid input/,
+    ],
     ['un attendu vide', { ...good, attendu: [] }, /expected array to have >=1/],
     ['une personne hors de la famille', { ...good, vers: 'samuel' }, /samuel is not in F99/],
     [

@@ -79,7 +79,9 @@ paires:
       - chemin: "1/1[gae+kie]"
         fratrie: { type: adoption, partage: full }
         base: [adoptive]
-        fr: à rédiger
+        fr:
+          court: "sœur par adoption"
+          explique: "fille de votre père et de votre mère, par adoption"
         en: à rédiger
   - id: F06-02
     de: tsouette
@@ -90,7 +92,9 @@ paires:
       - chemin: "1/0[kie]"
         base: [adoptive]
         cote_de: { par: kie, cote: father, type: adoptive }
-        fr: à rédiger
+        fr:
+          court: "père adoptif"
+          explique: "votre père adoptif, par adoption"
         en: à rédiger
   - id: F06-03
     de: kie
@@ -101,7 +105,9 @@ paires:
       - chemin: "0/1[kie]"
         base: [adoptive]
         cote_vers: { par: kie, cote: father, type: adoptive }
-        fr: à rédiger
+        fr:
+          court: "fille adoptive"
+          explique: "votre fille adoptive, par adoption"
         en: à rédiger
   - id: F06-04
     de: tsouette
@@ -111,7 +117,9 @@ paires:
     attendu:
       - chemin: "1/0[muine]"
         cote_de: { par: muine, cote: parent }
-        fr: à rédiger
+        fr:
+          court: "mère"
+          explique: "votre mère, par la naissance"
         en: à rédiger
   - id: F06-05
     de: nayoun
@@ -128,12 +136,16 @@ paires:
       - chemin: "1/0[kie]"
         base: [raised]
         cote_de: { par: kie, cote: parent, type: raised }
-        fr: à rédiger
+        fr:
+          court: "personne qui vous a élevé"
+          explique: "personne qui vous a élevé ; ce lien n’est pas un lien de naissance"
         en: à rédiger
       - chemin: "1/0[gae] =kie"
         alliance: { type: spouse_of_parent, autre_parent: [successive] }
         cote_de: { par: gae, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "mari de votre mère"
+          explique: "mari de Gae, votre mère, à une autre période que votre père"
         en: à rédiger
   - id: F06-07
     de: tilei
@@ -143,7 +155,9 @@ paires:
     attendu:
       - chemin: "1/0[pungom]"
         cote_de: { par: pungom, cote: father }
-        fr: à rédiger
+        fr:
+          court: "père"
+          explique: "votre père, par la naissance"
         en: à rédiger
   - id: F06-08
     de: tilei
@@ -153,7 +167,9 @@ paires:
     attendu:
       - chemin: "1/1[gae] | 1/1[kie]"
         fratrie: { type: birth, partage: half, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "demi-frère, même mère"
+          explique: "fils de votre mère et de Kie"
         en: à rédiger
   - id: F06-09
     de: djoe
@@ -164,7 +180,9 @@ paires:
       - chemin: "1/0[kie]"
         base: [fostered]
         cote_de: { par: kie, cote: parent, type: fostered }
-        fr: à rédiger
+        fr:
+          court: "personne à qui vous êtes confié"
+          explique: "personne à qui vous êtes confié ; ce lien n’est ni une naissance ni une adoption"
         en: à rédiger
   - id: F06-10
     de: kie
@@ -175,7 +193,9 @@ paires:
       - chemin: "0/1[kie]"
         base: [fostered]
         cote_vers: { par: kie, cote: parent, type: fostered }
-        fr: à rédiger
+        fr:
+          court: "enfant qui vous est confié"
+          explique: "enfant qui vous est confié ; ce lien n’est ni une naissance ni une adoption"
         en: à rédiger
   - id: F06-11
     de: djoe
@@ -186,7 +206,9 @@ paires:
       - chemin: "1/1[kie]"
         fratrie: { type: other, partage: full_or_half, cote: parent }
         base: [fostered]
-        fr: à rédiger
+        fr:
+          court: "fils de la personne à qui vous êtes confié"
+          explique: "fils de Kie, la personne à qui vous êtes confié"
         en: à rédiger
   - id: F06-12
     de: djoe
@@ -196,7 +218,9 @@ paires:
     attendu:
       - chemin: "1/0[yetchao]"
         cote_de: { par: yetchao, cote: father }
-        fr: à rédiger
+        fr:
+          court: "père"
+          explique: "votre père, par la naissance"
         en: à rédiger
   - id: F06-13
     de: djoe
@@ -208,7 +232,9 @@ paires:
         alliance: { type: spouse_of_parent, autre_parent: [none] }
         base: [fostered]
         cote_de: { par: kie, cote: parent, type: fostered }
-        fr: à rédiger
+        fr:
+          court: "épouse de la personne à qui vous êtes confié"
+          explique: "épouse de Kie, la personne à qui vous êtes confié"
         en: à rédiger
   - id: F06-14
     de: hun
@@ -219,7 +245,9 @@ paires:
       - chemin: "0/1[hun]"
         base: [guardian]
         cote_vers: { par: hun, cote: father, type: guardian }
-        fr: à rédiger
+        fr:
+          court: "pupille"
+          explique: "personne placée sous votre tutelle ; ce lien n’est pas un lien de naissance"
         en: à rédiger
   - id: F06-15
     de: zeine
@@ -230,7 +258,9 @@ paires:
       - chemin: "1/0[pei]"
         base: [donor]
         cote_de: { par: pei, cote: father, type: donor }
-        fr: à rédiger
+        fr:
+          court: "donneur"
+          explique: "personne dont le don a permis votre naissance"
         en: à rédiger
   - id: F06-16
     de: zeine
@@ -240,7 +270,9 @@ paires:
     attendu:
       - chemin: "1/0[wafuou]"
         cote_de: { par: wafuou, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "mère"
+          explique: "votre mère, par la naissance"
         en: à rédiger
   - id: F06-17
     de: djodjeou
@@ -251,7 +283,9 @@ paires:
       - chemin: "1/0[njinouia]"
         base: [surrogacy]
         cote_de: { par: njinouia, cote: parent, type: surrogacy }
-        fr: à rédiger
+        fr:
+          court: "personne qui vous a portée"
+          explique: "personne qui vous a portée pendant la grossesse, par gestation pour autrui"
         en: à rédiger
   - id: F06-18
     de: nayoun
@@ -262,7 +296,9 @@ paires:
       - chemin: "2/0[mbanyam]"
         certitude: probable
         cote_de: { par: kie, cote: father }
-        fr: à rédiger
+        fr:
+          court: "Peut-être votre grand-père par votre père"
+          explique: "père de Kie, votre père (lien probable, à confirmer)"
         en: à rédiger
   - id: F06-19
     de: kie
@@ -273,7 +309,9 @@ paires:
       - chemin: "1/0[mbanyam]"
         certitude: probable
         cote_de: { par: mbanyam, cote: father }
-        fr: à rédiger
+        fr:
+          court: "Peut-être votre père"
+          explique: "votre père, par la naissance (lien probable, à confirmer)"
         en: à rédiger
   - id: F06-20
     de: nayoun
@@ -284,7 +322,9 @@ paires:
       - chemin: "2/0[zofouou]"
         certitude: hypothetical
         cote_de: { par: gae, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "Hypothèse : votre grand-mère par votre mère"
+          explique: "mère de Gae, votre mère (hypothèse, à vérifier)"
         en: à rédiger
   - id: F06-21
     de: nayoun
@@ -295,7 +335,9 @@ paires:
       - chemin: "1/1[gae+kie]"
         fratrie: { type: birth, partage: full }
         certitude: probable
-        fr: à rédiger
+        fr:
+          court: "Peut-être votre frère"
+          explique: "fils de votre père et de votre mère (lien probable, à confirmer)"
         en: à rédiger
   - id: F06-22
     de: tsukaine
@@ -306,7 +348,9 @@ paires:
       - chemin: "1/1[maette] | 1/1[leette]"
         fratrie: { type: birth_and_adoption, partage: full }
         base: [adoptive]
-        fr: à rédiger
+        fr:
+          court: "sœur par la naissance et par adoption"
+          explique: "fille de votre parent Maette et, par adoption, de votre parent adoptif Leette"
         en: à rédiger
   - id: F06-23
     de: tsukaine
@@ -316,7 +360,9 @@ paires:
     attendu:
       - chemin: "1/1[maette]"
         fratrie: { type: birth, partage: full_or_half, cote: parent }
-        fr: à rédiger
+        fr:
+          court: "frère ou demi-frère"
+          explique: "fils de votre parent Maette ; on ne sait pas encore si vous avez les deux mêmes parents"
         en: à rédiger
   - id: F06-24
     de: tsukaine
@@ -327,7 +373,9 @@ paires:
       - chemin: "1/0[leette]"
         base: [adoptive]
         cote_de: { par: leette, cote: parent, type: adoptive }
-        fr: à rédiger
+        fr:
+          court: "mère adoptive"
+          explique: "votre mère adoptive, par adoption"
         en: à rédiger
   - id: F06-25
     de: mbupea
@@ -338,7 +386,9 @@ paires:
       - chemin: "1/0[maette] =leette"
         alliance: { type: spouse_of_parent, autre_parent: [none] }
         cote_de: { par: maette, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "épouse de votre mère"
+          explique: "épouse de Maette, votre mère"
         en: à rédiger
   - id: F06-26
     de: tilei
@@ -348,7 +398,9 @@ paires:
     attendu:
       - chemin: "1/0[gae]"
         cote_de: { par: gae, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "mère"
+          explique: "votre mère, par la naissance"
         en: à rédiger
   - id: F06-27
     de: tilei
@@ -360,5 +412,7 @@ paires:
       - chemin: "1/0[kie]"
         base: [raised]
         cote_de: { par: kie, cote: parent, type: raised }
-        fr: à rédiger
+        fr:
+          court: "personne qui vous a élevé"
+          explique: "personne qui vous a élevé ; ce lien n’est pas un lien de naissance"
         en: à rédiger

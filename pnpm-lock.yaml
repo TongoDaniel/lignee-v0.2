@@ -334,6 +334,9 @@ importers:
       '@lignee/domain':
         specifier: workspace:*
         version: link:../domain
+      '@lignee/i18n':
+        specifier: workspace:*
+        version: link:../i18n
     devDependencies:
       '@types/node':
         specifier: 'catalog:'

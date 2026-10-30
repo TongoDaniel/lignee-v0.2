@@ -161,13 +161,17 @@ paires:
     attendu:
       - chemin: "1/1[yaou]"
         fratrie: { type: birth, partage: half, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "demi-sœur, même mère"
+          explique: "fille de votre mère et de Fouyee"
         en: à rédiger
       - chemin: "2/2[meluo+tsenee]"
         certitude: probable
         cote_de: { par: sondom, cote: father }
         cote_vers: { par: fouyee, cote: father }
-        fr: à rédiger
+        fr:
+          court: "Peut-être votre cousine germaine par votre père"
+          explique: "fille de Fouyee, frère de votre père (lien probable, à confirmer)"
         en: à rédiger
       - chemin: "1/0[sondom] =ndoufeine =fouyee 0/1[fouyee]"
         alliance:
@@ -176,7 +180,9 @@ paires:
           autre_parent: [simultaneous, simultaneous]
         cote_de: { par: sondom, cote: father }
         cote_vers: { par: fouyee, cote: father }
-        fr: à rédiger
+        fr:
+          court: "fille de l’autre mari de l’épouse de votre père"
+          explique: "fille de Fouyee, autre mari de l’épouse de votre père"
         en: à rédiger
   - id: F10-02
     de: vio
@@ -186,13 +192,17 @@ paires:
     attendu:
       - chemin: "1/1[yaou] | 1/1[sondom]"
         fratrie: { type: birth, partage: half, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "demi-frère, même mère"
+          explique: "fils de votre mère et de Fouyee"
         en: à rédiger
       - chemin: "2/2[meluo+tsenee]"
         certitude: probable
         cote_de: { par: sondom, cote: father }
         cote_vers: { par: fouyee, cote: parent }
-        fr: à rédiger
+        fr:
+          court: "Peut-être votre cousin germain par votre père"
+          explique: "fils de Fouyee, frère de votre père (lien probable, à confirmer)"
         en: à rédiger
       - chemin: "1/0[sondom] =ndoufeine =fouyee 0/1[fouyee]"
         alliance:
@@ -201,7 +211,9 @@ paires:
           autre_parent: [simultaneous, simultaneous]
         cote_de: { par: sondom, cote: father }
         cote_vers: { par: fouyee, cote: parent }
-        fr: à rédiger
+        fr:
+          court: "fils de l’autre mari de l’épouse de votre père"
+          explique: "fils de Fouyee, autre mari de l’épouse de votre père"
         en: à rédiger
       - chemin: "1/0[yaou] =fouyee 1/2[meluo+tsenee]"
         alliance: { type: other, autre_parent: [successive] }
@@ -209,7 +221,9 @@ paires:
         certitude: probable
         cote_de: { par: yaou, cote: mother }
         cote_vers: { par: sondom, cote: parent, type: adoptive }
-        fr: à rédiger
+        fr:
+          court: "Peut-être le fils adoptif du frère du mari de votre mère"
+          explique: "fils adoptif de Sondom, frère du mari de votre mère (lien probable, à confirmer)"
         en: à rédiger
   - id: F10-03
     de: vio
@@ -221,19 +235,25 @@ paires:
         certitude: probable
         cote_de: { par: sondom, cote: father }
         cote_vers: { par: fouyee, cote: father }
-        fr: à rédiger
+        fr:
+          court: "Peut-être votre cousin germain par votre père"
+          explique: "fils de Fouyee, frère de votre père (lien probable, à confirmer)"
         en: à rédiger
       - chemin: "1/0[sondom] =ndoufeine 0/1[ndoufeine]"
         alliance: { type: step_sibling, autre_parent: [simultaneous, successive] }
         cote_de: { par: sondom, cote: father }
         cote_vers: { par: ndoufeine, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "fils de l’épouse de votre père"
+          explique: "fils de Ndoufeine, épouse de votre père"
         en: à rédiger
       - chemin: "1/0[yaou] =fouyee 0/1[fouyee]"
         alliance: { type: step_sibling, autre_parent: [successive, simultaneous] }
         cote_de: { par: yaou, cote: mother }
         cote_vers: { par: fouyee, cote: father }
-        fr: à rédiger
+        fr:
+          court: "fils du mari de votre mère"
+          explique: "fils de Fouyee, mari de votre mère"
         en: à rédiger
   - id: F10-04
     de: yaou
@@ -243,21 +263,29 @@ paires:
     attendu:
       - chemin: "=fouyee =ndoufeine"
         alliance: { type: co_spouse, simultaneite: simultaneous }
-        fr: à rédiger
+        fr:
+          court: "co-épouse"
+          explique: "autre épouse de Fouyee, votre mari, en même temps que vous"
         en: à rédiger
       - chemin: "=sondom =ndoufeine"
         alliance: { type: co_spouse, simultaneite: simultaneous }
-        fr: à rédiger
+        fr:
+          court: "co-épouse"
+          explique: "autre épouse de Sondom, votre mari, en même temps que vous"
         en: à rédiger
       - chemin: "=fouyee 1/1[meluo+tsenee] =ndoufeine"
         alliance: { type: spouse_of_sibling_of_spouse }
         certitude: probable
-        fr: à rédiger
+        fr:
+          court: "Peut-être votre belle-sœur"
+          explique: "épouse de Sondom, frère de votre mari (lien probable, à confirmer)"
         en: à rédiger
       - chemin: "=sondom 1/1[meluo+tsenee] =ndoufeine"
         alliance: { type: spouse_of_sibling_of_spouse }
         certitude: probable
-        fr: à rédiger
+        fr:
+          court: "Peut-être votre belle-sœur"
+          explique: "épouse de Fouyee, frère de votre mari (lien probable, à confirmer)"
         en: à rédiger
   - id: F10-05
     de: fouyee
@@ -268,17 +296,23 @@ paires:
       - chemin: "1/2[meluo+tsenee]"
         certitude: probable
         cote_vers: { par: sondom, cote: father }
-        fr: à rédiger
+        fr:
+          court: "Peut-être votre neveu"
+          explique: "fils de Sondom, votre frère (lien probable, à confirmer)"
         en: à rédiger
       - chemin: "=yaou 0/1[yaou]"
         alliance: { type: child_of_spouse, autre_parent: [successive] }
         cote_vers: { par: yaou, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "fils de votre épouse"
+          explique: "fils de votre épouse et de Sondom"
         en: à rédiger
       - chemin: "=ndoufeine =sondom 0/1[sondom]"
         alliance: { type: other, simultaneite: successive, autre_parent: [simultaneous] }
         cote_vers: { par: sondom, cote: father }
-        fr: à rédiger
+        fr:
+          court: "fils de l’autre mari de votre épouse"
+          explique: "fils de Sondom, autre mari de votre épouse"
         en: à rédiger
   - id: F10-06
     de: sondom
@@ -289,17 +323,23 @@ paires:
       - chemin: "0/1[sondom]"
         base: [adoptive]
         cote_vers: { par: sondom, cote: parent, type: adoptive }
-        fr: à rédiger
+        fr:
+          court: "fils adoptif"
+          explique: "votre fils adoptif, par adoption"
         en: à rédiger
       - chemin: "1/2[meluo+tsenee]"
         certitude: probable
         cote_vers: { par: fouyee, cote: parent }
-        fr: à rédiger
+        fr:
+          court: "Peut-être votre neveu"
+          explique: "fils de Fouyee, votre frère (lien probable, à confirmer)"
         en: à rédiger
       - chemin: "=ndoufeine =fouyee 0/1[fouyee]"
         alliance: { type: other, simultaneite: successive, autre_parent: [simultaneous] }
         cote_vers: { par: fouyee, cote: parent }
-        fr: à rédiger
+        fr:
+          court: "fils de l’autre mari de votre épouse"
+          explique: "fils de Fouyee, autre mari de votre épouse"
         en: à rédiger
   - id: F10-07
     de: livee
@@ -309,18 +349,24 @@ paires:
     attendu:
       - chemin: "1/1[fouyee]"
         fratrie: { type: birth, partage: half, cote: parent }
-        fr: à rédiger
+        fr:
+          court: "demi-frère, même parent"
+          explique: "fils de votre père et de Yaou"
         en: à rédiger
       - chemin: "2/2[meluo+tsenee]"
         base: [adoptive]
         certitude: probable
         cote_de: { par: fouyee, cote: father }
         cote_vers: { par: sondom, cote: parent, type: adoptive }
-        fr: à rédiger
+        fr:
+          court: "Peut-être le fils adoptif du frère de votre père"
+          explique: "fils adoptif de Sondom, frère de votre père (lien probable, à confirmer)"
         en: à rédiger
       - chemin: "=tsemoou =tembon"
         alliance: { type: spouse_of_spouse, simultaneite: successive }
-        fr: à rédiger
+        fr:
+          court: "autre mari de votre épouse"
+          explique: "autre mari de Tsemoou, votre épouse, à une autre période que vous"
         en: à rédiger
       - chemin: "1/0[fouyee] =ndoufeine =sondom 0/1[sondom]"
         alliance:
@@ -330,7 +376,9 @@ paires:
         base: [adoptive]
         cote_de: { par: fouyee, cote: father }
         cote_vers: { par: sondom, cote: parent, type: adoptive }
-        fr: à rédiger
+        fr:
+          court: "fils adoptif de l’autre mari de l’épouse de votre père"
+          explique: "fils adoptif de Sondom, autre mari de l’épouse de votre père"
         en: à rédiger
   - id: F10-08
     de: tembon
@@ -340,19 +388,25 @@ paires:
     attendu:
       - chemin: "=tsemoou"
         alliance: { type: spouse }
-        fr: à rédiger
+        fr:
+          court: "épouse"
+          explique: "votre épouse, union terminée"
         en: à rédiger
       - chemin: "1/1[fouyee] =tsemoou"
         alliance: { type: spouse_of_sibling }
         cote_de: { par: fouyee, cote: parent }
-        fr: à rédiger
+        fr:
+          court: "belle-sœur"
+          explique: "épouse de Livee, fils de votre père"
         en: à rédiger
       - chemin: "2/2[meluo+tsenee] =tsemoou"
         alliance: { type: other }
         base: [adoptive]
         certitude: probable
         cote_de: { par: sondom, cote: parent, type: adoptive }
-        fr: à rédiger
+        fr:
+          court: "Peut-être l’épouse de votre cousin germain par votre parent adoptif Sondom"
+          explique: "épouse de Livee, fils du frère de votre père adoptif (lien probable, à confirmer)"
         en: à rédiger
   - id: F10-09
     de: natoa
@@ -364,13 +418,17 @@ paires:
         certitude: probable
         cote_de: { par: mbiette, cote: mother }
         cote_vers: { par: goupiine, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "Peut-être votre cousin germain par votre mère"
+          explique: "fils de Goupiine, sœur de votre mère (lien probable, à confirmer)"
         en: à rédiger
       - chemin: "3/3[meluo+tsenee]"
         certitude: probable
         cote_de: { par: panuo, cote: father }
         cote_vers: { par: goupiine, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "Peut-être votre cousin issu de germain par votre père"
+          explique: "petit-fils de Tchoou, sœur du père de votre père (lien probable, à confirmer)"
         en: à rédiger
   - id: F10-10
     de: panuo
@@ -382,9 +440,13 @@ paires:
         certitude: probable
         cote_de: { par: boumbon, cote: father }
         cote_vers: { par: tchoou, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "Peut-être votre cousine germaine par votre père"
+          explique: "fille de Tchoou, sœur de votre père (lien probable, à confirmer)"
         en: à rédiger
       - chemin: "=mbiette"
         alliance: { type: spouse }
-        fr: à rédiger
+        fr:
+          court: "épouse"
+          explique: "votre épouse, sans fin d’union connue"
         en: à rédiger

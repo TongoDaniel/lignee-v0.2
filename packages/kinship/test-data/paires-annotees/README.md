@@ -21,12 +21,16 @@ Jeu de test de PAR-02 (« 100 % du jeu de test de 200 paires, en français et en
   attendu: # `aucun` (« Lien non disponible »), `meme_personne`, ou les liens dans l'ordre
     - chemin: '1/1[zolae]'
       fratrie: { type: birth, partage: half, cote: mother }
-      fr: à rédiger # T-026
+      fr: # T-026 : forme courte et forme expliquée (PAR-11)
+        court: 'demi-frère, même mère'
+        explique: 'fils de votre mère et de Yalom'
       en: à rédiger # T-027
     - chemin: '2/2[kwengim+noe]'
       cote_de: { par: yemui, cote: father }
       cote_vers: { par: yalom, cote: father }
-      fr: à rédiger
+      fr:
+        court: 'cousin germain par votre père'
+        explique: 'fils de Yalom, frère de votre père'
       en: à rédiger
 ```
 
@@ -40,7 +44,7 @@ Attendu structurel de chaque lien présenté (`presentRelationships`, ADR 0021),
 | `base`                 | Types non biologiques du lien affiché (`adoptive`, `raised`, `fostered`, `guardian`, `donor`, `surrogacy`) ; absent : naissance (PAR-06)                                                                                                                                                                  |
 | `certitude`            | `probable` ou `hypothetical` ; absente : certain (PAR-08)                                                                                                                                                                                                                                                 |
 | `cote_de`, `cote_vers` | Hors fratrie : parent par lequel monte A (et B, lu de B vers A), son `cote`, et `type` s'il n'est pas de naissance                                                                                                                                                                                        |
-| `fr`, `en`             | Mots du lien : « à rédiger » tant que T-026 et T-027 ne les ont pas écrits                                                                                                                                                                                                                                |
+| `fr`, `en`             | Mots du lien : `{ court, explique }` (forme courte et forme expliquée, PAR-11), ou « à rédiger » tant que le ticket de la langue ne les a pas écrits (T-027 pour l’anglais). Noms de la forme expliquée : la clé de la personne avec une majuscule, aucun pour une place à compléter ni pour `sans_prenom` |
 
 Non comparés : la fin des unions, leur type, l'état de l'autre parent d'une fratrie. À distance égale, l'ordre des liens suit les identifiants (ADR 0010, point 5) : il dépend de l'ordre des personnes dans le fichier.
 
@@ -49,10 +53,10 @@ Non comparés : la fin des unions, leur type, l'état de l'autre parent d'une fr
 - forme : schéma strict ; chaque personne citée existe dans la famille ; segments lisibles, ancêtres triés ; fratrie si et seulement si 1 et 1, alliance si et seulement si une union ; identifiants et paires uniques ; total exact. Des paires mal formées sont refusées (tests dédiés) ;
 - quotas : chaque catégorie au moins à son quota, et la table ci-dessous identique à `jeu.yaml` et aux comptes ;
 - partie structurelle : 100 % des paires, liens dans l'ordre ; le sens inverse est exactement l'inverse ; retirer le chemin principal d'une paire change sa signature (le jeu voit un lien changé) ;
-- mots : comptés par langue ; tant qu'aucun dictionnaire n'est branché, un mot écrit fait échouer le test (T-026 et T-027 branchent leur dictionnaire et comparent chaque mot écrit).
+- mots : français (T-026) : chaque lien écrit, forme courte et forme expliquée, et identique aux mots du dictionnaire (`describeResult` de `src/words.ts`, messages `kinship` de `@lignee/i18n`), 100 % des 264 liens ; anglais : comptés, « à rédiger » accepté, un mot écrit fait échouer le test tant que T-027 n'a pas branché son dictionnaire.
 - vocabulaire : chaque forme de base de PAR-02 (ligne directe et collatéraux jusqu'aux issus de germains, petite-nièce, « à la mode de Bretagne », degré civil, fratries, alliances), pour une personne visée homme et femme, une personne de genre « autre » et chaque lien non biologique, reste couverte par au moins une paire (`vocabularyKeys`).
 
-Pour T-026 et T-027 : T-026 vient avant T-027, la vérification des mots devra donc accepter un `en` encore « à rédiger » ; et le schéma des mots devra porter la forme courte et la forme expliquée de chaque lien (PAR-11), par exemple `fr: { court, explique }`.
+Pour T-027 : remplir chaque `en: à rédiger` par `{ court, explique }`, et brancher le dictionnaire anglais dans le test des mots, comme le français.
 
 Un attendu ne se recopie jamais du moteur sans être relu : une paire dont le calcul change est relue contre les règles (cahier, ADR) avant toute correction du fichier.
 

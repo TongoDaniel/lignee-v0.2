@@ -64,12 +64,16 @@ paires:
     attendu:
       - chemin: "1/1[zolae]"
         fratrie: { type: birth, partage: half, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "demi-frère, même mère"
+          explique: "fils de votre mère et de Yalom"
         en: à rédiger
       - chemin: "2/2[kwengim+noe]"
         cote_de: { par: yemui, cote: father }
         cote_vers: { par: yalom, cote: father }
-        fr: à rédiger
+        fr:
+          court: "cousin germain par votre père"
+          explique: "fils de Yalom, frère de votre père"
         en: à rédiger
   - id: F03-02
     de: gaine
@@ -79,12 +83,16 @@ paires:
     attendu:
       - chemin: "1/1[zolae]"
         fratrie: { type: birth, partage: half, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "demi-sœur, même mère"
+          explique: "fille de votre mère et de Yalom"
         en: à rédiger
       - chemin: "2/2[kwengim+noe]"
         cote_de: { par: yemui, cote: father }
         cote_vers: { par: yalom, cote: father }
-        fr: à rédiger
+        fr:
+          court: "cousine germaine par votre père"
+          explique: "fille de Yalom, frère de votre père"
         en: à rédiger
   - id: F03-03
     de: nugeou
@@ -94,12 +102,16 @@ paires:
     attendu:
       - chemin: "2/1[kwengim+noe]"
         cote_de: { par: yemui, cote: father }
-        fr: à rédiger
+        fr:
+          court: "oncle par votre père"
+          explique: "frère de Yemui, votre père"
         en: à rédiger
       - chemin: "1/0[zolae] =yalom"
         alliance: { type: spouse_of_parent, autre_parent: [successive] }
         cote_de: { par: zolae, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "mari de votre mère"
+          explique: "mari de Zolae, votre mère, à une autre période que votre père"
         en: à rédiger
   - id: F03-04
     de: sovee
@@ -109,12 +121,16 @@ paires:
     attendu:
       - chemin: "2/1[kwengim+noe]"
         cote_de: { par: yalom, cote: father }
-        fr: à rédiger
+        fr:
+          court: "oncle par votre père"
+          explique: "frère de Yalom, votre père"
         en: à rédiger
       - chemin: "1/0[zolae] =yemui"
         alliance: { type: spouse_of_parent, autre_parent: [successive] }
         cote_de: { par: zolae, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "mari de votre mère"
+          explique: "mari de Zolae, votre mère, à une autre période que votre père"
         en: à rédiger
   - id: F03-05
     de: sam
@@ -125,13 +141,17 @@ paires:
       - chemin: "2/2[kwengim+noe]"
         cote_de: { par: yalom, cote: father }
         cote_vers: { par: yemui, cote: father }
-        fr: à rédiger
+        fr:
+          court: "cousin germain par votre père"
+          explique: "fils de Yemui, frère de votre père"
         en: à rédiger
       - chemin: "1/0[yalom] =zolae 0/1[zolae]"
         alliance: { type: step_sibling, autre_parent: [simultaneous, successive] }
         cote_de: { par: yalom, cote: father }
         cote_vers: { par: zolae, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "fils de l’épouse de votre père"
+          explique: "fils de Zolae, épouse de votre père"
         en: à rédiger
   - id: F03-06
     de: sam
@@ -141,13 +161,17 @@ paires:
     attendu:
       - chemin: "1/1[yalom]"
         fratrie: { type: birth, partage: half, cote: father }
-        fr: à rédiger
+        fr:
+          court: "demi-frère, même père"
+          explique: "fils de votre père et de Zolae"
         en: à rédiger
       - chemin: "2/1[kwengim+noe] =zolae 0/1[zolae]"
         alliance: { type: other, autre_parent: [successive] }
         cote_de: { par: yalom, cote: father }
         cote_vers: { par: zolae, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "fils de l’épouse de votre oncle par votre père"
+          explique: "fils de Zolae, épouse du frère de votre père"
         en: à rédiger
   - id: F03-07
     de: lefeou
@@ -157,11 +181,15 @@ paires:
     attendu:
       - chemin: "=yalom =zolae"
         alliance: { type: co_spouse, simultaneite: simultaneous }
-        fr: à rédiger
+        fr:
+          court: "co-épouse"
+          explique: "autre épouse de Yalom, votre mari, en même temps que vous"
         en: à rédiger
       - chemin: "=yalom 1/1[kwengim+noe] =zolae"
         alliance: { type: spouse_of_sibling_of_spouse }
-        fr: à rédiger
+        fr:
+          court: "belle-sœur"
+          explique: "épouse de Yemui, frère de votre mari"
         en: à rédiger
   - id: F03-08
     de: lefeou
@@ -172,12 +200,16 @@ paires:
       - chemin: "=yalom =zolae 0/1[zolae]"
         alliance: { type: other, simultaneite: simultaneous, autre_parent: [successive] }
         cote_vers: { par: zolae, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "fils de votre co-épouse"
+          explique: "fils de Zolae, autre épouse de votre mari"
         en: à rédiger
       - chemin: "=yalom 1/2[kwengim+noe]"
         alliance: { type: other }
         cote_vers: { par: yemui, cote: father }
-        fr: à rédiger
+        fr:
+          court: "fils du frère de votre mari"
+          explique: "fils de Yemui, frère de votre mari"
         en: à rédiger
   - id: F03-09
     de: nugeou
@@ -187,12 +219,16 @@ paires:
     attendu:
       - chemin: "2/0[kwengim]"
         cote_de: { par: yemui, cote: father }
-        fr: à rédiger
+        fr:
+          court: "grand-père par votre père"
+          explique: "père de Yemui, votre père"
         en: à rédiger
       - chemin: "1/0[zolae] =yalom 1/0[kwengim]"
         alliance: { type: other, autre_parent: [successive] }
         cote_de: { par: zolae, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "père du mari de votre mère"
+          explique: "père de Yalom, mari de votre mère"
         en: à rédiger
   - id: F03-10
     de: zolae
@@ -202,11 +238,15 @@ paires:
     attendu:
       - chemin: "=yemui 1/0[kwengim]"
         alliance: { type: parent_of_spouse }
-        fr: à rédiger
+        fr:
+          court: "beau-père"
+          explique: "père de Yemui, votre mari"
         en: à rédiger
       - chemin: "=yalom 1/0[kwengim]"
         alliance: { type: parent_of_spouse }
-        fr: à rédiger
+        fr:
+          court: "beau-père"
+          explique: "père de Yalom, votre mari"
         en: à rédiger
   - id: F03-11
     de: mboutim
@@ -216,12 +256,16 @@ paires:
     attendu:
       - chemin: "1/1[tasao]"
         fratrie: { type: birth, partage: half, cote: father }
-        fr: à rédiger
+        fr:
+          court: "demi-sœur, même père"
+          explique: "fille de votre père et de Njovoou"
         en: à rédiger
       - chemin: "2/2[haette+kwio]"
         cote_de: { par: ndohoette, cote: mother }
         cote_vers: { par: njovoou, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "cousine germaine par votre mère"
+          explique: "fille de Njovoou, sœur de votre mère"
         en: à rédiger
   - id: F03-12
     de: mboutim
@@ -231,12 +275,16 @@ paires:
     attendu:
       - chemin: "2/1[haette+kwio]"
         cote_de: { par: ndohoette, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "tante par votre mère"
+          explique: "sœur de Ndohoette, votre mère"
         en: à rédiger
       - chemin: "1/0[tasao] =njovoou"
         alliance: { type: spouse_of_parent, autre_parent: [simultaneous] }
         cote_de: { par: tasao, cote: father }
-        fr: à rédiger
+        fr:
+          court: "épouse de votre père"
+          explique: "épouse de Tasao, votre père, en même temps que votre mère"
         en: à rédiger
   - id: F03-13
     de: ndohoette
@@ -246,11 +294,15 @@ paires:
     attendu:
       - chemin: "1/1[haette+kwio]"
         fratrie: { type: birth, partage: full }
-        fr: à rédiger
+        fr:
+          court: "sœur"
+          explique: "fille de votre père et de votre mère"
         en: à rédiger
       - chemin: "=tasao =njovoou"
         alliance: { type: co_spouse, simultaneite: simultaneous }
-        fr: à rédiger
+        fr:
+          court: "co-épouse"
+          explique: "autre épouse de Tasao, votre mari, en même temps que vous"
         en: à rédiger
   - id: F03-14
     de: tasao
@@ -260,11 +312,15 @@ paires:
     attendu:
       - chemin: "=njovoou"
         alliance: { type: spouse }
-        fr: à rédiger
+        fr:
+          court: "épouse"
+          explique: "votre épouse, sans fin d’union connue"
         en: à rédiger
       - chemin: "=ndohoette 1/1[haette+kwio]"
         alliance: { type: sibling_of_spouse }
-        fr: à rédiger
+        fr:
+          court: "belle-sœur"
+          explique: "sœur de Ndohoette, votre épouse"
         en: à rédiger
   - id: F03-15
     de: kwio
@@ -274,12 +330,16 @@ paires:
     attendu:
       - chemin: "0/2[kwio]"
         cote_vers: { par: ndohoette, cote: mother }
-        fr: à rédiger
+        fr:
+          court: "petit-fils"
+          explique: "fils de Ndohoette, votre fille"
         en: à rédiger
       - chemin: "0/1[kwio] =tasao 0/1[tasao]"
         alliance: { type: other, autre_parent: [simultaneous] }
         cote_vers: { par: tasao, cote: father }
-        fr: à rédiger
+        fr:
+          court: "fils du mari de votre fille"
+          explique: "fils de Tasao, mari de votre fille"
         en: à rédiger
   - id: F03-16
     de: noa
@@ -290,7 +350,9 @@ paires:
       - chemin: "1/0[yalom] =lefeou"
         alliance: { type: spouse_of_parent, autre_parent: [simultaneous] }
         cote_de: { par: yalom, cote: father }
-        fr: à rédiger
+        fr:
+          court: "épouse de votre père"
+          explique: "épouse de Yalom, votre père, en même temps que votre mère"
         en: à rédiger
   - id: F03-17
     de: nugeou
@@ -302,7 +364,9 @@ paires:
       - chemin: "2/2[kwengim+noe]"
         cote_de: { par: yemui, cote: father }
         cote_vers: { par: yalom, cote: father }
-        fr: à rédiger
+        fr:
+          court: "cousin germain par votre père"
+          explique: "fils de Yalom, frère de votre père"
         en: à rédiger
   - id: F03-18
     de: sam

@@ -13,7 +13,8 @@
     "test:budget": "vitest run src/budget.test.ts --no-file-parallelism"
   },
   "dependencies": {
-    "@lignee/domain": "workspace:*"
+    "@lignee/domain": "workspace:*",
+    "@lignee/i18n": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",

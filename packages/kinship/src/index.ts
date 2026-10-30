@@ -1,5 +1,6 @@
-// Point d'entrée de @lignee/kinship : graphe de parenté et calcul structurel des liens (TRD,
-// « Moteur de parenté », question 1). Paquet pur : ni réseau, ni base, ni Node, ni React.
+// Point d'entrée de @lignee/kinship : graphe de parenté, calcul structurel des liens (TRD,
+// « Moteur de parenté », question 1) et leurs mots (question 2, via @lignee/i18n). Paquet pur :
+// ni réseau, ni base, ni Node, ni React.
 export {
   AllianceContext,
   EMPTY_ALLIANCE_CONTEXT,
@@ -89,3 +90,12 @@ export {
   type StepSiblingLink,
   type StepSiblingVia,
 } from './siblings';
+export {
+  alsoText,
+  describeLink,
+  describeResult,
+  type LinkWords,
+  type ResultWords,
+  type Translate,
+  type WordsContext,
+} from './words';

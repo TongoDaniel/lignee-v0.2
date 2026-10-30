@@ -11,12 +11,13 @@
 # sont demi-frères par leur mère et cousins par leurs pères (UNI-21, PAR-05) ; pour C1, W2 est
 # son demi-frère par leur père, et aussi le fils de l'épouse de son oncle André ; W1 est sa
 # cousine, et aussi la fille de l'épouse de son père. Les deux sens sont vérifiés.
-# Reste : les mots en français et en anglais (T-026, T-027).
+# Mots français (T-026) : les mots calculés par le dictionnaire (packages/kinship/src/words.ts)
+# sont ceux de chaque lien, le principal puis « aussi ». Reste : les mots en anglais (T-027).
 id: CL-POL-09
 titre: Lévirat, la veuve épouse le frère du défunt, déjà marié
 couverture:
   teste: [disposition, lien]
-  reste: [T-026, T-027]
+  reste: [T-027]
 arbre:
   personnes: [pa/M, andre/M, wanda/F, benoit/M, claire/F, w1/F, w2/M, c1/F]
   unions:
@@ -84,10 +85,10 @@ attendu:
       fr: "demi-frère, même père"
       en: "half-brother, same father"
       aussi:
-        - { fr: "fils de l'épouse de votre oncle", en: "son of your uncle's wife" }
+        - { fr: "fils de l’épouse de votre oncle par votre père", en: "son of your uncle's wife" }
     - de: c1
       vers: w1
       fr: "cousine par votre père"
       en: "cousin through your father"
       aussi:
-        - { fr: "fille de l'épouse de votre père", en: "daughter of your father's wife" }
+        - { fr: "fille de l’épouse de votre père", en: "daughter of your father's wife" }
