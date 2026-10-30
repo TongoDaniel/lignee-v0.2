@@ -287,6 +287,450 @@
   "common:people.count": {
     "status": "to-review"
   },
+  "common:personForm.backHint": {
+    "status": "to-review"
+  },
+  "common:personForm.birth.date": {
+    "status": "to-review"
+  },
+  "common:personForm.birth.place": {
+    "status": "to-review"
+  },
+  "common:personForm.birth.placeHint": {
+    "status": "to-review"
+  },
+  "common:personForm.birth.title": {
+    "status": "to-review"
+  },
+  "common:personForm.coherence.bornAfterMotherDeath": {
+    "status": "to-review"
+  },
+  "common:personForm.coherence.bornLongAfterFatherDeath": {
+    "status": "to-review"
+  },
+  "common:personForm.coherence.deathBeforeBirth": {
+    "status": "to-review"
+  },
+  "common:personForm.coherence.implausibleAge": {
+    "status": "to-review"
+  },
+  "common:personForm.coherence.intro": {
+    "status": "to-review"
+  },
+  "common:personForm.coherence.parentTooYoung": {
+    "status": "to-review"
+  },
+  "common:personForm.coherence.parentYoungerThanChild": {
+    "status": "to-review"
+  },
+  "common:personForm.coherence.title": {
+    "status": "to-review"
+  },
+  "common:personForm.date.day": {
+    "status": "to-review"
+  },
+  "common:personForm.date.decade": {
+    "status": "to-review"
+  },
+  "common:personForm.date.decadeDescription": {
+    "status": "to-review"
+  },
+  "common:personForm.date.errors.dayInvalid": {
+    "status": "to-review"
+  },
+  "common:personForm.date.errors.dayNeedsMonth": {
+    "status": "to-review"
+  },
+  "common:personForm.date.errors.decadeNoMonth": {
+    "status": "to-review"
+  },
+  "common:personForm.date.errors.decadeYearInvalid": {
+    "status": "to-review"
+  },
+  "common:personForm.date.errors.invalidDate": {
+    "status": "to-review"
+  },
+  "common:personForm.date.errors.monthInvalid": {
+    "status": "to-review"
+  },
+  "common:personForm.date.errors.precisionDiffers": {
+    "status": "to-review"
+  },
+  "common:personForm.date.errors.rangeOrder": {
+    "status": "to-review"
+  },
+  "common:personForm.date.errors.textRequired": {
+    "status": "to-review"
+  },
+  "common:personForm.date.errors.yearInvalid": {
+    "status": "to-review"
+  },
+  "common:personForm.date.errors.yearRequired": {
+    "status": "to-review"
+  },
+  "common:personForm.date.first": {
+    "status": "to-review"
+  },
+  "common:personForm.date.hijri": {
+    "status": "to-review"
+  },
+  "common:personForm.date.mode": {
+    "status": "to-review"
+  },
+  "common:personForm.date.modes.about": {
+    "status": "to-review"
+  },
+  "common:personForm.date.modes.after": {
+    "status": "to-review"
+  },
+  "common:personForm.date.modes.before": {
+    "status": "to-review"
+  },
+  "common:personForm.date.modes.between": {
+    "status": "to-review"
+  },
+  "common:personForm.date.modes.calculated": {
+    "status": "to-review"
+  },
+  "common:personForm.date.modes.exact": {
+    "status": "to-review"
+  },
+  "common:personForm.date.modes.none": {
+    "status": "to-review"
+  },
+  "common:personForm.date.modes.text": {
+    "status": "to-review"
+  },
+  "common:personForm.date.month": {
+    "status": "to-review"
+  },
+  "common:personForm.date.second": {
+    "status": "to-review"
+  },
+  "common:personForm.date.text": {
+    "status": "to-review"
+  },
+  "common:personForm.date.textPlaceholder": {
+    "status": "to-review"
+  },
+  "common:personForm.date.year": {
+    "status": "to-review"
+  },
+  "common:personForm.death.cause": {
+    "status": "to-review"
+  },
+  "common:personForm.death.causeNote": {
+    "status": "to-review"
+  },
+  "common:personForm.death.date": {
+    "status": "to-review"
+  },
+  "common:personForm.death.place": {
+    "status": "to-review"
+  },
+  "common:personForm.death.title": {
+    "status": "to-review"
+  },
+  "common:personForm.delete.action": {
+    "status": "to-review"
+  },
+  "common:personForm.delete.alsoRemoves": {
+    "status": "to-review"
+  },
+  "common:personForm.delete.confirm": {
+    "status": "to-review"
+  },
+  "common:personForm.delete.confirmLabel": {
+    "status": "to-review"
+  },
+  "common:personForm.delete.facts": {
+    "status": "to-review"
+  },
+  "common:personForm.delete.failed": {
+    "status": "to-review"
+  },
+  "common:personForm.delete.irreversible": {
+    "status": "to-review"
+  },
+  "common:personForm.delete.keep": {
+    "status": "to-review"
+  },
+  "common:personForm.delete.links": {
+    "status": "to-review"
+  },
+  "common:personForm.delete.names": {
+    "status": "to-review"
+  },
+  "common:personForm.delete.nothingElse": {
+    "status": "to-review"
+  },
+  "common:personForm.delete.title": {
+    "status": "to-review"
+  },
+  "common:personForm.delete.titles": {
+    "status": "to-review"
+  },
+  "common:personForm.delete.unions": {
+    "status": "to-review"
+  },
+  "common:personForm.errors.cannotForgetName": {
+    "status": "to-review"
+  },
+  "common:personForm.errors.nameRequired": {
+    "status": "to-review"
+  },
+  "common:personForm.errors.occupationRequired": {
+    "status": "to-review"
+  },
+  "common:personForm.errors.record.authorMismatch": {
+    "status": "to-review"
+  },
+  "common:personForm.errors.record.baseVersionMismatch": {
+    "status": "to-review"
+  },
+  "common:personForm.errors.record.coherenceRefusal": {
+    "status": "to-review"
+  },
+  "common:personForm.errors.record.danglingReference": {
+    "status": "to-review"
+  },
+  "common:personForm.errors.record.duplicateId": {
+    "status": "to-review"
+  },
+  "common:personForm.errors.record.duplicateMutation": {
+    "status": "to-review"
+  },
+  "common:personForm.errors.record.duplicateVisibilityRule": {
+    "status": "to-review"
+  },
+  "common:personForm.errors.record.foreignAuthor": {
+    "status": "to-review"
+  },
+  "common:personForm.errors.record.invalidObject": {
+    "status": "to-review"
+  },
+  "common:personForm.errors.record.invalidSimultaneityAnswer": {
+    "status": "to-review"
+  },
+  "common:personForm.errors.record.personWithoutName": {
+    "status": "to-review"
+  },
+  "common:personForm.errors.record.privacyBarrier": {
+    "status": "to-review"
+  },
+  "common:personForm.errors.record.unknownObject": {
+    "status": "to-review"
+  },
+  "common:personForm.errors.record.unknownTree": {
+    "status": "to-review"
+  },
+  "common:personForm.errors.record.unsupportedReference": {
+    "status": "to-review"
+  },
+  "common:personForm.errors.titleLabelRequired": {
+    "status": "to-review"
+  },
+  "common:personForm.failed": {
+    "status": "to-review"
+  },
+  "common:personForm.identity.alive": {
+    "status": "to-review"
+  },
+  "common:personForm.identity.gender": {
+    "status": "to-review"
+  },
+  "common:personForm.identity.no": {
+    "status": "to-review"
+  },
+  "common:personForm.identity.title": {
+    "status": "to-review"
+  },
+  "common:personForm.identity.unspecified": {
+    "status": "to-review"
+  },
+  "common:personForm.identity.yes": {
+    "status": "to-review"
+  },
+  "common:personForm.loading": {
+    "status": "to-review"
+  },
+  "common:personForm.names.add": {
+    "status": "to-review"
+  },
+  "common:personForm.names.dated": {
+    "status": "to-review"
+  },
+  "common:personForm.names.displayForm": {
+    "status": "to-review"
+  },
+  "common:personForm.names.end": {
+    "status": "to-review"
+  },
+  "common:personForm.names.formerNote": {
+    "status": "to-review"
+  },
+  "common:personForm.names.givenNames": {
+    "status": "to-review"
+  },
+  "common:personForm.names.remove": {
+    "status": "to-review"
+  },
+  "common:personForm.names.removeLabel": {
+    "status": "to-review"
+  },
+  "common:personForm.names.rowTitle": {
+    "status": "to-review"
+  },
+  "common:personForm.names.singleForm": {
+    "status": "to-review"
+  },
+  "common:personForm.names.singleFormDescription": {
+    "status": "to-review"
+  },
+  "common:personForm.names.split": {
+    "status": "to-review"
+  },
+  "common:personForm.names.splitHintGivenFirst": {
+    "status": "to-review"
+  },
+  "common:personForm.names.splitHintSurnameFirst": {
+    "status": "to-review"
+  },
+  "common:personForm.names.start": {
+    "status": "to-review"
+  },
+  "common:personForm.names.surname": {
+    "status": "to-review"
+  },
+  "common:personForm.names.title": {
+    "status": "to-review"
+  },
+  "common:personForm.names.type": {
+    "status": "to-review"
+  },
+  "common:personForm.notes.label": {
+    "status": "to-review"
+  },
+  "common:personForm.notFound": {
+    "status": "to-review"
+  },
+  "common:personForm.noTree": {
+    "status": "to-review"
+  },
+  "common:personForm.occupations.add": {
+    "status": "to-review"
+  },
+  "common:personForm.occupations.date": {
+    "status": "to-review"
+  },
+  "common:personForm.occupations.place": {
+    "status": "to-review"
+  },
+  "common:personForm.occupations.remove": {
+    "status": "to-review"
+  },
+  "common:personForm.occupations.removeLabel": {
+    "status": "to-review"
+  },
+  "common:personForm.occupations.title": {
+    "status": "to-review"
+  },
+  "common:personForm.occupations.value": {
+    "status": "to-review"
+  },
+  "common:personForm.problems": {
+    "status": "to-review"
+  },
+  "common:personForm.removeHint": {
+    "status": "to-review"
+  },
+  "common:personForm.residences.add": {
+    "status": "to-review"
+  },
+  "common:personForm.residences.date": {
+    "status": "to-review"
+  },
+  "common:personForm.residences.place": {
+    "status": "to-review"
+  },
+  "common:personForm.residences.remove": {
+    "status": "to-review"
+  },
+  "common:personForm.residences.removeLabel": {
+    "status": "to-review"
+  },
+  "common:personForm.residences.title": {
+    "status": "to-review"
+  },
+  "common:personForm.saveAnyway": {
+    "status": "to-review"
+  },
+  "common:personForm.saveEdit": {
+    "status": "to-review"
+  },
+  "common:personForm.saveFailed": {
+    "status": "to-review"
+  },
+  "common:personForm.saveHint": {
+    "status": "to-review"
+  },
+  "common:personForm.saveNew": {
+    "status": "to-review"
+  },
+  "common:personForm.saveNewLabel": {
+    "status": "to-review"
+  },
+  "common:personForm.suggestFormer.accept": {
+    "status": "to-review"
+  },
+  "common:personForm.suggestFormer.body": {
+    "status": "to-review"
+  },
+  "common:personForm.suggestFormer.bodySeen": {
+    "status": "to-review"
+  },
+  "common:personForm.suggestFormer.keep": {
+    "status": "to-review"
+  },
+  "common:personForm.suggestFormer.title": {
+    "status": "to-review"
+  },
+  "common:personForm.titleEdit": {
+    "status": "to-review"
+  },
+  "common:personForm.titleNew": {
+    "status": "to-review"
+  },
+  "common:personForm.titles.add": {
+    "status": "to-review"
+  },
+  "common:personForm.titles.end": {
+    "status": "to-review"
+  },
+  "common:personForm.titles.label": {
+    "status": "to-review"
+  },
+  "common:personForm.titles.labelHint": {
+    "status": "to-review"
+  },
+  "common:personForm.titles.remove": {
+    "status": "to-review"
+  },
+  "common:personForm.titles.removeLabel": {
+    "status": "to-review"
+  },
+  "common:personForm.titles.start": {
+    "status": "to-review"
+  },
+  "common:personForm.titles.title": {
+    "status": "to-review"
+  },
+  "common:personForm.unknown.description": {
+    "status": "to-review"
+  },
+  "common:personForm.unknown.label": {
+    "status": "to-review"
+  },
   "common:privacy.onlyYou": {
     "status": "to-review"
   },
@@ -296,19 +740,37 @@
   "common:profile.dates.about": {
     "status": "to-review"
   },
+  "common:profile.dates.aboutDecade": {
+    "status": "to-review"
+  },
   "common:profile.dates.after": {
+    "status": "to-review"
+  },
+  "common:profile.dates.afterDecade": {
     "status": "to-review"
   },
   "common:profile.dates.before": {
     "status": "to-review"
   },
+  "common:profile.dates.beforeDecade": {
+    "status": "to-review"
+  },
   "common:profile.dates.between": {
+    "status": "to-review"
+  },
+  "common:profile.dates.betweenDecades": {
     "status": "to-review"
   },
   "common:profile.dates.decade": {
     "status": "to-review"
   },
   "common:profile.dates.hijri": {
+    "status": "to-review"
+  },
+  "common:profile.edit": {
+    "status": "to-review"
+  },
+  "common:profile.editHint": {
     "status": "to-review"
   },
   "common:profile.failed": {
@@ -432,6 +894,12 @@
     "status": "to-review"
   },
   "common:tree.personJoined": {
+    "status": "to-review"
+  },
+  "common:treeScreen.addPerson": {
+    "status": "to-review"
+  },
+  "common:treeScreen.addPersonHint": {
     "status": "to-review"
   },
   "common:treeScreen.bornIn": {

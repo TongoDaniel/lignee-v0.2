@@ -1,12 +1,12 @@
 # Noms générés. Le surnom sert de nom affiché ; le nom de naissance reste à compléter. La
 # personne est connue : « à compléter » est une nature, pas l'absence d'un nom de naissance.
-# La fiche (T-024) affiche le surnom comme nom, sans inventer de nom de naissance. Reste : la
-# saisie (T-031).
+# La fiche (T-024) affiche le surnom comme nom, sans inventer de nom de naissance. La
+# saisie à la main (T-031) est la partie saisie.
 id: CL-FAM-17
 titre: Personne connue seulement par un surnom
 couverture:
-  teste: [modele, fiche]
-  reste: [T-031]
+  teste: [modele, fiche, saisie]
+  reste: []
 arbre:
   personnes: [bobo/M]
   noms:
@@ -18,3 +18,12 @@ attendu:
   nom_de_naissance: absent
   fiche:
     - { personne: bobo, nom_affiche: "Tonton Bobo", nom_de_naissance: absent, autres_noms: [] }
+  # T-031 : un surnom suffit pour enregistrer une personne connue ; aucun nom de naissance n'est
+  # inventé.
+  saisie:
+    personnes:
+      - formulaire:
+          noms: [{ type: surnom, forme: "Tonton Bobo" }]
+        resultat:
+          nature: connue
+          noms: [{ type: surnom, forme: "Tonton Bobo" }]

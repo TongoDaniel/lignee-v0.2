@@ -15,6 +15,8 @@ import {
 import {
   fuzzyDateInputFromScenario,
   loadScenario,
+  otherPartsShape,
+  requireScenarioParts,
   scenarioFuzzyDateSchema,
   scenarioPrecisions,
   scenarioSchema,
@@ -44,8 +46,9 @@ describe('CL-DON-05 — « Né vers 1940 »', () => {
       approximative: z.literal(true),
       precision: z.enum(Object.keys(scenarioPrecisions) as [keyof typeof scenarioPrecisions]),
       ordre: z.array(scenarioFuzzyDateSchema).min(2),
+      ...otherPartsShape(['saisie'], 'attendu'),
     }),
-  });
+  }).superRefine(requireScenarioParts('modele', ['saisie']));
 
   it('modèle : une date approximative, à l’année, avec son texte d’origine', () => {
     const scenario = loadScenario('CL-DON-05', schema);
@@ -74,8 +77,9 @@ describe('CL-DON-06 — « Entre 1935 et 1940 »', () => {
       intervalle: z.strictObject({ du: z.string(), au: z.string() }),
       ordre: z.array(scenarioFuzzyDateSchema).min(2),
       refuse: z.array(scenarioFuzzyDateSchema).min(1),
+      ...otherPartsShape(['saisie'], 'attendu'),
     }),
-  });
+  }).superRefine(requireScenarioParts('modele', ['saisie']));
 
   const day = (value: string) => {
     const [year = 0, month = 0, dayOfMonth = 0] = value.split('-').map(Number);

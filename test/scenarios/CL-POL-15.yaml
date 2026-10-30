@@ -1,11 +1,12 @@
 # Noms générés. Partie modèle (T-004) : une famille polygame où chaque fiche porte ses propres
 # noms s'enregistre et se valide. « Aucun nom recopié automatiquement » se joue là où un nom
-# pourrait être recopié : la saisie à la main (T-031) et le plan d'une dictée (T-062).
+# pourrait être recopié : la saisie à la main (T-031, partie saisie ci-dessous) et le plan d'une
+# dictée (T-062).
 id: CL-POL-15
 titre: Épouses qui gardent leur nom, enfants qui ne portent pas celui du père
 couverture:
-  teste: [modele]
-  reste: [T-031, T-062]
+  teste: [modele, saisie]
+  reste: [T-062]
 arbre:
   personnes: [samuel/M, rose/F, odile/F, joseph/M, comfort/F]
   noms:
@@ -28,3 +29,11 @@ attendu:
     odile: [Mbolang]
     joseph: [Tchoupa]
     comfort: [Ewondi]
+  # T-031 : créer un enfant à la main ne recopie aucun nom (ni celui du père, ni celui de la mère).
+  saisie:
+    personnes:
+      - formulaire:
+          noms: [{ type: naissance, prenoms: Esther, nom: Awono }]
+        resultat:
+          nature: connue
+          noms: [{ type: naissance, prenoms: Esther, nom: Awono }]

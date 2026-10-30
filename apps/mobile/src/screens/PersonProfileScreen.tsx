@@ -10,7 +10,9 @@ import { useEffect, useState } from 'react';
 import { ScrollView, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useLocalChangeVersion } from '../db/localChanges';
 import { useLocalDatabase } from '../db/LocalDatabaseProvider';
+import { editPersonRoute } from '../navigation/personFormRoute';
 import { useTranslator } from '../i18n/I18nProvider';
 import { ProfileView } from './ProfileView';
 
@@ -71,6 +73,8 @@ export function PersonProfileScreen({ personId, treeId }: PersonProfileScreenPro
   const { t } = useTranslator();
   const database = useLocalDatabase();
   const [state, setState] = useState<ProfileState>({ status: 'loading' });
+  // Une saisie enregistrée (T-031) : la fiche relit la copie locale en revenant du formulaire.
+  const changes = useLocalChangeVersion();
 
   useEffect(() => {
     // Une autre personne : on repart de l'attente, jamais la fiche précédente.
@@ -100,7 +104,7 @@ export function PersonProfileScreen({ personId, treeId }: PersonProfileScreenPro
     return () => {
       clearTimeout(timer);
     };
-  }, [database, personId, treeId]);
+  }, [database, personId, treeId, changes]);
 
   switch (state.status) {
     case 'loading':
@@ -110,6 +114,15 @@ export function PersonProfileScreen({ personId, treeId }: PersonProfileScreenPro
     case 'failed':
       return <Notice testID="screen-profile-failed" message={t('common:profile.failed')} />;
     case 'ready':
-      return <ProfileView profile={state.profile} treeName={state.treeName} onBack={goBack} />;
+      return (
+        <ProfileView
+          profile={state.profile}
+          treeName={state.treeName}
+          onBack={goBack}
+          onEdit={() => {
+            router.push(editPersonRoute(personId, treeId));
+          }}
+        />
+      );
   }
 }

@@ -627,6 +627,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - UNI-10 : « Un lien probable s'affiche « Peut-être son frère » »
   - UNI-11 : « Choisir la mère plus tard déplace l'enfant dans son foyer »
   - UNI-14 (partie saisie) : « « Jumeaux » affiché sur les deux fiches »
+  - Obligation reçue de T-031 (ADR 0032, point 10) : « rebond léger » et vibration légère de la charte (07-mouvement) quand une personne ajoutée apparaît dans l'arbre ; T-031 revient à l'arbre sans animation.
   - ARB-05 : « Préciser la mère déplace l'enfant dans le bon foyer »
   - Obligations reçues des relectures (T-030, ADR 0027, Conséquences) : une suppression liste ses dépendants (noms, faits, liens, unions) dans le même lot de `recordLocalChanges` ; codes de refus (`MUTATION_ISSUE_CODES`) traduits par `packages/i18n`.
 - Cas limites : CL-POL-03, CL-POL-11, CL-GEN-14, CL-FAM-02, CL-FAM-03, CL-FAM-04, CL-FAM-05, CL-FAM-06, CL-FAM-07, CL-FAM-08, CL-FAM-11, CL-FAM-13, CL-DON-11.
@@ -815,6 +816,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - CPT-08 : « Une proposition dans sa branche lui est envoyée, et à lui seul avec le propriétaire »
   - TRD : « un module unique de règles (rôle, branche, visibilité, propriété) appelé par toutes les routes, la synchronisation, les exports et les notifications » ; table de fermeture des branches recalculée à chaque changement de filiation ou d'union.
 - Cas limites : aucun en propre.
+- Obligations reçues des relectures (T-031, ADR 0032) : l'écran affiche « Modifier » et « Supprimer » selon ce module ; le contrôle qui fait foi est celui du serveur (T-060).
 - Dépend de : T-042, T-048.
 - Agent : api-serveur ; relecture gardien-confidentialite.
 - Taille : L.
@@ -895,6 +897,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - CPT-13 : « Accès retiré à la synchronisation suivante ; ses ajouts restent dans l'arbre »
 - Obligations reçues des relectures (T-016, ADR 0023) : vérifier que `trees.reader_account_id` de la base locale est le compte connecté avant toute lecture ; à l'exclusion, `eraseLocalTree` ou `destroyLocalDatabase`.
 - Cas limites : CL-SEC-08 (partie exclusion).
+- Obligations reçues des relectures (T-031, ADR 0032) : afficher « Modifier » et « Supprimer » une fiche selon le module de droits (T-049) ; le contrôle qui fait foi est celui du serveur (T-060).
 - Dépend de : T-049, T-050.
 - Agent : ecrans-lignee ; relecture gardien-confidentialite.
 - Taille : M.
@@ -920,6 +923,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - PAR-09 : « Avec une fiche masquée sur le seul chemin : « Lien non disponible », sans autre indice »
   - Obligations reçues des relectures (T-016, ADR 0023, Conséquences) : les instantanés produits passent `parseLocalTreeSnapshot` de `@lignee/sync` sans compter sur son refus (la seconde barrière n'est pas le filtre) ; les tests de non-fuite couvrent aussi la base locale (aller-retour `replaceTreeSnapshot` puis `readTreeSnapshot`) ; `packages/sync/src/dev-seed/projection.ts` n'est pas un modèle du filtrage.
 - Cas limites : CL-SEC-01, CL-SEC-02, CL-POL-17.
+- Obligations reçues des relectures (T-031, ADR 0032) : l'instantané ne porte que les lieux cités par des objets visibles du lecteur.
 - Dépend de : T-042, T-049, T-052.
 - Agent : api-serveur ; relecture gardien-confidentialite.
 - Taille : L.
@@ -954,6 +958,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
 - Exigences :
   - CPT-10 : « Accord parental enregistré avec sa date ; aucune donnée de santé saisie par un mineur »
 - Cas limites : CL-SEC-11.
+- Obligations reçues des relectures (T-031, ADR 0032) : le champ « Cause du décès » du formulaire d'une personne est retiré pour un compte de mineur.
 - Dépend de : T-054.
 - Agent : api-serveur, avec ecrans-lignee ; relecture gardien-confidentialite.
 - Taille : M.
@@ -975,6 +980,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
     - `canWriterSee` branché sur la projection du rédacteur (T-056), vrai pour les objets créés dans le lot ; suppression d'une règle : même réponse pour un non-auteur et une règle inexistante ; un objet et sa règle « moi seul » appliqués d'un seul bloc.
     - ne jamais journaliser une ZodError brute (clé de champ inconnue fournie par le client) ; état « convertie en proposition » face à la contrainte CHECK de `mutation_queue.status` (migration qui recrée la table).
 - Cas limites : CL-DON-10, CL-DON-11 (refus serveur), CL-VOI-28 (conversion), CL-SEC-08 (refus).
+- Obligations reçues des relectures (T-031, ADR 0032) : `planPersonDeletion` envoie `multiple_birth.members` et `person.distinctFrom` entiers, calculés sur la copie filtrée : le serveur fusionne en gardant les membres masqués ; un changement de type vers ou depuis `former` est soumis à la règle d'auteur ; un lieu créé n'est jamais dédoublonné avec un lieu masqué de façon visible ; les dépendants masqués d'une suppression (ancien prénom ou cause de décès d'autrui, règles de visibilité) sont traités par le serveur.
 - Dépend de : T-030, T-049, T-056.
 - Agent : sync-hors-ligne, avec api-serveur ; relecture gardien-confidentialite.
 - Taille : L.
@@ -1112,6 +1118,7 @@ Des critères V1 font référence à des fonctions V2. Ils sont listés dans la 
   - UNI-19 : « Restaurer une version ne touche pas aux autres fiches »
   - COL-07 (partie historique) : « Aucune saisie perdue sur le scénario de test à deux téléphones »
 - Cas limites : aucun en propre.
+- Obligations reçues des relectures (T-031, ADR 0032) : l'historique d'un nom de naissance rangé en ancien prénom, ou d'un `former` changé de type, ne montre pas l'ancien prénom à qui n'y a pas droit.
 - Dépend de : T-067.
 - Agent : ecrans-lignee, avec api-serveur ; relecture gardien-confidentialite (historique filtré par lecteur).
 - Taille : M.
@@ -1867,6 +1874,7 @@ La figure de la feuille de route n'est pas lisible. Cette liste rassemble ce que
 - Revue de sécurité et de confidentialité de la porte (présentation, Rituels).
 - Tests de non-fuite verts (CON-05).
 - Analyse d'impact (AIPD) pour la voix et les personnes vivantes, « avant la bêta publique de la V1 » (TRD, Conformité) ; registre des traitements dans `docs/conformite/`.
+- Cause de décès saisie dès la V1 (UNI-15, T-031) inscrite au registre des traitements et à l'AIPD, avant la bêta publique.
 - Avis juridique ; lieu de la société décidé ; autorisation préalable de l'Autorité si elle est requise.
 - Conditions et politique validées par le juriste (ADM-08).
 - Clause « pas d'entraînement, conservation minimale » signée avec chaque fournisseur de voix (VOX-21).

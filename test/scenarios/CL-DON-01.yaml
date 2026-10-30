@@ -1,11 +1,11 @@
 # Noms générés. Partie modèle (T-004) : prénoms et nom sont des champs séparés, et l'ordre
-# d'affichage est un réglage de l'arbre, que la fiche (T-024) suit. Reste : découper « Abenzo Lucien »
-# dit ou écrit dans l'ordre NOM Prénom (voix, T-058 ; saisie, T-031).
+# d'affichage est un réglage de l'arbre, que la fiche (T-024) suit. Découper « Abenzo Lucien »
+# dit ou écrit dans l'ordre NOM Prénom (voix, T-058 ; saisie à la main : partie saisie, T-031).
 id: CL-DON-01
 titre: Nom donné dans l'ordre NOM Prénom
 couverture:
-  teste: [modele, fiche]
-  reste: [T-031, T-058]
+  teste: [modele, fiche, saisie]
+  reste: [T-058]
 arbre:
   personnes: [lucien/M]
   noms:
@@ -18,3 +18,15 @@ attendu:
   fiche:
     - { personne: lucien, ordre_des_noms: nom_puis_prenoms, nom_affiche: "Abenzo Lucien" }
     - { personne: lucien, ordre_des_noms: prenoms_puis_nom, nom_affiche: "Lucien Abenzo" }
+  # T-031 : le formulaire garde prénoms et nom dans deux champs ; un nom écrit d'un trait se
+  # sépare selon l'ordre réglé par l'arbre.
+  saisie:
+    decouper:
+      - { ordre: nom_puis_prenoms, texte: "Abenzo Lucien", prenoms: Lucien, nom: Abenzo }
+      - { ordre: prenoms_puis_nom, texte: "Lucien Abenzo", prenoms: Lucien, nom: Abenzo }
+    personnes:
+      - formulaire:
+          noms: [{ type: naissance, prenoms: Lucien, nom: Abenzo }]
+        resultat:
+          nature: connue
+          noms: [{ type: naissance, prenoms: Lucien, nom: Abenzo }]

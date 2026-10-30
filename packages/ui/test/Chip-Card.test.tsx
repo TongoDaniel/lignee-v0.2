@@ -66,6 +66,26 @@ describe.each(THEME_CASES)('Puce ($scheme, mode Aînés : $seniorMode)', (theme)
     fireEvent.press(button);
     expect(onPress).toHaveBeenCalledTimes(1);
   });
+
+  it('de choix : lue comme un choix coché ou non, avec une coche quand elle est choisie', () => {
+    const view = renderThemed(
+      <>
+        <Chip label="Vers" selected onPress={noop} testID="chosen" />
+        <Chip label="Avant" selected={false} onPress={noop} testID="other" />
+      </>,
+      theme,
+    );
+    expectReadableTexts(view, theme.scheme);
+    const chosen = screen.getByRole('radio', { name: 'Vers' });
+    const other = screen.getByRole('radio', { name: 'Avant' });
+    expect(chosen.props.accessibilityState).toEqual({ checked: true });
+    expect(other.props.accessibilityState).toEqual({ checked: false });
+    expect(touchHeight(chosen)).toBeGreaterThanOrEqual(touchTargetFor(theme));
+    const icons = (id: string) =>
+      screen.getByTestId(id).findAll((n) => n.props.viewBox === '0 0 24 24').length;
+    expect(icons('chosen')).toBe(1);
+    expect(icons('other')).toBe(0);
+  });
 });
 
 describe.each(THEME_CASES)('Carte ($scheme, mode Aînés : $seniorMode)', (theme) => {

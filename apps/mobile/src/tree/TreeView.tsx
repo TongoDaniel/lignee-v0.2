@@ -73,6 +73,8 @@ export interface TreeViewProps {
   readonly model: TreeModel;
   /** Ouvre la fiche d'une personne (T-025) ; sans elle, le toucher sélectionne seulement. */
   readonly onOpenPerson?: (personId: Id) => void;
+  /** Ouvre le formulaire « Ajouter une personne » (T-031) ; sans lui, pas de bouton. */
+  readonly onAddPerson?: () => void;
 }
 
 const NO_FOLDS: FoldChoices = new Map();
@@ -93,7 +95,7 @@ function missingKinds(layout: TreeLayout): ReadonlyMap<string, 'mother' | 'fathe
   return kinds;
 }
 
-export function TreeView({ model, onOpenPerson }: TreeViewProps) {
+export function TreeView({ model, onOpenPerson, onAddPerson }: TreeViewProps) {
   const theme = useTheme();
   const { colors, typography } = theme;
   const { t } = useTranslator();
@@ -485,6 +487,17 @@ export function TreeView({ model, onOpenPerson }: TreeViewProps) {
               onPress={() => {
                 openDescendants(focusId);
               }}
+            />
+          ) : null}
+          {descendantsOf === undefined && onAddPerson !== undefined ? (
+            <Button
+              testID="tree-add-person"
+              label={t('common:treeScreen.addPerson')}
+              accessibilityHint={t('common:treeScreen.addPersonHint')}
+              icon="ajouter"
+              variant="secondary"
+              compact
+              onPress={onAddPerson}
             />
           ) : null}
           {descendantsOf === undefined ? (

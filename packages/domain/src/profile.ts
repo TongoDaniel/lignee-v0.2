@@ -317,7 +317,9 @@ export function buildProfile(
       ...(title.end === undefined ? {} : { end: describeFuzzyDate(title.end) }),
     }));
   const multipleBirth = multipleBirthOf(person.id, source, displayNameOf);
-  const birthNameMissing = !placeholder && birthName === undefined;
+  // Un ancien prénom visible pour ce lecteur : « À compléter » ne l'invite pas à le saisir comme nom
+  // de naissance (ADR 0032) ; aucune mention de nom de naissance manquant.
+  const birthNameMissing = !placeholder && birthName === undefined && formerNames.length === 0;
   const life = birthFact !== undefined || deceased;
 
   const sections: ProfileSectionKey[] = [];

@@ -2,6 +2,7 @@
 // générateur d'arbres, arbitraires fast-check, lecture et construction des scénarios de cas
 // limites. Réservé aux tests : ce code lit des fichiers (Node) et n'entre jamais dans l'app.
 export * from './arbitraries';
+export * from './entry-scenario';
 export * from './fixtures';
 export * from './generated-names';
 export * from './probability';

@@ -27,7 +27,7 @@ T-024 affiche la fiche d'une personne. Le PRD (UNI-01, UNI-14, UNI-17, UNI-22) d
 - Chaque ouverture relit tout l'arbre de la copie locale (`readTreeSnapshot`), pour rester dans la copie filtrée sans requête de plus. Pour 5 000 personnes, la lecture se fait après le premier dessin (« Ouverture de la fiche… »). À mesurer sur l'Android de référence ; si elle dépasse le budget, une lecture ciblée (la personne, ses noms, ses faits, ses titres, sa naissance multiple) s'ajoute dans `packages/sync` sans changer `buildProfile`.
 - Les dates de noms et de titres saisies en texte (scénarios) ne se trient pas ; l'ordre reste celui de la saisie jusqu'à ce que T-031 produise de vraies dates floues.
 
-- Les dates floues composées (« vers années 1940 ») et le calendrier hégirien sont rendus au plus simple (année seule en hégirien) ; leur rendu complet reste à T-031.
+- Les dates floues composées (« vers années 1940 ») et le calendrier hégirien sont rendus au plus simple (année seule en hégirien) ; leur rendu complet est fait par T-031 (ADR 0032, points 1 et 2).
 
 ## Écarté
 
