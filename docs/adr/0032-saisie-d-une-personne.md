@@ -21,7 +21,8 @@ T-031 crée, modifie et supprime une personne à la main. Le PRD (UNI-01, UNI-15
 
 ## Conséquences
 
-- Accès : un bouton « Ajouter une personne » sur l'onglet Arbre (`TreeScreen`), « Modifier la fiche » sur la fiche. T-018 devra l'intégrer à sa barre (une seule action principale par écran).
+- Accès : « Ajouter une personne » est un bouton secondaire de la barre de l'arbre (`TreeView`, prop `onAddPerson`), avec les autres actions ; « Modifier la fiche » est dans l'en-tête de la fiche. Aucun bouton ne recouvre le dessin, « Vous » ni la liste : l'arbre n'a toujours aucune action principale (T-018, T-025).
+- Suppression : `TreeScreen` donne à `TreeView` une clé qui change quand une personne du modèle précédent a disparu (`useTreeViewKey`) ; la vue repart de « Vous » au lieu de garder un centre, une personne choisie, un fil d'Ariane, des filtres ou une descendance qui n'existent plus (`prepareTree` lèverait une `RangeError`). Un ajout ne change pas la clé.
 - `Chip` reçoit `selected` (puce de choix, rôle `radio`, coche) et `Field` accepte `error: undefined` ; à répercuter dans le README de la charte (Puce).
 - Chaque saisie relit l'arbre entier de la copie locale (ADR 0027) ; à mesurer sur l'Android de référence.
 - La partie `saisie` des scénarios est jouée par domain (dates, découpage) et sync (formulaires enregistrés pour de bon).

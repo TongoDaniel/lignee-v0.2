@@ -22,3 +22,22 @@ export function bottomCenterFrame(
     { x: size.width / 2, y: size.height - margin - scene.spec.cardBottom },
   );
 }
+
+/**
+ * Cadre de la vue « descendance » (ARB-14) : l'ancêtre en haut au centre, à l'échelle standard ;
+ * ses descendants s'étendent vers le bas. `margin` est l'espace laissé au-dessus de sa fiche (un
+ * jeton d'espacement).
+ */
+export function topCenterFrame(
+  scene: TreeScene,
+  personId: Id,
+  size: ScreenSize,
+  margin: number,
+): Viewport {
+  const person = scene.personById.get(personId);
+  return placeAt(
+    1,
+    { x: person?.x ?? 0, y: person?.y ?? 0 },
+    { x: size.width / 2, y: margin + scene.spec.radius },
+  );
+}

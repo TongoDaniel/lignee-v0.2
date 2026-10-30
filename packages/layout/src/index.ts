@@ -31,3 +31,12 @@ export {
 } from './descendants';
 // T-017 : le dessin de l'arbre (mesures, scène à peindre, culling, zoom, parcours accessible).
 export * from './scene';
+// T-025 : filtres de l'arbre (ARB-11).
+export {
+  ancestorRoots,
+  branchMembers,
+  foyerMembers,
+  sideMembers,
+  sideRoots,
+  type Side,
+} from './filters';

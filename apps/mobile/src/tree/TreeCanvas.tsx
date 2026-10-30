@@ -66,6 +66,8 @@ export interface TreeCanvasProps {
   /** « Vous » : l'avatar doré, même quand l'arbre est centré sur une autre personne. */
   readonly youId: Id;
   readonly selectedId: Id | undefined;
+  /** Personnes qui répondent au filtre (ARB-11) ; les autres sont atténuées. Absent : aucun filtre. */
+  readonly matching?: ReadonlySet<Id> | undefined;
   readonly initialViewport: Viewport;
   readonly command: ViewportCommand | undefined;
   /** Pousse à jouer (ouverture, nouveau centre, foyer ouvert) ; absente : tout paraît d'un coup. */
@@ -90,6 +92,7 @@ export function TreeCanvas({
   missingOf,
   youId,
   selectedId,
+  matching,
   initialViewport,
   command,
   growth,
@@ -341,6 +344,7 @@ export function TreeCanvas({
                   cards={cards}
                   youId={youId}
                   selectedId={selectedId}
+                  matching={matching}
                   missingOf={missingOf}
                   spec={spec}
                   theme={theme}

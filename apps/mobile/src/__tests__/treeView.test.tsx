@@ -16,6 +16,7 @@ import { AccessibilityInfo } from 'react-native';
 import { cancelAnimation, withTiming } from 'react-native-reanimated';
 
 import { AppProviders } from '../AppProviders';
+import { opacity } from '@lignee/ui';
 import { sceneSpecFor } from '../tree/sceneSpec';
 import { modelFromSnapshot } from '../tree/treeModel';
 import { TreeCanvas } from '../tree/TreeCanvas';
@@ -499,4 +500,89 @@ describe('TreeView — l’arbre pousse (ARB-13)', () => {
     await act(() => Promise.resolve());
     expect(cancelAnimation).toHaveBeenCalled();
   });
+});
+
+describe('TreeCanvas — personnes atténuées par un filtre (ARB-11)', () => {
+  function dimmedGroups(matching: ReadonlySet<string> | undefined, opacity: string) {
+    const built = model(80);
+    const spec = sceneSpecFor({ seniorScale: 1, systemFontScale: 1, touchTarget: 48 });
+    const scene = buildScene(layoutTree(built.graph, built.centerId), spec);
+    const view = render(
+      <AppProviders theme={{ reduceMotion: true }}>
+        <TreeCanvas
+          scene={scene}
+          index={indexScene(scene)}
+          size={{ width: 360, height: 800 }}
+          cards={built.cards}
+          missingOf={new Map()}
+          youId={built.centerId}
+          selectedId={undefined}
+          matching={matching}
+          initialViewport={{ scale: 1, x: 0, y: 0 }}
+          command={undefined}
+          onSettle={jest.fn()}
+          onActivate={jest.fn()}
+        />
+      </AppProviders>,
+    );
+    const count = screen
+      .queryAllByTestId('skia-Group')
+      .filter(
+        (group) =>
+          (group.props as { accessibilityValue?: { text?: string } }).accessibilityValue?.text ===
+          opacity,
+      ).length;
+    view.unmount();
+    return { built, count };
+  }
+
+  it('sans filtre, personne n’est atténué', () => {
+    const none = dimmedGroups(undefined, String(opacity.attenue));
+    expect(none.count).toBe(0);
+  });
+
+  it('un filtre atténue les personnes qui n’y répondent pas, et elles seules', () => {
+    const level = String(opacity.attenue);
+    const probe = dimmedGroups(undefined, level);
+    const centerId = probe.built.centerId;
+    const everyone = new Set(probe.built.cards.keys());
+    // Un filtre vide atténue toutes les personnes dessinées : leur nombre.
+    const drawn = dimmedGroups(new Set(), level).count;
+    expect(drawn).toBeGreaterThan(1);
+    // Garder « Vous » seul : toutes les autres sont atténuées, lui jamais (une de moins).
+    expect(dimmedGroups(new Set([centerId]), level).count).toBe(drawn - 1);
+    // Garder tout le monde sauf « Vous » : lui seul est atténué.
+    const others = new Set(everyone);
+    others.delete(centerId);
+    expect(dimmedGroups(others, level).count).toBe(1);
+    // Garder tout le monde : personne.
+    expect(dimmedGroups(everyone, level).count).toBe(0);
+  });
+});
+
+describe('TreeView — budget des filtres sur 500 personnes', () => {
+  // Marge large : le test garde l'ordre de grandeur (la feuille fermée ne calcule rien, l'ouvrir
+  // calcule les décomptes de quelques filtres), pas une mesure fine.
+  const BUDGET_MS = 500;
+  const FACTOR = 4;
+
+  it('ouvrir la feuille des filtres reste sous le budget, la feuille fermée ne coûte rien', async () => {
+    const built = model(500);
+    render(
+      <AppProviders theme={{ reduceMotion: true }}>
+        <TreeView model={built} />
+      </AppProviders>,
+    );
+    await act(() => Promise.resolve());
+    layOut();
+    const start = performance.now();
+    act(() => {
+      fireEvent.press(screen.getByTestId('tree-filters-open'));
+    });
+    const elapsed = performance.now() - start;
+    expect(screen.getByTestId('filter-vital-living')).toBeTruthy();
+    // Au plus six branches (parents et grands-parents), jamais une par oncle ou belle-mère.
+    expect(screen.queryAllByTestId(/^filter-branch-/).length).toBeLessThanOrEqual(6);
+    expect(elapsed).toBeLessThan(BUDGET_MS * FACTOR);
+  }, 30_000);
 });

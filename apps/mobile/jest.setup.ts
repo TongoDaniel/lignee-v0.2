@@ -17,10 +17,24 @@ jest.mock('@shopify/react-native-skia', () => {
   const React = jest.requireActual<typeof import('react')>('react');
   const { View } = jest.requireActual<typeof import('react-native')>('react-native');
   const host = (name: string) => {
-    const Component = ({ children, ...props }: { children?: React.ReactNode; text?: string }) =>
+    const Component = ({
+      children,
+      ...props
+    }: {
+      children?: React.ReactNode;
+      text?: string;
+      opacity?: unknown;
+    }) =>
       React.createElement(
         View,
-        { testID: `skia-${name}`, accessibilityLabel: JSON.stringify(props.text ?? '') },
+        {
+          testID: `skia-${name}`,
+          accessibilityLabel: JSON.stringify(props.text ?? ''),
+          // Opacité fixe d'un groupe (personnes atténuées par un filtre) : lisible par les tests.
+          ...(typeof props.opacity === 'number'
+            ? { accessibilityValue: { text: String(props.opacity) } }
+            : {}),
+        },
         children,
       );
     Component.displayName = name;
