@@ -1,0 +1,53 @@
+# Noms générés. Partie recherche (T-034) : le nom est gardé tel quel, avec sa particule, et les
+# termes indexables (normalisation, jetons, clé phonétique, packages/domain/src/name-search.ts)
+# laissent la recherche le trouver avec ou sans la particule, avec la faute courante « biyon ».
+# `trouve` est la liste exacte des personnes retrouvées par les termes : niveau `exact`,
+# `debut` (début de mot) ou `phonetique` ; `sans_particule` : une particule de la requête
+# (« Ngo ») manque à la personne, sans l'exclure. Reste : la requête FTS5 sur la base locale,
+# la distance de Jaro-Winkler et le classement, en moins de 300 ms pour 5 000 personnes (T-038).
+id: CL-DON-03
+titre: Préfixe « Ngo » gardé dans le nom, retrouvé aussi sans le préfixe
+couverture:
+  teste: [recherche]
+  reste: [T-038]
+arbre:
+  personnes: [odile/F, ruth/F, ernest/M, paul/M]
+  noms:
+    - { personne: odile, type: naissance, prenoms: Odile, nom: Ngo Biyong }
+    - { personne: ruth, type: naissance, prenoms: Ruth, nom: Nga Mbarga }
+    - { personne: ernest, type: naissance, prenoms: Ernest, nom: Biyong }
+    - { personne: paul, type: naissance, prenoms: Paul, nom: Mbarga }
+attendu:
+  recherche:
+    noms_gardes:
+      - { personne: odile, nom: Ngo Biyong }
+      - { personne: ruth, nom: Nga Mbarga }
+    requetes:
+      - requete: Ngo Biyong
+        trouve:
+          - { personne: odile, niveau: exact }
+          - { personne: ernest, niveau: exact, sans_particule: true }
+      - requete: ngo biyon
+        trouve:
+          - { personne: odile, niveau: debut }
+          - { personne: ernest, niveau: debut, sans_particule: true }
+      - requete: Biyong
+        trouve:
+          - { personne: odile, niveau: exact }
+          - { personne: ernest, niveau: exact }
+      - requete: Biyon Odile
+        trouve:
+          - { personne: odile, niveau: debut }
+      - requete: Odile Biong
+        trouve:
+          - { personne: odile, niveau: phonetique }
+      - requete: Ngobiyong
+        trouve:
+          - { personne: odile, niveau: exact }
+      - requete: Ngo
+        trouve:
+          - { personne: odile, niveau: exact }
+      - requete: Ngo Mbarga
+        trouve:
+          - { personne: ruth, niveau: exact, sans_particule: true }
+          - { personne: paul, niveau: exact, sans_particule: true }

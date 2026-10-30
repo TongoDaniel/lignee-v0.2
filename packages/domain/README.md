@@ -21,6 +21,7 @@ Zod est la seule dépendance du code du paquet. Hors des tests, ESLint (`eslint.
 | `coherence.ts` | `findCoherenceIssues`, `checkNewFiliation`, `checkUnion`, `checkPersonDates`, `checkStatedAge`, `coherenceIssueSchema`, `toleratedSpan` (T-007, voir plus bas) | UNI-09, UNI-18 ; CL-DON-08 à CL-DON-11 |
 | `union-simultaneity.ts` | `resolveSimultaneity`, `simultaneityQuestions`, `simultaneityQuestionFor`, `uniformPairAnswers`, `pairAnswersFromHouseholds`, `answerSimultaneity` (T-007) | UNI-08 ; CL-POL-05 |
 | `vital-status.ts` | `assessVitalStatus`, `assessVitalStatuses`, `isPresumedLiving` (T-007) | UNI-16 |
+| `name-search.ts` | `normalizeNameText`, `nameTokens`, `NAME_PARTICLES`, `phoneticKey`, `personSearchTerms`, `buildSearchTerms`, `queryTerms`, `matchQuery`, `jaroWinkler` (T-034, voir plus bas) | ARB-10 ; TRD, Recherche ; CL-DON-03, CL-DON-04 |
 
 Les identifiants et valeurs sont en anglais ; correspondance avec les mots du cahier :
 
@@ -150,3 +151,15 @@ Retouches de T-007 dans ces fichiers de T-006 :
 - `tree-generator.ts` : réponses « simultanées ou successives » écrites par paire d'unions (`simultaneityAnswers`), d'après le chevauchement réel des années ; la polygamie annoncée (`features.polygamousPeople`) est comptée sur ces réponses. Un enfant naît au plus tard l'année qui précède la mort de chacun de ses parents : les jours étant tirés au hasard dans l'année, une naissance l'année du décès pouvait tomber après la mort de la mère (contre-exemple trouvé par la CI, graine -2146553169).
 - `tree-generator.test.ts` : le test « produit exactement le nombre de personnes demandé » reçoit un délai explicite de 60 s. Il prend 0,5 s seul, mais dépassait le délai par défaut de 5 s quand les propriétés de T-007 tournent en parallèle. La vérification de la polygamie lit les réponses par paire.
 - `tree-data.ts` : `simultaneityAnswers` et ses vérifications. `scenario-tree.ts` : section `faits`.
+
+## Noms dans la recherche (T-034, ADR 0034)
+
+`name-search.ts` prépare la recherche hors-ligne (T-038) et le score de doublon (T-040) ; la recherche elle-même (FTS5, seuil approché, classement) n'est pas ici.
+
+- **Normalisation** (`normalizeNameText`) : minuscules, sans accents ni tons, lettres camerounaises ramenées au latin de base (ɛ → e, ɔ → o, ŋ → ng…), sans apostrophes (« N'Dzanga » → « ndzanga »), élision « d' » séparée, traits d'union et ponctuation en espaces. « Nguyễn Thị Hoa » → « nguyen thi hoa ».
+- **Particules** (`NAME_PARTICLES`) : « ngo », « nga », « mbe », « de », « du », « des », « d » ; gardées dans le nom et l'index, jamais exigées d'une requête, sauf requête faite de particules seules (CL-DON-03).
+- **Clé phonétique** (`phoneticKey`, par mot) : Nkoulou et Nkulu → nkulu ; Biyong et Biyon → bion ; Tchoupo et Choupo → xupo ; Camga et Kamga → kanga. Règles et limites (« an » et « en », « s » et « z », « e » final) : ADR 0034, point 6.
+- **Termes indexables** (`personSearchTerms`, `buildSearchTerms`) : les mots et clés des noms de naissance, d'usage, surnoms, titres et variantes de la personne, avec la forme accolée d'une partie de plusieurs mots (« ngobiyong ») ; colonnes `text` et `keys` prêtes pour FTS5. **Jamais un ancien prénom** (`former`), même saisi par le lecteur, et rien d'autre qu'un nom (aucune cause de décès) : un test unitaire, une propriété sur des arbres générés et CL-DON-04 échouent sinon.
+- **Requête** (`queryTerms`, `matchQuery`) : niveaux `exact`, `prefix` (début de mot), `phonetic` ; `missingParticles` signale une particule de la requête absente. **Fautes de frappe** : `jaroWinkler`, symétrique, seuils à T-038 et T-040.
+- **Budget** (`name-search.budget.test.ts`, lancé seul par `corepack pnpm test:budget` comme les budgets du moteur de parenté ; arbre généré de 5 000 personnes, facteur de l'ADR 0026) : une requête sur toutes les personnes sans index dans les 300 ms d'ARB-10 ; la construction des termes dans 1 000 ms sur le téléphone. Le facteur de ralentissement de l'Android de référence est dans `src/test-support/reference-device.ts`, partagé avec packages/kinship.
+- Les règles sont tirées de noms générés : la liste de noms réels des familles pilotes (doute de la section 4 du plan) reste à fournir par Daniel, hors du dépôt.

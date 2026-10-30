@@ -109,7 +109,7 @@ const links = await presentRelationshipsInSlices(graph, me, them, {
 
 Chaque changement de l'arbre reconstruit tout le graphe et tout le contexte, par tranches (0,3 à 1,9 s estimées sur le téléphone) ; une question posée pendant ce temps attend le nouveau graphe.
 
-Les budgets du TRD visent l'Android de référence ; les tests les ramènent au poste par un facteur de ralentissement estimé à 30 (`src/test-support/reference-device.ts`, `LIGNEE_DEVICE_SLOWDOWN`), à remplacer par la mesure sur le téléphone (T-105). Le test vérifie ce budget estimé ; il ne détecte pas une régression de 3 fois sur le lien (ADR 0026, point 8).
+Les budgets du TRD visent l'Android de référence ; les tests les ramènent au poste par un facteur de ralentissement estimé à 30 (`reference-device.ts` de `@lignee/domain/test-support`, repris par `src/test-support/reference-device.ts`, `LIGNEE_DEVICE_SLOWDOWN`), à remplacer par la mesure sur le téléphone (T-105). Le test vérifie ce budget estimé ; il ne détecte pas une régression de 3 fois sur le lien (ADR 0026, point 8).
 
 Le test de budget tourne seul, hors de `test` :
 

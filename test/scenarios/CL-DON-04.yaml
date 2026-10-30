@@ -1,0 +1,52 @@
+# Noms générés. Partie recherche (T-034) : le nom est gardé tel quel, signes diacritiques
+# compris (vietnamien, lettres de l'alphabet général des langues camerounaises, tons), et la
+# recherche les ignore : casse, accents, lettres ɛ, ɔ, ŋ, apostrophes et traits d'union.
+# L'ancien prénom (`ancien`) n'entre jamais dans les termes indexables : le chercher ne trouve
+# personne (ADR 0023, ADR 0034). Même format que CL-DON-03. Reste : la requête FTS5 sur la base
+# locale, la distance de Jaro-Winkler et le classement (T-038).
+id: CL-DON-04
+titre: Nom avec signes diacritiques, gardé tel quel, retrouvé sans les accents
+couverture:
+  teste: [recherche]
+  reste: [T-038]
+arbre:
+  personnes: [hoa/F, helene/F, eyong/M, andre/A]
+  noms:
+    - { personne: hoa, type: naissance, prenoms: Thị Hoa, nom: Nguyễn }
+    - { personne: helene, type: naissance, prenoms: Hélène-Ruth, nom: Ngué }
+    - { personne: eyong, type: naissance, prenoms: Mbɔ́, nom: Ɛ̀yɔ́ŋ }
+    - { personne: andre, type: naissance, prenoms: Aloma, nom: N'Dzanga }
+    - { personne: andre, type: ancien, prenoms: Zéphyrin }
+attendu:
+  recherche:
+    noms_gardes:
+      - { personne: hoa, nom: Nguyễn }
+      - { personne: helene, nom: Ngué }
+      - { personne: eyong, nom: Ɛ̀yɔ́ŋ }
+      - { personne: andre, nom: N'Dzanga }
+    requetes:
+      - requete: nguyen thi hoa
+        trouve:
+          - { personne: hoa, niveau: exact }
+      - requete: NGUYỄN
+        trouve:
+          - { personne: hoa, niveau: exact }
+      - requete: Helene Ngue
+        trouve:
+          - { personne: helene, niveau: exact }
+      - requete: hélène ruth
+        trouve:
+          - { personne: helene, niveau: exact }
+      - requete: Eyong
+        trouve:
+          - { personne: eyong, niveau: exact }
+      - requete: Ɛyɔn
+        trouve:
+          - { personne: eyong, niveau: debut }
+      - requete: Ndzanga
+        trouve:
+          - { personne: andre, niveau: exact }
+      - requete: Zéphyrin
+        trouve: []
+      - requete: zephyrin
+        trouve: []

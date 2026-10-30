@@ -6,6 +6,7 @@ export * from './fixtures';
 export * from './generated-names';
 export * from './probability';
 export * from './random';
+export * from './reference-device';
 export * from './scenario';
 export * from './scenario-format';
 export * from './scenario-tree';
