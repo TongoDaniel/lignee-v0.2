@@ -6,6 +6,7 @@ export * from './filiation';
 export * from './fuzzy-date';
 export * from './ids';
 export * from './mutation';
+export * from './name-search';
 export * from './person';
 export * from './profile';
 export * from './place';

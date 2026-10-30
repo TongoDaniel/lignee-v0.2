@@ -52,7 +52,7 @@ corepack pnpm install        # installe les dépendances (pnpm-lock.yaml)
 corepack pnpm lint           # ESLint dans chaque paquet, via Turborepo
 corepack pnpm typecheck      # tsc --noEmit dans chaque paquet
 corepack pnpm test           # Vitest dans chaque paquet
-corepack pnpm test:budget    # budgets de temps du moteur (CL-FAM-20), seuls
+corepack pnpm test:budget    # budgets de temps du moteur (CL-FAM-20) et de la recherche des noms, seuls
 corepack pnpm format:check   # vérifie la mise en forme (Prettier)
 corepack pnpm format         # corrige la mise en forme
 corepack pnpm check:forbidden-dependencies  # CON-12 : aucune bibliothèque de reconnaissance faciale (npm et natif)
@@ -74,7 +74,7 @@ Les budgets de temps du cahier des charges (TRD, « Performance et appareils cib
 
 Les budgets eux-mêmes ne changent pas pour faire passer la CI ; seul le facteur absorbe la lenteur des runners.
 
-Les budgets du moteur de parenté sur l'Android de référence (CL-FAM-20, ADR 0026) tournent à part, seuls, pour que la charge des autres tests ne fausse pas les mesures : `corepack pnpm test:budget` (la CI le lance après les autres tests, et le job `cas-limites` échoue s'il ne tourne pas). Le facteur de ralentissement estimé du téléphone (30) se change avec `LIGNEE_DEVICE_SLOWDOWN`.
+Les budgets du moteur de parenté (CL-FAM-20, ADR 0026) et des noms dans la recherche (ARB-10, ADR 0034) sur l'Android de référence tournent à part, seuls, pour que la charge des autres tests ne fausse pas les mesures : `corepack pnpm test:budget` (la CI le lance après les autres tests, et le job `cas-limites` échoue s'il ne tourne pas). Le facteur de ralentissement estimé du téléphone (30) se change avec `LIGNEE_DEVICE_SLOWDOWN`.
 
 Textes d'interface : jamais en dur (ACC-04). ESLint refuse le texte dans le JSX de `apps/mobile`, `apps/web`, `apps/admin` et `packages/ui` (règle `i18next/no-literal-string`) ; pour ajouter un texte, voir [packages/i18n/README.md](packages/i18n/README.md).
 

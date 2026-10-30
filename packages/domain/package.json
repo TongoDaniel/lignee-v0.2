@@ -11,7 +11,8 @@
   "scripts": {
     "lint": "eslint .",
     "typecheck": "tsc --noEmit -p tsconfig.src.json && tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --exclude src/name-search.budget.test.ts",
+    "test:budget": "vitest run src/name-search.budget.test.ts --no-file-parallelism"
   },
   "devDependencies": {
     "@types/node": "catalog:",
