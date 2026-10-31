@@ -69,7 +69,7 @@ Lignée est un espace privé par famille. Elle ne cherche pas à relier toute l'
 - La saisie à la voix (français, anglais), au clavier et par scan de documents.
 - Toutes les structures familiales : polygamie, unions successives, familles recomposées, adoption, confiage, parents de même sexe, liens incertains.
 - Le lien de parenté exact entre deux personnes, et le nom d'usage que chacun donne à ses proches.
-- La mémoire : récits enregistrés, photos, documents, recettes, capsules temporelles.
+- La mémoire : récits enregistrés, photos, documents, recettes, capsules temporelles ; le parcours de vie de chaque personne, dont elle reste maître, et les événements de famille.
 - Un calque santé visible par son seul auteur.
 - Les rappels (anniversaires, commémorations), la carte des origines, le livre imprimé, l'import et l'export GEDCOM.
 - Le fonctionnement hors-ligne, en français et en anglais.
@@ -81,7 +81,7 @@ Lignée est un espace privé par famille. Elle ne cherche pas à relier toute l'
 - Pas de diagnostic, de score de risque ni de conseil médical : le calque santé constate, il ne prédit pas.
 - Pas de valeur juridique : Lignée n'établit ni filiation ni droit à succession, et ne remplace pas un acte d'état civil.
 - Pas de messagerie instantanée : les échanges restent sur WhatsApp. Lignée a seulement des commentaires sur les fiches et les propositions.
-- Pas de collecte d'argent pour la famille (cotisations, tontines, contributions aux obsèques) : c'est une activité de paiement réglementée.
+- Pas de collecte d'argent pour la famille (cotisations, tontines, contributions aux obsèques) : c'est une activité de paiement réglementée. Lignée tient seulement le registre des tontines et des cotisations (Caisse de famille, V3) ; l'argent circule hors de l'app.
 - Pas de publicité, ni de revente ou d'exploitation commerciale des données.
 - Pas de visage généré ou animé par une IA, ni de photo « améliorée » présentée comme authentique.
 
@@ -198,6 +198,11 @@ Décisions prises le 14 octobre 2026 :
 | Gratuit jusqu'à la V3 | Construire l'usage avant de faire payer |
 | Le calque santé arrive en V3 | Il exige une analyse d'impact, un chiffrement audité et un avis juridique |
 | Pas de reconnaissance faciale automatique | Les données biométriques sont sensibles au Cameroun comme dans le RGPD ; on identifie les personnes à la main |
+| Parcours de vie sur chaque fiche (V2) : tout membre peut publier un moment sur un proche, mais la personne concernée en est maître (31 octobre 2026) | Transmettre le vécu de chacun sans déposséder personne de son histoire ; consentement exigé par la loi n° 2024/017 |
+| Listes d'inclusion et d'exclusion, visibilité changeable et ouverture programmée pour tout objet (V2) | Montrer d'abord à quelques proches, puis ouvrir à tous quand on le décide |
+| Événements de famille (V2), reliés au Parcours et à la Caisse de famille | Réunions, mariages et funérailles sont les moments où la famille se retrouve et où l'on ne sait plus qui est qui |
+| Abonnement familial par paliers de membres connectés : gratuit jusqu'à 20, puis 21 à 50, puis au-delà de 50 ; fiches illimitées (V3) | Ne jamais faire payer une famille parce qu'elle complète son arbre ; les coûts réels viennent de la voix et des photos, pas des fiches |
+| Caisse de famille (V3, après avis juridique) : registre des tontines et cotisations, sans argent qui passe par Lignée | Répondre au besoin sans exercer une activité de paiement réglementée (agrément COBAC et BEAC) |
 
 Questions ouvertes :
 
