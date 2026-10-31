@@ -208,6 +208,45 @@ La mémoire, ce sont les voix, les récits, les photos et les recettes des aîn�
 | MEM-13 | Aucun visage généré ou animé, aucune voix imitée d'une personne | V2 | Aucune fonction de ce type dans l'app |
 | MEM-14 | Médias chargés à la demande, vignettes légères, envois repris après une coupure | V2 | Le mode Économie de données ne télécharge que les vignettes |
 
+## Parcours de vie
+
+Chaque fiche porte un Parcours : les moments qui racontent la vie d'une personne, pour que ceux qui viennent après sachent d'où elle est partie et ce qu'elle a fait. Tout membre peut publier un moment sur un proche, mais **la personne concernée est maître du moment** : elle le modifie, le supprime, choisit qui le voit. Le Parcours arrive en V2 avec les photos ; ce n'est pas un réseau social : pas de fil, pas de « j'aime » public, rien hors de la famille.
+
+| ID | Exigence | Version | Critère d'acceptation |
+| --- | --- | --- | --- |
+| VIE-01 | Moment de vie : type (voyage, distinction ou prix, diplôme, métier, activité, engagement, déménagement, libre), date floue, lieu, texte ou dictée, photos | V2 | Un moment se crée en moins d'une minute, au clavier ou à la voix |
+| VIE-02 | Tout membre peut publier un moment sur un proche ; l'auteur reste affiché (« publié par Nadège ») | V2 | Le moment porte son auteur et sa date de publication |
+| VIE-03 | La personne concernée est maître du moment : modifier, supprimer, changer la visibilité, masquer ; l'auteur peut seulement retirer son propre moment | V2 | Aucune autre personne, responsable de branche compris, ne modifie un moment d'une personne vivante qui a un compte |
+| VIE-04 | Personne vivante avec compte : le moment publié par un autre reste visible d'elle et de l'auteur seuls tant qu'elle ne l'a pas accepté | V2 | Consentement tracé (loi n° 2024/017) ; sans réponse, rien ne s'ouvre |
+| VIE-05 | Personne vivante sans compte (aîné sans téléphone, mineur) : son gardien décide à sa place (parent, ou responsable de branche) ; dès qu'elle a un compte, la maîtrise lui revient | V2 | Le gardien est affiché sur la fiche |
+| VIE-06 | Personne décédée : le responsable de branche, ou la personne désignée dans « Après moi », est maître de ses moments | V2 | Un descendant peut proposer une correction, validée par ce maître |
+| VIE-07 | Grandes lignes : 3 à 5 moments épinglés en haut de la fiche par leur maître | V2 | Visibles d'un coup d'œil sans faire défiler |
+| VIE-08 | Moments à plusieurs (un voyage en famille) : chaque personne citée peut se retirer du moment | V2 | Retirer une personne ne supprime pas le moment des autres |
+| VIE-09 | Chemin sur la carte : chaque moment avec un lieu se place sur la carte, et la vie d'une personne se suit de lieu en lieu | V2 | Les lieux restent en texte libre, jamais la position du téléphone (CAR-01) |
+| VIE-10 | Les moments entrent dans la chronologie de la famille (MEM-11), selon la visibilité de chacun | V2 | Un moment non visible n'apparaît ni dans la chronologie, ni dans les compteurs |
+| VIE-11 | Dictée : « Ajoute que maman a voyagé à Dubaï en 2019 » crée un moment proposé dans un aperçu | V2 | Rien n'est publié sans l'aperçu validé |
+| VIE-12 | Nouvelles de la famille : un résumé hebdomadaire des moments visibles, au lieu d'un fil d'actualité | V2 | Désactivable ; aucun défilement infini dans l'app |
+| VIE-13 | Aucun moment de santé, de deuil intime ou de conflit dans le Parcours : la santé reste dans son calque privé | V2 | Le type « santé » n'existe pas ; une dictée de santé est renvoyée vers le calque |
+| VIE-14 | Visibilité fine d'un moment : listes d'inclusion et d'exclusion, élargie ou restreinte à tout moment par son maître, ouverture programmée (CON-14 à CON-17) | V2 | « Mon voyage à Dubaï » visible de deux personnes, puis ouvert à tout l'arbre, sans republier |
+
+Techniquement, un moment publié sur un autre est une **proposition** (section Collaboration) dont le propriétaire est la personne concernée : même mécanisme, même module de visibilité, mêmes médias.
+
+## Événements de famille
+
+Un événement de famille rassemble une date, un lieu et des personnes de l'arbre : réunion, mariage, baptême, funérailles, anniversaire de deuil, retour au village. Il relie les autres modules : il nourrit le Parcours des présents, garde les photos et récits du jour, et peut ouvrir une cotisation ponctuelle dans la Caisse de famille. Il arrive en V2, la cotisation liée en V3.
+
+| ID | Exigence | Version | Critère d'acceptation |
+| --- | --- | --- | --- |
+| EVT-01 | Événement : type, date ou période, lieu en texte libre, description, organisateur ; invités choisis dans l'arbre ou par branche | V2 | Un événement se crée depuis l'arbre en moins de deux minutes |
+| EVT-02 | Réponse « je viens / je ne viens pas / peut-être », et liste des présents tenue par l'organisateur | V2 | La réponse se donne hors-ligne et se synchronise |
+| EVT-03 | Invitation partagée par WhatsApp vers les proches sans l'app, avec une page d'invitation qui ne montre que l'événement | V2 | La page ne révèle aucune donnée de l'arbre |
+| EVT-04 | Après l'événement : photos, récits et souvenirs rattachés à l'événement et aux présents identifiés à la main | V2 | Une photo de l'événement suit la visibilité de la personne la plus protégée qu'elle montre |
+| EVT-05 | L'événement propose un moment dans le Parcours de chaque présent, qui l'accepte ou le refuse (règles VIE-03 à VIE-06) | V2 | Aucun moment n'est ajouté sans l'accord de son maître |
+| EVT-06 | Rappels avant l'événement, à l'heure locale de chaque invité | V2 | Rappel la veille et le jour même, désactivables |
+| EVT-07 | Funérailles et deuil : ton sobre, aucun rappel joyeux, aucune animation ; l'organisateur choisit qui est prévenu | V2 | Aucune notification de félicitations liée à un décès |
+| EVT-08 | Un événement peut ouvrir une cotisation ponctuelle dans la Caisse de famille (obsèques, mariage, réunion) | V3 | L'argent ne passe pas par Lignée (section Caisse de famille) |
+| EVT-09 | Visibilité : invités seulement par défaut ; listes d'inclusion et d'exclusion comme tout objet (CON-14 à CON-17) | V2 | Un non-invité ne voit ni l'événement, ni qu'il existe |
+
 ## Calque santé
 
 Le calque santé note les antécédents de la famille pour en parler avec un médecin. Il ne prédit rien, il reste visible par son seul auteur, et il est chiffré sur le téléphone avant tout envoi. Il arrive en V3, après l'analyse d'impact, l'audit du chiffrement et l'avis juridique.
@@ -267,6 +306,10 @@ Chacun voit seulement ce qu'il a le droit de voir, et cela vaut aussi pour les c
 | CON-11 | Journal des accès aux données sensibles, consultable par la personne concernée | V3 | Chaque lecture d'une donnée sensible y figure |
 | CON-12 | Pas de reconnaissance faciale ni de donnée biométrique | V1 | Aucune bibliothèque de reconnaissance faciale dans l'app |
 | CON-13 | Pas de champ « ethnie » ni « religion » ; la carte des origines est réservée aux membres et désactivable, car l'origine régionale est une donnée sensible au Cameroun | V1 | Le propriétaire peut couper la carte pour tout l'arbre |
+| CON-14 | Listes d'inclusion : « personnes choisies » devient une liste nommée et réutilisable (« mes sœurs », « côté maternel »), gérée par la personne qui l'a créée | V2 | Modifier une liste change à la fois la visibilité de tous les objets qui l'utilisent |
+| CON-15 | Listes d'exclusion : « tout l'arbre sauf… », « ma branche sauf… » ; une exclusion l'emporte toujours sur une inclusion | V2 | La personne exclue ne voit ni l'objet, ni qu'il existe, ni qu'elle est exclue (test de non-fuite, CON-05) |
+| CON-16 | Visibilité changeable à tout moment par le maître de l'objet : l'élargir (moi seul, puis tout l'arbre) ou la restreindre | V2 | Restreindre retire l'objet des téléphones concernés à la synchronisation suivante ; avant d'élargir, l'app rappelle que ce qui a été vu ne peut pas être « dé-vu » |
+| CON-17 | Ouverture programmée : un objet s'ouvre à une liste ou à tout l'arbre à la date choisie (« mon voyage à Dubaï, visible de tous le 1er janvier ») | V2 | L'ouverture se fait sur le serveur à la date prévue, même si son maître n'ouvre pas l'app ; annulable jusque-là |
 
 ## Rappels et notifications
 
@@ -364,12 +407,31 @@ Lignée reste gratuite jusqu'à la V3. Ensuite, les règles des stores décident
 | --- | --- | --- | --- |
 | PAY-01 | Gratuit jusqu'à la V3 : arbre, voix, collaboration, export de ses données | V1 | Aucun écran de paiement avant la V3 |
 | PAY-02 | Quotas de voix par famille pour maîtriser les coûts (par exemple 200 dictées par mois), annoncés avant d'être atteints | V1 | Alerte à 80 % du quota ; le clavier reste toujours disponible |
-| PAY-03 | Abonnement famille : un seul payeur, toute la famille en profite (récits illimités, stockage étendu, livre à prix réduit ; contenu exact à décider) | V3 | Tous les membres de l'arbre voient l'abonnement actif |
+| PAY-03 | Abonnement famille : un abonnement par arbre, payé par n'importe quel membre (souvent dans la diaspora) ; le payeur peut changer sans interruption, et payer ne donne aucun droit de plus dans l'arbre | V3 | Tous les membres de l'arbre voient l'abonnement actif |
 | PAY-04 | Dans l'app, l'abonnement passe par les achats intégrés (règle 3.1.1 d'Apple, politique de paiement de Google Play) | V3 | Validation des reçus côté serveur |
 | PAY-05 | Sur le site web, l'abonnement se paie en mobile money ; l'app le reconnaît mais n'oriente jamais vers le site, et l'abonnement reste aussi achetable dans l'app (règles 3.1.3 et 3.1.3(b) d'Apple, politique de Google Play) ; on peut en parler hors de l'app, par e-mail ou WhatsApp | V3 | Revue des règles des stores juste avant la sortie |
 | PAY-06 | Livre : mobile money ou carte, dans l'app, hors achats intégrés (règle 3.1.3(e) d'Apple ; biens physiques exclus de Google Play Billing) | V3 | Paiement confirmé par le serveur après le retour signé de l'agrégateur |
 | PAY-07 | Prix affichés en FCFA et en euros ; reçus par e-mail ou WhatsApp | V3 | Reçu envoyé dans la minute |
 | PAY-08 | Aucune fonction de sécurité, de confidentialité ou d'accessibilité derrière un paiement | V1 | Mode Aînés, export de ses données et réglages de visibilité gratuits pour toujours |
+| PAY-09 | Paliers selon les membres connectés (personnes qui ont un compte dans l'arbre) : gratuit jusqu'à 20, palier Famille de 21 à 50, palier Grande famille au-delà de 50 ; les fiches (ancêtres, décédés, personnes sans compte) restent illimitées et gratuites | V3 | Ajouter une fiche ne coûte jamais rien ; montants à fixer en FCFA et en euros avant la V3 |
+| PAY-10 | Chaque palier comprend aussi un quota de dictées et d'espace photo (Parcours, événements, mémoire), calculé sur les coûts réels de la voix et du stockage | V3 | Le prix de chaque palier couvre au moins ses coûts (section Budget de fonctionnement) |
+| PAY-11 | Jamais de blocage : un arbre qui dépasse son palier garde tout ; après 30 jours de grâce, seules les nouvelles invitations attendent l'abonnement | V3 | Aucune donnée masquée ni supprimée, export toujours gratuit (PAY-08) ; tous les membres sont prévenus 7 jours avant la fin de la grâce |
+
+## Caisse de famille
+
+La Caisse de famille tient le registre des tontines et des cotisations de la famille, mais **l'argent ne passe jamais par Lignée** : il circule comme aujourd'hui, en mobile money ou en espèces. Encaisser ou garder l'argent d'une tontine serait une activité de paiement réglementée (agrément COBAC et BEAC en zone CEMAC). Elle arrive au plus tôt en V3, après l'avis juridique.
+
+| ID | Exigence | Version | Critère d'acceptation |
+| --- | --- | --- | --- |
+| CAI-01 | Tontine : participants choisis dans l'arbre, montant, fréquence, ordre des bénéficiaires (choisi ou tiré au sort devant tous), calendrier | V3 | Le tirage au sort est enregistré avec sa date et ses témoins |
+| CAI-02 | Cotisations ponctuelles : obsèques, mariage, réunion, ouvertes depuis un événement (EVT-08) ou seules, avec un objectif facultatif | V3 | Le total déclaré et le reste à réunir sont visibles des participants |
+| CAI-03 | Chacun déclare avoir payé, le trésorier désigné confirme ; une référence de transaction mobile money peut être jointe | V3 | Aucun paiement initié, encaissé ni conservé par Lignée |
+| CAI-04 | Rappels d'échéance par notification et WhatsApp, sans montant dans le texte en mode discret | V3 | Rappel 3 jours avant et le jour même, désactivables |
+| CAI-05 | Historique et comptes rendus de réunion attachés à la caisse ; export PDF pour la réunion de famille | V3 | L'historique ne se modifie pas : une correction ajoute une ligne |
+| CAI-06 | Visibilité : participants seulement ; les montants ne sont jamais montrés hors de la caisse | V3 | Un non-participant ne voit ni la caisse, ni qu'elle existe |
+| CAI-07 | Pas de prêt, d'intérêt, d'épargne ni de cagnotte gérée par Lignée | V3 | Aucune de ces fonctions dans l'app ; revue juridique avant la sortie |
+
+La ligne du périmètre « pas de collecte d'argent pour la famille » reste vraie : Lignée tient les comptes, la famille gère l'argent.
 
 ## Administration, support et modération
 

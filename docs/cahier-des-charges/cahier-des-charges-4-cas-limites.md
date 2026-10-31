@@ -184,3 +184,46 @@ Le réseau tombe, les téléphones sont modestes, les paiements arrivent en doub
 | CL-RES-13 | Abonnement payé sur le site, utilisé dans l'app | Reconnu dans l'app, sans aucun lien vers le site | V3 |
 | CL-RES-14 | Remboursement accordé par un store | Droits retirés, propriétaire de l'arbre prévenu | V3 |
 | CL-RES-15 | Livre payé mais impression échouée | Réimpression ou remboursement, client prévenu à chaque étape | V3 |
+
+## Parcours, événements et visibilité fine
+
+Le Parcours fait publier des informations sur d'autres personnes : chaque scénario vérifie que la personne concernée reste maître, et qu'une exclusion ne se devine jamais.
+
+| ID | Situation | Comportement attendu | Version |
+| --- | --- | --- | --- |
+| CL-VIE-01 | Nadège publie « Maman a reçu un prix » sur la fiche de sa mère, qui a un compte | Visible de la mère et de Nadège seules jusqu'à l'accord de la mère | V2 |
+| CL-VIE-02 | La mère modifie le texte du moment publié par Nadège | Modification acceptée ; Nadège reste affichée comme auteure, avec « modifié par » | V2 |
+| CL-VIE-03 | Le responsable de branche veut supprimer un moment d'une personne vivante qui a un compte | Refusé : seule la personne concernée et l'auteur (pour son propre moment) peuvent le retirer | V2 |
+| CL-VIE-04 | Moment publié sur un mineur | Son gardien décide ; à l'ouverture de son compte avec l'accord parental, la maîtrise lui revient | V2 |
+| CL-VIE-05 | Moment publié sur un grand-père décédé par un petit-fils | Validé par le responsable de branche ou la personne désignée dans « Après moi » | V2 |
+| CL-VIE-06 | Deux descendants publient des versions contradictoires sur un défunt (date ou lieu d'un voyage) | Les deux sont gardées avec leur auteur ; le maître choisit celle qui est retenue | V2 |
+| CL-VIE-07 | La personne concernée ne répond jamais à la demande d'accord | Le moment reste visible d'elle et de l'auteur seuls, sans limite de temps | V2 |
+| CL-VIE-08 | Voyage en famille cité sur trois fiches, l'une des trois se retire | Le moment reste sur les deux autres fiches, sans son nom ni son visage identifié | V2 |
+| CL-VIE-09 | Dictée « Ajoute que papa a eu un AVC en 2020 » | Aucun moment créé ; renvoi vers le calque santé (V3), qui reste privé | V2 |
+| CL-VIE-10 | « Mon voyage à Dubaï » : tout l'arbre sauf Tonton Paul | Paul ne voit ni le moment, ni la carte, ni le compteur, ni la chronologie qui le citerait | V2 |
+| CL-VIE-11 | Paul est à la fois dans la liste « ma branche » et dans l'exclusion | L'exclusion l'emporte | V2 |
+| CL-VIE-12 | Moment d'abord ouvert à deux personnes, ouvert à tout l'arbre trois mois plus tard | Visible de tous après le changement, sans republication ; avertissement avant d'élargir | V2 |
+| CL-VIE-13 | Moment restreint après avoir été ouvert à tout l'arbre | Retiré des téléphones des membres exclus à leur synchronisation suivante | V2 |
+| CL-VIE-14 | Ouverture programmée au 1er janvier, le maître n'ouvre pas l'app ce jour-là | Ouverture faite par le serveur à la date prévue | V2 |
+| CL-VIE-15 | Une liste réutilisée « mes sœurs » perd une personne | Tous les objets qui utilisent la liste lui deviennent invisibles en même temps | V2 |
+| CL-EVT-01 | Invitation WhatsApp à des funérailles envoyée à un proche sans l'app | La page d'invitation montre l'événement seul, aucune donnée de l'arbre | V2 |
+| CL-EVT-02 | Photo d'une réunion où figure une personne masquée pour certains membres | La photo suit la visibilité la plus restrictive des personnes identifiées | V2 |
+| CL-EVT-03 | Événement de deuil | Aucun rappel joyeux, aucune animation, aucune félicitation | V2 |
+
+## Abonnement et caisse de famille
+
+Payer ne doit jamais faire perdre une donnée, et l'argent de la famille ne doit jamais passer par Lignée.
+
+| ID | Situation | Comportement attendu | Version |
+| --- | --- | --- | --- |
+| CL-PAY-01 | Un arbre de 300 fiches dont 12 membres connectés | Gratuit : seules les personnes avec un compte comptent | V3 |
+| CL-PAY-02 | Le 21e membre accepte une invitation dans un arbre gratuit | Il entre ; 30 jours de grâce s'ouvrent, tous les membres sont prévenus | V3 |
+| CL-PAY-03 | Fin de la grâce sans abonnement | Rien n'est masqué ni supprimé ; seules les nouvelles invitations attendent | V3 |
+| CL-PAY-04 | Le payeur change (la cousine de Montréal reprend après le cousin de Paris) | Aucune interruption de l'abonnement | V3 |
+| CL-PAY-05 | Le payeur veut exclure un membre ou voir une donnée masquée | Refusé : payer ne donne aucun droit de plus | V3 |
+| CL-PAY-06 | L'arbre redescend de 52 à 48 membres | Le palier suivant s'applique au renouvellement, jamais en cours de période | V3 |
+| CL-CAI-01 | Tirage au sort de l'ordre d'une tontine | Enregistré avec sa date et ses témoins, non modifiable | V3 |
+| CL-CAI-02 | Un participant déclare avoir payé, le trésorier ne confirme pas | Déclaration affichée « en attente », jamais comptée comme payée | V3 |
+| CL-CAI-03 | Erreur dans l'historique de la caisse | Correction ajoutée en nouvelle ligne ; l'ancienne reste visible | V3 |
+| CL-CAI-04 | Un membre demande à Lignée de garder l'argent ou d'envoyer la cagnotte | Impossible dans l'app ; aucun bouton de paiement vers un tiers | V3 |
+| CL-CAI-05 | Un non-participant cherche la caisse dans l'arbre | Ni la caisse, ni les montants, ni son existence ne lui sont visibles | V3 |
